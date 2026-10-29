@@ -1,0 +1,4782 @@
+{
+  "google provider conformance > creates, reads, updates and deletes a timed event": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk conformance",
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633757112414\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633757112414\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:38.556Z",
+            "summary": "calsdk conformance",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633757112414\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633757112414\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:38.556Z",
+            "summary": "calsdk conformance",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-07T05%3A00%3A00.000Z&timeMax=2030-01-08T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nrh47sm7g9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:34:38.556Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633757112414\"",
+                "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:34:38.000Z",
+                "updated": "2026-10-29T23:34:38.556Z",
+                "summary": "calsdk conformance",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-07T09:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-07T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633757112414\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633757112414\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:38.556Z",
+            "summary": "calsdk conformance",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk conformance (renamed)",
+            "description": "notes"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633763230558\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633763230558\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:41.615Z",
+            "summary": "calsdk conformance (renamed)",
+            "description": "notes",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633764847070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633764847070\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "cancelled",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:42.423Z",
+            "summary": "calsdk conformance (renamed)",
+            "description": "notes",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 1,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633764847070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633764847070\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "cancelled",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:42.423Z",
+            "summary": "calsdk conformance (renamed)",
+            "description": "notes",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 1,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/gjfoo2p77hu6rq8ic2uc6fhk20"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633764847070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633764847070\"",
+            "id": "gjfoo2p77hu6rq8ic2uc6fhk20",
+            "status": "cancelled",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Z2pmb28ycDc3aHU2cnE4aWMydWM2ZmhrMjAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:38.000Z",
+            "updated": "2026-10-29T23:34:42.423Z",
+            "summary": "calsdk conformance (renamed)",
+            "description": "notes",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-07T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-07T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "gjfoo2p77hu6rq8ic2uc6fhk20@google.com",
+            "sequence": 1,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    }
+  ],
+  "google provider conformance > keeps the time zone an event was scheduled in": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "start": {
+              "dateTime": "2030-01-08T15:00:00+05:30",
+              "timeZone": "Asia/Kolkata"
+            },
+            "end": {
+              "dateTime": "2030-01-08T16:00:00+05:30",
+              "timeZone": "Asia/Kolkata"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633775076606\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633775076606\"",
+            "id": "v5t0ccshj1liqdvhl1olui37ps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=djV0MGNjc2hqMWxpcWR2aGwxb2x1aTM3cHMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:47.000Z",
+            "updated": "2026-10-29T23:34:47.538Z",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-08T04:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "end": {
+              "dateTime": "2030-01-08T05:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "iCalUID": "v5t0ccshj1liqdvhl1olui37ps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/v5t0ccshj1liqdvhl1olui37ps"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633775076606\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633775076606\"",
+            "id": "v5t0ccshj1liqdvhl1olui37ps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=djV0MGNjc2hqMWxpcWR2aGwxb2x1aTM3cHMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:47.000Z",
+            "updated": "2026-10-29T23:34:47.538Z",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-08T04:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "end": {
+              "dateTime": "2030-01-08T05:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "iCalUID": "v5t0ccshj1liqdvhl1olui37ps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/v5t0ccshj1liqdvhl1olui37ps"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633775076606\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633775076606\"",
+            "id": "v5t0ccshj1liqdvhl1olui37ps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=djV0MGNjc2hqMWxpcWR2aGwxb2x1aTM3cHMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:47.000Z",
+            "updated": "2026-10-29T23:34:47.538Z",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-08T04:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "end": {
+              "dateTime": "2030-01-08T05:30:00-05:00",
+              "timeZone": "Asia/Kolkata"
+            },
+            "iCalUID": "v5t0ccshj1liqdvhl1olui37ps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/v5t0ccshj1liqdvhl1olui37ps"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > lists calendars with exactly one primary": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/users/me/calendarList?maxResults=250"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#calendarList",
+            "etag": "\"p33npl1npm7g9e0o\"",
+            "nextSyncToken": "CO-ahvmx4JcDEht2YWliaGF2cGF0aGFrOTk4NEBnbWFpbC5jb20=",
+            "items": [
+              {
+                "kind": "calendar#calendarListEntry",
+                "etag": "\"1783542399868943\"",
+                "id": "me@example.com",
+                "summary": "me@example.com",
+                "timeZone": "Asia/Kolkata",
+                "colorId": "14",
+                "backgroundColor": "#9fe1e7",
+                "foregroundColor": "#000000",
+                "selected": true,
+                "accessRole": "owner",
+                "defaultReminders": [
+                  {
+                    "method": "popup",
+                    "minutes": 30
+                  }
+                ],
+                "notificationSettings": {
+                  "notifications": [
+                    {
+                      "type": "eventCreation",
+                      "method": "email"
+                    },
+                    {
+                      "type": "eventChange",
+                      "method": "email"
+                    },
+                    {
+                      "type": "eventCancellation",
+                      "method": "email"
+                    },
+                    {
+                      "type": "eventResponse",
+                      "method": "email"
+                    }
+                  ]
+                },
+                "primary": true,
+                "conferenceProperties": {
+                  "allowedConferenceSolutionTypes": [
+                    "hangoutsMeet"
+                  ]
+                }
+              },
+              {
+                "kind": "calendar#calendarListEntry",
+                "etag": "\"1793316872097135\"",
+                "id": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                "summary": "calsdk conformance",
+                "timeZone": "America/New_York",
+                "dataOwner": "me@example.com",
+                "colorId": "19",
+                "backgroundColor": "#c2c2c2",
+                "foregroundColor": "#000000",
+                "selected": true,
+                "accessRole": "owner",
+                "defaultReminders": [],
+                "conferenceProperties": {
+                  "allowedConferenceSolutionTypes": [
+                    "hangoutsMeet"
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "google provider conformance > pages through events in start order": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk page 9",
+            "start": {
+              "dateTime": "2030-01-09T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633779638910\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633779638910\"",
+            "id": "isrqdmhq6o68agg1th2ddssvu4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aXNycWRtaHE2bzY4YWdnMXRoMmRkc3N2dTQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:49.000Z",
+            "updated": "2026-10-29T23:34:49.819Z",
+            "summary": "calsdk page 9",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "isrqdmhq6o68agg1th2ddssvu4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk page 11",
+            "start": {
+              "dateTime": "2030-01-09T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633781111710\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633781111710\"",
+            "id": "j9u3pj8h2qnpio31ne7ve7regc",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=ajl1M3BqOGgycW5waW8zMW5lN3ZlN3JlZ2MgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:50.000Z",
+            "updated": "2026-10-29T23:34:50.555Z",
+            "summary": "calsdk page 11",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "j9u3pj8h2qnpio31ne7ve7regc@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk page 13",
+            "start": {
+              "dateTime": "2030-01-09T13:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T14:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633782634558\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633782634558\"",
+            "id": "ohdmf6tlvaghf94i8pjn9udsjs",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=b2hkbWY2dGx2YWdoZjk0aThwam45dWRzanMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:51.000Z",
+            "updated": "2026-10-29T23:34:51.317Z",
+            "summary": "calsdk page 13",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T13:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T14:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "ohdmf6tlvaghf94i8pjn9udsjs@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-09T05%3A00%3A00.000Z&timeMax=2030-01-10T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime&maxResults=2"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32fo9c42mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:34:51.656Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextPageToken": "EiwKKhIoCgYIgIudhwcSHgocChpqOXUzcGo4aDJxbnBpbzMxbmU3dmU3cmVnY8A-AQ==",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633779638910\"",
+                "id": "isrqdmhq6o68agg1th2ddssvu4",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=aXNycWRtaHE2bzY4YWdnMXRoMmRkc3N2dTQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:34:49.000Z",
+                "updated": "2026-10-29T23:34:49.819Z",
+                "summary": "calsdk page 9",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-09T09:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-09T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "isrqdmhq6o68agg1th2ddssvu4@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633781111710\"",
+                "id": "j9u3pj8h2qnpio31ne7ve7regc",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=ajl1M3BqOGgycW5waW8zMW5lN3ZlN3JlZ2MgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:34:50.000Z",
+                "updated": "2026-10-29T23:34:50.555Z",
+                "summary": "calsdk page 11",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-09T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-09T12:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "j9u3pj8h2qnpio31ne7ve7regc@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-09T05%3A00%3A00.000Z&timeMax=2030-01-10T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime&maxResults=2&pageToken=EiwKKhIoCgYIgIudhwcSHgocChpqOXUzcGo4aDJxbnBpbzMxbmU3dmU3cmVnY8A-AQ%3D%3D"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32fo9c42mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:34:51.656Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633782634558\"",
+                "id": "ohdmf6tlvaghf94i8pjn9udsjs",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=b2hkbWY2dGx2YWdoZjk0aThwam45dWRzanMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:34:51.000Z",
+                "updated": "2026-10-29T23:34:51.317Z",
+                "summary": "calsdk page 13",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-09T13:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-09T14:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ohdmf6tlvaghf94i8pjn9udsjs@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/isrqdmhq6o68agg1th2ddssvu4"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633779638910\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633779638910\"",
+            "id": "isrqdmhq6o68agg1th2ddssvu4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aXNycWRtaHE2bzY4YWdnMXRoMmRkc3N2dTQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:49.000Z",
+            "updated": "2026-10-29T23:34:49.819Z",
+            "summary": "calsdk page 9",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "isrqdmhq6o68agg1th2ddssvu4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/isrqdmhq6o68agg1th2ddssvu4"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/j9u3pj8h2qnpio31ne7ve7regc"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633781111710\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633781111710\"",
+            "id": "j9u3pj8h2qnpio31ne7ve7regc",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=ajl1M3BqOGgycW5waW8zMW5lN3ZlN3JlZ2MgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:50.000Z",
+            "updated": "2026-10-29T23:34:50.555Z",
+            "summary": "calsdk page 11",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "j9u3pj8h2qnpio31ne7ve7regc@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/j9u3pj8h2qnpio31ne7ve7regc"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ohdmf6tlvaghf94i8pjn9udsjs"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633782634558\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633782634558\"",
+            "id": "ohdmf6tlvaghf94i8pjn9udsjs",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=b2hkbWY2dGx2YWdoZjk0aThwam45dWRzanMgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:51.000Z",
+            "updated": "2026-10-29T23:34:51.317Z",
+            "summary": "calsdk page 13",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-09T13:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-09T14:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "ohdmf6tlvaghf94i8pjn9udsjs@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ohdmf6tlvaghf94i8pjn9udsjs"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > recurring events > applies thisAndFollowing to an occurrence and every later one": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk series",
+            "start": {
+              "dateTime": "2030-01-21T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-21T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633818797150\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633818797150\"",
+            "id": "si6hh1ou17ptsb9li64vdr87po",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:09.000Z",
+            "updated": "2026-10-29T23:35:09.398Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-21T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-21T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ],
+            "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-21T05%3A00%3A00.000Z&timeMax=2030-01-28T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nv9qkambg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:09.398Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300121T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300122T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300123T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjNUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-23T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300124T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-24T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-24T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-24T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300125T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-25T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-25T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-25T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-20T15%3A00%3A00.000Z&timeMax=2030-01-26T16%3A00%3A00.000Z&singleEvents=false&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nv9qkambg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:09.398Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CK_06oqy4JcDEK_06oqy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;COUNT=5"
+                ],
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po_20300122T150000Z"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633818797150\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633818797150\"",
+            "id": "si6hh1ou17ptsb9li64vdr87po_20300122T150000Z",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:09.000Z",
+            "updated": "2026-10-29T23:35:09.398Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+            "originalStartTime": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633818797150\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633818797150\"",
+            "id": "si6hh1ou17ptsb9li64vdr87po",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:09.000Z",
+            "updated": "2026-10-29T23:35:09.398Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-21T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-21T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ],
+            "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po/instances?timeMax=2030-01-22T15%3A00%3A00.000Z&showDeleted=true&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p33ftfpcbmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:11.410Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CN_X5Yuy4JcDEN_X5Yuy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633818797150\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300121T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:09.398Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk following",
+            "reminders": {
+              "useDefault": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=4"
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633826819070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633826819070\"",
+            "id": "ruv3adn83dulo1ld2n5lc9vpps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:13.000Z",
+            "updated": "2026-10-29T23:35:13.409Z",
+            "summary": "calsdk following",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=4"
+            ],
+            "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300122T145959Z"
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633828721310\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633828721310\"",
+            "id": "si6hh1ou17ptsb9li64vdr87po",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:09.000Z",
+            "updated": "2026-10-29T23:35:14.360Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-21T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-21T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300122T145959Z"
+            ],
+            "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-21T05%3A00%3A00.000Z&timeMax=2030-01-28T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337u56cdmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:14.360Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633828721310\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300121T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:14.360Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300122T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300123T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjNUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-23T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300124T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-24T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-24T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-24T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300125T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-25T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-25T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-25T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-20T15%3A00%3A00.000Z&timeMax=2030-01-26T16%3A00%3A00.000Z&singleEvents=false&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337u56cdmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:14.360Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CM_imY2y4JcDEM_imY2y4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;COUNT=4"
+                ],
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633828721310\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:14.360Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;UNTIL=20300122T145959Z"
+                ],
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps_20300124T150000Z"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633826819070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633826819070\"",
+            "id": "ruv3adn83dulo1ld2n5lc9vpps_20300124T150000Z",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:13.000Z",
+            "updated": "2026-10-29T23:35:13.409Z",
+            "summary": "calsdk following",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-24T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-24T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+            "originalStartTime": {
+              "dateTime": "2030-01-24T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633826819070\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633826819070\"",
+            "id": "ruv3adn83dulo1ld2n5lc9vpps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:13.000Z",
+            "updated": "2026-10-29T23:35:13.409Z",
+            "summary": "calsdk following",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=4"
+            ],
+            "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps/instances?timeMax=2030-01-24T15%3A00%3A00.000Z&showDeleted=true&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337u56cdmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:14.360Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CM_imY2y4JcDEM_imY2y4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300122T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633826819070\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300123T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjNUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:13.409Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-23T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300124T145959Z"
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633836164702\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633836164702\"",
+            "id": "ruv3adn83dulo1ld2n5lc9vpps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:13.000Z",
+            "updated": "2026-10-29T23:35:18.082Z",
+            "summary": "calsdk following",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300124T145959Z"
+            ],
+            "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-21T05%3A00%3A00.000Z&timeMax=2030-01-28T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nvdv4embg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:18.082Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633828721310\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po_20300121T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:14.360Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "si6hh1ou17ptsb9li64vdr87po",
+                "originalStartTime": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633836164702\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300122T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:18.082Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633836164702\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps_20300123T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjNUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:18.082Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-23T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "ruv3adn83dulo1ld2n5lc9vpps",
+                "originalStartTime": {
+                  "dateTime": "2030-01-23T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-20T15%3A00%3A00.000Z&timeMax=2030-01-24T16%3A00%3A00.000Z&singleEvents=false&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nvdv4embg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:18.082Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CK_2_I6y4JcDEK_2_I6y4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633828721310\"",
+                "id": "si6hh1ou17ptsb9li64vdr87po",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:09.000Z",
+                "updated": "2026-10-29T23:35:14.360Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-21T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-21T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;UNTIL=20300122T145959Z"
+                ],
+                "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633836164702\"",
+                "id": "ruv3adn83dulo1ld2n5lc9vpps",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:13.000Z",
+                "updated": "2026-10-29T23:35:18.082Z",
+                "summary": "calsdk following",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-22T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-22T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;UNTIL=20300124T145959Z"
+                ],
+                "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633828721310\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633828721310\"",
+            "id": "si6hh1ou17ptsb9li64vdr87po",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=c2k2aGgxb3UxN3B0c2I5bGk2NHZkcjg3cG9fMjAzMDAxMjFUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:09.000Z",
+            "updated": "2026-10-29T23:35:14.360Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-21T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-21T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300122T145959Z"
+            ],
+            "iCalUID": "si6hh1ou17ptsb9li64vdr87po@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/si6hh1ou17ptsb9li64vdr87po"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633836164702\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633836164702\"",
+            "id": "ruv3adn83dulo1ld2n5lc9vpps",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=cnV2M2FkbjgzZHVsbzFsZDJuNWxjOXZwcHNfMjAzMDAxMjJUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:13.000Z",
+            "updated": "2026-10-29T23:35:18.082Z",
+            "summary": "calsdk following",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-22T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-22T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;UNTIL=20300124T145959Z"
+            ],
+            "iCalUID": "ruv3adn83dulo1ld2n5lc9vpps@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ruv3adn83dulo1ld2n5lc9vpps"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > recurring events > expands a series and modifies or deletes single occurrences": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk series",
+            "start": {
+              "dateTime": "2030-01-14T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-14T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633804644414\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633804644414\"",
+            "id": "cc93ir80h5p5vkcmvan5rd15jk",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:02.000Z",
+            "updated": "2026-10-29T23:35:02.322Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-14T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-14T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ],
+            "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-14T05%3A00%3A00.000Z&timeMax=2030-01-21T05%3A00%3A00.000Z&singleEvents=false"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32fo1es7mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:02.322Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CJ-Au4ey4JcDEJ-Au4ey4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-14T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;COUNT=5"
+                ],
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-14T05%3A00%3A00.000Z&timeMax=2030-01-21T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32fo1es7mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:02.322Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300114T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-14T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-15T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300116T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTZUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-16T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-16T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-16T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300117T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTdUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-17T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-17T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-17T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300118T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMThUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-18T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-18T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-18T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-13T15%3A00%3A00.000Z&timeMax=2030-01-19T16%3A00%3A00.000Z&singleEvents=false&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32nrlv47mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:03.394Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CK-6_Iey4JcDEK-6_Iey4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633804644414\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:02.322Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-14T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;COUNT=5"
+                ],
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633804644414\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633804644414\"",
+            "id": "cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:02.000Z",
+            "updated": "2026-10-29T23:35:02.322Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-15T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-15T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+            "originalStartTime": {
+              "dateTime": "2030-01-15T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk exception"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633811171742\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633811171742\"",
+            "id": "cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:02.000Z",
+            "updated": "2026-10-29T23:35:05.585Z",
+            "summary": "calsdk exception",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-15T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-15T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+            "originalStartTime": {
+              "dateTime": "2030-01-15T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/cc93ir80h5p5vkcmvan5rd15jk_20300116T150000Z"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-14T05%3A00%3A00.000Z&timeMax=2030-01-21T05%3A00%3A00.000Z&singleEvents=true&orderBy=startTime"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337rhec9mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:06.490Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300114T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-14T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk exception",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-15T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300117T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTdUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-17T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-17T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-17T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300118T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMThUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-18T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-18T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-18T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?timeMin=2030-01-13T15%3A00%3A00.000Z&timeMax=2030-01-19T16%3A00%3A00.000Z&singleEvents=false&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337rhec9mbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:06.490Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CM-4uYmy4JcDEM-4uYmy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk series",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-14T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-14T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurrence": [
+                  "RRULE:FREQ=DAILY;COUNT=5"
+                ],
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300115T150000Z",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTVUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+                "created": "2026-10-29T23:35:02.000Z",
+                "updated": "2026-10-29T23:35:06.373Z",
+                "summary": "calsdk exception",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-15T11:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-15T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              },
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633812746654\"",
+                "id": "cc93ir80h5p5vkcmvan5rd15jk_20300116T150000Z",
+                "status": "cancelled",
+                "recurringEventId": "cc93ir80h5p5vkcmvan5rd15jk",
+                "originalStartTime": {
+                  "dateTime": "2030-01-16T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                }
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/cc93ir80h5p5vkcmvan5rd15jk"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633812746654\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633812746654\"",
+            "id": "cc93ir80h5p5vkcmvan5rd15jk",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=Y2M5M2lyODBoNXA1dmtjbXZhbjVyZDE1amtfMjAzMDAxMTRUMTUwMDAwWiBhMzA5NDAxYTkxMWJhYTUyNjgzOGZiMjc3YzZhYzdiM2FjNWQxYjU3OGZjNDE5MDFlNDc3MjQxNTQ5OWVmMzE3QGc",
+            "created": "2026-10-29T23:35:02.000Z",
+            "updated": "2026-10-29T23:35:06.373Z",
+            "summary": "calsdk series",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-14T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-14T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "recurrence": [
+              "RRULE:FREQ=DAILY;COUNT=5"
+            ],
+            "iCalUID": "cc93ir80h5p5vkcmvan5rd15jk@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/cc93ir80h5p5vkcmvan5rd15jk"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > rejects writes with a stale etag": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk etag",
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633793566430\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633793566430\"",
+            "id": "he2shg62nd5ig9rcla6afsqe0k",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aGUyc2hnNjJuZDVpZzlyY2xhNmFmc3FlMGsgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:56.000Z",
+            "updated": "2026-10-29T23:34:56.783Z",
+            "summary": "calsdk etag",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "he2shg62nd5ig9rcla6afsqe0k@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633793566430\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633793566430\"",
+            "id": "he2shg62nd5ig9rcla6afsqe0k",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aGUyc2hnNjJuZDVpZzlyY2xhNmFmc3FlMGsgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:56.000Z",
+            "updated": "2026-10-29T23:34:56.783Z",
+            "summary": "calsdk etag",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "he2shg62nd5ig9rcla6afsqe0k@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk etag v2"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633796711614\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633796711614\"",
+            "id": "he2shg62nd5ig9rcla6afsqe0k",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aGUyc2hnNjJuZDVpZzlyY2xhNmFmc3FlMGsgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:56.000Z",
+            "updated": "2026-10-29T23:34:58.355Z",
+            "summary": "calsdk etag v2",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "he2shg62nd5ig9rcla6afsqe0k@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633796711614\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633796711614\"",
+            "id": "he2shg62nd5ig9rcla6afsqe0k",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aGUyc2hnNjJuZDVpZzlyY2xhNmFmc3FlMGsgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:56.000Z",
+            "updated": "2026-10-29T23:34:58.355Z",
+            "summary": "calsdk etag v2",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "he2shg62nd5ig9rcla6afsqe0k@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk etag v3"
+          }
+        }
+      },
+      "response": {
+        "status": 412,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "error": {
+              "code": 412,
+              "message": "Precondition check failed.",
+              "errors": [
+                {
+                  "message": "Precondition check failed.",
+                  "domain": "global",
+                  "reason": "failedPrecondition"
+                }
+              ],
+              "status": "FAILED_PRECONDITION"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k"
+      },
+      "response": {
+        "status": 412,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "error": {
+              "errors": [
+                {
+                  "domain": "global",
+                  "reason": "conditionNotMet",
+                  "message": "Precondition Failed",
+                  "locationType": "header",
+                  "location": "If-Match"
+                }
+              ],
+              "code": 412,
+              "message": "Precondition Failed"
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633796711614\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633796711614\"",
+            "id": "he2shg62nd5ig9rcla6afsqe0k",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=aGUyc2hnNjJuZDVpZzlyY2xhNmFmc3FlMGsgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:56.000Z",
+            "updated": "2026-10-29T23:34:58.355Z",
+            "summary": "calsdk etag v2",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-10T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-10T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "he2shg62nd5ig9rcla6afsqe0k@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/he2shg62nd5ig9rcla6afsqe0k"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > reports busy time and ignores events shown as free": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk busy",
+            "start": {
+              "dateTime": "2030-01-12T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633855519550\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633855519550\"",
+            "id": "ksg63na7ijvkl500dp32nfamp4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=a3NnNjNuYTdpanZrbDUwMGRwMzJuZmFtcDQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:27.000Z",
+            "updated": "2026-10-29T23:35:27.759Z",
+            "summary": "calsdk busy",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-12T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "ksg63na7ijvkl500dp32nfamp4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk free",
+            "start": {
+              "dateTime": "2030-01-12T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "transparency": "transparent"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633856708158\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633856708158\"",
+            "id": "jvjn79n42a7lb5cvk4eapkr0j4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=anZqbjc5bjQyYTdsYjVjdms0ZWFwa3IwajQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:28.000Z",
+            "updated": "2026-10-29T23:35:28.354Z",
+            "summary": "calsdk free",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-12T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "transparency": "transparent",
+            "iCalUID": "jvjn79n42a7lb5cvk4eapkr0j4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/freeBusy",
+        "body": {
+          "json": {
+            "timeMin": "2030-01-12T08:00:00-05:00",
+            "timeMax": "2030-01-12T13:00:00-05:00",
+            "items": [
+              {
+                "id": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com"
+              }
+            ]
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#freeBusy",
+            "timeMin": "2030-01-12T13:00:00.000Z",
+            "timeMax": "2030-01-12T18:00:00.000Z",
+            "calendars": {
+              "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com": {
+                "busy": [
+                  {
+                    "start": "2030-01-12T14:00:00Z",
+                    "end": "2030-01-12T15:00:00Z"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ksg63na7ijvkl500dp32nfamp4"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633855519550\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633855519550\"",
+            "id": "ksg63na7ijvkl500dp32nfamp4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=a3NnNjNuYTdpanZrbDUwMGRwMzJuZmFtcDQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:27.000Z",
+            "updated": "2026-10-29T23:35:27.759Z",
+            "summary": "calsdk busy",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-12T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "ksg63na7ijvkl500dp32nfamp4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/ksg63na7ijvkl500dp32nfamp4"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jvjn79n42a7lb5cvk4eapkr0j4"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633856708158\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633856708158\"",
+            "id": "jvjn79n42a7lb5cvk4eapkr0j4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=anZqbjc5bjQyYTdsYjVjdms0ZWFwa3IwajQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:28.000Z",
+            "updated": "2026-10-29T23:35:28.354Z",
+            "summary": "calsdk free",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-12T11:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-12T12:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "transparency": "transparent",
+            "iCalUID": "jvjn79n42a7lb5cvk4eapkr0j4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jvjn79n42a7lb5cvk4eapkr0j4"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > round-trips an all-day event with an exclusive end date": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk all-day",
+            "start": {
+              "date": "2030-01-08"
+            },
+            "end": {
+              "date": "2030-01-10"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633769803038\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633769803038\"",
+            "id": "tke5lf79cel3t0uaehavn9htr4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=dGtlNWxmNzljZWwzdDB1YWVoYXZuOWh0cjQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:44.000Z",
+            "updated": "2026-10-29T23:34:44.901Z",
+            "summary": "calsdk all-day",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "date": "2030-01-08"
+            },
+            "end": {
+              "date": "2030-01-10"
+            },
+            "iCalUID": "tke5lf79cel3t0uaehavn9htr4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": false
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/tke5lf79cel3t0uaehavn9htr4"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633769803038\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633769803038\"",
+            "id": "tke5lf79cel3t0uaehavn9htr4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=dGtlNWxmNzljZWwzdDB1YWVoYXZuOWh0cjQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:44.000Z",
+            "updated": "2026-10-29T23:34:44.901Z",
+            "summary": "calsdk all-day",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "date": "2030-01-08"
+            },
+            "end": {
+              "date": "2030-01-10"
+            },
+            "iCalUID": "tke5lf79cel3t0uaehavn9htr4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": false
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/tke5lf79cel3t0uaehavn9htr4"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633769803038\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633769803038\"",
+            "id": "tke5lf79cel3t0uaehavn9htr4",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=dGtlNWxmNzljZWwzdDB1YWVoYXZuOWh0cjQgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:34:44.000Z",
+            "updated": "2026-10-29T23:34:44.901Z",
+            "summary": "calsdk all-day",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "date": "2030-01-08"
+            },
+            "end": {
+              "date": "2030-01-10"
+            },
+            "iCalUID": "tke5lf79cel3t0uaehavn9htr4@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": false
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/tke5lf79cel3t0uaehavn9htr4"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    }
+  ],
+  "google provider conformance > syncs creates, updates and deletes incrementally": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p337u3ikgmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:21.454Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CM_hypCy4JcDEM_hypCy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": []
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk sync",
+            "start": {
+              "dateTime": "2030-01-11T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-11T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633845144958\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633845144958\"",
+            "id": "jj94c2hm8154v3196s4d9dt0e0",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:22.000Z",
+            "updated": "2026-10-29T23:35:22.572Z",
+            "summary": "calsdk sync",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-11T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-11T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?syncToken=CM_hypCy4JcDEM_hypCy4JcDGAUghe-t4AMohe-t4AM%3D&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32vvr3khmbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:22.572Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CL_9jpGy4JcDEL_9jpGy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633845144958\"",
+                "id": "jj94c2hm8154v3196s4d9dt0e0",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:35:22.000Z",
+                "updated": "2026-10-29T23:35:22.572Z",
+                "summary": "calsdk sync",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-11T09:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-11T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jj94c2hm8154v3196s4d9dt0e0"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633845144958\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633845144958\"",
+            "id": "jj94c2hm8154v3196s4d9dt0e0",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:22.000Z",
+            "updated": "2026-10-29T23:35:22.572Z",
+            "summary": "calsdk sync",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-11T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-11T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jj94c2hm8154v3196s4d9dt0e0?conferenceDataVersion=1",
+        "body": {
+          "json": {
+            "summary": "calsdk sync v2"
+          }
+        }
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633849753278\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633849753278\"",
+            "id": "jj94c2hm8154v3196s4d9dt0e0",
+            "status": "confirmed",
+            "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:22.000Z",
+            "updated": "2026-10-29T23:35:24.876Z",
+            "summary": "calsdk sync v2",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-11T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-11T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+            "sequence": 0,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?syncToken=CL_9jpGy4JcDEL_9jpGy4JcDGAUghe-t4AMohe-t4AM%3D&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p33fst6simbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:24.876Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CN_Om5Ky4JcDEN_Om5Ky4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633849753278\"",
+                "id": "jj94c2hm8154v3196s4d9dt0e0",
+                "status": "confirmed",
+                "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+                "created": "2026-10-29T23:35:22.000Z",
+                "updated": "2026-10-29T23:35:24.876Z",
+                "summary": "calsdk sync v2",
+                "creator": {
+                  "email": "me@example.com"
+                },
+                "organizer": {
+                  "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+                  "displayName": "calsdk conformance",
+                  "self": true
+                },
+                "start": {
+                  "dateTime": "2030-01-11T09:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "end": {
+                  "dateTime": "2030-01-11T10:00:00-05:00",
+                  "timeZone": "America/New_York"
+                },
+                "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+                "sequence": 0,
+                "reminders": {
+                  "useDefault": true
+                },
+                "eventType": "default"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jj94c2hm8154v3196s4d9dt0e0"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events?syncToken=CN_Om5Ky4JcDEN_Om5Ky4JcDGAUghe-t4AMohe-t4AM%3D&maxResults=2500"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#events",
+            "etag": "\"p32vp1pkimbg9e0o\"",
+            "summary": "calsdk conformance",
+            "description": "",
+            "updated": "2026-10-29T23:35:26.097Z",
+            "timeZone": "America/New_York",
+            "accessRole": "owner",
+            "defaultReminders": [],
+            "nextSyncToken": "CL-Q5pKy4JcDEL-Q5pKy4JcDGAUghe-t4AMohe-t4AM=",
+            "items": [
+              {
+                "kind": "calendar#event",
+                "etag": "\"3586633852194942\"",
+                "id": "jj94c2hm8154v3196s4d9dt0e0",
+                "status": "cancelled"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://www.googleapis.com/calendar/v3/calendars/a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317%40group.calendar.google.com/events/jj94c2hm8154v3196s4d9dt0e0"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json; charset=UTF-8",
+          "etag": "\"3586633852194942\""
+        },
+        "body": {
+          "json": {
+            "kind": "calendar#event",
+            "etag": "\"3586633852194942\"",
+            "id": "jj94c2hm8154v3196s4d9dt0e0",
+            "status": "cancelled",
+            "htmlLink": "https://www.google.com/calendar/event?eid=amo5NGMyaG04MTU0djMxOTZzNGQ5ZHQwZTAgYTMwOTQwMWE5MTFiYWE1MjY4MzhmYjI3N2M2YWM3YjNhYzVkMWI1NzhmYzQxOTAxZTQ3NzI0MTU0OTllZjMxN0Bn",
+            "created": "2026-10-29T23:35:22.000Z",
+            "updated": "2026-10-29T23:35:26.097Z",
+            "summary": "calsdk sync v2",
+            "creator": {
+              "email": "me@example.com"
+            },
+            "organizer": {
+              "email": "a309401a911baa526838fb277c6ac7b3ac5d1b578fc41901e4772415499ef317@group.calendar.google.com",
+              "displayName": "calsdk conformance",
+              "self": true
+            },
+            "start": {
+              "dateTime": "2030-01-11T09:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "end": {
+              "dateTime": "2030-01-11T10:00:00-05:00",
+              "timeZone": "America/New_York"
+            },
+            "iCalUID": "jj94c2hm8154v3196s4d9dt0e0@google.com",
+            "sequence": 1,
+            "reminders": {
+              "useDefault": true
+            },
+            "eventType": "default"
+          }
+        }
+      }
+    }
+  ]
+}

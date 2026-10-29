@@ -1,0 +1,41 @@
+{
+  "name": "@calsdk/provider-utils",
+  "version": "0.0.0",
+  "description": "Helpers for writing calsdk calendar providers.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@calsdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/provider-utils"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@calsdk/provider": "workspace:*",
+    "@standard-schema/spec": "^1.1.0"
+  },
+  "devDependencies": {
+    "zod": "^4.6.7"
+  }
+}

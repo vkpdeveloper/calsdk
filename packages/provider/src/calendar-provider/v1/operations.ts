@@ -39,7 +39,6 @@ export type ListEventsOptionsV1 = CallOptionsV1 & {
   pageSize?: number;
   /** `nextPageToken` from the previous page. */
   pageToken?: string;
-  includeCancelled?: boolean;
 };
 export type ListEventsResultV1 = ResultBaseV1 & {
   events: EventV1[];

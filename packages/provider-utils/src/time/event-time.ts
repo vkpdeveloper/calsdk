@@ -2,8 +2,9 @@ import type { EventTimeV1 } from '@calsdk/provider';
 import { formatLocalDate, localToInstant, parseLocalDateTime } from './zoned-time';
 
 /** Narrows an event time to the all-day form. */
-export function isAllDay(time: EventTimeV1): time is { date: string } {
-  return 'date' in time;
+export function isAllDay(time: EventTimeV1): time is Extract<EventTimeV1, { date: string }> {
+  // Checks the value, not the key: `{ dateTime, timeZone, date: undefined }` is timed.
+  return time.date !== undefined;
 }
 
 /**

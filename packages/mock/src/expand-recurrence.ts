@@ -34,13 +34,17 @@ export type RecurringEvent = {
 const DAY_MS = 86_400_000;
 
 /** RRULE parts provider-utils keeps in `other`, with their RFC 5545 value ranges. */
+// RFC 5545 allows BYSECOND=60 for leap seconds, which the library drops: it is rejected
+// as unsupported below rather than accepted here.
 const EXTRA_PARTS: Record<string, [min: number, max: number]> = {
-  BYSECOND: [0, 60],
+  BYSECOND: [0, 59],
   BYMINUTE: [0, 59],
   BYHOUR: [0, 23],
   BYYEARDAY: [-366, 366],
   BYWEEKNO: [-53, 53],
 };
+
+const TIME_PARTS = new Set(['BYSECOND', 'BYMINUTE', 'BYHOUR']);
 
 // The library's default of 10,000 periods is too low for long COUNT series queried far
 // from their start (a daily series over 30 years). It stops early on impossible rules.
@@ -103,6 +107,13 @@ export function assertSupportedRecurrence(event: RecurringEvent): void {
   // rrule-temporal ignores unknown parts and clamps some values in non-strict mode,
   // so check the parts provider-utils does not model before trusting it.
   for (const [part, value] of Object.entries(parsed.rrule.other ?? {})) {
+    if (isAllDay(event.start) && TIME_PARTS.has(part)) {
+      throw new InvalidArgumentError({
+        argument: 'recurrence',
+        message: `${part} cannot be used in the rule of an all-day event (RFC 5545).`,
+      });
+    }
+    if (part === 'BYSECOND' && value.split(',').includes('60')) throw unsupported('leap seconds');
     const range = Object.hasOwn(EXTRA_PARTS, part) ? EXTRA_PARTS[part] : undefined;
     if (!range) throw unsupported(part);
     const [min, max] = range;

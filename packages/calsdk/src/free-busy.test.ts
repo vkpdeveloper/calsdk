@@ -1,6 +1,6 @@
 import { mockCalendar } from '@calsdk/mock';
 import type { CalendarProviderV1 } from '@calsdk/provider';
-import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
 import { findFreeTime } from './find-free-time';
 import { getFreeBusy } from './get-free-busy';
@@ -50,6 +50,57 @@ describe('getFreeBusy', () => {
     });
     expect(result.calendars.missing?.error).toBeDefined();
     expect(result.warnings).toEqual([expect.objectContaining({ type: 'compatibility' })]);
+  });
+
+  it('blocks all-day events conservatively when the calendar zone is unknown', async () => {
+    const mock = mockCalendar({
+      events: [{ start: { date: '2026-11-03' }, end: { date: '2026-11-04' } }],
+    });
+    const pageWarning = { type: 'other', message: 'from the provider' } as const;
+    const calendar: CalendarProviderV1 = {
+      ...mock,
+      doListCalendars: async () => ({
+        calendars: [{ id: 'primary', name: 'Primary', isPrimary: true, accessRole: 'owner' }],
+        warnings: [],
+      }),
+      doListEvents: async (options) => {
+        const page = await mock.doListEvents(options);
+        return { ...page, warnings: [pageWarning] };
+      },
+    };
+
+    const result = await getFreeBusy({
+      calendar,
+      timeMin: '2026-11-02T00:00:00Z',
+      timeMax: '2026-11-05T00:00:00Z',
+    });
+    // From the earliest zone's start of the 3rd (UTC+14) to the latest's end (UTC-12).
+    expect(result.calendars.primary).toEqual({
+      busy: [{ start: '2026-11-02T10:00:00.000Z', end: '2026-11-04T12:00:00.000Z' }],
+    });
+    expect(result.warnings).toEqual([
+      expect.objectContaining({ type: 'compatibility', feature: 'freeBusy' }),
+      pageWarning,
+      expect.objectContaining({ type: 'compatibility', feature: 'allDayEvents' }),
+    ]);
+  });
+
+  it('does not read inherited keys from a native response', async () => {
+    const calendar: CalendarProviderV1 = {
+      ...mockCalendar(),
+      doFreeBusy: async () => ({ calendars: {}, warnings: [] }),
+    };
+    const result = await getFreeBusy({
+      calendar,
+      calendarIds: ['__proto__', 'toString'],
+      timeMin: '2026-11-02T00:00:00Z',
+      timeMax: '2026-11-02T12:00:00Z',
+    });
+    expect(Object.keys(result.calendars)).toEqual(['__proto__', 'toString']);
+    expect(Object.values(result.calendars)).toEqual([
+      { busy: [], error: expect.any(String) },
+      { busy: [], error: expect.any(String) },
+    ]);
   });
 
   it('merges, sorts and clips native free/busy blocks', async () => {
@@ -119,6 +170,79 @@ describe('findFreeTime', () => {
     });
     expect(slots[0]?.start).toBe('2026-11-02T06:15:00.000Z'); // 11:45
     expect(slots.at(-1)?.end).toBe('2026-11-02T07:30:00.000Z'); // 13:00, then Tuesday is skipped
+  });
+
+  // On 2026-03-08 New York skips 02:00-03:00. On 2026-11-01 it repeats 01:00-02:00.
+  const newYork = (start: string, end: string) => ({
+    calendars: [{ calendar: mockCalendar() }],
+    duration: 30,
+    slotInterval: 30,
+    workingHours: { start, end, timeZone: 'America/New_York', days: [0] },
+  });
+
+  it('never places slots in an hour skipped by DST', async () => {
+    const { slots } = await findFreeTime({
+      ...newYork('01:00', '02:30'),
+      timeMin: '2026-03-08T00:00:00Z',
+      timeMax: '2026-03-09T00:00:00Z',
+    });
+    expect(slots).toEqual([
+      { start: '2026-03-08T06:00:00.000Z', end: '2026-03-08T06:30:00.000Z' }, // 01:00 EST
+      { start: '2026-03-08T06:30:00.000Z', end: '2026-03-08T07:00:00.000Z' }, // 01:30 EST
+    ]);
+  });
+
+  it('offers both runs of an hour repeated by DST', async () => {
+    const { slots } = await findFreeTime({
+      ...newYork('00:00', '01:30'),
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-02T00:00:00Z',
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-11-01T04:00:00.000Z', // 00:00 EDT
+      '2026-11-01T04:30:00.000Z', // 00:30 EDT
+      '2026-11-01T05:00:00.000Z', // 01:00 EDT
+      '2026-11-01T06:00:00.000Z', // 01:00 EST
+    ]);
+  });
+
+  it('aligns slots to the hour, not to the working-hours start', async () => {
+    const { slots } = await findFreeTime({
+      calendars: [{ calendar: mockCalendar() }],
+      ...day,
+      duration: 30,
+      slotInterval: 30,
+      workingHours: { ...workingHours, start: '09:10', end: '10:30' },
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-11-02T04:00:00.000Z', // 09:30
+      '2026-11-02T04:30:00.000Z', // 10:00
+    ]);
+  });
+
+  it('forwards per-provider headers and provider options', async () => {
+    const mock = mockCalendar();
+    const doFreeBusy = vi.fn<NonNullable<CalendarProviderV1['doFreeBusy']>>(async () => ({
+      calendars: { primary: { busy: [] } },
+      warnings: [],
+    }));
+    await findFreeTime({
+      calendars: [
+        {
+          calendar: { ...mock, doFreeBusy },
+          headers: { 'x-trace': '1' },
+          providerOptions: { mock: { flag: true } },
+        },
+      ],
+      ...day,
+      duration: 30,
+    });
+    expect(doFreeBusy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        headers: { 'x-trace': '1' },
+        providerOptions: { mock: { flag: true } },
+      }),
+    );
   });
 
   it('throws when a calendar cannot be read', async () => {

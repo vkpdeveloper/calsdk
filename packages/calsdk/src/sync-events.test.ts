@@ -43,6 +43,13 @@ describe('syncEvents', () => {
     expect(last.nextCursor).toBeDefined();
   });
 
+  it('accepts paginate as a runtime boolean', async () => {
+    const calendar = mockCalendar({ events: [allDay('A', 0)] });
+    const paginate = Math.random() > 2; // A boolean the compiler cannot narrow.
+    const result = await syncEvents({ calendar, paginate });
+    expect(result.changes).toHaveLength(1);
+  });
+
   it('throws UnsupportedFunctionalityError when the provider cannot sync', async () => {
     const { doSyncEvents: _, ...calendar } = mockCalendar();
     await expect(syncEvents({ calendar })).rejects.toSatisfy(

@@ -4,11 +4,12 @@ import {
   formatLocalDate,
   instantToLocal,
   isValidTimeZone,
+  type LocalDateTime,
   localToInstant,
 } from '@calsdk/provider-utils';
 import { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
 import { getFreeBusy, mergeBusy } from './get-free-busy';
-import type { CalendarProvider, TimeInput, Warning } from './types';
+import type { CallSettings, TimeInput, Warning } from './types';
 import { toTimeRange } from './util/validate';
 
 const MINUTE_MS = 60_000;
@@ -25,15 +26,20 @@ export type WorkingHours = {
 };
 
 export type FindFreeTimeOptions = {
-  /** Every calendar that must be free, grouped by provider. `calendarIds` defaults to `['primary']`. */
-  calendars: { calendar: CalendarProvider; calendarIds?: string[] }[];
+  /**
+   * Every calendar that must be free, grouped by provider. `calendarIds` defaults to
+   * `['primary']`. `headers` and `providerOptions` apply to that provider's requests.
+   */
+  calendars: (Pick<CallSettings, 'calendar' | 'headers' | 'providerOptions'> & {
+    calendarIds?: string[];
+  })[];
   timeMin: TimeInput;
   timeMax: TimeInput;
   /** Meeting length in minutes. */
   duration: number;
   /** Only return slots inside these hours. Omit to search the whole window. */
   workingHours?: WorkingHours;
-  /** Minutes between slot starts, aligned to the hour. Defaults to 15. */
+  /** Minutes between slot starts, aligned to the hour (in `workingHours.timeZone`, else UTC). Defaults to 15. */
   slotInterval?: number;
   maxRetries?: number;
   abortSignal?: AbortSignal;
@@ -64,15 +70,17 @@ export async function findFreeTime(options: FindFreeTimeOptions): Promise<FindFr
   const bounds = { start: Date.parse(range.timeMin), end: Date.parse(range.timeMax) };
   const duration = positiveInteger(options.duration, 'duration') * MINUTE_MS;
   const interval = positiveInteger(options.slotInterval ?? 15, 'slotInterval') * MINUTE_MS;
-  const windows = options.workingHours
-    ? workingWindows(options.workingHours, bounds)
-    : [{ ...bounds, gridOrigin: 0 }];
+  const { windows, fits } = options.workingHours
+    ? workingHoursOf(options.workingHours, bounds)
+    : { windows: [{ ...bounds, gridOrigin: 0 }], fits: () => true };
 
   const results = await Promise.all(
-    options.calendars.map(({ calendar, calendarIds }) =>
+    options.calendars.map(({ calendar, calendarIds, headers, providerOptions }) =>
       getFreeBusy({
         calendar,
         calendarIds,
+        headers,
+        providerOptions,
         ...range,
         maxRetries: options.maxRetries,
         abortSignal: options.abortSignal,
@@ -101,11 +109,12 @@ export async function findFreeTime(options: FindFreeTimeOptions): Promise<FindFr
   const slots: FreeSlot[] = [];
   let next = 0; // First busy block that may still overlap a slot.
   for (const window of windows) {
-    // Round up to the grid, which starts at the working day's start (or the epoch).
+    // Round up to the grid, which starts at local midnight (or the epoch).
     const offset = (window.start - window.gridOrigin) % interval;
     let start = offset === 0 ? window.start : window.start + interval - offset;
     for (; start + duration <= window.end; start += interval) {
       const end = start + duration;
+      if (!fits(start, end)) continue;
       while (next < blocks.length && (blocks[next]?.end ?? 0) <= start) next++;
       const block = blocks[next];
       if (block && block.start < end) continue;
@@ -125,9 +134,15 @@ function positiveInteger(value: number, argument: string): number {
   return value;
 }
 
-/** Working-hour windows inside `bounds`, one per working day, in order. */
-function workingWindows(hours: WorkingHours, bounds: { start: number; end: number }) {
-  if (!isValidTimeZone(hours.timeZone)) {
+/**
+ * Working days inside `bounds`, from local midnight to midnight, and a check that a slot
+ * stays within working hours by the local wall clock. Checking the wall clock, instead of
+ * converting the hours to instants, keeps DST days right: a slot never lands in an hour
+ * skipped by a gap, and both runs of a repeated hour count.
+ */
+function workingHoursOf(hours: WorkingHours, bounds: { start: number; end: number }) {
+  const { timeZone } = hours;
+  if (!isValidTimeZone(timeZone)) {
     throw new InvalidArgumentError({
       argument: 'workingHours.timeZone',
       message: 'Expected an IANA time zone such as "Asia/Kolkata".',
@@ -149,36 +164,50 @@ function workingWindows(hours: WorkingHours, bounds: { start: number; end: numbe
     });
   }
 
+  const midnightOf = (date: string) => {
+    const utc = new Date(`${date}T00:00:00Z`);
+    const local = {
+      year: utc.getUTCFullYear(),
+      month: utc.getUTCMonth() + 1,
+      day: utc.getUTCDate(),
+      hour: 0,
+      minute: 0,
+      second: 0,
+    };
+    return { instant: localToInstant(local, timeZone), weekday: utc.getUTCDay() };
+  };
+
   const windows: { start: number; end: number; gridOrigin: number }[] = [];
-  const lastDate = formatLocalDate(instantToLocal(bounds.end, hours.timeZone));
+  const lastDate = formatLocalDate(instantToLocal(bounds.end, timeZone));
   for (
-    let date = formatLocalDate(instantToLocal(bounds.start, hours.timeZone));
+    let date = formatLocalDate(instantToLocal(bounds.start, timeZone));
     date <= lastDate;
     date = addDaysToDate(date, 1)
   ) {
-    const midnight = new Date(`${date}T00:00:00Z`);
-    if (!days.has(midnight.getUTCDay())) continue;
-    const at = (minutes: number) =>
-      localToInstant(
-        {
-          year: midnight.getUTCFullYear(),
-          month: midnight.getUTCMonth() + 1,
-          day: midnight.getUTCDate(),
-          hour: Math.floor(minutes / 60),
-          minute: minutes % 60,
-          second: 0,
-        },
-        hours.timeZone,
-      );
-    const dayStart = at(start);
+    const midnight = midnightOf(date);
+    if (!days.has(midnight.weekday)) continue;
     const window = {
-      start: Math.max(dayStart, bounds.start),
-      end: Math.min(at(end), bounds.end),
-      gridOrigin: dayStart,
+      start: Math.max(midnight.instant, bounds.start),
+      end: Math.min(midnightOf(addDaysToDate(date, 1)).instant, bounds.end),
+      gridOrigin: midnight.instant,
     };
     if (window.end > window.start) windows.push(window);
   }
-  return windows;
+
+  const minutesOf = (local: LocalDateTime) =>
+    local.hour * 60 + local.minute + (local.second + (local.millisecond ?? 0) / 1000) / 60;
+  const fits = (slotStart: number, slotEnd: number) => {
+    const first = instantToLocal(slotStart, timeZone);
+    const last = instantToLocal(slotEnd - 1, timeZone);
+    return (
+      formatLocalDate(first) === formatLocalDate(last) &&
+      minutesOf(first) >= start &&
+      minutesOf(last) < end &&
+      // A slot spanning a repeated hour must not wander back before `start`.
+      minutesOf(last) >= minutesOf(first)
+    );
+  };
+  return { windows, fits };
 }
 
 /** Minutes since midnight for `'HH:mm'`. */

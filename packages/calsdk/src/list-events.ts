@@ -1,4 +1,4 @@
-import { InvalidResponseDataError } from '@calsdk/provider';
+import { InvalidResponseDataError, type ListEventsResultV1 } from '@calsdk/provider';
 import type { CalendarEvent, CallSettings, ResultMetadata, TimeInput } from './types';
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId, toTimeRange, validatePageSize } from './util/validate';
@@ -68,16 +68,24 @@ export async function listEvents(options: ListEventsOptions): Promise<ListEvents
 export async function* iterateEvents(
   options: Omit<ListEventsOptions, 'pageToken'>,
 ): AsyncGenerator<CalendarEvent, void, undefined> {
+  for await (const page of listEventPages(options, 'iterateEvents')) yield* page.events;
+}
+
+/** Every raw page of a listing, for core functions that also need each page's warnings. */
+export async function* listEventPages(
+  options: Omit<ListEventsOptions, 'pageToken'>,
+  operation: string,
+): AsyncGenerator<ListEventsResultV1, void, undefined> {
   const request = prepare(options);
   const seen = new Set<string>();
   let pageToken: string | undefined;
   do {
     const token = pageToken;
-    const result = await runCall(options, 'iterateEvents', 'retryable', (callOptions) =>
+    const page = await runCall(options, operation, 'retryable', (callOptions) =>
       options.calendar.doListEvents({ ...callOptions, ...request, pageToken: token }),
     );
-    yield* result.events;
-    pageToken = result.nextPageToken;
+    yield page;
+    pageToken = page.nextPageToken;
     if (pageToken !== undefined) {
       // A provider returning the same token twice would loop forever.
       if (seen.has(pageToken)) {

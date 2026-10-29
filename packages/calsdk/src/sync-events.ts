@@ -52,6 +52,9 @@ export async function syncEvents(
 ): Promise<SyncEventsPageResult>;
 export async function syncEvents(
   options: SyncEventsOptions & { paginate?: boolean; pageToken?: string },
+): Promise<SyncEventsResult | SyncEventsPageResult>;
+export async function syncEvents(
+  options: SyncEventsOptions & { paginate?: boolean; pageToken?: string },
 ): Promise<SyncEventsResult | SyncEventsPageResult> {
   const calendarId = requireId(options.calendarId ?? 'primary', 'calendarId');
   const fetchPage = async (pageToken: string | undefined) => {

@@ -1,0 +1,344 @@
+import {
+  NotFoundError,
+  PermissionDeniedError,
+  RateLimitError,
+  SyncCursorExpiredError,
+} from '@calsdk/provider';
+import { describe, expect, it } from 'vitest';
+import { google } from './google-provider';
+
+type Route = {
+  method: string;
+  path: RegExp;
+  respond: (request: Request) => Response | Promise<Response>;
+};
+
+/** A fake Google API: each request goes to the first matching route. */
+function fakeGoogle(routes: Route[]) {
+  const requests: { method: string; url: URL; body: unknown; headers: Headers }[] = [];
+  const calendar = google({
+    accessToken: 'token',
+    fetch: async (input, init) => {
+      const request = new Request(input, init);
+      const url = new URL(request.url);
+      const text = await request.clone().text();
+      requests.push({
+        method: request.method,
+        url,
+        body: text ? JSON.parse(text) : undefined,
+        headers: request.headers,
+      });
+      const route = routes.find(
+        (candidate) =>
+          candidate.method === request.method &&
+          candidate.path.test(url.pathname.replace('/calendar/v3', '')),
+      );
+      if (!route) throw new Error(`Unexpected ${request.method} ${url.pathname}`);
+      return route.respond(request);
+    },
+  });
+  return { calendar, requests };
+}
+
+const googleError = (status: number, reason?: string) =>
+  Response.json(
+    { error: { code: status, message: 'stubbed', errors: reason ? [{ reason }] : [] } },
+    { status },
+  );
+
+const series = {
+  id: 'series1',
+  etag: '"m1"',
+  summary: 'Standup',
+  start: { dateTime: '2026-11-02T10:00:00-05:00', timeZone: 'America/New_York' },
+  end: { dateTime: '2026-11-02T10:15:00-05:00', timeZone: 'America/New_York' },
+  recurrence: ['RRULE:FREQ=DAILY;COUNT=5', 'EXDATE;TZID=America/New_York:20261105T100000'],
+  conferenceData: {
+    conferenceId: 'abc-defg-hij',
+    entryPoints: [{ entryPointType: 'video', uri: 'https://meet.google.com/abc-defg-hij' }],
+  },
+  attendees: [{ email: 'a@example.com', responseStatus: 'accepted' }],
+};
+const instance = (day: number, extra = {}) => ({
+  id: `series1_202611${String(day).padStart(2, '0')}T150000Z`,
+  etag: `"i${day}"`,
+  summary: 'Standup',
+  recurringEventId: 'series1',
+  originalStartTime: {
+    dateTime: `2026-11-${String(day).padStart(2, '0')}T10:00:00-05:00`,
+    timeZone: 'America/New_York',
+  },
+  start: {
+    dateTime: `2026-11-${String(day).padStart(2, '0')}T10:00:00-05:00`,
+    timeZone: 'America/New_York',
+  },
+  end: {
+    dateTime: `2026-11-${String(day).padStart(2, '0')}T10:15:00-05:00`,
+    timeZone: 'America/New_York',
+  },
+  ...extra,
+});
+
+describe('google', () => {
+  it('converts events, using the calendar zone when an event has none', async () => {
+    const { calendar } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /^\/calendars\/primary\/events$/,
+        respond: () =>
+          Response.json({
+            timeZone: 'Asia/Kolkata',
+            items: [
+              {
+                id: 'e1',
+                summary: 'Review',
+                status: 'tentative',
+                start: { dateTime: '2026-11-03T04:30:00Z' },
+                end: { dateTime: '2026-11-03T05:30:00Z' },
+                transparency: 'transparent',
+                visibility: 'confidential',
+                colorId: '11',
+                hangoutLink: 'https://meet.google.com/xyz',
+                reminders: { useDefault: false, overrides: [{ method: 'popup', minutes: 10 }] },
+                organizer: { email: 'me@example.com', self: true },
+              },
+            ],
+          }),
+      },
+    ]);
+    const { events } = await calendar.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2026-11-03T00:00:00Z',
+      timeMax: '2026-11-04T00:00:00Z',
+      expandRecurring: true,
+    });
+    expect(events[0]).toMatchObject({
+      kind: 'single',
+      start: { dateTime: '2026-11-03T10:00:00+05:30', timeZone: 'Asia/Kolkata' },
+      status: 'tentative',
+      showAs: 'free',
+      visibility: 'private',
+      color: '#d50000',
+      conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/xyz' },
+      reminders: { useDefault: false, overrides: [{ method: 'popup', minutesBefore: 10 }] },
+      organizer: { email: 'me@example.com', self: true },
+    });
+  });
+
+  it('tells modified instances from plain occurrences', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /^\/calendars\/primary\/events$/,
+        respond: (request) =>
+          new URL(request.url).searchParams.get('singleEvents') === 'true'
+            ? Response.json({ items: [instance(2), instance(3, { summary: 'Moved' })] })
+            : // Unexpanded: the master, the modified instance, and a deleted one.
+              Response.json({
+                items: [
+                  series,
+                  instance(3, { summary: 'Moved' }),
+                  instance(5, { status: 'cancelled' }),
+                ],
+              }),
+      },
+    ]);
+    const { events } = await calendar.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-08T00:00:00Z',
+      expandRecurring: true,
+    });
+    expect(events.map((event) => [event.kind, event.seriesId])).toEqual([
+      ['occurrence', 'series1'],
+      ['exception', 'series1'],
+    ]);
+    expect(requests).toHaveLength(2);
+  });
+
+  it('only returns singles and masters when not expanding', async () => {
+    const { calendar } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /^\/calendars\/primary\/events$/,
+        respond: () =>
+          Response.json({
+            items: [
+              series,
+              instance(3, { summary: 'Moved' }),
+              instance(5, { status: 'cancelled' }),
+            ],
+          }),
+      },
+    ]);
+    const { events } = await calendar.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-08T00:00:00Z',
+      expandRecurring: false,
+    });
+    expect(events.map((event) => [event.id, event.kind])).toEqual([['series1', 'series']]);
+  });
+
+  it('splits a series for thisAndFollowing and keeps its meeting', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20261104T150000Z$/,
+        respond: () => Response.json(instance(4)),
+      },
+      { method: 'GET', path: /\/events\/series1$/, respond: () => Response.json(series) },
+      {
+        method: 'GET',
+        path: /\/events\/series1\/instances$/,
+        // Two instances before the cut: the 2nd and the 3rd.
+        respond: () => Response.json({ items: [instance(2), instance(3)] }),
+      },
+      {
+        method: 'POST',
+        path: /\/calendars\/primary\/events$/,
+        respond: async (request) => Response.json({ ...(await request.json()), id: 'series2' }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => Response.json(series) },
+    ]);
+
+    const { event } = await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'series1_20261104T150000Z',
+      patch: { title: 'Standup v2' },
+      scope: 'thisAndFollowing',
+    });
+    expect(event).toMatchObject({ id: 'series2', kind: 'series', title: 'Standup v2' });
+
+    const created = requests.find((request) => request.method === 'POST');
+    expect(created?.body).toMatchObject({
+      summary: 'Standup v2',
+      start: { dateTime: '2026-11-04T10:00:00-05:00', timeZone: 'America/New_York' },
+      end: { dateTime: '2026-11-04T10:15:00-05:00', timeZone: 'America/New_York' },
+      recurrence: ['RRULE:FREQ=DAILY;COUNT=3', 'EXDATE;TZID=America/New_York:20261105T100000'],
+      conferenceData: series.conferenceData,
+      attendees: series.attendees,
+    });
+    expect(created?.url.searchParams.get('conferenceDataVersion')).toBe('1');
+
+    const trimmed = requests.find((request) => request.method === 'PATCH');
+    expect(trimmed?.body).toEqual({ recurrence: ['RRULE:FREQ=DAILY;UNTIL=20261104T145959Z'] });
+    expect(trimmed?.headers.get('if-match')).toBe('"m1"');
+  });
+
+  it('removes the new series when trimming the old one fails', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20261104T150000Z$/,
+        respond: () => Response.json(instance(4)),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1$/,
+        respond: () => Response.json({ ...series, recurrence: ['RRULE:FREQ=DAILY'] }),
+      },
+      {
+        method: 'POST',
+        path: /\/events$/,
+        respond: () => Response.json({ ...series, id: 'series2' }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => googleError(412) },
+      {
+        method: 'DELETE',
+        path: /\/events\/series2$/,
+        respond: () => new Response(null, { status: 204 }),
+      },
+    ]);
+    await expect(
+      calendar.doUpdateEvent({
+        calendarId: 'primary',
+        eventId: 'series1_20261104T150000Z',
+        patch: { title: 'x' },
+        scope: 'thisAndFollowing',
+      }),
+    ).rejects.toThrow();
+    expect(requests.at(-1)).toMatchObject({ method: 'DELETE' });
+  });
+
+  it('treats deleted events as not found', async () => {
+    const { calendar } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/e1$/,
+        respond: () => Response.json({ id: 'e1', status: 'cancelled' }),
+      },
+    ]);
+    await expect(calendar.doGetEvent({ calendarId: 'primary', eventId: 'e1' })).rejects.toSatisfy(
+      NotFoundError.isInstance,
+    );
+    await expect(
+      calendar.doUpdateEvent({ calendarId: 'primary', eventId: 'e1', patch: { title: 'x' } }),
+    ).rejects.toSatisfy(NotFoundError.isInstance);
+  });
+
+  it('maps Google rate limits, permissions and expired sync tokens', async () => {
+    const respondWith = (response: () => Response) =>
+      fakeGoogle([{ method: 'GET', path: /./, respond: response }]).calendar;
+
+    await expect(
+      respondWith(() => googleError(403, 'rateLimitExceeded')).doGetEvent({
+        calendarId: 'primary',
+        eventId: 'e',
+      }),
+    ).rejects.toSatisfy(RateLimitError.isInstance);
+    await expect(
+      respondWith(() => googleError(403, 'forbidden')).doGetEvent({
+        calendarId: 'primary',
+        eventId: 'e',
+      }),
+    ).rejects.toSatisfy(PermissionDeniedError.isInstance);
+    await expect(
+      respondWith(() => googleError(410, 'fullSyncRequired')).doSyncEvents({
+        calendarId: 'primary',
+        cursor: 'old',
+      }),
+    ).rejects.toSatisfy(SyncCursorExpiredError.isInstance);
+  });
+
+  it('reports sync deletes and returns the cursor on the last page', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events$/,
+        respond: () =>
+          Response.json({
+            timeZone: 'UTC',
+            nextSyncToken: 'next',
+            items: [{ id: 'gone', status: 'cancelled' }, instance(3, { summary: 'Moved' })],
+          }),
+      },
+    ]);
+    const result = await calendar.doSyncEvents({ calendarId: 'primary', cursor: 'prev' });
+    expect(result.changes).toEqual([
+      { type: 'delete', eventId: 'gone' },
+      { type: 'upsert', event: expect.objectContaining({ kind: 'exception', title: 'Moved' }) },
+    ]);
+    expect(result.nextCursor).toBe('next');
+    expect(requests[0]?.url.searchParams.get('syncToken')).toBe('prev');
+  });
+
+  it('saves colors outside the palette as the nearest one, with a warning', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'POST',
+        path: /\/events$/,
+        respond: async (request) => Response.json({ ...(await request.json()), id: 'e1' }),
+      },
+    ]);
+    const { event, warnings } = await calendar.doCreateEvent({
+      calendarId: 'primary',
+      event: { start: { date: '2026-11-03' }, end: { date: '2026-11-04' }, color: '#d00000' },
+    });
+    expect(requests[0]?.body).toMatchObject({ colorId: '11' });
+    expect(event.color).toBe('#d50000');
+    expect(warnings).toEqual([
+      expect.objectContaining({ type: 'compatibility', feature: 'color' }),
+    ]);
+  });
+});

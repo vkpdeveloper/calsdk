@@ -1,19 +1,21 @@
-import { type EventTimeV1, UnsupportedFunctionalityError } from '@calsdk/provider';
+import {
+  type EventTimeV1,
+  InvalidArgumentError,
+  UnsupportedFunctionalityError,
+} from '@calsdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
-  formatLocalDate,
+  formatICalDate,
+  formatRRule,
   formatZonedDateTime,
-  type ICalDate,
-  instantToLocal,
   isAllDay,
-  type LocalDateTime,
   localToInstant,
   parseLocalDateTime,
   parseRecurrence,
   type RRule,
-  WEEKDAYS,
 } from '@calsdk/provider-utils';
+import { RRuleTemporal } from 'rrule-temporal';
 
 /** One instance of a recurring event. */
 export type Instance = {
@@ -30,248 +32,133 @@ export type RecurringEvent = {
 };
 
 const DAY_MS = 86_400_000;
-// A rule that matches no day for this many periods in a row is treated as finished
-// (e.g. FREQ=MONTHLY;BYMONTH=2;BYMONTHDAY=30).
-const MAX_EMPTY_PERIODS = 1_000;
-
-type Day = { year: number; month: number; day: number };
-
-const dayNumber = (day: Day) => Date.UTC(day.year, day.month - 1, day.day) / DAY_MS;
-const weekdayOf = (n: number) => new Date(n * DAY_MS).getUTCDay();
-const daysInMonth = (year: number, month: number) =>
-  new Date(Date.UTC(year, month, 0)).getUTCDate();
-const dayFromNumber = (n: number): Day => {
-  const date = new Date(n * DAY_MS);
-  return { year: date.getUTCFullYear(), month: date.getUTCMonth() + 1, day: date.getUTCDate() };
-};
 
 function unsupported(feature: string): UnsupportedFunctionalityError {
   return new UnsupportedFunctionalityError({
     provider: 'mock',
     functionality: `recurrence with ${feature}`,
-    message: `The mock provider does not support recurrence with ${feature}. It supports DAILY, WEEKLY, MONTHLY and YEARLY rules with INTERVAL, COUNT, UNTIL, BYDAY, BYMONTHDAY, BYMONTH, WKST and EXDATE.`,
+    message: `The mock provider does not support recurrence with ${feature}. It supports one RRULE line plus EXDATE lines.`,
   });
 }
 
-/** Throws `UnsupportedFunctionalityError` unless the mock can expand these recurrence lines. */
-export function assertSupportedRecurrence(recurrence: readonly string[]): RRule {
-  const parsed = parseRecurrence(recurrence);
+/**
+ * Builds the RFC 5545 rule. Timed events recur on the wall clock of their own time
+ * zone, so a 10:00 meeting stays at 10:00 across DST changes. All-day events recur
+ * on dates. `includeDtstart` keeps the series start as the first instance even when
+ * it does not match the rule, like Google does.
+ */
+function ruleOf(event: RecurringEvent, rrule: RRule): RRuleTemporal {
+  const line = formatRRule(rrule);
+  try {
+    if (isAllDay(event.start)) {
+      const dtstart = formatICalDate({ type: 'date', date: event.start.date });
+      return new RRuleTemporal({
+        rruleString: `DTSTART;VALUE=DATE:${dtstart}\n${line}`,
+        includeDtstart: true,
+      });
+    }
+    // An exact instant keeps DTSTART on the right side of a DST fold.
+    const { timeZone } = event.start;
+    const instant = new Date(eventTimeToInstant(event.start, timeZone)).toISOString();
+    return new RRuleTemporal({
+      rruleString: line,
+      dtstart: { timeZoneId: timeZone, toString: () => `${instant}[${timeZone}]` },
+      includeDtstart: true,
+    });
+  } catch (error) {
+    throw new InvalidArgumentError({
+      argument: 'recurrence',
+      message: error instanceof Error ? error.message : String(error),
+      cause: error,
+    });
+  }
+}
+
+/**
+ * Throws `UnsupportedFunctionalityError` unless the mock can expand these recurrence
+ * lines, and `InvalidArgumentError` when they are invalid for this event.
+ */
+export function assertSupportedRecurrence(event: RecurringEvent): void {
+  const parsed = parseRecurrence(event.recurrence);
   if (!parsed.rrule) throw unsupported('no RRULE line');
   if (parsed.rdates.length > 0) throw unsupported('RDATE');
   const [otherLine] = parsed.other;
   if (otherLine) throw unsupported(otherLine.split(/[;:]/, 1)[0] ?? otherLine);
-
-  const rule = parsed.rrule;
-  if (!['DAILY', 'WEEKLY', 'MONTHLY', 'YEARLY'].includes(rule.freq)) {
-    throw unsupported(`FREQ=${rule.freq}`);
-  }
-  if (rule.bySetPos) throw unsupported('BYSETPOS');
-  const [otherPart] = Object.keys(rule.other ?? {});
-  if (otherPart) throw unsupported(otherPart);
-  if (rule.byDay?.some((day) => day.n !== undefined) && rule.freq !== 'MONTHLY') {
-    throw unsupported(`numbered BYDAY with FREQ=${rule.freq}`);
-  }
-  if (rule.freq === 'YEARLY' && rule.byDay) throw unsupported('BYDAY with FREQ=YEARLY');
-  return rule;
-}
-
-/** Candidate days of the `period`-th recurrence period, before filtering by the series start. */
-function periodDays(rule: RRule, first: Day, period: number): number[] {
-  const interval = rule.interval ?? 1;
-  const firstNumber = dayNumber(first);
-  const weekdays = rule.byDay?.map(({ weekday }) => WEEKDAYS.indexOf(weekday));
-
-  switch (rule.freq) {
-    case 'DAILY':
-      return [firstNumber + period * interval];
-
-    case 'WEEKLY': {
-      const weekStart = WEEKDAYS.indexOf(rule.weekStart ?? 'MO');
-      const firstWeek = firstNumber - ((weekdayOf(firstNumber) - weekStart + 7) % 7);
-      const week = firstWeek + period * interval * 7;
-      return (weekdays ?? [weekdayOf(firstNumber)]).map(
-        (weekday) => week + ((weekday - weekStart + 7) % 7),
-      );
-    }
-
-    case 'MONTHLY': {
-      const monthIndex = first.year * 12 + (first.month - 1) + period * interval;
-      const year = Math.floor(monthIndex / 12);
-      const month = (monthIndex % 12) + 1;
-      return monthDays(rule, year, month, first.day);
-    }
-
-    default: {
-      const year = first.year + period * interval;
-      return (rule.byMonth ?? [first.month]).flatMap((month) =>
-        monthDays(rule, year, month, first.day),
-      );
-    }
-  }
-}
-
-function monthDays(rule: RRule, year: number, month: number, defaultDay: number): number[] {
-  const length = daysInMonth(year, month);
-  const firstOfMonth = dayNumber({ year, month, day: 1 });
-
-  const byMonthDay = rule.byMonthDay
-    ?.map((day) => (day > 0 ? day : length + 1 + day))
-    .filter((day) => day >= 1 && day <= length);
-
-  let byDay: number[] | undefined;
-  if (rule.byDay) {
-    byDay = rule.byDay.flatMap(({ weekday, n }) => {
-      const target = WEEKDAYS.indexOf(weekday);
-      const matches: number[] = [];
-      for (let day = 1; day <= length; day++) {
-        if (weekdayOf(firstOfMonth + day - 1) === target) matches.push(day);
-      }
-      if (n === undefined) return matches;
-      const match = n > 0 ? matches[n - 1] : matches[matches.length + n];
-      return match === undefined ? [] : [match];
-    });
-  }
-
-  let days: number[];
-  if (byMonthDay && byDay) days = byMonthDay.filter((day) => byDay.includes(day));
-  else days = byMonthDay ?? byDay ?? (defaultDay <= length ? [defaultDay] : []);
-  return days.map((day) => firstOfMonth + day - 1);
-}
-
-function matchesFilters(rule: RRule, n: number): boolean {
-  const day = dayFromNumber(n);
-  if (rule.byMonth && !rule.byMonth.includes(day.month)) return false;
-  if (rule.freq === 'DAILY') {
-    if (
-      rule.byDay &&
-      !rule.byDay.some(({ weekday }) => WEEKDAYS.indexOf(weekday) === weekdayOf(n))
-    ) {
-      return false;
-    }
-    if (
-      rule.byMonthDay &&
-      !monthDays({ ...rule, byDay: undefined }, day.year, day.month, 0).includes(n)
-    ) {
-      return false;
-    }
-  }
-  return true;
-}
-
-function untilInstant(until: ICalDate, timeZone: string): number {
-  if (until.type === 'date') {
-    const local = parseLocalDateTime(until.date) as LocalDateTime;
-    // A date UNTIL includes the whole day.
-    return localToInstant(local, timeZone) + DAY_MS - 1;
-  }
-  return localToInstant(
-    parseLocalDateTime(until.local) as LocalDateTime,
-    until.timeZone ?? timeZone,
-  );
+  ruleOf(event, parsed.rrule);
 }
 
 /**
- * Lazily yields every instance of a recurring event in start order, honoring
- * COUNT, UNTIL and EXDATE. The series start is always the first instance.
- * `includeExcluded` also yields EXDATE instances, which still count toward COUNT.
- *
- * Timed events recur on the wall clock of their own time zone, so a 10:00
- * meeting stays at 10:00 across DST changes. All-day events use `allDayTimeZone`
- * only to compute instants.
+ * Instances whose start falls in `[from, to)`, in start order, honoring COUNT,
+ * UNTIL and EXDATE. `includeExcluded` also returns EXDATE instances, which still
+ * count toward COUNT. All-day events use `allDayTimeZone` only to compute instants.
  */
-export function* iterateInstances(
+export function instancesBetween(
   event: RecurringEvent,
   allDayTimeZone: string,
+  from: number,
+  to: number,
   { includeExcluded = false }: { includeExcluded?: boolean } = {},
-): Generator<Instance> {
-  const rule = assertSupportedRecurrence(event.recurrence);
+): Instance[] {
   const parsed = parseRecurrence(event.recurrence);
-  const allDay = isAllDay(event.start);
-  const timeZone = 'timeZone' in event.start ? event.start.timeZone : allDayTimeZone;
+  if (!parsed.rrule) throw unsupported('no RRULE line');
+  const rule = ruleOf(event, parsed.rrule);
 
   const seriesStart = eventTimeToInstant(event.start, allDayTimeZone);
   const durationMs = eventTimeToInstant(event.end, allDayTimeZone) - seriesStart;
-  const startLocal = instantToLocal(seriesStart, timeZone);
   const durationDays =
     isAllDay(event.start) && isAllDay(event.end)
-      ? dayNumber(parseLocalDateTime(event.end.date) as Day) -
-        dayNumber(parseLocalDateTime(event.start.date) as Day)
+      ? Math.round((Date.parse(event.end.date) - Date.parse(event.start.date)) / DAY_MS)
       : 0;
+  const timeZone = isAllDay(event.start) ? allDayTimeZone : event.start.timeZone;
+  const endZone = isAllDay(event.end) ? timeZone : event.end.timeZone;
 
   // Date-time EXDATEs remove the instance starting at that instant, date EXDATEs
   // remove any instance starting on that local date.
-  const excludedInstants = new Set(
-    parsed.exdates.flatMap((date) =>
-      date.type === 'date-time'
-        ? [
-            localToInstant(
-              parseLocalDateTime(date.local) as LocalDateTime,
-              date.timeZone ?? timeZone,
-            ),
-          ]
-        : [],
-    ),
-  );
-  const excludedDates = new Set(
-    parsed.exdates.flatMap((date) => (date.type === 'date' ? [date.date] : [])),
-  );
-  const until = rule.until ? untilInstant(rule.until, timeZone) : Number.POSITIVE_INFINITY;
-  const firstNumber = dayNumber(startLocal);
-
-  const toInstance = (n: number): Instance => {
-    const day = dayFromNumber(n);
-    if (allDay) {
-      const date = formatLocalDate(day);
-      const startInstant = localToInstant({ ...day, hour: 0, minute: 0, second: 0 }, timeZone);
-      return {
-        start: { date },
-        end: { date: addDaysToDate(date, durationDays) },
-        startInstant,
-        endInstant: localToInstant(
-          { ...dayFromNumber(n + durationDays), hour: 0, minute: 0, second: 0 },
-          timeZone,
-        ),
-      };
-    }
-    const startInstant = localToInstant({ ...startLocal, ...day }, timeZone);
-    const endInstant = startInstant + durationMs;
-    const endZone = 'timeZone' in event.end ? event.end.timeZone : timeZone;
-    return {
-      start: { dateTime: formatZonedDateTime(startInstant, timeZone), timeZone },
-      end: { dateTime: formatZonedDateTime(endInstant, endZone), timeZone: endZone },
-      startInstant,
-      endInstant,
-    };
-  };
-
-  let emitted = 0;
-  let emptyPeriods = 0;
-  let seenStart = false;
-  for (let period = 0; emptyPeriods < MAX_EMPTY_PERIODS; period++) {
-    const days = [
-      ...new Set(
-        periodDays(rule, startLocal, period).filter(
-          (n) => n > firstNumber && matchesFilters(rule, n),
-        ),
-      ),
-    ].sort((a, b) => a - b);
-    if (!seenStart) {
-      days.unshift(firstNumber);
-      seenStart = true;
-    }
-    emptyPeriods = days.length === 0 ? emptyPeriods + 1 : 0;
-
-    for (const n of days) {
-      const instance = toInstance(n);
-      if (instance.startInstant > until) return;
-      emitted++;
-      const isExcluded =
-        excludedInstants.has(instance.startInstant) ||
-        excludedDates.has(formatLocalDate(dayFromNumber(n)));
-      if (includeExcluded || !isExcluded) yield instance;
-      if (rule.count !== undefined && emitted >= rule.count) return;
+  const excludedInstants = new Set<number>();
+  const excludedDates = new Set<string>();
+  for (const date of parsed.exdates) {
+    if (date.type === 'date') excludedDates.add(date.date);
+    else {
+      const local = parseLocalDateTime(date.local);
+      if (local) excludedInstants.add(localToInstant(local, date.timeZone ?? timeZone));
     }
   }
+
+  // All-day rules run on UTC dates, which can be up to a day away from instants in
+  // `allDayTimeZone`, so query a wider window and filter on the real instants.
+  const lower = new Date(Math.max(from, seriesStart) - DAY_MS);
+  const upper = new Date(to + DAY_MS);
+  if (lower >= upper) return [];
+
+  const instances: Instance[] = [];
+  for (const occurrence of rule.between(lower, upper, true)) {
+    let instance: Instance;
+    if (isAllDay(event.start)) {
+      const date = occurrence.toPlainDate().toString();
+      const endDate = addDaysToDate(date, durationDays);
+      instance = {
+        start: { date },
+        end: { date: endDate },
+        startInstant: eventTimeToInstant({ date }, allDayTimeZone),
+        endInstant: eventTimeToInstant({ date: endDate }, allDayTimeZone),
+      };
+    } else {
+      const startInstant = occurrence.epochMilliseconds;
+      const endInstant = startInstant + durationMs;
+      instance = {
+        start: { dateTime: formatZonedDateTime(startInstant, timeZone), timeZone },
+        end: { dateTime: formatZonedDateTime(endInstant, endZone), timeZone: endZone },
+        startInstant,
+        endInstant,
+      };
+    }
+    if (instance.startInstant < from || instance.startInstant >= to) continue;
+    const excluded =
+      excludedInstants.has(instance.startInstant) ||
+      excludedDates.has(occurrence.toPlainDate().toString());
+    if (includeExcluded || !excluded) instances.push(instance);
+  }
+  return instances;
 }
 
 /** Instances overlapping `[rangeStart, rangeEnd)`, in start order. */
@@ -281,10 +168,10 @@ export function expandInRange(
   rangeStart: number,
   rangeEnd: number,
 ): Instance[] {
-  const instances: Instance[] = [];
-  for (const instance of iterateInstances(event, allDayTimeZone)) {
-    if (instance.startInstant >= rangeEnd) break;
-    if (instance.endInstant > rangeStart) instances.push(instance);
-  }
-  return instances;
+  const seriesStart = eventTimeToInstant(event.start, allDayTimeZone);
+  // Instances can be a DST hour longer than the series start, hence the extra day.
+  const longest = eventTimeToInstant(event.end, allDayTimeZone) - seriesStart + DAY_MS;
+  return instancesBetween(event, allDayTimeZone, rangeStart - longest, rangeEnd).filter(
+    (instance) => instance.endInstant > rangeStart,
+  );
 }

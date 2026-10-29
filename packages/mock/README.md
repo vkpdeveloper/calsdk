@@ -26,4 +26,4 @@ const { events } = await listEvents({
 console.log(calendar.events); // inspect stored state
 ```
 
-Recurrence supports DAILY, WEEKLY, MONTHLY and YEARLY rules with INTERVAL, COUNT, UNTIL, BYDAY, BYMONTHDAY, BYMONTH, WKST and EXDATE. Other rules throw `UnsupportedFunctionalityError`.
+Recurrence follows RFC 5545 through [`rrule-temporal`](https://github.com/ggaabe/rrule-temporal): one `RRULE` line plus `EXDATE` lines. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`.

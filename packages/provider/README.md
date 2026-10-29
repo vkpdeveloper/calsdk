@@ -11,8 +11,12 @@ export function fastmail(settings: FastmailSettings): CalendarProviderV1 {
   return {
     specificationVersion: 'v1',
     provider: 'fastmail',
-    capabilities: { /* ... */ },
-    async doListCalendars(options) { /* ... */ },
+    capabilities: {
+      /* ... */
+    },
+    async doListCalendars(options) {
+      /* ... */
+    },
     // doGetEvent, doListEvents, doCreateEvent, doUpdateEvent, doDeleteEvent
   };
 }

@@ -117,12 +117,18 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
 
   describe(`${options.name} provider conformance`, () => {
     afterEach(async () => {
+      const failed: { eventId: string; error: unknown }[] = [];
       for (const eventId of created.splice(0)) {
-        await provider.doDeleteEvent({ calendarId, eventId, scope: 'all' }).then(
-          () => {},
-          (error: unknown) => {
-            if (!NotFoundError.isInstance(error)) throw error;
-          },
+        try {
+          await provider.doDeleteEvent({ calendarId, eventId, scope: 'all' });
+        } catch (error) {
+          if (!NotFoundError.isInstance(error)) failed.push({ eventId, error });
+        }
+      }
+      if (failed.length > 0) {
+        throw new AggregateError(
+          failed.map(({ error }) => error),
+          `Could not delete test events ${failed.map(({ eventId }) => eventId).join(', ')}. Remove them from the test calendar by hand.`,
         );
       }
     });
@@ -176,6 +182,23 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
           description: 'notes',
         });
         expectSameTime(updated.event.start, input.start);
+
+        const stored = (await provider.doGetEvent({ calendarId, eventId: event.id })).event;
+        expect(stored).toMatchObject({
+          title: 'calsdk conformance (renamed)',
+          description: 'notes',
+        });
+        expectSameTime(stored.start, input.start);
+        expectSameTime(stored.end, input.end);
+
+        await provider.doUpdateEvent({
+          calendarId,
+          eventId: event.id,
+          patch: { description: null },
+        });
+        const cleared = (await provider.doGetEvent({ calendarId, eventId: event.id })).event;
+        expect(cleared.description ?? '').toBe('');
+        expect(cleared.title).toBe('calsdk conformance (renamed)');
 
         await provider.doDeleteEvent({ calendarId, eventId: event.id });
         await expect(provider.doGetEvent({ calendarId, eventId: event.id })).rejects.toSatisfy(
@@ -306,15 +329,28 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
         );
 
       it(
-        'expands a series and modifies or deletes single occurrences',
+        'creates and reads a series',
         async () => {
-          const series = await createDaily(7);
+          const series = await createDaily(21);
           expect(series.kind).toBe('series');
           expect(series.recurrence).toContain('RRULE:FREQ=DAILY;COUNT=5');
 
-          const masters = await list(dayRange(7, 14), false);
-          expect(masters.find((event) => event.id === series.id)?.kind).toBe('series');
+          const fetched = (await provider.doGetEvent({ calendarId, eventId: series.id })).event;
+          expectValidEvent(fetched);
+          expect(fetched.kind).toBe('series');
+          expect(fetched.recurrence).toContain('RRULE:FREQ=DAILY;COUNT=5');
 
+          const masters = await list(dayRange(21, 28), false);
+          expect(masters.find((event) => event.id === series.id)?.kind).toBe('series');
+          expect(masters.filter((event) => event.seriesId === series.id)).toEqual([]);
+        },
+        timeout,
+      );
+
+      it.runIf(isSupported(capabilities.events.serverSideExpansion))(
+        'expands a series and modifies or deletes single occurrences',
+        async () => {
+          const series = await createDaily(7);
           const instances = await instancesOf([series.id], 7);
           expect(instances.map((event) => event.kind)).toEqual(Array(5).fill('occurrence'));
           for (const [index, instance] of instances.entries()) {
@@ -340,6 +376,10 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
           await provider.doDeleteEvent({ calendarId, eventId: third.id, scope: 'this' });
 
           const after = await instancesOf([series.id], 7);
+          expect(after.map((event) => event.id)).not.toContain(third.id);
+          expect(after.map((event) => originalInstant(event))).toEqual(
+            [0, 1, 3, 4].map((index) => eventTimeToInstant(at(7 + index, 10))),
+          );
           expect(after.map((event) => [event.kind, event.title])).toEqual([
             ['occurrence', 'calsdk series'],
             ['exception', 'calsdk exception'],
@@ -350,7 +390,10 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
         timeout,
       );
 
-      it.runIf(isSupported(capabilities.events.recurrenceScopeThisAndFollowing))(
+      it.runIf(
+        isSupported(capabilities.events.serverSideExpansion) &&
+          isSupported(capabilities.events.recurrenceScopeThisAndFollowing),
+      )(
         'applies thisAndFollowing to an occurrence and every later one',
         async () => {
           const series = await createDaily(14);
@@ -371,6 +414,9 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
           if (!created.includes(newSeriesId)) created.push(newSeriesId);
 
           const afterUpdate = await instancesOf([series.id, newSeriesId], 14);
+          expect(afterUpdate.map((event) => eventTimeToInstant(event.start))).toEqual(
+            [0, 1, 2, 3, 4].map((index) => eventTimeToInstant(at(14 + index, 10))),
+          );
           expect(afterUpdate.map((event) => event.title)).toEqual([
             'calsdk series',
             ...Array(4).fill('calsdk following'),
@@ -384,6 +430,9 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
             scope: 'thisAndFollowing',
           });
           const afterDelete = await instancesOf([series.id, newSeriesId], 14);
+          expect(afterDelete.map((event) => eventTimeToInstant(event.start))).toEqual(
+            [0, 1, 2].map((index) => eventTimeToInstant(at(14 + index, 10))),
+          );
           expect(afterDelete.map((event) => event.title)).toEqual([
             'calsdk series',
             'calsdk following',
@@ -394,15 +443,17 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
       );
     });
 
-    it.runIf(isSupported(capabilities.sync) && provider.doSyncEvents !== undefined)(
+    it.runIf(isSupported(capabilities.sync))(
       'syncs creates, updates and deletes incrementally',
       async () => {
+        const { doSyncEvents } = provider;
+        if (!doSyncEvents)
+          throw new Error('capabilities.sync is true, but doSyncEvents is missing.');
         const sync = async (cursor?: string) => {
           const changes: SyncChangeV1[] = [];
           let pageToken: string | undefined;
           for (let page = 0; page < 100; page++) {
-            const result = await provider.doSyncEvents?.({ calendarId, cursor, pageToken });
-            if (!result) throw new Error('doSyncEvents is missing.');
+            const result = await doSyncEvents.call(provider, { calendarId, cursor, pageToken });
             changes.push(...result.changes);
             if (result.nextCursor !== undefined) return { changes, cursor: result.nextCursor };
             pageToken = result.nextPageToken;
@@ -416,11 +467,23 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
             change.type === 'upsert' && change.event.id === eventId ? [change.event] : [],
           );
 
-        const initial = await sync();
-        const event = await create({ title: 'calsdk sync', start: at(4, 9), end: at(4, 10) });
+        const ours = (changes: SyncChangeV1[]) =>
+          changes.filter((change) =>
+            [existing.id, event.id].includes(
+              change.type === 'upsert' ? change.event.id : change.eventId,
+            ),
+          );
 
+        const existing = await create({ title: 'calsdk existing', start: at(4, 7), end: at(4, 8) });
+        const initial = await sync();
+        expect(upserted(initial.changes, existing.id)).toHaveLength(1);
+
+        const event = await create({ title: 'calsdk sync', start: at(4, 9), end: at(4, 10) });
         const afterCreate = await sync(initial.cursor);
-        expect(upserted(afterCreate.changes, event.id)).toHaveLength(1);
+        // Incremental: only what changed since the cursor, not the event from before.
+        expect(ours(afterCreate.changes)).toEqual([
+          { type: 'upsert', event: expect.objectContaining({ id: event.id }) },
+        ]);
 
         await provider.doUpdateEvent({
           calendarId,
@@ -428,11 +491,18 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
           patch: { title: 'calsdk sync v2' },
         });
         const afterUpdate = await sync(afterCreate.cursor);
-        expect(upserted(afterUpdate.changes, event.id).at(-1)?.title).toBe('calsdk sync v2');
+        expect(ours(afterUpdate.changes)).toEqual([
+          {
+            type: 'upsert',
+            event: expect.objectContaining({ id: event.id, title: 'calsdk sync v2' }),
+          },
+        ]);
 
         await provider.doDeleteEvent({ calendarId, eventId: event.id });
         const afterDelete = await sync(afterUpdate.cursor);
-        expect(afterDelete.changes).toContainEqual({ type: 'delete', eventId: event.id });
+        expect(ours(afterDelete.changes)).toEqual([{ type: 'delete', eventId: event.id }]);
+        const quiet = await sync(afterDelete.cursor);
+        expect(ours(quiet.changes)).toEqual([]);
         for (const change of [...afterCreate.changes, ...afterUpdate.changes]) {
           if (change.type === 'upsert') expectValidEvent(change.event);
         }
@@ -440,18 +510,21 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
       timeout,
     );
 
-    it.runIf(isSupported(capabilities.freeBusy) && provider.doFreeBusy !== undefined)(
+    it.runIf(isSupported(capabilities.freeBusy))(
       'reports busy time and ignores events shown as free',
       async () => {
+        if (!provider.doFreeBusy) {
+          throw new Error('capabilities.freeBusy is true, but doFreeBusy is missing.');
+        }
         await create({ title: 'calsdk busy', start: at(5, 9), end: at(5, 10) });
         await create({ title: 'calsdk free', start: at(5, 11), end: at(5, 12), showAs: 'free' });
 
-        const result = await provider.doFreeBusy?.({
+        const result = await provider.doFreeBusy({
           calendarIds: [calendarId],
           timeMin: at(5, 8).dateTime,
           timeMax: at(5, 13).dateTime,
         });
-        const busy = (result?.calendars[calendarId]?.busy ?? []).map((block) => ({
+        const busy = (result.calendars[calendarId]?.busy ?? []).map((block) => ({
           start: Date.parse(block.start),
           end: Date.parse(block.end),
         }));
@@ -535,6 +608,10 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
       });
     });
   });
+}
+
+function originalInstant(event: EventV1): number {
+  return eventTimeToInstant(event.originalStart ?? event.start);
 }
 
 function isSupported(capability: CapabilityV1): boolean {

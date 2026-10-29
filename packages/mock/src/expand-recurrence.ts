@@ -33,6 +33,19 @@ export type RecurringEvent = {
 
 const DAY_MS = 86_400_000;
 
+/** RRULE parts provider-utils keeps in `other`, with their RFC 5545 value ranges. */
+const EXTRA_PARTS: Record<string, [min: number, max: number]> = {
+  BYSECOND: [0, 60],
+  BYMINUTE: [0, 59],
+  BYHOUR: [0, 23],
+  BYYEARDAY: [-366, 366],
+  BYWEEKNO: [-53, 53],
+};
+
+// The library's default of 10,000 periods is too low for long COUNT series queried far
+// from their start (a daily series over 30 years). It stops early on impossible rules.
+const MAX_ITERATIONS = 1_000_000;
+
 function unsupported(feature: string): UnsupportedFunctionalityError {
   return new UnsupportedFunctionalityError({
     provider: 'mock',
@@ -55,6 +68,7 @@ function ruleOf(event: RecurringEvent, rrule: RRule): RRuleTemporal {
       return new RRuleTemporal({
         rruleString: `DTSTART;VALUE=DATE:${dtstart}\n${line}`,
         includeDtstart: true,
+        maxIterations: MAX_ITERATIONS,
       });
     }
     // An exact instant keeps DTSTART on the right side of a DST fold.
@@ -64,6 +78,7 @@ function ruleOf(event: RecurringEvent, rrule: RRule): RRuleTemporal {
       rruleString: line,
       dtstart: { timeZoneId: timeZone, toString: () => `${instant}[${timeZone}]` },
       includeDtstart: true,
+      maxIterations: MAX_ITERATIONS,
     });
   } catch (error) {
     throw new InvalidArgumentError({
@@ -84,6 +99,26 @@ export function assertSupportedRecurrence(event: RecurringEvent): void {
   if (parsed.rdates.length > 0) throw unsupported('RDATE');
   const [otherLine] = parsed.other;
   if (otherLine) throw unsupported(otherLine.split(/[;:]/, 1)[0] ?? otherLine);
+
+  // rrule-temporal ignores unknown parts and clamps some values in non-strict mode,
+  // so check the parts provider-utils does not model before trusting it.
+  for (const [part, value] of Object.entries(parsed.rrule.other ?? {})) {
+    const range = Object.hasOwn(EXTRA_PARTS, part) ? EXTRA_PARTS[part] : undefined;
+    if (!range) throw unsupported(part);
+    const [min, max] = range;
+    const valid = value.split(',').every((item) => {
+      const number = Number(item);
+      return (
+        /^[+-]?\d+$/.test(item) && number >= min && number <= max && (min >= 0 || number !== 0)
+      );
+    });
+    if (!valid) {
+      throw new InvalidArgumentError({
+        argument: 'recurrence',
+        message: `${part} values must be integers from ${min} to ${max}${min < 0 ? ', except 0' : ''}.`,
+      });
+    }
+  }
   ruleOf(event, parsed.rrule);
 }
 

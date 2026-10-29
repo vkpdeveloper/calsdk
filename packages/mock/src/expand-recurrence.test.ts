@@ -152,6 +152,17 @@ describe('instancesBetween', () => {
     expect(starts(event).at(-1)).toBe('2026-03-09T10:00:00-04:00');
   });
 
+  it('finds instances of long COUNT series far from their start', () => {
+    const event = timed(['RRULE:FREQ=DAILY;COUNT=20000'], '2000-01-03T10:00:00+05:30');
+    const instances = instancesBetween(
+      event,
+      'UTC',
+      Date.parse('2039-01-01T00:00:00Z'),
+      Date.parse('2039-01-08T00:00:00Z'),
+    );
+    expect(instances).toHaveLength(7);
+  });
+
   it('only returns instances starting in the window', () => {
     const event = timed(['RRULE:FREQ=DAILY'], '2000-01-03T10:00:00+05:30');
     const instances = instancesBetween(
@@ -174,9 +185,20 @@ describe('assertSupportedRecurrence', () => {
     );
   });
 
-  it('rejects invalid rules', () => {
-    expect(() => assertSupportedRecurrence(timed(['RRULE:FREQ=WEEKLY;BYDAY=1MO']))).toThrow(
-      InvalidArgumentError,
+  it.each([
+    'RRULE:FREQ=WEEKLY;BYDAY=1MO',
+    'RRULE:FREQ=DAILY;BYHOUR=99',
+    'RRULE:FREQ=YEARLY;BYYEARDAY=0',
+  ])('rejects the invalid rule %s', (line) => {
+    expect(() => assertSupportedRecurrence(timed([line]))).toThrow(InvalidArgumentError);
+  });
+
+  it('accepts other RFC 5545 parts and refuses unknown ones', () => {
+    expect(() =>
+      assertSupportedRecurrence(timed(['RRULE:FREQ=DAILY;BYHOUR=9,17;BYMINUTE=30'])),
+    ).not.toThrow();
+    expect(() => assertSupportedRecurrence(timed(['RRULE:FREQ=DAILY;BOGUS=YES']))).toThrow(
+      UnsupportedFunctionalityError,
     );
   });
 });

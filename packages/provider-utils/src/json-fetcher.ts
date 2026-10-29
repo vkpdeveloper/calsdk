@@ -1,4 +1,4 @@
-import { APICallError, InvalidResponseDataError } from '@calsdk/provider';
+import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@calsdk/provider';
 import { combineHeaders } from './headers';
 import { formatSchemaIssues, type StandardSchemaV1, validateSchema } from './validate-schema';
 
@@ -40,16 +40,23 @@ export type JsonFetcher = <Output = undefined>(
 /**
  * Builds a URL path from a template, percent-encoding every interpolated value.
  * Calendar and event ids can contain `@`, `/` and `#`, so never interpolate them raw.
+ * Empty, `.` and `..` values are rejected: URL parsing would collapse them into another path.
  *
  * @example
  * urlPath`/calendars/${calendarId}/events/${eventId}`
  */
 export function urlPath(strings: TemplateStringsArray, ...values: string[]): string {
-  return strings.reduce(
-    (path, part, index) =>
-      path + part + (index < values.length ? encodeURIComponent(values[index] as string) : ''),
-    '',
-  );
+  let path = strings[0] ?? '';
+  values.forEach((value, index) => {
+    if (value === '' || value === '.' || value === '..') {
+      throw new InvalidArgumentError({
+        argument: 'path',
+        message: `"${value}" is not a valid path segment.`,
+      });
+    }
+    path += encodeURIComponent(value) + (strings[index + 1] ?? '');
+  });
+  return path;
 }
 
 /**
@@ -57,10 +64,13 @@ export function urlPath(strings: TemplateStringsArray, ...values: string[]): str
  *
  * - Sends `Authorization: Bearer <token>`, resolving the token per request.
  * - Throws `APICallError` for non-2xx responses and network failures. It never
- *   includes request headers, so the token cannot leak through errors.
+ *   includes request headers, and tokens are validated before use, so the token
+ *   cannot leak through errors.
+ * - Never follows redirects: the token must only reach the provider origin, and
+ *   provider JSON APIs do not redirect.
  * - Validates response bodies with the request's schema and throws
  *   `InvalidResponseDataError` on mismatch.
- * - Abort errors are rethrown unchanged.
+ * - When `abortSignal` aborts, its reason is rethrown unchanged.
  */
 export function createJsonFetcher({
   baseURL,
@@ -76,35 +86,52 @@ export function createJsonFetcher({
   const base = baseURL.replace(/\/+$/, '');
 
   return async <Output>(request: JsonRequest<Output>) => {
+    const signal = request.abortSignal;
+    signal?.throwIfAborted();
     const url = buildURL(base, request.path, request.query);
+    const body = request.body !== undefined ? JSON.stringify(request.body) : undefined;
     const token = typeof accessToken === 'function' ? await accessToken() : accessToken;
+    signal?.throwIfAborted();
+    assertValidToken(token);
+
+    const init: RequestInit = {
+      method: request.method,
+      headers: combineHeaders(
+        { accept: 'application/json' },
+        body !== undefined ? { 'content-type': 'application/json' } : undefined,
+        headers,
+        request.headers,
+        { authorization: `Bearer ${token}` },
+      ),
+      body,
+      redirect: 'manual',
+      signal,
+    };
 
     let response: Response;
     try {
-      response = await fetch(url, {
-        method: request.method,
-        headers: combineHeaders(
-          { accept: 'application/json' },
-          request.body !== undefined ? { 'content-type': 'application/json' } : undefined,
-          headers,
-          request.headers,
-          { authorization: `Bearer ${token}` },
-        ),
-        body: request.body !== undefined ? JSON.stringify(request.body) : undefined,
-        signal: request.abortSignal,
-      });
+      response = await fetch(url, init);
     } catch (error) {
-      if (isAbortError(error)) throw error;
+      throw networkError(error, signal, url, 'failed before a response was received');
+    }
+
+    // Browsers report manual redirects as opaque responses with status 0.
+    if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
       throw new APICallError({
-        message: `Request to ${url} failed before a response was received: ${errorMessage(error)}`,
+        message: `Request to ${url} was redirected. calsdk does not follow redirects, so the access token never leaves the provider origin.`,
         url,
-        cause: error,
-        isRetryable: true,
+        statusCode: response.status,
+        isRetryable: false,
       });
     }
 
     const responseHeaders = Object.fromEntries(response.headers);
-    const text = await response.text();
+    let text: string;
+    try {
+      text = await response.text();
+    } catch (error) {
+      throw networkError(error, signal, url, 'failed while reading the response body');
+    }
 
     if (!response.ok) {
       throw new APICallError({
@@ -181,6 +208,35 @@ function describeErrorBody(text: string): string {
     // Not JSON: the raw body stays available on `responseBody`.
   }
   return '.';
+}
+
+// RFC 6750 b64token. Anything else could make fetch throw an error that echoes the header value.
+const TOKEN_PATTERN = /^[A-Za-z0-9\-._~+/]+=*$/;
+
+function assertValidToken(token: string): void {
+  if (!TOKEN_PATTERN.test(token)) {
+    throw new InvalidArgumentError({
+      argument: 'accessToken',
+      message:
+        'The access token is empty or contains characters that are not allowed in a bearer token.',
+    });
+  }
+}
+
+function networkError(
+  error: unknown,
+  signal: AbortSignal | undefined,
+  url: string,
+  stage: string,
+): unknown {
+  if (signal?.aborted) return signal.reason;
+  if (isAbortError(error)) return error;
+  return new APICallError({
+    message: `Request to ${url} ${stage}: ${errorMessage(error)}`,
+    url,
+    cause: error,
+    isRetryable: true,
+  });
 }
 
 function isAbortError(error: unknown): boolean {

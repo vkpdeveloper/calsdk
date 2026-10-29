@@ -1,4 +1,7 @@
-/** Merges header records left to right. Later values win and `undefined` values are dropped. */
+/**
+ * Merges header records left to right. Names are compared case-insensitively and lower-cased
+ * in the result, later values win and `undefined` values are dropped.
+ */
 export function combineHeaders(
   ...headers: (Record<string, string | undefined> | undefined)[]
 ): Record<string, string> {
@@ -6,7 +9,7 @@ export function combineHeaders(
   for (const record of headers) {
     if (record == null) continue;
     for (const [key, value] of Object.entries(record)) {
-      if (value !== undefined) result[key] = value;
+      if (value !== undefined) result[key.toLowerCase()] = value;
     }
   }
   return result;

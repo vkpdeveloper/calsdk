@@ -127,7 +127,8 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
     const resource = { type: 'event', id: eventId } as const;
     const raw = await request(
       call,
-      { resource },
+      // Reads precede conditional writes, so a 412 here is a conflict too.
+      { resource, eventId },
       { method: 'GET', path: eventPath(calendarId, eventId), schema: googleEventSchema },
     );
     if (raw.status === 'cancelled') {

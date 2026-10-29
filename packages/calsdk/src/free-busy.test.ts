@@ -206,6 +206,52 @@ describe('findFreeTime', () => {
     ]);
   });
 
+  it('keeps slots that span a repeated hour inside working hours', async () => {
+    const { slots } = await findFreeTime({
+      ...newYork('00:00', '03:00'),
+      duration: 60,
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-02T00:00:00Z',
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-11-01T04:00:00.000Z', // 00:00 EDT
+      '2026-11-01T04:30:00.000Z',
+      '2026-11-01T05:00:00.000Z', // 01:00 EDT
+      '2026-11-01T05:30:00.000Z', // 01:30 EDT, ends 01:30 EST
+      '2026-11-01T06:00:00.000Z', // 01:00 EST
+      '2026-11-01T06:30:00.000Z',
+      '2026-11-01T07:00:00.000Z', // 02:00 EST, ends 03:00
+    ]);
+  });
+
+  it('rejects slots that leave working hours through a repeated hour', async () => {
+    const { slots } = await findFreeTime({
+      ...newYork('01:30', '02:00'),
+      duration: 90,
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-02T00:00:00Z',
+    });
+    // 01:30 EDT to 02:00 EST passes through 01:00-01:30 EST.
+    expect(slots).toEqual([]);
+  });
+
+  it('stays on the hour after a half-hour DST change', async () => {
+    const { slots } = await findFreeTime({
+      calendars: [{ calendar: mockCalendar() }],
+      timeMin: '2026-10-03T12:00:00Z',
+      timeMax: '2026-10-04T12:00:00Z',
+      duration: 60,
+      slotInterval: 60,
+      // Lord Howe Island moves from +10:30 to +11:00 at 02:00 on 2026-10-04.
+      workingHours: { start: '09:00', end: '12:00', timeZone: 'Australia/Lord_Howe', days: [0] },
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-10-03T22:00:00.000Z', // 09:00
+      '2026-10-03T23:00:00.000Z', // 10:00
+      '2026-10-04T00:00:00.000Z', // 11:00
+    ]);
+  });
+
   it('aligns slots to the hour, not to the working-hours start', async () => {
     const { slots } = await findFreeTime({
       calendars: [{ calendar: mockCalendar() }],

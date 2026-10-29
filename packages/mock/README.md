@@ -7,15 +7,22 @@ import { mockCalendar } from '@calsdk/mock';
 import { listEvents } from 'calsdk';
 
 const calendar = mockCalendar({
-  events: [{
-    title: 'Standup',
-    start: { dateTime: '2026-11-02T10:00:00+05:30', timeZone: 'Asia/Kolkata' },
-    end: { dateTime: '2026-11-02T10:15:00+05:30', timeZone: 'Asia/Kolkata' },
-    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR'],
-  }],
+  events: [
+    {
+      title: 'Standup',
+      start: { dateTime: '2026-11-02T10:00:00+05:30', timeZone: 'Asia/Kolkata' },
+      end: { dateTime: '2026-11-02T10:15:00+05:30', timeZone: 'Asia/Kolkata' },
+      recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR'],
+    },
+  ],
 });
 
-const { events } = await listEvents({ calendar, timeMin: '2026-11-01', timeMax: '2026-12-01', expandRecurring: true });
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-01',
+  timeMax: '2026-12-01',
+  expandRecurring: true,
+});
 console.log(calendar.events); // inspect stored state
 ```
 

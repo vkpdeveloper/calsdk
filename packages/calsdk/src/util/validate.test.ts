@@ -27,6 +27,12 @@ describe('normalizeEventTime', () => {
     });
   });
 
+  it('keeps fractional seconds', () => {
+    expect(
+      normalizeEventTime({ dateTime: '2026-11-03T10:00:00.900', timeZone: 'UTC' }, 'start'),
+    ).toEqual({ dateTime: '2026-11-03T10:00:00.900+00:00', timeZone: 'UTC' });
+  });
+
   it('keeps explicit offsets and all-day dates', () => {
     const timed = { dateTime: '2026-11-03T04:30:00Z', timeZone: 'Asia/Kolkata' };
     expect(normalizeEventTime(timed, 'start')).toEqual(timed);
@@ -46,6 +52,11 @@ describe('normalizeEventTime', () => {
     [{ date: '2026-02-30' }, 'start.date'],
     [{ date: '2026-11-03', dateTime: '2026-11-03T10:00:00Z', timeZone: 'UTC' }, 'start'],
     [{ dateTime: 'tomorrow', timeZone: 'UTC' }, 'start.dateTime'],
+    [{ dateTime: '2026-11-03T25:00:00', timeZone: 'UTC' }, 'start.dateTime'],
+    [{ dateTime: '2026-11-03T10:99:00', timeZone: 'UTC' }, 'start.dateTime'],
+    [{ dateTime: '2026-02-30T10:00:00Z', timeZone: 'UTC' }, 'start.dateTime'],
+    [{ dateTime: '2026-11-03T10:00:00+24:00', timeZone: 'UTC' }, 'start.dateTime'],
+    [{ dateTime: '2026-11-03', timeZone: 'UTC' }, 'start.dateTime'],
     [{ dateTime: '2026-11-03T10:00:00Z' }, 'start.timeZone'],
   ])('rejects %j', (time, argument) => {
     expect(argumentOf(() => normalizeEventTime(time, 'start'))).toBe(argument);

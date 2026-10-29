@@ -116,6 +116,25 @@ describe('event functions', () => {
     await expect(result).resolves.toEqual(expect.objectContaining({ warnings: [] }));
   });
 
+  it('does not hide a missing calendar on a retried delete', async () => {
+    const missing = new NotFoundError({ provider: 'mock', resource: 'calendar', id: 'typo' });
+    const flaky = {
+      ...mockCalendar(),
+      doDeleteEvent: vi
+        .fn<CalendarProviderV1['doDeleteEvent']>()
+        .mockRejectedValueOnce(
+          new APICallError({ message: 'timeout', url: 'https://x', isRetryable: true }),
+        )
+        .mockRejectedValueOnce(missing),
+    };
+    vi.useFakeTimers();
+    const result = deleteEvent({ calendar: flaky, calendarId: 'typo', eventId: 'e' });
+    result.catch(() => {});
+    await vi.advanceTimersByTimeAsync(1000);
+    vi.useRealTimers();
+    await expect(result).rejects.toBe(missing);
+  });
+
   it('reports warnings through the global setting', async () => {
     const handler = vi.fn();
     globalThis.CALSDK_WARNINGS = handler;

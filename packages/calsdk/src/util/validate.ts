@@ -54,7 +54,7 @@ export function validatePageSize(pageSize: number | undefined): number | undefin
   return pageSize;
 }
 
-const OFFSET = /(?:Z|[+-]\d{2}:\d{2})$/i;
+const OFFSET = /(?:Z|([+-])(\d{2}):(\d{2}))$/i;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
 
 function isRealDate(date: string): boolean {
@@ -104,16 +104,23 @@ export function normalizeEventTime(time: unknown, argument: string): EventTimeV1
   if (typeof dateTime !== 'string') {
     throw invalid(`${argument}.dateTime`, 'Expected an ISO 8601 date-time string.');
   }
-  if (OFFSET.test(dateTime)) {
-    if (Number.isNaN(Date.parse(dateTime))) {
-      throw invalid(`${argument}.dateTime`, `"${dateTime}" is not a valid ISO 8601 date-time.`);
-    }
-    return { dateTime, timeZone };
-  }
-  const local = parseLocalDateTime(dateTime);
-  if (!local || !isRealDate(dateTime.slice(0, 10))) {
+  // Date.parse and Date.UTC roll impossible values over (25:00 becomes the next day),
+  // so check every component before converting.
+  const offset = OFFSET.exec(dateTime);
+  const local = parseLocalDateTime(offset ? dateTime.slice(0, offset.index) : dateTime);
+  if (
+    !local ||
+    !dateTime.includes('T') ||
+    !isRealDate(dateTime.slice(0, 10)) ||
+    local.hour > 23 ||
+    local.minute > 59 ||
+    local.second > 59 ||
+    Number(offset?.[2] ?? 0) > 23 ||
+    Number(offset?.[3] ?? 0) > 59
+  ) {
     throw invalid(`${argument}.dateTime`, `"${dateTime}" is not a valid ISO 8601 date-time.`);
   }
+  if (offset) return { dateTime, timeZone };
   return { dateTime: formatZonedDateTime(localToInstant(local, timeZone), timeZone), timeZone };
 }
 

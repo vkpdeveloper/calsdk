@@ -21,8 +21,6 @@ export type ListEventsOptions = CallSettings & {
   pageSize?: number;
   /** `nextPageToken` from the previous page. */
   pageToken?: string;
-  /** Include cancelled events. Default `false`. */
-  includeCancelled?: boolean;
 };
 export type ListEventsResult = ResultMetadata & {
   events: CalendarEvent[];
@@ -37,7 +35,6 @@ function prepare(options: Omit<ListEventsOptions, keyof CallSettings>) {
     expandRecurring: options.expandRecurring ?? true,
     query: options.query,
     pageSize: validatePageSize(options.pageSize),
-    includeCancelled: options.includeCancelled,
   };
 }
 

@@ -126,13 +126,13 @@ export function formatICalDate(value: ICalDate): string {
   return value.type === 'date-time' && value.timeZone === 'UTC' ? `${compact}Z` : compact;
 }
 
-/** The UTC date-time form of an instant, e.g. for `UNTIL`: `20261231T235959Z`. */
+/**
+ * The UTC date-time form of an instant, e.g. for `UNTIL`: `20261231T235959Z`.
+ * iCalendar has no fractional seconds, so milliseconds are dropped.
+ */
 export function instantToICalDate(instant: number): ICalDate {
-  return {
-    type: 'date-time',
-    local: formatLocalDateTime(instantToLocal(instant, 'UTC')),
-    timeZone: 'UTC',
-  };
+  const { millisecond: _, ...local } = instantToLocal(instant, 'UTC');
+  return { type: 'date-time', local: formatLocalDateTime(local), timeZone: 'UTC' };
 }
 
 /** The date form of an instant in a zone, e.g. for all-day `UNTIL`: `20261231`. */

@@ -90,7 +90,14 @@ export function createJsonFetcher({
     signal?.throwIfAborted();
     const url = buildURL(base, request.path, request.query);
     const body = request.body !== undefined ? JSON.stringify(request.body) : undefined;
-    const token = typeof accessToken === 'function' ? await accessToken() : accessToken;
+    let token: string;
+    try {
+      token = typeof accessToken === 'function' ? await accessToken() : accessToken;
+    } catch (error) {
+      // A resolver that fails because the call was cancelled should surface the cancellation.
+      signal?.throwIfAborted();
+      throw error;
+    }
     signal?.throwIfAborted();
     assertValidToken(token);
 
@@ -117,6 +124,8 @@ export function createJsonFetcher({
 
     // Browsers report manual redirects as opaque responses with status 0.
     if (response.type === 'opaqueredirect' || (response.status >= 300 && response.status < 400)) {
+      // Release the connection instead of leaving the body streaming.
+      await response.body?.cancel().catch(() => {});
       throw new APICallError({
         message: `Request to ${url} was redirected. calsdk does not follow redirects, so the access token never leaves the provider origin.`,
         url,

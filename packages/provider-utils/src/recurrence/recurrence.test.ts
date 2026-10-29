@@ -111,3 +111,41 @@ describe('formatExdates', () => {
     ]);
   });
 });
+
+describe('validation', () => {
+  it.each([
+    ['a line break', 'RRULE:FREQ=DAILY\r\nATTENDEE:mailto:x@example.com'],
+    ['a repeated part', 'RRULE:FREQ=DAILY;FREQ=WEEKLY'],
+    ['a part with two values', 'RRULE:FREQ=DAILY;BYHOUR=9=17'],
+    ['a COUNT that is not a safe integer', `RRULE:FREQ=DAILY;COUNT=${'9'.repeat(400)}`],
+    ['numbered BYDAY with WEEKLY', 'RRULE:FREQ=WEEKLY;BYDAY=2MO'],
+    ['BYMONTHDAY with WEEKLY', 'RRULE:FREQ=WEEKLY;BYMONTHDAY=3'],
+    ['an impossible date', 'EXDATE;VALUE=DATE:20260230'],
+  ])('rejects %s', (_, line) => {
+    expect(() => parseRecurrence([line])).toThrow(InvalidArgumentError);
+  });
+
+  it('unquotes TZID and keeps RDATE periods verbatim', () => {
+    const lines = [
+      'EXDATE;TZID="Asia/Kolkata":20261110T100000',
+      'RDATE;VALUE=PERIOD:20261110T100000Z/PT1H',
+    ];
+    expect(parseRecurrence(lines)).toEqual({
+      exdates: [{ type: 'date-time', local: '2026-11-10T10:00:00', timeZone: 'Asia/Kolkata' }],
+      rdates: [],
+      other: ['RDATE;VALUE=PERIOD:20261110T100000Z/PT1H'],
+    });
+  });
+
+  it('refuses to format values that would break the line', () => {
+    expect(() =>
+      formatExdates([{ type: 'date-time', local: '2026-11-10T10:00:00', timeZone: 'X:\r\nY' }]),
+    ).toThrow(InvalidArgumentError);
+    expect(() => formatExdates([{ type: 'date', date: '2026-11-10\r\nX' }])).toThrow(
+      InvalidArgumentError,
+    );
+    expect(() => formatRRule({ freq: 'DAILY', other: { BYHOUR: '9;COUNT=1' } })).toThrow(
+      InvalidArgumentError,
+    );
+  });
+});

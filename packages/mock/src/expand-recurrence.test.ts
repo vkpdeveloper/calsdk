@@ -1,6 +1,11 @@
-import { UnsupportedFunctionalityError } from '@calsdk/provider';
+import { InvalidArgumentError, UnsupportedFunctionalityError } from '@calsdk/provider';
 import { describe, expect, it } from 'vitest';
-import { expandInRange, iterateInstances, type RecurringEvent } from './expand-recurrence';
+import {
+  assertSupportedRecurrence,
+  expandInRange,
+  instancesBetween,
+  type RecurringEvent,
+} from './expand-recurrence';
 
 const timed = (recurrence: string[], start = '2026-11-02T10:00:00+05:30'): RecurringEvent => ({
   start: { dateTime: start, timeZone: 'Asia/Kolkata' },
@@ -11,16 +16,15 @@ const timed = (recurrence: string[], start = '2026-11-02T10:00:00+05:30'): Recur
   recurrence,
 });
 
-const starts = (event: RecurringEvent, limit = 20) => {
-  const result: string[] = [];
-  for (const instance of iterateInstances(event, 'UTC')) {
-    result.push('date' in instance.start ? instance.start.date : instance.start.dateTime);
-    if (result.length >= limit) break;
-  }
-  return result;
-};
+const all = (event: RecurringEvent) =>
+  instancesBetween(event, 'UTC', Date.parse('2000-01-01'), Date.parse('2040-01-01'));
 
-describe('iterateInstances', () => {
+const starts = (event: RecurringEvent, limit = 20) =>
+  all(event)
+    .slice(0, limit)
+    .map(({ start }) => ('date' in start ? start.date : start.dateTime));
+
+describe('instancesBetween', () => {
   it('expands DAILY with INTERVAL and COUNT', () => {
     expect(starts(timed(['RRULE:FREQ=DAILY;INTERVAL=2;COUNT=3']))).toEqual([
       '2026-11-02T10:00:00+05:30',
@@ -93,7 +97,7 @@ describe('iterateInstances', () => {
       end: { date: '2027-01-01' },
       recurrence: ['RRULE:FREQ=YEARLY;UNTIL=20281231', 'EXDATE;VALUE=DATE:20271231'],
     };
-    const instances = [...iterateInstances(event, 'UTC')];
+    const instances = all(event);
     expect(instances.map((instance) => instance.start)).toEqual([
       { date: '2026-12-31' },
       { date: '2028-12-31' },
@@ -101,19 +105,78 @@ describe('iterateInstances', () => {
     expect(instances[1]?.end).toEqual({ date: '2029-01-01' });
   });
 
-  it('stops rules that can never match again', () => {
-    const event = timed(['RRULE:FREQ=MONTHLY;BYMONTH=2;BYMONTHDAY=30']);
-    expect(starts(event)).toEqual(['2026-11-02T10:00:00+05:30']);
+  it('finds sparse rules such as leap days', () => {
+    const event: RecurringEvent = {
+      start: { date: '2024-02-29' },
+      end: { date: '2024-03-01' },
+      recurrence: ['RRULE:FREQ=YEARLY;COUNT=3'],
+    };
+    expect(starts(event)).toEqual(['2024-02-29', '2028-02-29', '2032-02-29']);
   });
 
-  it.each([
-    'RRULE:FREQ=HOURLY',
-    'RRULE:FREQ=MONTHLY;BYDAY=MO;BYSETPOS=1',
-    'RRULE:FREQ=DAILY;BYHOUR=9',
-    'RRULE:FREQ=WEEKLY;BYDAY=1MO',
-  ])('rejects %s', (line) => {
-    expect(() => [...iterateInstances(timed([line]), 'UTC')]).toThrow(
+  it('expands YEARLY BYMONTHDAY into every month', () => {
+    expect(
+      starts(timed(['RRULE:FREQ=YEARLY;BYMONTHDAY=15;COUNT=3'], '2027-01-15T09:00:00+05:30')),
+    ).toEqual([
+      '2027-01-15T09:00:00+05:30',
+      '2027-02-15T09:00:00+05:30',
+      '2027-03-15T09:00:00+05:30',
+    ]);
+  });
+
+  it('skips wall-clock times that DST removes, without counting them', () => {
+    const event: RecurringEvent = {
+      start: { dateTime: '2026-03-07T02:30:00-05:00', timeZone: 'America/New_York' },
+      end: { dateTime: '2026-03-07T03:00:00-05:00', timeZone: 'America/New_York' },
+      recurrence: ['RRULE:FREQ=DAILY;COUNT=2'],
+    };
+    expect(starts(event)).toEqual(['2026-03-07T02:30:00-05:00', '2026-03-09T02:30:00-04:00']);
+  });
+
+  it('keeps a series start in the second half of a DST fold', () => {
+    // 01:30 happens twice on 2026-11-01 in New York; this is the later one.
+    const event: RecurringEvent = {
+      start: { dateTime: '2026-11-01T01:30:00-05:00', timeZone: 'America/New_York' },
+      end: { dateTime: '2026-11-01T02:00:00-05:00', timeZone: 'America/New_York' },
+      recurrence: ['RRULE:FREQ=DAILY;COUNT=2'],
+    };
+    expect(all(event)[0]?.startInstant).toBe(Date.parse('2026-11-01T06:30:00Z'));
+  });
+
+  it('ends a date UNTIL on that local date across DST', () => {
+    const event: RecurringEvent = {
+      start: { dateTime: '2026-03-06T10:00:00-05:00', timeZone: 'America/New_York' },
+      end: { dateTime: '2026-03-06T11:00:00-05:00', timeZone: 'America/New_York' },
+      recurrence: ['RRULE:FREQ=DAILY;UNTIL=20260309'],
+    };
+    expect(starts(event).at(-1)).toBe('2026-03-09T10:00:00-04:00');
+  });
+
+  it('only returns instances starting in the window', () => {
+    const event = timed(['RRULE:FREQ=DAILY'], '2000-01-03T10:00:00+05:30');
+    const instances = instancesBetween(
+      event,
+      'UTC',
+      Date.parse('2039-01-01T00:00:00Z'),
+      Date.parse('2039-01-03T00:00:00Z'),
+    );
+    expect(instances.map(({ start }) => start)).toEqual([
+      { dateTime: '2039-01-01T10:00:00+05:30', timeZone: 'Asia/Kolkata' },
+      { dateTime: '2039-01-02T10:00:00+05:30', timeZone: 'Asia/Kolkata' },
+    ]);
+  });
+});
+
+describe('assertSupportedRecurrence', () => {
+  it.each(['RDATE:20261110T100000Z', 'EXRULE:FREQ=DAILY'])('does not support %s', (line) => {
+    expect(() => assertSupportedRecurrence(timed(['RRULE:FREQ=DAILY', line]))).toThrow(
       UnsupportedFunctionalityError,
+    );
+  });
+
+  it('rejects invalid rules', () => {
+    expect(() => assertSupportedRecurrence(timed(['RRULE:FREQ=WEEKLY;BYDAY=1MO']))).toThrow(
+      InvalidArgumentError,
     );
   });
 });

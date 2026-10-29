@@ -1,6 +1,7 @@
 import {
   ConflictError,
   type EventV1,
+  InvalidArgumentError,
   NotFoundError,
   SyncCursorExpiredError,
 } from '@calsdk/provider';
@@ -237,5 +238,103 @@ describe('mockCalendar', () => {
     await expect(
       calendar.doSyncEvents({ calendarId: 'primary', cursor: 'cal_1:999' }),
     ).rejects.toSatisfy(SyncCursorExpiredError.isInstance);
+  });
+
+  it('leaves the series alone when a thisAndFollowing split is invalid', async () => {
+    const calendar = weekly();
+    const before = calendar.events;
+    await expect(
+      calendar.doUpdateEvent({
+        calendarId: 'primary',
+        eventId: 'evt_1_20261116T043000Z',
+        scope: 'thisAndFollowing',
+        patch: { end: kolkata('2026-11-16T09:00:00+05:30') },
+      }),
+    ).rejects.toSatisfy(InvalidArgumentError.isInstance);
+    expect(calendar.events).toEqual(before);
+  });
+
+  it('gives a new exception its own etag', async () => {
+    const calendar = weekly();
+    const occurrence = await calendar.doGetEvent({
+      calendarId: 'primary',
+      eventId: 'evt_1_20261109T043000Z',
+    });
+    const { event } = await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: occurrence.event.id,
+      patch: { title: 'Changed' },
+    });
+    expect(event.etag).not.toBe(occurrence.event.etag);
+  });
+
+  it('drops exceptions whose occurrence no longer exists after the series moves', async () => {
+    const calendar = weekly();
+    await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'evt_1_20261109T043000Z',
+      patch: { title: 'Special' },
+    });
+    await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'evt_1_20261102T043000Z',
+      scope: 'all',
+      patch: {
+        start: kolkata('2026-11-02T11:00:00+05:30'),
+        end: kolkata('2026-11-02T11:30:00+05:30'),
+      },
+    });
+    const { events } = await calendar.doListEvents(window);
+    expect(events.map((e) => e.start)).toEqual([
+      kolkata('2026-11-02T11:00:00+05:30'),
+      kolkata('2026-11-09T11:00:00+05:30'),
+      kolkata('2026-11-16T11:00:00+05:30'),
+      kolkata('2026-11-23T11:00:00+05:30'),
+    ]);
+  });
+
+  it('rejects unparseable times instead of storing them', async () => {
+    const calendar = mockCalendar();
+    await expect(
+      calendar.doCreateEvent({
+        calendarId: 'primary',
+        event: { start: kolkata('not a date'), end: kolkata('2026-11-02T10:30:00+05:30') },
+      }),
+    ).rejects.toSatisfy(InvalidArgumentError.isInstance);
+    expect(calendar.events).toEqual([]);
+  });
+
+  it('does not reuse seeded ids', async () => {
+    const calendar = mockCalendar({
+      events: [{ id: 'evt_1', start: { date: '2026-11-03' }, end: { date: '2026-11-04' } }],
+    });
+    const { event } = await calendar.doCreateEvent({
+      calendarId: 'primary',
+      event: { start: { date: '2026-11-05' }, end: { date: '2026-11-06' } },
+    });
+    expect(event.id).toBe('evt_2');
+  });
+
+  it('keeps sync pages stable when events change mid-round', async () => {
+    const calendar = mockCalendar({
+      defaultPageSize: 1,
+      events: ['A', 'B', 'C'].map((title) => ({
+        title,
+        start: { date: '2026-11-03' },
+        end: { date: '2026-11-04' },
+      })),
+    });
+    const seen: string[] = [];
+    let page = await calendar.doSyncEvents({ calendarId: 'primary' });
+    await calendar.doDeleteEvent({ calendarId: 'primary', eventId: 'evt_1' });
+    for (;;) {
+      for (const change of page.changes) seen.push(change.type === 'upsert' ? change.event.id : '');
+      if (!page.nextPageToken) break;
+      page = await calendar.doSyncEvents({ calendarId: 'primary', pageToken: page.nextPageToken });
+    }
+    expect(seen).toEqual(['evt_1', 'evt_2', 'evt_3']);
+
+    const next = await calendar.doSyncEvents({ calendarId: 'primary', cursor: page.nextCursor });
+    expect(next.changes).toEqual([{ type: 'delete', eventId: 'evt_1' }]);
   });
 });

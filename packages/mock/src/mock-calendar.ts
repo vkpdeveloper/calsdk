@@ -23,13 +23,15 @@ import {
   type ICalDate,
   instantToICalDate,
   isAllDay,
+  isValidTimeZone,
+  parseICalDate,
   parseRecurrence,
 } from '@calsdk/provider-utils';
 import {
   assertSupportedRecurrence,
   expandInRange,
   type Instance,
-  iterateInstances,
+  instancesBetween,
 } from './expand-recurrence';
 
 export type MockCalendarSettings = {
@@ -59,7 +61,7 @@ export type MockCalendarProvider = CalendarProviderV1 &
 const PROVIDER = 'mock';
 const DAY_MS = 86_400_000;
 
-type ChangeLogEntry = { seq: number; calendarId: string; eventId: string };
+type ChangeLogEntry = { seq: number; calendarId: string; eventId: string; deleted: boolean };
 
 const clone = <T>(value: T): T => structuredClone(value);
 
@@ -104,6 +106,12 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
   let nextId = 1;
   let seq = 0;
 
+  function newId() {
+    // Seeded events may already use ids of the generated form.
+    while (events.has(`evt_${nextId}`)) nextId++;
+    return `evt_${nextId++}`;
+  }
+
   function resolveCalendar(calendarId: string): CalendarV1 {
     const calendar =
       calendarId === 'primary'
@@ -127,14 +135,16 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
   function save(event: EventV1) {
     const previous = events.get(event.id);
     const timestamp = now().toISOString();
-    const version = previous?.etag ? Number(previous.etag.replaceAll('"', '')) + 1 : 1;
+    seq++;
     events.set(event.id, {
       ...compact(event),
-      etag: `"${version}"`,
+      // The change sequence is unique across events, so an exception never reuses
+      // the etag it inherited from its series.
+      etag: `"${seq}"`,
       createdAt: previous?.createdAt ?? timestamp,
       updatedAt: timestamp,
     });
-    changeLog.push({ seq: ++seq, calendarId: event.calendarId, eventId: event.id });
+    changeLog.push({ seq, calendarId: event.calendarId, eventId: event.id, deleted: false });
   }
 
   function remove(event: EventV1) {
@@ -142,7 +152,7 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       for (const exception of exceptionsOf(event.id)) remove(exception);
     }
     events.delete(event.id);
-    changeLog.push({ seq: ++seq, calendarId: event.calendarId, eventId: event.id });
+    changeLog.push({ seq: ++seq, calendarId: event.calendarId, eventId: event.id, deleted: true });
   }
 
   const exceptionsOf = (seriesId: string) =>
@@ -198,13 +208,24 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
     const series = separator > 0 ? events.get(eventId.slice(0, separator)) : undefined;
     if (series?.kind !== 'series' || series.calendarId !== calendar.id) throw notFound(eventId);
 
-    for (const instance of iterateInstances(recurringOf(series), zoneOf(calendar))) {
-      const occurrence = occurrenceOf(series, instance, calendar);
-      if (occurrence.id === eventId) return occurrence;
-      // Suffixes are fixed-width timestamps, so string order is time order.
-      if (occurrence.id.slice(separator + 1) > eventId.slice(separator + 1)) break;
+    // The suffix is the UTC start (timed) or the date (all-day). A date is up to a
+    // day away from the instant in the calendar's zone.
+    let start: number;
+    try {
+      start = eventTimeToInstant(occurrenceStartOf(eventId.slice(separator + 1)), 'UTC');
+    } catch {
+      throw notFound(eventId);
     }
-    throw notFound(eventId);
+    const occurrence = instancesBetween(
+      recurringOf(series),
+      zoneOf(calendar),
+      start - DAY_MS,
+      start + DAY_MS,
+    )
+      .map((instance) => occurrenceOf(series, instance, calendar))
+      .find((candidate) => candidate.id === eventId);
+    if (!occurrence) throw notFound(eventId);
+    return occurrence;
   }
 
   function checkEtag(event: EventV1, ifMatch: string | undefined) {
@@ -252,6 +273,18 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
   }
 
   function validateTimes(event: Pick<EventV1, 'start' | 'end'>, calendar: CalendarV1) {
+    for (const key of ['start', 'end'] as const) {
+      const time = event[key];
+      if (
+        (!isAllDay(time) && !isValidTimeZone(time.timeZone)) ||
+        !Number.isFinite(instantOf(time, calendar))
+      ) {
+        throw new InvalidArgumentError({
+          argument: `event.${key}`,
+          message: 'Not a valid date, date-time or time zone.',
+        });
+      }
+    }
     if (isAllDay(event.start) !== isAllDay(event.end)) {
       throw new InvalidArgumentError({
         argument: 'event.end',
@@ -267,7 +300,8 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
     }
   }
 
-  function createEvent(calendar: CalendarV1, input: EventInputV1, id = `evt_${nextId++}`): EventV1 {
+  /** Validates `input` and builds the event without storing it. */
+  function buildEvent(calendar: CalendarV1, input: EventInputV1, id = newId()): EventV1 {
     if (events.has(id)) {
       throw new InvalidArgumentError({
         argument: 'event.id',
@@ -275,7 +309,6 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       });
     }
     const { createConference, attendees, showAs, recurrence, ...fields } = clone(input);
-    if (recurrence?.length) assertSupportedRecurrence(recurrence);
     const event: EventV1 = {
       ...fields,
       id,
@@ -289,8 +322,26 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       conference: createConference ? conferenceFor(id) : undefined,
     };
     validateTimes(event, calendar);
+    if (event.recurrence) assertSupportedRecurrence(recurringOf(event));
+    return event;
+  }
+
+  function createEvent(calendar: CalendarV1, input: EventInputV1, id?: string): EventV1 {
+    const event = buildEvent(calendar, input, id);
     save(event);
-    return events.get(id) as EventV1;
+    return events.get(event.id) as EventV1;
+  }
+
+  /** Removes exceptions whose original occurrence is no longer part of the series. */
+  function dropOrphanedExceptions(series: EventV1, calendar: CalendarV1) {
+    for (const exception of exceptionsOf(series.id)) {
+      const originalStart = instantOf(exception.originalStart ?? exception.start, calendar);
+      const stillThere =
+        series.kind === 'series' &&
+        instancesBetween(recurringOf(series), zoneOf(calendar), originalStart, originalStart + 1)
+          .length > 0;
+      if (!stillThere) remove(exception);
+    }
   }
 
   /** The input that recreates `event`, used when splitting a series. */
@@ -320,11 +371,12 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
     const parsed = parseRecurrence(series.recurrence ?? []);
     if (!parsed.rrule) return false;
 
-    let last: Instance | undefined;
-    for (const instance of iterateInstances(recurringOf(series), zoneOf(calendar))) {
-      if (instance.startInstant >= cut) break;
-      last = instance;
-    }
+    const last = instancesBetween(
+      recurringOf(series),
+      zoneOf(calendar),
+      instantOf(series.start, calendar),
+      cut,
+    ).at(-1);
     if (!last) return false;
 
     const { count: _count, ...rule } = parsed.rrule;
@@ -397,6 +449,7 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       if (end) next.end = shiftTime(series.end, instance.end, end, calendar);
       validateTimes(next, calendar);
       save(next);
+      dropOrphanedExceptions(next, calendar);
       return events.get(series.id) as EventV1;
     }
 
@@ -405,12 +458,10 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
     const parsed = parseRecurrence(series.recurrence ?? []);
     let remaining = parsed.rrule?.count;
     if (remaining !== undefined) {
-      for (const earlier of iterateInstances(recurringOf(series), zoneOf(calendar), {
+      const seriesStart = instantOf(series.start, calendar);
+      remaining -= instancesBetween(recurringOf(series), zoneOf(calendar), seriesStart, cut, {
         includeExcluded: true,
-      })) {
-        if (earlier.startInstant >= cut) break;
-        remaining--;
-      }
+      }).length;
     }
     const rule = parsed.rrule && { ...parsed.rrule, count: remaining };
     const anchored = {
@@ -419,9 +470,11 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       end: shiftTime(series.end, series.start, originalStart, calendar),
       recurrence: rule ? [formatRRule(rule)] : undefined,
     };
-    const input = toInput(applyPatch(anchored, patch));
+    // Validate the new series before touching the old one, so a bad patch changes nothing.
+    const next = buildEvent(calendar, toInput(applyPatch(anchored, patch)));
     if (!trimSeries(series, cut, calendar)) remove(series);
-    return createEvent(calendar, input);
+    save(next);
+    return events.get(next.id) as EventV1;
   }
 
   function deleteInstance(calendar: CalendarV1, instance: EventV1, scope: UpdateScopeV1) {
@@ -545,12 +598,10 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
 
       const next = applyPatch(event, patch);
       next.kind = next.recurrence ? 'series' : 'single';
-      if (next.recurrence) assertSupportedRecurrence(next.recurrence);
       validateTimes(next, calendar);
-      if (event.kind === 'series' && next.kind === 'single') {
-        for (const exception of exceptionsOf(event.id)) remove(exception);
-      }
+      if (next.recurrence) assertSupportedRecurrence(recurringOf(next));
       save(next);
+      if (event.kind === 'series') dropOrphanedExceptions(next, calendar);
       return { event: clone(events.get(event.id) as EventV1), warnings: [] };
     },
 
@@ -577,21 +628,23 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
       const to = round?.to ?? seq;
       const offset = round?.offset ?? 0;
 
-      // Latest change per event, in the order of that latest change.
-      const changed = new Set<string>();
+      // Latest change per event within the window, in the order of that change. The
+      // window's log entries never change, so every page of a round sees the same list
+      // even when events change mid-round. Changes after `to` come in the next round.
+      const latest = new Map<string, ChangeLogEntry>();
       for (const entry of changeLog) {
         if (entry.seq > from && entry.seq <= to && entry.calendarId === calendar.id) {
-          changed.delete(entry.eventId);
-          changed.add(entry.eventId);
+          latest.delete(entry.eventId);
+          latest.set(entry.eventId, entry);
         }
       }
 
       const changes: SyncChangeV1[] = [];
-      for (const eventId of changed) {
+      for (const { eventId, deleted } of latest.values()) {
+        // An initial sync only reports events that existed at the start of the round.
+        if (deleted && from === 0) continue;
         const event = events.get(eventId);
-        if (event) changes.push({ type: 'upsert', event: clone(event) });
-        // An initial sync only reports events that exist.
-        else if (from > 0) changes.push({ type: 'delete', eventId });
+        changes.push(event ? { type: 'upsert', event: clone(event) } : { type: 'delete', eventId });
       }
 
       const end = offset + pageSizeDefault;
@@ -642,4 +695,12 @@ function parseCursor(cursor: string, calendarId: string, currentSeq: number): nu
     throw new SyncCursorExpiredError({ provider: PROVIDER, calendarId });
   }
   return Number(value);
+}
+
+/** The start encoded in an occurrence id suffix: `20261103` or `20261103T043000Z`. */
+function occurrenceStartOf(suffix: string): EventTimeV1 {
+  const value = parseICalDate(suffix);
+  return value.type === 'date'
+    ? { date: value.date }
+    : { dateTime: `${value.local}Z`, timeZone: 'UTC' };
 }

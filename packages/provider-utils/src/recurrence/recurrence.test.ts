@@ -105,10 +105,12 @@ describe('formatExdates', () => {
     ]);
   });
 
-  it('formats instants as UTC date-times', () => {
-    expect(formatExdates([instantToICalDate(Date.parse('2026-11-24T04:30:00Z'))])).toEqual([
-      'EXDATE:20261124T043000Z',
-    ]);
+  it('formats instants as UTC date-times, dropping milliseconds', () => {
+    const date = instantToICalDate(Date.parse('2026-11-24T04:30:00.250Z'));
+    expect(formatExdates([date])).toEqual(['EXDATE:20261124T043000Z']);
+    expect(formatRRule({ freq: 'DAILY', until: date })).toBe(
+      'RRULE:FREQ=DAILY;UNTIL=20261124T043000Z',
+    );
   });
 });
 

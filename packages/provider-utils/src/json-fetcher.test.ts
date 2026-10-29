@@ -141,9 +141,14 @@ describe('createJsonFetcher', () => {
     expect(fetch).toHaveBeenCalledTimes(1);
   });
 
-  it('does not follow redirects', async () => {
+  it('does not follow redirects, and releases the redirect body', async () => {
+    const cancel = vi.fn();
     const fetch = stubFetch(
-      () => new Response(null, { status: 302, headers: { location: 'https://evil.example.com' } }),
+      () =>
+        new Response(new ReadableStream({ cancel }), {
+          status: 302,
+          headers: { location: 'https://evil.example.com' },
+        }),
     );
     const request = createJsonFetcher({
       baseURL: 'https://api.example.com',
@@ -155,6 +160,7 @@ describe('createJsonFetcher', () => {
 
     expect(fetch.mock.calls[0]?.[1]?.redirect).toBe('manual');
     expect(APICallError.isInstance(error) && !error.isRetryable).toBe(true);
+    expect(cancel).toHaveBeenCalled();
   });
 
   it('rejects malformed tokens without echoing them', async () => {
@@ -199,6 +205,27 @@ describe('createJsonFetcher', () => {
         controller.abort(reason);
         throw new TypeError('fetch failed');
       },
+    });
+
+    await expect(
+      request({ method: 'GET', path: '/a', abortSignal: controller.signal }),
+    ).rejects.toBe(reason);
+  });
+
+  it('rethrows the abort reason when the token resolver fails after an abort', async () => {
+    const controller = new AbortController();
+    const reason = new Error('user cancelled');
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      accessToken: async () => {
+        controller.abort(reason);
+        throw new APICallError({
+          message: 'refresh failed',
+          url: 'https://auth',
+          isRetryable: true,
+        });
+      },
+      fetch: stubFetch(() => Response.json({})),
     });
 
     await expect(

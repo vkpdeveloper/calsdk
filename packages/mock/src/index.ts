@@ -1,1 +1,5 @@
-export { expandInRange, iterateInstances } from './expand-recurrence';
+export {
+  type MockCalendarProvider,
+  type MockCalendarSettings,
+  mockCalendar,
+} from './mock-calendar';

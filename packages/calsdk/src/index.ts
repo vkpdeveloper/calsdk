@@ -34,6 +34,12 @@ export {
   type ListEventsResult,
   listEvents,
 } from './list-events';
+export {
+  type SyncEventsOptions,
+  type SyncEventsPageResult,
+  type SyncEventsResult,
+  syncEvents,
+} from './sync-events';
 export type * from './types';
 export {
   type UpdateEventOptions,

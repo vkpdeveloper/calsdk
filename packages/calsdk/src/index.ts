@@ -22,7 +22,21 @@ export {
   type DeleteEventResult,
   deleteEvent,
 } from './delete-event';
+export { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
+export {
+  type FindFreeTimeOptions,
+  type FindFreeTimeResult,
+  type FreeSlot,
+  findFreeTime,
+  type WorkingHours,
+} from './find-free-time';
 export { type GetEventOptions, type GetEventResult, getEvent } from './get-event';
+export {
+  type FreeBusyCalendar,
+  type GetFreeBusyOptions,
+  type GetFreeBusyResult,
+  getFreeBusy,
+} from './get-free-busy';
 export {
   type ListCalendarsOptions,
   type ListCalendarsResult,

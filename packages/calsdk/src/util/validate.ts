@@ -6,6 +6,7 @@ import {
 } from '@calsdk/provider';
 import {
   formatZonedDateTime,
+  isAllDay,
   isValidTimeZone,
   localToInstant,
   parseLocalDateTime,
@@ -125,18 +126,16 @@ export function normalizeEventTime(time: unknown, argument: string): EventTimeV1
 }
 
 function compareTimes(start: EventTimeV1, end: EventTimeV1, argument: string) {
-  if ('date' in start !== 'date' in end) {
+  if (isAllDay(start) !== isAllDay(end)) {
     throw invalid(
       `${argument}.end`,
       'start and end must both be all-day ({ date }) or both timed ({ dateTime, timeZone }).',
     );
   }
   const isAfter =
-    'date' in start && 'date' in end
+    isAllDay(start) && isAllDay(end)
       ? end.date > start.date
-      : 'dateTime' in start &&
-        'dateTime' in end &&
-        Date.parse(end.dateTime) > Date.parse(start.dateTime);
+      : !isAllDay(start) && !isAllDay(end) && Date.parse(end.dateTime) > Date.parse(start.dateTime);
   if (!isAfter) {
     throw invalid(
       `${argument}.end`,

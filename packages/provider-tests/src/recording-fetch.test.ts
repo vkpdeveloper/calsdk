@@ -62,6 +62,52 @@ describe('createRecordingFetch', () => {
     expect((await post(replay.fetch, 'b')).status).toBe(200);
   });
 
+  it('never stores credentials passed in the URL', async () => {
+    const path = join(await mkdtemp(join(tmpdir(), 'calsdk-')), 'recording.json');
+    const real = vi.fn<typeof globalThis.fetch>(async () => Response.json({}));
+    const recorder = createRecordingFetch({ path, mode: 'record', fetch: real });
+    await get(recorder.fetch, `${url}?access_token=secret&q=1`);
+    await recorder.save();
+    expect(await readFile(path, 'utf8')).not.toContain('secret');
+
+    const replay = createRecordingFetch({ path });
+    expect((await get(replay.fetch, `${url}?access_token=other&q=1`)).status).toBe(200);
+    await expect(get(replay.fetch, `${url}?access_token=secret&q=2`)).rejects.toThrow(
+      /access_token=REDACTED&q=2/,
+    );
+  });
+
+  it('only replays a conditional response for the same condition', async () => {
+    const path = join(await mkdtemp(join(tmpdir(), 'calsdk-')), 'recording.json');
+    const real = vi.fn<typeof globalThis.fetch>(async () => new Response(null, { status: 412 }));
+    const recorder = createRecordingFetch({ path, mode: 'record', fetch: real });
+    await recorder.fetch(url, { method: 'PATCH', headers: { 'if-match': '"v1"' } });
+    await recorder.save();
+
+    const replay = createRecordingFetch({ path });
+    await expect(replay.fetch(url, { method: 'PATCH' })).rejects.toThrow(/No recorded response/);
+    const response = await replay.fetch(url, { method: 'PATCH', headers: { 'if-match': '"v1"' } });
+    expect(response.status).toBe(412);
+  });
+
+  it('keeps recordings saved by another recorder in the meantime', async () => {
+    const path = join(await mkdtemp(join(tmpdir(), 'calsdk-')), 'recording.json');
+    const recorder = createRecordingFetch({
+      path,
+      mode: 'record',
+      fetch: async () => Response.json({}),
+    });
+    await get(recorder.fetch);
+    await recorder.save();
+    const saved = JSON.parse(await readFile(path, 'utf8'));
+    await writeFile(path, JSON.stringify({ ...saved, 'another file > its test': [] }));
+    await recorder.save();
+    expect(Object.keys(JSON.parse(await readFile(path, 'utf8')))).toEqual([
+      'another file > its test',
+      'createRecordingFetch > keeps recordings saved by another recorder in the meantime',
+    ]);
+  });
+
   it('explains how to create a missing recording', async () => {
     const replay = createRecordingFetch({ path: join(tmpdir(), 'calsdk-missing.json') });
     await expect(get(replay.fetch)).rejects.toThrow(/Run once with mode 'record'/);

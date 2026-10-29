@@ -1,18 +1,12 @@
 import { InvalidArgumentError } from '@calsdk/provider';
-import {
-  addDaysToDate,
-  formatLocalDate,
-  instantToLocal,
-  isValidTimeZone,
-  type LocalDateTime,
-  localToInstant,
-} from '@calsdk/provider-utils';
+import { getTimeZoneOffset, isValidTimeZone } from '@calsdk/provider-utils';
 import { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
 import { getFreeBusy, mergeBusy } from './get-free-busy';
 import type { CallSettings, TimeInput, Warning } from './types';
 import { toTimeRange } from './util/validate';
 
 const MINUTE_MS = 60_000;
+const DAY_MS = 86_400_000;
 
 export type WorkingHours = {
   /** `'HH:mm'`, e.g. `'09:00'`. */
@@ -70,9 +64,8 @@ export async function findFreeTime(options: FindFreeTimeOptions): Promise<FindFr
   const bounds = { start: Date.parse(range.timeMin), end: Date.parse(range.timeMax) };
   const duration = positiveInteger(options.duration, 'duration') * MINUTE_MS;
   const interval = positiveInteger(options.slotInterval ?? 15, 'slotInterval') * MINUTE_MS;
-  const { windows, fits } = options.workingHours
-    ? workingHoursOf(options.workingHours, bounds)
-    : { windows: [{ ...bounds, gridOrigin: 0 }], fits: () => true };
+  // Validated before any request is made.
+  const slotStarts = options.workingHours ? workingHoursOf(options.workingHours) : epochGridStarts;
 
   const results = await Promise.all(
     options.calendars.map(({ calendar, calendarIds, headers, providerOptions }) =>
@@ -108,18 +101,12 @@ export async function findFreeTime(options: FindFreeTimeOptions): Promise<FindFr
 
   const slots: FreeSlot[] = [];
   let next = 0; // First busy block that may still overlap a slot.
-  for (const window of windows) {
-    // Round up to the grid, which starts at local midnight (or the epoch).
-    const offset = (window.start - window.gridOrigin) % interval;
-    let start = offset === 0 ? window.start : window.start + interval - offset;
-    for (; start + duration <= window.end; start += interval) {
-      const end = start + duration;
-      if (!fits(start, end)) continue;
-      while (next < blocks.length && (blocks[next]?.end ?? 0) <= start) next++;
-      const block = blocks[next];
-      if (block && block.start < end) continue;
-      slots.push({ start: new Date(start).toISOString(), end: new Date(end).toISOString() });
-    }
+  for (const start of slotStarts(bounds, duration, interval)) {
+    const end = start + duration;
+    while (next < blocks.length && (blocks[next]?.end ?? 0) <= start) next++;
+    const block = blocks[next];
+    if (block && block.start < end) continue;
+    slots.push({ start: new Date(start).toISOString(), end: new Date(end).toISOString() });
   }
   return { slots, warnings };
 }
@@ -134,13 +121,28 @@ function positiveInteger(value: number, argument: string): number {
   return value;
 }
 
+type Bounds = { start: number; end: number };
+
+/** Slot starts on a grid counted from the Unix epoch, so in UTC. */
+function* epochGridStarts(bounds: Bounds, duration: number, interval: number) {
+  for (
+    let start = Math.ceil(bounds.start / interval) * interval;
+    start + duration <= bounds.end;
+    start += interval
+  ) {
+    yield start;
+  }
+}
+
 /**
- * Working days inside `bounds`, from local midnight to midnight, and a check that a slot
- * stays within working hours by the local wall clock. Checking the wall clock, instead of
- * converting the hours to instants, keeps DST days right: a slot never lands in an hour
- * skipped by a gap, and both runs of a repeated hour count.
+ * Validates working hours and returns a generator of slot starts inside them, in order.
+ *
+ * Time is split into stretches where the zone's UTC offset does not change. Inside one,
+ * local time is just `instant + offset`, so slots are placed on the local wall clock:
+ * the grid stays on the hour after any DST change, an hour skipped by a gap gets no
+ * slots, and both runs of a repeated hour get them.
  */
-function workingHoursOf(hours: WorkingHours, bounds: { start: number; end: number }) {
+function workingHoursOf(hours: WorkingHours) {
   const { timeZone } = hours;
   if (!isValidTimeZone(timeZone)) {
     throw new InvalidArgumentError({
@@ -148,9 +150,9 @@ function workingHoursOf(hours: WorkingHours, bounds: { start: number; end: numbe
       message: 'Expected an IANA time zone such as "Asia/Kolkata".',
     });
   }
-  const start = clockTime(hours.start, 'workingHours.start');
-  const end = clockTime(hours.end, 'workingHours.end');
-  if (end <= start) {
+  const dayStart = clockTime(hours.start, 'workingHours.start') * MINUTE_MS;
+  const dayEnd = clockTime(hours.end, 'workingHours.end') * MINUTE_MS;
+  if (dayEnd <= dayStart) {
     throw new InvalidArgumentError({
       argument: 'workingHours.end',
       message: 'end must be after start.',
@@ -164,50 +166,68 @@ function workingHoursOf(hours: WorkingHours, bounds: { start: number; end: numbe
     });
   }
 
-  const midnightOf = (date: string) => {
-    const utc = new Date(`${date}T00:00:00Z`);
-    const local = {
-      year: utc.getUTCFullYear(),
-      month: utc.getUTCMonth() + 1,
-      day: utc.getUTCDate(),
-      hour: 0,
-      minute: 0,
-      second: 0,
-    };
-    return { instant: localToInstant(local, timeZone), weekday: utc.getUTCDay() };
+  const offsetAt = (instant: number) => getTimeZoneOffset(instant, timeZone);
+
+  /** Splits `[from, to)` into stretches with one UTC offset each. */
+  const stretches = (from: number, to: number) => {
+    const result: { start: number; end: number; offset: number }[] = [];
+    for (let start = from; start < to; ) {
+      const offset = offsetAt(start);
+      let end = to;
+      if (offsetAt(to - 1) !== offset) {
+        // Binary search for the first instant with another offset.
+        let low = start;
+        let high = to - 1;
+        while (high - low > 1) {
+          const middle = Math.floor((low + high) / 2);
+          if (offsetAt(middle) === offset) low = middle;
+          else high = middle;
+        }
+        end = high;
+      }
+      result.push({ start, end, offset });
+      start = end;
+    }
+    return result;
   };
 
-  const windows: { start: number; end: number; gridOrigin: number }[] = [];
-  const lastDate = formatLocalDate(instantToLocal(bounds.end, timeZone));
-  for (
-    let date = formatLocalDate(instantToLocal(bounds.start, timeZone));
-    date <= lastDate;
-    date = addDaysToDate(date, 1)
-  ) {
-    const midnight = midnightOf(date);
-    if (!days.has(midnight.weekday)) continue;
-    const window = {
-      start: Math.max(midnight.instant, bounds.start),
-      end: Math.min(midnightOf(addDaysToDate(date, 1)).instant, bounds.end),
-      gridOrigin: midnight.instant,
-    };
-    if (window.end > window.start) windows.push(window);
-  }
+  // Local days are counted from 1970-01-01, a Thursday.
+  const localDay = (instant: number, offset: number) => Math.floor((instant + offset) / DAY_MS);
 
-  const minutesOf = (local: LocalDateTime) =>
-    local.hour * 60 + local.minute + (local.second + (local.millisecond ?? 0) / 1000) / 60;
+  /** Whether every part of the slot falls inside working hours on one local day. */
   const fits = (slotStart: number, slotEnd: number) => {
-    const first = instantToLocal(slotStart, timeZone);
-    const last = instantToLocal(slotEnd - 1, timeZone);
-    return (
-      formatLocalDate(first) === formatLocalDate(last) &&
-      minutesOf(first) >= start &&
-      minutesOf(last) < end &&
-      // A slot spanning a repeated hour must not wander back before `start`.
-      minutesOf(last) >= minutesOf(first)
-    );
+    const day = localDay(slotStart, offsetAt(slotStart));
+    return stretches(slotStart, slotEnd).every(({ start, end, offset }) => {
+      const last = end - 1;
+      return (
+        localDay(start, offset) === day &&
+        localDay(last, offset) === day &&
+        start + offset - day * DAY_MS >= dayStart &&
+        last + offset - day * DAY_MS < dayEnd
+      );
+    });
   };
-  return { windows, fits };
+
+  return function* (bounds: Bounds, duration: number, interval: number) {
+    for (const stretch of stretches(bounds.start, bounds.end)) {
+      const lastDay = localDay(stretch.end - 1, stretch.offset);
+      for (let day = localDay(stretch.start, stretch.offset); day <= lastDay; day++) {
+        if (!days.has((((day + 4) % 7) + 7) % 7)) continue;
+        // Candidates on the local grid from midnight, inside working hours.
+        for (
+          let local = Math.ceil(dayStart / interval) * interval;
+          local + duration <= dayEnd;
+          local += interval
+        ) {
+          const start = day * DAY_MS + local - stretch.offset;
+          if (start < stretch.start || start < bounds.start) continue;
+          if (start >= stretch.end) break;
+          if (start + duration > bounds.end) return;
+          if (fits(start, start + duration)) yield start;
+        }
+      }
+    }
+  };
 }
 
 /** Minutes since midnight for `'HH:mm'`. */

@@ -27,6 +27,14 @@ describe('windows <-> IANA', () => {
     expect(windowsToIana('Not A Zone')).toBeUndefined();
   });
 
+  it('maps every alias of a zone and ignores inherited or empty keys', () => {
+    expect(ianaToWindows('UTC')).toBe('UTC');
+    expect(ianaToWindows('US/Eastern')).toBe('Eastern Standard Time');
+    expect(ianaToWindows('')).toBeUndefined();
+    expect(ianaToWindows('constructor')).toBeUndefined();
+    expect(windowsToIana('toString')).toBeUndefined();
+  });
+
   it('only maps to zones the runtime knows', () => {
     // Guards the generated table against ids that Intl rejects.
     const unknown = Object.values(windowsToIanaZones).filter((zone) => !isValidTimeZone(zone));
@@ -44,6 +52,25 @@ describe('zoned time', () => {
       -4 * 3_600_000,
     );
     expect(getTimeZoneOffset(Date.parse('2026-07-15T12:00:00Z'), 'Asia/Kolkata')).toBe(19_800_000);
+  });
+
+  it('keeps milliseconds and years before 100', () => {
+    expect(localToInstant(local('2026-11-03T10:00:00.250'), 'UTC')).toBe(
+      Date.parse('2026-11-03T10:00:00.250Z'),
+    );
+    expect(formatZonedDateTime(Date.parse('2026-11-03T04:30:00.250Z'), 'Asia/Kolkata')).toBe(
+      '2026-11-03T10:00:00.250+05:30',
+    );
+    expect(localToInstant(local('0050-06-01T00:00'), 'UTC')).toBe(
+      Date.parse('0050-06-01T00:00:00Z'),
+    );
+  });
+
+  it('writes UTC when the historical offset has seconds', () => {
+    // Before 1854, Kolkata used local mean time, +05:53:28.
+    expect(formatZonedDateTime(Date.parse('1850-01-01T00:00:00Z'), 'Asia/Kolkata')).toBe(
+      '1850-01-01T00:00:00+00:00',
+    );
   });
 
   it('resolves wall-clock times to instants', () => {

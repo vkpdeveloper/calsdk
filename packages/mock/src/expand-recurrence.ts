@@ -173,6 +173,7 @@ function untilInstant(until: ICalDate, timeZone: string): number {
 /**
  * Lazily yields every instance of a recurring event in start order, honoring
  * COUNT, UNTIL and EXDATE. The series start is always the first instance.
+ * `includeExcluded` also yields EXDATE instances, which still count toward COUNT.
  *
  * Timed events recur on the wall clock of their own time zone, so a 10:00
  * meeting stays at 10:00 across DST changes. All-day events use `allDayTimeZone`
@@ -181,6 +182,7 @@ function untilInstant(until: ICalDate, timeZone: string): number {
 export function* iterateInstances(
   event: RecurringEvent,
   allDayTimeZone: string,
+  { includeExcluded = false }: { includeExcluded?: boolean } = {},
 ): Generator<Instance> {
   const rule = assertSupportedRecurrence(event.recurrence);
   const parsed = parseRecurrence(event.recurrence);
@@ -266,7 +268,7 @@ export function* iterateInstances(
       const isExcluded =
         excludedInstants.has(instance.startInstant) ||
         excludedDates.has(formatLocalDate(dayFromNumber(n)));
-      if (!isExcluded) yield instance;
+      if (includeExcluded || !isExcluded) yield instance;
       if (rule.count !== undefined && emitted >= rule.count) return;
     }
   }

@@ -201,6 +201,18 @@ describe('assertSupportedRecurrence', () => {
       UnsupportedFunctionalityError,
     );
   });
+
+  it('refuses time parts on all-day rules and leap seconds', () => {
+    const allDay = {
+      start: { date: '2026-01-01' },
+      end: { date: '2026-01-02' },
+      recurrence: ['RRULE:FREQ=DAILY;BYHOUR=9,17;COUNT=3'],
+    };
+    expect(() => assertSupportedRecurrence(allDay)).toThrow(InvalidArgumentError);
+    expect(() =>
+      assertSupportedRecurrence(timed(['RRULE:FREQ=DAILY;BYSECOND=60;COUNT=3'])),
+    ).toThrow(UnsupportedFunctionalityError);
+  });
 });
 
 describe('expandInRange', () => {

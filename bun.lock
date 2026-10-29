@@ -37,6 +37,20 @@
       "name": "@calsdk/provider",
       "version": "0.0.0",
     },
+    "packages/provider-tests": {
+      "name": "@calsdk/provider-tests",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
+      },
+      "devDependencies": {
+        "@calsdk/mock": "workspace:*",
+      },
+      "peerDependencies": {
+        "vitest": "^5.0.0",
+      },
+    },
     "packages/provider-utils": {
       "name": "@calsdk/provider-utils",
       "version": "0.0.0",
@@ -75,6 +89,8 @@
     "@calsdk/mock": ["@calsdk/mock@workspace:packages/mock"],
 
     "@calsdk/provider": ["@calsdk/provider@workspace:packages/provider"],
+
+    "@calsdk/provider-tests": ["@calsdk/provider-tests@workspace:packages/provider-tests"],
 
     "@calsdk/provider-utils": ["@calsdk/provider-utils@workspace:packages/provider-utils"],
 

@@ -59,6 +59,23 @@ describe('withRetries', () => {
     expect(fn).toHaveBeenCalledTimes(1);
   });
 
+  it('rethrows instead of waiting out a Retry-After over a minute', async () => {
+    const error = new RateLimitError({ provider: 'google', retryAfterMs: 120_000 });
+    const fn = vi.fn<() => Promise<never>>().mockRejectedValue(error);
+    await expect(withRetries(policy, fn)).rejects.toBe(error);
+    expect(fn).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call the provider when already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort();
+    const fn = vi.fn<() => Promise<string>>().mockResolvedValue('ok');
+    await expect(withRetries({ ...policy, abortSignal: controller.signal }, fn)).rejects.toBe(
+      controller.signal.reason,
+    );
+    expect(fn).not.toHaveBeenCalled();
+  });
+
   it('stops waiting when aborted', async () => {
     const controller = new AbortController();
     const result = withRetries({ ...policy, abortSignal: controller.signal }, () =>

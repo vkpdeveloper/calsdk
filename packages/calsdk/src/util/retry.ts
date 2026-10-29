@@ -3,8 +3,8 @@ import { parseRetryAfterMs } from '@calsdk/provider-utils';
 
 const INITIAL_DELAY_MS = 1000;
 const BACKOFF_FACTOR = 2;
-// Longer Retry-After values are ignored in favor of normal backoff, so a single
-// call never hangs for minutes.
+// A longer Retry-After is not waited out: the error is rethrown so a single call
+// never hangs for minutes, and the app can reschedule the work.
 const MAX_RETRY_AFTER_MS = 60_000;
 
 export type RetryPolicy = {
@@ -24,15 +24,10 @@ export function isRetryableError(error: unknown, retryOn: RetryPolicy['retryOn']
   return APICallError.isInstance(error) && error.isRetryable;
 }
 
-function retryDelayMs(error: unknown, attempt: number): number {
-  const backoff = INITIAL_DELAY_MS * BACKOFF_FACTOR ** attempt;
-  const retryAfter = RateLimitError.isInstance(error)
-    ? error.retryAfterMs
-    : APICallError.isInstance(error)
-      ? parseRetryAfterMs(error.responseHeaders)
-      : undefined;
-  if (retryAfter !== undefined && retryAfter <= MAX_RETRY_AFTER_MS) return retryAfter;
-  return backoff;
+function retryAfterMs(error: unknown): number | undefined {
+  if (RateLimitError.isInstance(error)) return error.retryAfterMs;
+  if (APICallError.isInstance(error)) return parseRetryAfterMs(error.responseHeaders);
+  return undefined;
 }
 
 function sleep(ms: number, abortSignal: AbortSignal | undefined): Promise<void> {
@@ -56,11 +51,14 @@ export async function withRetries<T>(
   fn: (attempt: number) => Promise<T>,
 ): Promise<T> {
   for (let attempt = 0; ; attempt++) {
+    policy.abortSignal?.throwIfAborted();
     try {
       return await fn(attempt);
     } catch (error) {
       if (attempt >= policy.maxRetries || !isRetryableError(error, policy.retryOn)) throw error;
-      await sleep(retryDelayMs(error, attempt), policy.abortSignal);
+      const retryAfter = retryAfterMs(error);
+      if (retryAfter !== undefined && retryAfter > MAX_RETRY_AFTER_MS) throw error;
+      await sleep(retryAfter ?? INITIAL_DELAY_MS * BACKOFF_FACTOR ** attempt, policy.abortSignal);
     }
   }
 }

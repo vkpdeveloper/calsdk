@@ -43,7 +43,10 @@ export async function deleteEvent(options: DeleteEventOptions): Promise<DeleteEv
         });
       } catch (error) {
         // An earlier attempt may have deleted the event before its response was lost.
-        if (attempt > 0 && NotFoundError.isInstance(error)) return { warnings: [] };
+        // A missing calendar is a real error either way.
+        if (attempt > 0 && NotFoundError.isInstance(error) && error.resource === 'event') {
+          return { warnings: [] };
+        }
         throw error;
       }
     },

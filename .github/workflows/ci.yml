@@ -2,6 +2,8 @@ name: CI
 
 on:
   pull_request:
+    # `edited` reruns CI when a stacked PR is retargeted to a new base.
+    types: [opened, synchronize, reopened, edited]
   push:
     branches: [main]
 
@@ -14,6 +16,8 @@ permissions:
 
 jobs:
   check:
+    # Skip title/body edits; only base changes need a new run.
+    if: github.event.action != 'edited' || github.event.changes.base != null
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:

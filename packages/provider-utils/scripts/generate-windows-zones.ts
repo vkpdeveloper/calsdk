@@ -13,13 +13,17 @@ const [windowsZones, bcp47] = await Promise.all([
   download(`${CLDR}/bcp47/timezone.xml`),
 ]);
 
+const ids = (list: string) => list.split(/\s+/).filter(Boolean);
+
 // CLDR keys zones by legacy ids (Asia/Calcutta). Map every alias to the current IANA id.
 const canonical = new Map<string, string>();
+const aliasGroups: string[][] = [];
 for (const [, aliases = '', iana] of bcp47.matchAll(
   /<type name="\w+"[^>]*?alias="([^"]+)"(?:[^>]*?iana="([^"]+)")?/g,
 )) {
-  const ids = aliases.split(' ');
-  for (const id of ids) canonical.set(id, iana ?? ids[0] ?? id);
+  const group = ids(aliases);
+  aliasGroups.push(iana ? [iana, ...group] : group);
+  for (const id of group) canonical.set(id, iana ?? group[0] ?? id);
 }
 const toIana = (id: string) => canonical.get(id) ?? id;
 
@@ -28,11 +32,17 @@ const ianaToWindows: Record<string, string> = {};
 for (const [, windows = '', territory, types = ''] of windowsZones.matchAll(
   /<mapZone other="([^"]+)" territory="(\w+)" type="([^"]+)"\/>/g,
 )) {
-  for (const id of types.split(' ')) {
+  for (const id of ids(types)) {
     if (territory === '001') windowsToIana[windows] = toIana(id);
     ianaToWindows[toIana(id)] ??= windows;
     ianaToWindows[id] ??= windows;
   }
+}
+
+// windowsZones.xml only lists some ids of each zone. Give the rest (UTC, US/Eastern) the same name.
+for (const group of aliasGroups) {
+  const windows = group.map((id) => ianaToWindows[id]).find(Boolean);
+  if (windows) for (const id of group) ianaToWindows[id] ??= windows;
 }
 
 const sorted = (record: Record<string, string>) =>

@@ -32,6 +32,9 @@
         "@calsdk/provider-utils": "workspace:*",
         "rrule-temporal": "^2.2.8",
       },
+      "devDependencies": {
+        "@calsdk/provider-tests": "workspace:*",
+      },
     },
     "packages/provider": {
       "name": "@calsdk/provider",

@@ -1,5 +1,5 @@
 import { NotFoundError, PermissionDeniedError } from '@calsdk/provider';
-import { eventTimeToInstant } from '@calsdk/provider-utils';
+import { eventTimeToInstant, isAllDay } from '@calsdk/provider-utils';
 import { iterateEvents } from './list-events';
 import type { BusyBlock, CallSettings, ResultMetadata, TimeInput, Warning } from './types';
 import { logWarnings } from './util/log-warnings';
@@ -95,7 +95,7 @@ export async function getFreeBusy(options: GetFreeBusyOptions): Promise<GetFreeB
           expandRecurring: true,
         })) {
           if (event.showAs === 'free' || event.status === 'cancelled') continue;
-          const zone = 'date' in event.start ? await zoneOf(calendarId) : 'UTC';
+          const zone = isAllDay(event.start) ? await zoneOf(calendarId) : 'UTC';
           intervals.push({
             start: eventTimeToInstant(event.start, zone),
             end: eventTimeToInstant(event.end, zone),

@@ -1,6 +1,6 @@
 import { NotFoundError, PermissionDeniedError } from '@calsdk/provider';
 import { eventTimeToInstant, isAllDay } from '@calsdk/provider-utils';
-import { iterateEvents } from './list-events';
+import { listEventPages } from './list-events';
 import type { BusyBlock, CallSettings, ResultMetadata, TimeInput, Warning } from './types';
 import { logWarnings } from './util/log-warnings';
 import { resultMetadata, runCall } from './util/prepare-call';
@@ -50,56 +50,83 @@ export async function getFreeBusy(options: GetFreeBusyOptions): Promise<GetFreeB
     const result = await runCall(options, 'getFreeBusy', 'retryable', (call) =>
       doFreeBusy({ ...call, calendarIds, ...range }),
     );
-    const calendars: Record<string, FreeBusyCalendar> = {};
-    for (const id of calendarIds) {
-      const entry = result.calendars[id] ?? { busy: [], error: 'Missing from the response.' };
-      calendars[id] = {
-        busy: mergeBusy(entry.busy.map(toInterval), bounds),
-        ...(entry.error !== undefined && { error: entry.error }),
-      };
-    }
+    // Calendar ids are arbitrary strings (even `__proto__`), so read and build own entries only.
+    const calendars = Object.fromEntries(
+      calendarIds.map((id): [string, FreeBusyCalendar] => {
+        const entry = Object.hasOwn(result.calendars, id) ? result.calendars[id] : undefined;
+        if (!entry) return [id, { busy: [], error: 'Missing from the provider response.' }];
+        return [
+          id,
+          {
+            busy: mergeBusy(entry.busy.map(toInterval), bounds),
+            ...(entry.error !== undefined && { error: entry.error }),
+          },
+        ];
+      }),
+    );
     return { calendars, ...resultMetadata(result) };
   }
 
-  const warning: Warning = {
-    type: 'compatibility',
-    feature: 'freeBusy',
-    details: `Provider "${options.calendar.provider}" has no free/busy endpoint, so busy times were computed from events.`,
-  };
-  logWarnings([warning], { provider: options.calendar.provider, operation: 'getFreeBusy' });
+  const warnings: Warning[] = [
+    {
+      type: 'compatibility',
+      feature: 'freeBusy',
+      details: `Provider "${options.calendar.provider}" has no free/busy endpoint, so busy times were computed from events.`,
+    },
+  ];
+  logWarnings(warnings, { provider: options.calendar.provider, operation: 'getFreeBusy' });
 
   // All-day events block whole days in their calendar's zone, which only listCalendars knows.
   let zones: Promise<Map<string, string>> | undefined;
   const zoneOf = async (calendarId: string) => {
     zones ??= runCall(options, 'getFreeBusy', 'retryable', (call) =>
       options.calendar.doListCalendars(call),
-    ).then(({ calendars }) => {
+    ).then(({ calendars, warnings: listWarnings }) => {
+      warnings.push(...listWarnings);
       const map = new Map<string, string>();
       for (const calendar of calendars) {
-        map.set(calendar.id, calendar.timeZone ?? 'UTC');
-        if (calendar.isPrimary) map.set('primary', calendar.timeZone ?? 'UTC');
+        if (calendar.timeZone === undefined) continue;
+        map.set(calendar.id, calendar.timeZone);
+        if (calendar.isPrimary) map.set('primary', calendar.timeZone);
       }
       return map;
     });
-    return (await zones).get(calendarId) ?? 'UTC';
+    return (await zones).get(calendarId);
   };
+  let unknownZone = false;
 
   const entries = await Promise.all(
     calendarIds.map(async (calendarId): Promise<[string, FreeBusyCalendar]> => {
       try {
         const intervals: Interval[] = [];
-        for await (const event of iterateEvents({
-          ...options,
-          calendarId,
-          ...range,
-          expandRecurring: true,
-        })) {
-          if (event.showAs === 'free' || event.status === 'cancelled') continue;
-          const zone = isAllDay(event.start) ? await zoneOf(calendarId) : 'UTC';
-          intervals.push({
-            start: eventTimeToInstant(event.start, zone),
-            end: eventTimeToInstant(event.end, zone),
-          });
+        const listing = { ...options, calendarId, ...range, expandRecurring: true };
+        for await (const page of listEventPages(listing, 'getFreeBusy')) {
+          warnings.push(...page.warnings);
+          for (const event of page.events) {
+            if (event.showAs === 'free' || event.status === 'cancelled') continue;
+            if (!isAllDay(event.start) || !isAllDay(event.end)) {
+              intervals.push({
+                start: eventTimeToInstant(event.start, 'UTC'),
+                end: eventTimeToInstant(event.end, 'UTC'),
+              });
+              continue;
+            }
+            const zone = await zoneOf(calendarId);
+            if (zone) {
+              intervals.push({
+                start: eventTimeToInstant(event.start, zone),
+                end: eventTimeToInstant(event.end, zone),
+              });
+            } else {
+              // Without the zone, block the days in every zone (UTC+14 to UTC-12), so the
+              // result never shows free time that is actually taken.
+              unknownZone = true;
+              intervals.push({
+                start: Date.parse(event.start.date) - 14 * HOUR_MS,
+                end: Date.parse(event.end.date) + 12 * HOUR_MS,
+              });
+            }
+          }
         }
         return [calendarId, { busy: mergeBusy(intervals, bounds) }];
       } catch (error) {
@@ -111,8 +138,20 @@ export async function getFreeBusy(options: GetFreeBusyOptions): Promise<GetFreeB
       }
     }),
   );
-  return { calendars: Object.fromEntries(entries), warnings: [warning] };
+  if (unknownZone) {
+    const warning: Warning = {
+      type: 'compatibility',
+      feature: 'allDayEvents',
+      details:
+        'A calendar has no known time zone, so its all-day events were treated as busy for the whole day in every time zone.',
+    };
+    warnings.push(warning);
+    logWarnings([warning], { provider: options.calendar.provider, operation: 'getFreeBusy' });
+  }
+  return { calendars: Object.fromEntries(entries), warnings };
 }
+
+const HOUR_MS = 3_600_000;
 
 type Interval = { start: number; end: number };
 

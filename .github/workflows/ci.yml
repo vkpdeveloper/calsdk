@@ -8,7 +8,8 @@ on:
     branches: [main]
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # Title/body edits get their own group so they never cancel a real run.
+  group: ci-${{ github.ref }}${{ github.event.action == 'edited' && github.event.changes.base == null && format('-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:

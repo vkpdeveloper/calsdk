@@ -3,6 +3,7 @@ import { APICallError } from './api-call-error';
 import { CalsdkError } from './calsdk-error';
 import { NotFoundError } from './not-found-error';
 import { RateLimitError } from './rate-limit-error';
+import { SyncCursorExpiredError } from './sync-cursor-expired-error';
 
 describe('isInstance', () => {
   it('matches the class and its base, not siblings', () => {
@@ -44,5 +45,18 @@ describe('APICallError', () => {
     expect(new APICallError({ message: 'x', url: 'https://x', statusCode }).isRetryable).toBe(
       isRetryable,
     );
+  });
+});
+
+describe('default messages', () => {
+  it('leave out ids, which can be email addresses', () => {
+    const id = 'alice@example.com';
+    const notFound = new NotFoundError({ provider: 'google', resource: 'calendar', id });
+    const expired = new SyncCursorExpiredError({ provider: 'google', calendarId: id });
+
+    expect(notFound.message).not.toContain(id);
+    expect(notFound.id).toBe(id);
+    expect(expired.message).not.toContain(id);
+    expect(expired.calendarId).toBe(id);
   });
 });

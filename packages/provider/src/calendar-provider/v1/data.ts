@@ -27,10 +27,13 @@ export type EventTimeV1 =
       dateTime: string;
       /** IANA time zone the event was scheduled in, e.g. `'Asia/Kolkata'`. */
       timeZone: string;
+      date?: never;
     }
   | {
       /** `'YYYY-MM-DD'`. For `end`, the date is exclusive: a one-day event on the 3rd ends on the 4th. */
       date: string;
+      dateTime?: never;
+      timeZone?: never;
     };
 
 /**
@@ -81,6 +84,11 @@ export type EventV1 = {
   end: EventTimeV1;
   /** RFC 5545 lines, e.g. `['RRULE:FREQ=WEEKLY;BYDAY=MO', 'EXDATE:20261110T100000Z']`. Set for `series`. */
   recurrence?: string[];
+  /**
+   * `cancelled` is for events that still have full details, such as a Microsoft meeting the
+   * organizer cancelled. Deleted events and cancelled occurrences of a series are not events:
+   * `listEvents` omits them and `syncEvents` reports them as `delete` changes.
+   */
   status: 'confirmed' | 'tentative' | 'cancelled';
   /** Whether the event blocks time on free/busy queries. */
   showAs: 'busy' | 'free';

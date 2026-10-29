@@ -4,7 +4,10 @@ const name = 'SyncCursorExpiredError';
 const marker = `calsdk.error.${name}`;
 const symbol = Symbol.for(marker);
 
-/** The stored sync cursor is no longer valid. The app must discard it and run a full sync. */
+/**
+ * The stored sync cursor is no longer valid. The app must discard it and run a full sync.
+ * The default message leaves out `calendarId`, since calendar ids are often email addresses.
+ */
 export class SyncCursorExpiredError extends CalsdkError {
   private readonly [symbol] = true;
 
@@ -26,7 +29,7 @@ export class SyncCursorExpiredError extends CalsdkError {
       name,
       message:
         message ??
-        `Provider "${provider}" rejected the sync cursor of calendar "${calendarId}". Discard the stored cursor and call syncEvents() without a cursor to run a full sync.`,
+        `Provider "${provider}" rejected the sync cursor. Discard the stored cursor and call syncEvents() without a cursor to run a full sync.`,
       cause,
     });
     this.provider = provider;

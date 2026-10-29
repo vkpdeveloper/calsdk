@@ -4,7 +4,10 @@ const name = 'NotFoundError';
 const marker = `calsdk.error.${name}`;
 const symbol = Symbol.for(marker);
 
-/** The calendar or event does not exist, was deleted, or is not visible to the user. */
+/**
+ * The calendar or event does not exist, was deleted, or is not visible to the user.
+ * The default message leaves out `id`, since calendar ids are often email addresses.
+ */
 export class NotFoundError extends CalsdkError {
   private readonly [symbol] = true;
 
@@ -29,7 +32,7 @@ export class NotFoundError extends CalsdkError {
       name,
       message:
         message ??
-        `The ${resource} "${id}" was not found on provider "${provider}". It may have been deleted, or the user cannot access it.`,
+        `The ${resource} was not found on provider "${provider}". It may have been deleted, or the user cannot access it.`,
       cause,
     });
     this.provider = provider;

@@ -39,7 +39,7 @@
   },
   "overrides": [
     {
-      "includes": ["packages/provider/src/errors/**"],
+      "includes": ["packages/*/src/errors/**"],
       "linter": {
         "rules": {
           "correctness": {

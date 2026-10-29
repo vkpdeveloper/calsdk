@@ -1,4 +1,4 @@
-import { APICallError, InvalidResponseDataError } from '@calsdk/provider';
+import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@calsdk/provider';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { createJsonFetcher, urlPath } from './json-fetcher';
@@ -139,5 +139,92 @@ describe('createJsonFetcher', () => {
     ).rejects.toSatisfy(InvalidResponseDataError.isInstance);
     await request({ method: 'GET', path: 'https://graph.example.com/v1.0/next?page=2' });
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not follow redirects', async () => {
+    const fetch = stubFetch(
+      () => new Response(null, { status: 302, headers: { location: 'https://evil.example.com' } }),
+    );
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      accessToken: 't',
+      fetch,
+    });
+
+    const error = await request({ method: 'GET', path: '/a' }).catch((e: unknown) => e);
+
+    expect(fetch.mock.calls[0]?.[1]?.redirect).toBe('manual');
+    expect(APICallError.isInstance(error) && !error.isRetryable).toBe(true);
+  });
+
+  it('rejects malformed tokens without echoing them', async () => {
+    const fetch = stubFetch(() => Response.json({}));
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      accessToken: 'secret\nx',
+      fetch,
+    });
+
+    const error = await request({ method: 'GET', path: '/a' }).catch((e: unknown) => e);
+
+    expect(InvalidArgumentError.isInstance(error)).toBe(true);
+    expect(String(error)).not.toContain('secret');
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('overrides caller authorization headers in any casing', async () => {
+    const fetch = stubFetch(() => Response.json({}));
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      headers: { Authorization: 'Bearer other' },
+      accessToken: 't',
+      fetch,
+    });
+
+    await request({ method: 'GET', path: '/a', headers: { AUTHORIZATION: 'Bearer x' } });
+
+    expect(fetch.mock.calls[0]?.[1]?.headers).toEqual({
+      accept: 'application/json',
+      authorization: 'Bearer t',
+    });
+  });
+
+  it('rethrows a custom abort reason even when fetch reports another error', async () => {
+    const controller = new AbortController();
+    const reason = new Error('user cancelled');
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      accessToken: 't',
+      fetch: async () => {
+        controller.abort(reason);
+        throw new TypeError('fetch failed');
+      },
+    });
+
+    await expect(
+      request({ method: 'GET', path: '/a', abortSignal: controller.signal }),
+    ).rejects.toBe(reason);
+  });
+
+  it('wraps body read failures as retryable APICallError', async () => {
+    const body = new ReadableStream({
+      pull(controller) {
+        controller.error(new TypeError('terminated'));
+      },
+    });
+    const request = createJsonFetcher({
+      baseURL: 'https://api.example.com',
+      accessToken: 't',
+      fetch: stubFetch(() => new Response(body)),
+    });
+
+    const error = await request({ method: 'GET', path: '/a' }).catch((e: unknown) => e);
+    expect(APICallError.isInstance(error) && error.isRetryable).toBe(true);
+  });
+});
+
+describe('urlPath', () => {
+  it.each(['', '.', '..'])('rejects the segment %j', (id) => {
+    expect(() => urlPath`/calendars/${id}/events`).toThrow(InvalidArgumentError);
   });
 });

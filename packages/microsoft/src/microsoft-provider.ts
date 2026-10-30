@@ -241,6 +241,8 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
     provider: PROVIDER,
     capabilities: {
       events: {
+        details: true,
+        allDay: true,
         recurrence: true,
         recurrenceScopeThisAndFollowing: false,
         serverSideExpansion: true,

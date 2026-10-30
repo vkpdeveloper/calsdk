@@ -507,6 +507,8 @@ export function mockCalendar(settings: MockCalendarSettings = {}): MockCalendarP
     provider: PROVIDER,
     capabilities: {
       events: {
+        details: true,
+        allDay: true,
         recurrence: true,
         recurrenceScopeThisAndFollowing: true,
         serverSideExpansion: true,

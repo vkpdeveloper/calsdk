@@ -1,6 +1,7 @@
 import { fileURLToPath } from 'node:url';
 import {
   APICallError,
+  ConflictError,
   type EventV1,
   type SyncChangeV1,
   SyncCursorExpiredError,
@@ -221,7 +222,7 @@ describe('caldav credentials', () => {
   });
 });
 
-describe('caldav sync of cancellations', () => {
+describe('caldav with a stubbed server', () => {
   const series = (cancelled: boolean) =>
     [
       'BEGIN:VCALENDAR',
@@ -246,17 +247,35 @@ describe('caldav sync of cancellations', () => {
         : []),
       'END:VCALENDAR',
     ].join('\r\n');
+  const multistatus = (body: string) =>
+    new Response(
+      `<?xml version="1.0"?><D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">${body}</D:multistatus>`,
+      { status: 207 },
+    );
 
-  it('deletes a cancelled instance once, also in a first sync', async () => {
-    let cancelled = false;
-    const multistatus = (body: string) =>
-      new Response(
-        `<?xml version="1.0"?><D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">${body}</D:multistatus>`,
-        { status: 207 },
-      );
+  /** A server with the calendar `/cal/`, answering other requests with `handle`. */
+  function stub(handle: (request: Request, body: string) => Response | undefined) {
     const fetch: FetchFunction = async (input, init) => {
       const request = new Request(input, init);
       const body = await request.text();
+      return (
+        handle(request, body) ??
+        multistatus(
+          '<D:response><D:href>/</D:href><D:propstat><D:prop><D:current-user-principal><D:href>/</D:href></D:current-user-principal><C:calendar-home-set><D:href>/</D:href></C:calendar-home-set></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/cal/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><C:calendar/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>',
+        )
+      );
+    };
+    return caldav({
+      serverUrl: 'https://caldav.example.com/',
+      username: 'me',
+      password: 'secret',
+      fetch,
+    });
+  }
+
+  it('deletes a cancelled instance once, also in a first sync', async () => {
+    let cancelled = false;
+    const provider = stub((_request, body) => {
       if (body.includes('sync-collection')) {
         return multistatus(
           '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:sync-token>next</D:sync-token>',
@@ -267,15 +286,6 @@ describe('caldav sync of cancellations', () => {
           `<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>${series(cancelled)}</C:calendar-data></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>`,
         );
       }
-      return multistatus(
-        '<D:response><D:href>/</D:href><D:propstat><D:prop><D:current-user-principal><D:href>/</D:href></D:current-user-principal><C:calendar-home-set><D:href>/</D:href></C:calendar-home-set></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/cal/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><C:calendar/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>',
-      );
-    };
-    const provider = caldav({
-      serverUrl: 'https://caldav.example.com/',
-      username: 'me',
-      password: 'secret',
-      fetch,
     });
     const deletes = (changes: SyncChangeV1[]) =>
       changes.flatMap((change) => (change.type === 'delete' ? [change.eventId] : []));
@@ -289,5 +299,42 @@ describe('caldav sync of cancellations', () => {
     // A first sync reports a cancellation the series already has.
     const first = await provider.doSyncEvents({ calendarId: '/cal/' });
     expect(deletes(first.changes)).toEqual(['standup_20300305T100000Z']);
+  });
+
+  it('deletes an instance with ifMatch on a server that checks it before the address', async () => {
+    const writes: string[] = [];
+    const provider = stub((request) => {
+      const { pathname } = new URL(request.url);
+      const ifMatch = request.headers.get('if-match');
+      if (request.method === 'DELETE') {
+        // Nothing is stored at an instance's address, so no etag matches it (RFC 9110).
+        return new Response(null, {
+          status: ifMatch && pathname !== '/cal/standup.ics' ? 412 : 404,
+        });
+      }
+      if (request.method === 'GET') {
+        return pathname === '/cal/standup.ics'
+          ? new Response(series(false), { headers: { etag: '"1"' } })
+          : new Response(null, { status: 404 });
+      }
+      if (request.method === 'PUT') {
+        writes.push(`${pathname} ${ifMatch}`);
+        return new Response(null, { status: ifMatch === '"1"' ? 204 : 412 });
+      }
+    });
+
+    await provider.doDeleteEvent({
+      calendarId: '/cal/',
+      eventId: 'standup_20300305T100000Z',
+      ifMatch: '"1"',
+    });
+    expect(writes).toEqual(['/cal/standup.ics "1"']);
+    await expect(
+      provider.doDeleteEvent({
+        calendarId: '/cal/',
+        eventId: 'standup_20300305T100000Z',
+        ifMatch: '"0"',
+      }),
+    ).rejects.toSatisfy(ConflictError.isInstance);
   });
 });

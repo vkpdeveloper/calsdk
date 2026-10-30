@@ -13,6 +13,7 @@ import {
 import {
   APICallError,
   type CalendarProviderV1,
+  ConflictError,
   type EventTimeV1,
   type EventV1,
   InvalidArgumentError,
@@ -478,11 +479,17 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
           url: eventUrl(url, eventId),
           call,
           headers: { 'if-match': ifMatch },
-          allow: [404, 410],
+          // Servers may check If-Match before finding nothing at an instance's address.
+          allow: [404, 410, 412],
         });
-        if (direct.status !== 404 && direct.status !== 410) return { warnings };
+        if (direct.status !== 404 && direct.status !== 410 && direct.status !== 412) {
+          return { warnings };
+        }
 
         const { resource, instance } = await locate(calendarId, eventId, call);
+        if (!instance && direct.status === 412) {
+          throw new ConflictError({ provider: PROVIDER, eventId });
+        }
         if (!instance) {
           throw new NotFoundError({ provider: PROVIDER, resource: 'event', id: eventId });
         }
@@ -692,7 +699,8 @@ function parseServerUrl(address: string): URL {
 /** The id of an event resource: its name without `.ics`. Other names are not events calsdk can address. */
 function resourceId(url: URL): string | undefined {
   const name = url.pathname.split('/').at(-1) ?? '';
-  if (!name.toLowerCase().endsWith('.ics')) return undefined;
+  // Exactly `.ics`, as event ids are turned back into names with it.
+  if (!name.endsWith('.ics')) return undefined;
   try {
     return decodeURIComponent(name.slice(0, -'.ics'.length));
   } catch {

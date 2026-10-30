@@ -1045,6 +1045,22 @@
     },
     {
       "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"b1c6efd13da23c2ccbb0f21c9355f0e74f228f5fa4e9cb3f7c6cacdc106c6ea6\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk etag v2\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
         "method": "DELETE",
         "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
       },
@@ -1175,7 +1191,7 @@
           "content-type": "text/xml; charset=utf-8"
         },
         "body": {
-          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/2a6003be9e6df8955235d3453e74e281c67f059530febc58adadf72a728cdbdd</sync-token><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/605b803f-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/960909ff-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e015a710-f88b-4ef2-9403-5b8da9b3aa26.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/9576cb02-8b0a-410e-9f1e-a540fda1ff3a.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/08af87ed065f9a61db5a1348188aa7ed4d6f00fd8ea9f3906269149d0eb5a9f4</sync-token><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/605b803f-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/960909ff-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e015a710-f88b-4ef2-9403-5b8da9b3aa26.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/9576cb02-8b0a-410e-9f1e-a540fda1ff3a.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
         }
       }
     },
@@ -1236,7 +1252,7 @@
         "method": "REPORT",
         "url": "http://localhost:5232/test/calsdk/",
         "body": {
-          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/2a6003be9e6df8955235d3453e74e281c67f059530febc58adadf72a728cdbdd</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/08af87ed065f9a61db5a1348188aa7ed4d6f00fd8ea9f3906269149d0eb5a9f4</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
         }
       },
       "response": {
@@ -1245,7 +1261,7 @@
           "content-type": "text/xml; charset=utf-8"
         },
         "body": {
-          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/5ef47915620f89fe5ad8e77fb3f59d30bc5113b675f85b0507a16c4a51d295ad</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/aa28c2dfa1a4a0a7ac85a5e1add51b48140fd48f42668fedab826375ef8d3935</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
         }
       }
     },
@@ -1322,7 +1338,7 @@
         "method": "REPORT",
         "url": "http://localhost:5232/test/calsdk/",
         "body": {
-          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/5ef47915620f89fe5ad8e77fb3f59d30bc5113b675f85b0507a16c4a51d295ad</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/aa28c2dfa1a4a0a7ac85a5e1add51b48140fd48f42668fedab826375ef8d3935</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
         }
       },
       "response": {
@@ -1331,7 +1347,7 @@
           "content-type": "text/xml; charset=utf-8"
         },
         "body": {
-          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/401bbbf99aed57b97e56241fffc6b538f6bed80a20b1d052250da318c262c8f7</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/fa2f4da8d327482758a72dfa007bc560d3fc9d0dc9165b4ae72433f692351243</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
         }
       }
     },
@@ -1373,7 +1389,7 @@
         "method": "REPORT",
         "url": "http://localhost:5232/test/calsdk/",
         "body": {
-          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/401bbbf99aed57b97e56241fffc6b538f6bed80a20b1d052250da318c262c8f7</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/fa2f4da8d327482758a72dfa007bc560d3fc9d0dc9165b4ae72433f692351243</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
         }
       },
       "response": {
@@ -1382,7 +1398,7 @@
           "content-type": "text/xml; charset=utf-8"
         },
         "body": {
-          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response></multistatus>"
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/0b3aaf7c3ca0f70ee88722f4dd8f5873398792252a1ec87cbfab429a7a39cb4f</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response></multistatus>"
         }
       }
     },
@@ -1391,7 +1407,7 @@
         "method": "REPORT",
         "url": "http://localhost:5232/test/calsdk/",
         "body": {
-          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/0b3aaf7c3ca0f70ee88722f4dd8f5873398792252a1ec87cbfab429a7a39cb4f</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
         }
       },
       "response": {
@@ -1400,7 +1416,7 @@
           "content-type": "text/xml; charset=utf-8"
         },
         "body": {
-          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</sync-token></multistatus>"
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/0b3aaf7c3ca0f70ee88722f4dd8f5873398792252a1ec87cbfab429a7a39cb4f</sync-token></multistatus>"
         }
       }
     },

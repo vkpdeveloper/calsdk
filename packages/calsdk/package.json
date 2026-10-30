@@ -1,0 +1,48 @@
+{
+  "name": "calsdk",
+  "version": "0.0.0",
+  "description": "One typed API for Google Calendar, Microsoft Outlook and other calendar providers.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@calsdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/calsdk"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "calendar",
+    "google-calendar",
+    "outlook",
+    "microsoft-graph",
+    "sdk"
+  ],
+  "dependencies": {
+    "@calsdk/provider": "workspace:*",
+    "@calsdk/provider-utils": "workspace:*"
+  },
+  "devDependencies": {
+    "@calsdk/mock": "workspace:*"
+  }
+}

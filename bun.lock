@@ -13,6 +13,17 @@
         "vitest": "5.0.5",
       },
     },
+    "packages/calsdk": {
+      "name": "calsdk",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
+      },
+      "devDependencies": {
+        "@calsdk/mock": "workspace:*",
+      },
+    },
     "packages/mock": {
       "name": "@calsdk/mock",
       "version": "0.0.0",
@@ -234,6 +245,8 @@
     "assertion-error": ["assertion-error@2.0.1", "", {}, "sha512-Izi8RQcffqCeNVgFigKli1ssklIbpHnCYc6AknXGYoB6grJqyeby7jv12JUQgmTAnIDnbck1uxksT4dzN3PWBA=="],
 
     "cac": ["cac@7.1.0", "", {}, "sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA=="],
+
+    "calsdk": ["calsdk@workspace:packages/calsdk"],
 
     "chai": ["chai@6.3.0", "", {}, "sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg=="],
 

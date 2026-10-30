@@ -1,0 +1,39 @@
+{
+  "name": "@calsdk/mock",
+  "version": "0.0.0",
+  "description": "In-memory calsdk calendar provider for tests, examples and offline development.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@calsdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/mock"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@calsdk/provider": "workspace:*",
+    "@calsdk/provider-utils": "workspace:*",
+    "rrule-temporal": "^2.2.8"
+  }
+}

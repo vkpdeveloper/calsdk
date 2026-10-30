@@ -47,6 +47,27 @@
           }
         }
       }
+    },
+    {
+      "includes": ["packages/*/src/**", "!packages/provider-tests/**", "!**/*.test.ts"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNodejsModules": "error"
+          },
+          "style": {
+            "noRestrictedGlobals": {
+              "level": "error",
+              "options": {
+                "deniedGlobals": {
+                  "process": "Packages must run on edge runtimes. Take configuration as settings instead.",
+                  "Buffer": "Packages must run on edge runtimes. Use Uint8Array, TextEncoder or btoa instead."
+                }
+              }
+            }
+          }
+        }
+      }
     }
   ]
 }

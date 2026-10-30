@@ -235,6 +235,34 @@ describe('findFreeTime', () => {
     expect(slots).toEqual([]);
   });
 
+  it('keeps slots that start before a repeated hour and end after it', async () => {
+    const { slots } = await findFreeTime({
+      ...newYork('00:00', '02:00'),
+      duration: 90,
+      timeMin: '2026-11-01T00:00:00Z',
+      timeMax: '2026-11-02T00:00:00Z',
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-11-01T04:00:00.000Z', // 00:00 EDT, ends 01:30 EDT
+      '2026-11-01T04:30:00.000Z', // 00:30 EDT, ends 01:00 EST
+      '2026-11-01T05:00:00.000Z', // 01:00 EDT, ends 01:30 EST
+      '2026-11-01T05:30:00.000Z', // 01:30 EDT, ends 02:00 EST
+    ]);
+  });
+
+  it('follows offset changes that cancel out over a long range', async () => {
+    // New York has the same offset on 2026-01-01 and 2027-01-01, with summer time between.
+    const { slots } = await findFreeTime({
+      calendars: [{ calendar: mockCalendar() }],
+      timeMin: '2026-01-01T00:00:00Z',
+      timeMax: '2027-01-01T00:00:00Z',
+      duration: 60,
+      workingHours: { start: '09:00', end: '10:00', timeZone: 'America/New_York' },
+    });
+    expect(slots).toHaveLength(261);
+    expect(slots.map((slot) => slot.start)).toContain('2026-07-01T13:00:00.000Z'); // 09:00 EDT
+  });
+
   it('stays on the hour after a half-hour DST change', async () => {
     const { slots } = await findFreeTime({
       calendars: [{ calendar: mockCalendar() }],

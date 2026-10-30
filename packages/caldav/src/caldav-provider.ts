@@ -711,14 +711,15 @@ function parseServerUrl(address: string): URL {
 
 /** The id of an event resource: its name without `.ics`. Other names are not events calsdk can address. */
 function resourceId(url: URL): string | undefined {
-  const name = url.pathname.split('/').at(-1) ?? '';
-  // Exactly `.ics`, as event ids are turned back into names with it.
-  if (!name.endsWith('.ics')) return undefined;
+  let name: string;
   try {
-    return decodeURIComponent(name.slice(0, -'.ics'.length));
+    // Decoded first, as servers may encode the same name differently (`a%2Eics`).
+    name = decodeURIComponent(url.pathname.split('/').at(-1) ?? '');
   } catch {
     return undefined;
   }
+  // Exactly `.ics`, as event ids are turned back into names with it.
+  return name.endsWith('.ics') ? name.slice(0, -'.ics'.length) : undefined;
 }
 
 const eventUrl = (calendar: URL, id: string) => new URL(`${encodeURIComponent(id)}.ics`, calendar);

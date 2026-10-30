@@ -314,6 +314,13 @@ describe('caldav with a stubbed server', () => {
     });
     const { nextCursor: cursor } = await provider.doSyncEvents({ calendarId: '/cal/' });
 
+    // The same name, encoded differently in the answer.
+    multiget = ok.replace('/cal/standup.ics', '/cal/stand%75p%2Eics');
+    const encoded = await provider.doSyncEvents({ calendarId: '/cal/', cursor });
+    expect(encoded.changes).toEqual([
+      { type: 'upsert', event: expect.objectContaining({ id: 'standup' }) },
+    ]);
+
     for (const failed of [
       '<D:response><D:href>/cal/standup.ics</D:href><D:status>HTTP/1.1 500 Internal Server Error</D:status></D:response>',
       '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><C:calendar-data/></D:prop><D:status>HTTP/1.1 500 Internal Server Error</D:status></D:propstat></D:response>',

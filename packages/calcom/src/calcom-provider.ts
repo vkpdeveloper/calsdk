@@ -67,9 +67,9 @@ export type CalcomProvider = CalendarProviderV1<'calcom', CalcomProviderTypes> &
 
 const PROVIDER = 'calcom';
 const MAX_PAGE_SIZE = 100;
-// Bookings are found by their start, so a listing reads from a day before `timeMin` to
-// include bookings already running then. Longer bookings that started earlier are missed.
-const LOOKBACK_MS = 86_400_000;
+// Bookings are found by their start, so a listing reads back from `timeMin` by the longest
+// length a booking in the calendar can have, and at least a day.
+const DAY_MS = 86_400_000;
 // A booking saved in a slow transaction can appear after later ones. Each sync rereads this
 // long before the newest change it saw, and skips bookings it already reported.
 const SYNC_OVERLAP_MS = 60_000;
@@ -156,7 +156,7 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
   }
 
   async function listBookings(call: Call, calendarId: string, query: Record<string, QueryValue>) {
-    const { data } = await request(
+    return request(
       call,
       { type: 'calendar', id: calendarId },
       {
@@ -167,7 +167,58 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
         schema: bookingListSchema,
       },
     );
+  }
+
+  /** Every booking last changed at `changedAt`, through Cal.com's cursor. */
+  async function listChangedAt(call: Call, calendarId: string, changedAt: string) {
+    const bookings: Booking[] = [];
+    const seen = new Set<string>();
+    let cursor: string | undefined;
+    do {
+      const page = await listBookings(call, calendarId, {
+        afterUpdatedAt: changedAt,
+        beforeUpdatedAt: changedAt,
+        limit: MAX_PAGE_SIZE,
+        cursor,
+      });
+      bookings.push(...page.data);
+      cursor = page.pagination?.hasMore ? (page.pagination.nextCursor ?? undefined) : undefined;
+      if (cursor !== undefined) {
+        // A cursor returned twice would loop forever.
+        if (seen.has(cursor)) {
+          throw new InvalidResponseDataError({
+            data: cursor,
+            message: 'Cal.com returned the same cursor twice.',
+          });
+        }
+        seen.add(cursor);
+      }
+    } while (cursor !== undefined);
+    return bookings;
+  }
+
+  async function listEventTypes(call: Call) {
+    const { data } = await request(call, undefined, {
+      method: 'GET',
+      path: '/event-types',
+      version: API_VERSIONS.eventTypes,
+      schema: eventTypeListSchema,
+    });
     return data;
+  }
+
+  /** The longest a booking in the calendar can last, in ms: what its event types offer. */
+  async function longestBooking(call: Call, calendarId: string) {
+    const eventTypeId = eventTypeOf(calendarId);
+    const eventTypes =
+      eventTypeId === undefined
+        ? await listEventTypes(call)
+        : [await getEventType(call, eventTypeId)];
+    const minutes = eventTypes.flatMap((eventType) => [
+      eventType.lengthInMinutes,
+      ...(eventType.lengthInMinutesOptions ?? []),
+    ]);
+    return Math.max(...minutes, 0) * 60_000;
   }
 
   async function getMe(call: Call) {
@@ -202,20 +253,12 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
     },
 
     async doListCalendars(call) {
-      const [me, eventTypes] = await Promise.all([
-        getMe(call),
-        request(call, undefined, {
-          method: 'GET',
-          path: '/event-types',
-          version: API_VERSIONS.eventTypes,
-          schema: eventTypeListSchema,
-        }),
-      ]);
+      const [me, eventTypes] = await Promise.all([getMe(call), listEventTypes(call)]);
       const timeZone = me.timeZone && isValidTimeZone(me.timeZone) ? me.timeZone : undefined;
       return {
         calendars: [
           { id: 'primary', name: 'All bookings', timeZone, isPrimary: true, accessRole: 'owner' },
-          ...eventTypes.data.map((eventType) => ({
+          ...eventTypes.map((eventType) => ({
             id: String(eventType.id),
             name: eventType.title,
             timeZone,
@@ -243,21 +286,22 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
       const min = Date.parse(timeMin);
       const max = Date.parse(timeMax);
       const limit = Math.min(pageSize ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE);
+      const lookback = Math.max(DAY_MS, await longestBooking(call, calendarId));
       const token: ListToken =
         pageToken === undefined
-          ? { start: new Date(min - LOOKBACK_MS).toISOString(), seen: [] }
+          ? { start: new Date(min - lookback).toISOString(), seen: [] }
           : decodeListToken(pageToken);
-      if (token.seen.length + limit > MAX_PAGE_SIZE) {
+      if (token.seen.length >= MAX_PAGE_SIZE) {
         throw new InvalidResponseDataError({
           data: token.start,
-          message: `More than ${MAX_PAGE_SIZE - limit} bookings start at ${token.start}, so calsdk cannot page past them. Use a smaller pageSize.`,
+          message: `${MAX_PAGE_SIZE} or more bookings start at ${token.start}, so calsdk cannot page past them.`,
         });
       }
 
       // Bookings already returned at the token's start come back first, so the request
-      // asks for that many more.
-      const fetched = token.seen.length + limit;
-      const bookings = await listBookings(call, calendarId, {
+      // asks for that many more, up to Cal.com's limit.
+      const fetched = Math.min(MAX_PAGE_SIZE, token.seen.length + limit);
+      const { data: bookings } = await listBookings(call, calendarId, {
         afterStart: token.start,
         sortStart: 'asc',
         limit: fetched,
@@ -463,19 +507,27 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
         });
       }
 
-      const bookings = await listBookings(call, calendarId, {
+      const page = await listBookings(call, calendarId, {
         afterUpdatedAt: state.after,
         sortUpdatedAt: 'asc',
         limit: MAX_PAGE_SIZE,
       });
+      const full = page.data.length === MAX_PAGE_SIZE;
+      const first = page.data[0];
+      const last = page.data.at(-1);
+      // A full page changed at one time can hide more bookings changed then, and the next
+      // page would start at that time again. Cal.com's cursor reads all of them instead.
+      const tied =
+        full && first && last && changeTime(first) === changeTime(last)
+          ? changeTime(last)
+          : undefined;
+      const bookings = tied === undefined ? page.data : await listChangedAt(call, calendarId, tied);
       const seen = { ...state.seen };
       const changes: SyncChangeV1[] = [];
-      let fresh = 0;
       for (const booking of bookings) {
         const changedAt = changeTime(booking);
         if (seen[booking.uid] === changedAt) continue;
         seen[booking.uid] = changedAt;
-        fresh++;
         if (isActive(booking)) {
           changes.push({ type: 'upsert', event: fromBooking(booking, { calendarId }) });
         } else if (!state.initial) {
@@ -490,15 +542,10 @@ export function calcom(settings: CalcomSettings): CalcomProvider {
         Object.fromEntries(
           Object.entries(seen).filter(([, changedAt]) => Date.parse(changedAt) >= after),
         );
-      const last = bookings.at(-1);
-      if (bookings.length === MAX_PAGE_SIZE && last) {
-        const after = changeTime(last);
-        if (fresh === 0 && Date.parse(after) === Date.parse(state.after ?? '')) {
-          throw new InvalidResponseDataError({
-            data: after,
-            message: `More than ${MAX_PAGE_SIZE} bookings changed at ${after}, so calsdk cannot page past them.`,
-          });
-        }
+      if (full && last) {
+        // After a tie, every booking changed at that time has been read.
+        const after =
+          tied === undefined ? changeTime(last) : new Date(Date.parse(tied) + 1).toISOString();
         return {
           changes,
           nextPageToken: encodeToken({

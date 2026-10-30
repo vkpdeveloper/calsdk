@@ -2,6 +2,7 @@ export type {
   GoogleEventMetadata,
   GoogleEventOptions,
   GoogleListEventsOptions,
+  GoogleProviderTypes,
 } from './google-options';
 export {
   type GoogleCalendarProvider,

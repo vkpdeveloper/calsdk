@@ -55,7 +55,11 @@ import {
   googleEventSchema,
   googleFreeBusySchema,
 } from './google-api';
-import { googleEventOptionsSchema, googleListEventsOptionsSchema } from './google-options';
+import {
+  type GoogleProviderTypes,
+  googleEventOptionsSchema,
+  googleListEventsOptionsSchema,
+} from './google-options';
 import { endAfter, moveRecurrence, moveTime, seriesMove } from './move-series';
 
 export type GoogleCalendarSettings = {
@@ -69,7 +73,7 @@ export type GoogleCalendarSettings = {
   fetch?: FetchFunction;
 };
 
-export type GoogleCalendarProvider = CalendarProviderV1 &
+export type GoogleCalendarProvider = CalendarProviderV1<'google', GoogleProviderTypes> &
   Required<Pick<CalendarProviderV1, 'doFreeBusy' | 'doSyncEvents'>>;
 
 const PROVIDER = 'google';

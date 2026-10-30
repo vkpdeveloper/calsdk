@@ -1,0 +1,45 @@
+{
+  "name": "@calsdk/caldav",
+  "version": "0.0.0",
+  "description": "CalDAV provider for calsdk: iCloud, Fastmail, Nextcloud and other CalDAV servers.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@calsdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/caldav"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@calsdk/ics": "workspace:*",
+    "@calsdk/provider": "workspace:*",
+    "@calsdk/provider-utils": "workspace:*",
+    "@xmldom/xmldom": "^0.9.12",
+    "ical.js": "^2.2.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@calsdk/provider-tests": "workspace:*"
+  }
+}

@@ -1,0 +1,563 @@
+{
+  "caldav provider > moves a whole series through one instance and drops exceptions it no longer has": [
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:current-user-principal/><C:calendar-home-set/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/</href><propstat><prop><current-user-principal><href>/test/</href></current-user-principal></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-home-set /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/test/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><C:calendar-home-set/><C:calendar-user-address-set/><C:schedule-inbox-URL/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/</href><propstat><prop><C:calendar-home-set><href>/test/</href></C:calendar-home-set><C:calendar-user-address-set><href>/test/</href></C:calendar-user-address-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:schedule-inbox-URL /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/test/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:resourcetype/><D:displayname/><D:current-user-privilege-set/><C:calendar-description/><C:supported-calendar-component-set/><A:calendar-color/><CS:shared-url/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:CS=\"http://calendarserver.org/ns/\" xmlns:ICAL=\"http://apple.com/ns/ical/\"><response><href>/test/</href><propstat><prop><resourcetype><principal /><collection /></resourcetype><current-user-privilege-set><privilege><read /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><displayname /><C:calendar-description /><C:supported-calendar-component-set /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/calsdk/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>calsdk</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VEVENT\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/work/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>Work</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VTODO\" /><C:comp name=\"VEVENT\" /><C:comp name=\"VJOURNAL\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:series\r\nDTSTART;TZID=UTC:20300304T100000\r\nDTEND;TZID=UTC:20300304T110000\r\nRRULE:FREQ=DAILY;COUNT=3\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"4095eef9ad472e43045ba16538beba8ab12918e4e5dce48837434ceae640491c\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"4095eef9ad472e43045ba16538beba8ab12918e4e5dce48837434ceae640491c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300228T000000Z\" end=\"20300402T000000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"4095eef9ad472e43045ba16538beba8ab12918e4e5dce48837434ceae640491c\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001_20300304T100000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"4095eef9ad472e43045ba16538beba8ab12918e4e5dce48837434ceae640491c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"4095eef9ad472e43045ba16538beba8ab12918e4e5dce48837434ceae640491c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:moved once\r\nRECURRENCE-ID:20300304T100000Z\r\nDTSTART;TZID=UTC:20300304T100000\r\nDTEND;TZID=UTC:20300304T110000\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"0cfe0342ad65f619d8cd079538ab8bd53ec1bddda96e54fdcdaf780150c5219c\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"0cfe0342ad65f619d8cd079538ab8bd53ec1bddda96e54fdcdaf780150c5219c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nRECURRENCE-ID:20300304T100000Z\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:moved once\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001_20300305T100000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"0cfe0342ad65f619d8cd079538ab8bd53ec1bddda96e54fdcdaf780150c5219c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nRECURRENCE-ID:20300304T100000Z\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:moved once\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"0cfe0342ad65f619d8cd079538ab8bd53ec1bddda96e54fdcdaf780150c5219c\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:1\r\nSUMMARY:series\r\nDTSTART;TZID=UTC:20300304T120000\r\nDTEND;TZID=UTC:20300304T130000\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"f1bedf64d07cc1260050fe27ed8e7a1e5c50dc1696394321623c510b5f86b6f3\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"f1bedf64d07cc1260050fe27ed8e7a1e5c50dc1696394321623c510b5f86b6f3\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T120000Z\r\nDTEND;TZID=UTC:20300304T130000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:1\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300228T000000Z\" end=\"20300402T000000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"f1bedf64d07cc1260050fe27ed8e7a1e5c50dc1696394321623c510b5f86b6f3\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:093328d5-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T120000Z\r\nDTEND;TZID=UTC:20300304T130000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:1\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/093328d5-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider > rejects a sync cursor the server no longer knows": [
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/0000000000000000000000000000000000000000000000000000000000000000</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 403,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<error xmlns=\"DAV:\"><valid-sync-token /></error>"
+        }
+      }
+    }
+  ],
+  "caldav provider > syncs an instance deleted from a series as a delete of its exception": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:series\r\nDTSTART;TZID=UTC:20300304T100000\r\nDTEND;TZID=UTC:20300304T110000\r\nRRULE:FREQ=DAILY;COUNT=3\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"2419b007616748d70e5a7ffc07969cc57fdacaeea18d59d5260d0ba5a6b9a00a\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"2419b007616748d70e5a7ffc07969cc57fdacaeea18d59d5260d0ba5a6b9a00a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300228T000000Z\" end=\"20300402T000000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"2419b007616748d70e5a7ffc07969cc57fdacaeea18d59d5260d0ba5a6b9a00a\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001_20300305T100000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"2419b007616748d70e5a7ffc07969cc57fdacaeea18d59d5260d0ba5a6b9a00a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"2419b007616748d70e5a7ffc07969cc57fdacaeea18d59d5260d0ba5a6b9a00a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:exception\r\nRECURRENCE-ID:20300305T100000Z\r\nDTSTART;TZID=UTC:20300305T100000\r\nDTEND;TZID=UTC:20300305T110000\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nRECURRENCE-ID:20300305T100000Z\r\nDTSTART;TZID=UTC:20300305T100000Z\r\nDTEND;TZID=UTC:20300305T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token></D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/82ef8e2c12b213180994e6c04dbf41236b766d3e2c7f4b05aa4620d7ce55a5b4</sync-token><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/605b803f-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/960909ff-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e015a710-f88b-4ef2-9403-5b8da9b3aa26.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/9576cb02-8b0a-410e-9f1e-a540fda1ff3a.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nRECURRENCE-ID:20300305T100000Z\r\nDTSTART;TZID=UTC:20300305T100000Z\r\nDTEND;TZID=UTC:20300305T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001_20300305T100000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001_20300305T100000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:0\r\nSUMMARY:series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nRECURRENCE-ID:20300305T100000Z\r\nDTSTART;TZID=UTC:20300305T100000Z\r\nDTEND;TZID=UTC:20300305T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"31adfca93a24832be949494aeab7d088c1a69dbc9cb3024512e6c3f2dc26eb6a\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:1\r\nSUMMARY:series\r\nEXDATE:20300305T100000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"8f75343fd00cdf3c06a1c928b48f9f0ee55cdff45754525812f968fbfd88eeea\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/82ef8e2c12b213180994e6c04dbf41236b766d3e2c7f4b05aa4620d7ce55a5b4</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/fcefd994d3062b7afafb32b68320398198d44bcbfca0890277b7a773ff75605d</sync-token><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"8f75343fd00cdf3c06a1c928b48f9f0ee55cdff45754525812f968fbfd88eeea\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"8f75343fd00cdf3c06a1c928b48f9f0ee55cdff45754525812f968fbfd88eeea\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:e0445ead-0000-4000-8000-000000000001\r\nDTSTART;TZID=UTC:20300304T100000Z\r\nDTEND;TZID=UTC:20300304T110000Z\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nEXDATE:20300305T100000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=3\r\nSEQUENCE:1\r\nSUMMARY:series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ]
+}

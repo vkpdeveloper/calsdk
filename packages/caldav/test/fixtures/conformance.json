@@ -1,0 +1,1453 @@
+{
+  "caldav provider conformance > creates, reads, updates and deletes a timed event": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk conformance\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk conformance\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk conformance\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300106T050000Z\" end=\"20300109T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk conformance\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk conformance\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"818ed1655464782a6cf8704060d4f61e3a0a509cb6b82bcbdcd9aad6ff171f98\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk conformance (renamed)\r\nDESCRIPTION:notes\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"fb0dada149afbf16c4ff7643df7391ff967fe0bc079f578815a31c7aa995117e\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"fb0dada149afbf16c4ff7643df7391ff967fe0bc079f578815a31c7aa995117e\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDESCRIPTION:notes\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"fb0dada149afbf16c4ff7643df7391ff967fe0bc079f578815a31c7aa995117e\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDESCRIPTION:notes\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"fb0dada149afbf16c4ff7643df7391ff967fe0bc079f578815a31c7aa995117e\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDESCRIPTION:notes\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"fb0dada149afbf16c4ff7643df7391ff967fe0bc079f578815a31c7aa995117e\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:2\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"96a0c2bdfc7e4c07a2f0e04ec1a5d4975fbe502d06547b8d6bdfd5dd6f8d9098\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"96a0c2bdfc7e4c07a2f0e04ec1a5d4975fbe502d06547b8d6bdfd5dd6f8d9098\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:2\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"96a0c2bdfc7e4c07a2f0e04ec1a5d4975fbe502d06547b8d6bdfd5dd6f8d9098\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:16b7faae-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300107T090000\r\nDTEND;TZID=America/New_York:20300107T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:2\r\nSUMMARY:calsdk conformance (renamed)\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > keeps the time zone an event was scheduled in": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/605b803f-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:605b803f-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nDTSTART;TZID=Asia/Kolkata:20300108T150000\r\nDTEND;TZID=Asia/Kolkata:20300108T160000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"1ec4ff223d083b8d3776a0fb26c38de29104b03a96c4893e9f6066d17a49f713\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/605b803f-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"1ec4ff223d083b8d3776a0fb26c38de29104b03a96c4893e9f6066d17a49f713\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Kolkata\r\nBEGIN:STANDARD\r\nDTSTART:20000101T000000\r\nRRULE:FREQ=YEARLY;BYMONTH=1\r\nTZNAME:IST\r\nTZOFFSETFROM:+0530\r\nTZOFFSETTO:+0530\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:605b803f-0000-4000-8000-000000000001\r\nDTSTART;TZID=Asia/Kolkata:20300108T150000\r\nDTEND;TZID=Asia/Kolkata:20300108T160000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/605b803f-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"1ec4ff223d083b8d3776a0fb26c38de29104b03a96c4893e9f6066d17a49f713\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:Asia/Kolkata\r\nBEGIN:STANDARD\r\nDTSTART:20000101T000000\r\nRRULE:FREQ=YEARLY;BYMONTH=1\r\nTZNAME:IST\r\nTZOFFSETFROM:+0530\r\nTZOFFSETTO:+0530\r\nEND:STANDARD\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:605b803f-0000-4000-8000-000000000001\r\nDTSTART;TZID=Asia/Kolkata:20300108T150000\r\nDTEND;TZID=Asia/Kolkata:20300108T160000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/605b803f-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/605b803f-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > lists calendars with exactly one primary": [
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:current-user-principal/><C:calendar-home-set/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/</href><propstat><prop><current-user-principal><href>/test/</href></current-user-principal></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-home-set /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/test/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><C:calendar-home-set/><C:calendar-user-address-set/><C:schedule-inbox-URL/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/</href><propstat><prop><C:calendar-home-set><href>/test/</href></C:calendar-home-set><C:calendar-user-address-set><href>/test/</href></C:calendar-user-address-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:schedule-inbox-URL /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/test/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:resourcetype/><D:displayname/><D:current-user-privilege-set/><C:calendar-description/><C:supported-calendar-component-set/><A:calendar-color/><CS:shared-url/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:CS=\"http://calendarserver.org/ns/\" xmlns:ICAL=\"http://apple.com/ns/ical/\"><response><href>/test/</href><propstat><prop><resourcetype><principal /><collection /></resourcetype><current-user-privilege-set><privilege><read /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><displayname /><C:calendar-description /><C:supported-calendar-component-set /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/calsdk/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>calsdk</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VEVENT\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/work/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>Work</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VTODO\" /><C:comp name=\"VEVENT\" /><C:comp name=\"VJOURNAL\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "http://localhost:5232/test/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:resourcetype/><D:displayname/><D:current-user-privilege-set/><C:calendar-description/><C:supported-calendar-component-set/><A:calendar-color/><CS:shared-url/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:CS=\"http://calendarserver.org/ns/\" xmlns:ICAL=\"http://apple.com/ns/ical/\"><response><href>/test/</href><propstat><prop><resourcetype><principal /><collection /></resourcetype><current-user-privilege-set><privilege><read /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><displayname /><C:calendar-description /><C:supported-calendar-component-set /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/calsdk/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>calsdk</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VEVENT\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response><response><href>/test/work/</href><propstat><prop><resourcetype><C:calendar /><collection /></resourcetype><displayname>Work</displayname><current-user-privilege-set><privilege><read /></privilege><privilege><C:read-free-busy /></privilege><privilege><all /></privilege><privilege><write /></privilege><privilege><write-properties /></privilege><privilege><write-content /></privilege></current-user-privilege-set><C:supported-calendar-component-set><C:comp name=\"VTODO\" /><C:comp name=\"VEVENT\" /><C:comp name=\"VJOURNAL\" /></C:supported-calendar-component-set></prop><status>HTTP/1.1 200 OK</status></propstat><propstat><prop><C:calendar-description /><ICAL:calendar-color /><CS:shared-url /></prop><status>HTTP/1.1 404 Not Found</status></propstat></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > pages through events in start order": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 9\r\nDTSTART;TZID=America/New_York:20300109T090000\r\nDTEND;TZID=America/New_York:20300109T100000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"b311317f1c4fa4204da5723f0dc5133b39b3c8c7e537283b2207e4622f8d7aa1\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"b311317f1c4fa4204da5723f0dc5133b39b3c8c7e537283b2207e4622f8d7aa1\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300109T090000\r\nDTEND;TZID=America/New_York:20300109T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 9\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000002\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 11\r\nDTSTART;TZID=America/New_York:20300109T110000\r\nDTEND;TZID=America/New_York:20300109T120000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"75501b1b0b14ac26d33aef91cf44f5b25e1393b8d025065231eecea310ab02a7\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"75501b1b0b14ac26d33aef91cf44f5b25e1393b8d025065231eecea310ab02a7\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300109T110000\r\nDTEND;TZID=America/New_York:20300109T120000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 11\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000003\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 13\r\nDTSTART;TZID=America/New_York:20300109T130000\r\nDTEND;TZID=America/New_York:20300109T140000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"c6fb13de426d61cce2cc1315ce7156b36531effec38e3f33339b800a8b62c6f0\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"c6fb13de426d61cce2cc1315ce7156b36531effec38e3f33339b800a8b62c6f0\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000003\r\nDTSTART;TZID=America/New_York:20300109T130000\r\nDTEND;TZID=America/New_York:20300109T140000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 13\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300108T050000Z\" end=\"20300111T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><propstat><prop><getetag>\"c6fb13de426d61cce2cc1315ce7156b36531effec38e3f33339b800a8b62c6f0\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000003\r\nDTSTART;TZID=America/New_York:20300109T130000\r\nDTEND;TZID=America/New_York:20300109T140000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 13\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"75501b1b0b14ac26d33aef91cf44f5b25e1393b8d025065231eecea310ab02a7\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300109T110000\r\nDTEND;TZID=America/New_York:20300109T120000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 11\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"b311317f1c4fa4204da5723f0dc5133b39b3c8c7e537283b2207e4622f8d7aa1\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300109T090000\r\nDTEND;TZID=America/New_York:20300109T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 9\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300108T050000Z\" end=\"20300111T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><propstat><prop><getetag>\"c6fb13de426d61cce2cc1315ce7156b36531effec38e3f33339b800a8b62c6f0\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000003\r\nDTSTART;TZID=America/New_York:20300109T130000\r\nDTEND;TZID=America/New_York:20300109T140000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 13\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"75501b1b0b14ac26d33aef91cf44f5b25e1393b8d025065231eecea310ab02a7\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300109T110000\r\nDTEND;TZID=America/New_York:20300109T120000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 11\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"b311317f1c4fa4204da5723f0dc5133b39b3c8c7e537283b2207e4622f8d7aa1\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:224c0f9e-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300109T090000\r\nDTEND;TZID=America/New_York:20300109T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk page 9\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > recurring events > creates and reads a series": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:804e3fca-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nDTSTART;TZID=America/New_York:20300128T100000\r\nDTEND;TZID=America/New_York:20300128T110000\r\nRRULE:FREQ=DAILY;COUNT=5\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"84cd9dbcb77486564fa049c2ac485a8812dfec3fc682b96414304b9331ed2f68\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"84cd9dbcb77486564fa049c2ac485a8812dfec3fc682b96414304b9331ed2f68\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:804e3fca-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300128T100000\r\nDTEND;TZID=America/New_York:20300128T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"84cd9dbcb77486564fa049c2ac485a8812dfec3fc682b96414304b9331ed2f68\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:804e3fca-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300128T100000\r\nDTEND;TZID=America/New_York:20300128T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300127T050000Z\" end=\"20300205T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"84cd9dbcb77486564fa049c2ac485a8812dfec3fc682b96414304b9331ed2f68\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:804e3fca-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300128T100000\r\nDTEND;TZID=America/New_York:20300128T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > recurring events > expands a series and modifies or deletes single occurrences": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nRRULE:FREQ=DAILY;COUNT=5\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"0f0247ac6dbcb9b053ec040cccd89d87b3df3626e2e079eb9fb6cf6ccd9c35ba\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"0f0247ac6dbcb9b053ec040cccd89d87b3df3626e2e079eb9fb6cf6ccd9c35ba\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300113T050000Z\" end=\"20300122T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"0f0247ac6dbcb9b053ec040cccd89d87b3df3626e2e079eb9fb6cf6ccd9c35ba\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001_20300115T150000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"0f0247ac6dbcb9b053ec040cccd89d87b3df3626e2e079eb9fb6cf6ccd9c35ba\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"0f0247ac6dbcb9b053ec040cccd89d87b3df3626e2e079eb9fb6cf6ccd9c35ba\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk exception\r\nRECURRENCE-ID;TZID=America/New_York:20300115T100000\r\nDTSTART;TZID=America/New_York:20300115T100000\r\nDTEND;TZID=America/New_York:20300115T110000\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"d6f59d098e65618c1879af884dd4c5aeaa366756bd84915a0844eb6a4d481cbf\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"d6f59d098e65618c1879af884dd4c5aeaa366756bd84915a0844eb6a4d481cbf\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nRECURRENCE-ID;TZID=America/New_York:20300115T100000\r\nDTSTART;TZID=America/New_York:20300115T100000\r\nDTEND;TZID=America/New_York:20300115T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001_20300116T150000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001_20300116T150000Z.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"d6f59d098e65618c1879af884dd4c5aeaa366756bd84915a0844eb6a4d481cbf\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:0\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nRECURRENCE-ID;TZID=America/New_York:20300115T100000\r\nDTSTART;TZID=America/New_York:20300115T100000\r\nDTEND;TZID=America/New_York:20300115T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"d6f59d098e65618c1879af884dd4c5aeaa366756bd84915a0844eb6a4d481cbf\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:1\r\nSUMMARY:calsdk series\r\nEXDATE;TZID=America/New_York:20300116T100000\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nRECURRENCE-ID;TZID=America/New_York:20300115T100000\r\nDTSTART;TZID=America/New_York:20300115T100000\r\nDTEND;TZID=America/New_York:20300115T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk exception\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"bca7a18b54c05346628d16152b335dc73cb777c1e059670b071a9adce5f81a1a\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300113T050000Z\" end=\"20300122T050000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"bca7a18b54c05346628d16152b335dc73cb777c1e059670b071a9adce5f81a1a\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300114T100000\r\nDTEND;TZID=America/New_York:20300114T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nEXDATE;TZID=America/New_York:20300116T100000\r\nLAST-MODIFIED:20261030T000000Z\r\nRRULE:FREQ=DAILY;COUNT=5\r\nSEQUENCE:1\r\nSUMMARY:calsdk series\r\nEND:VEVENT\r\nBEGIN:VEVENT\r\nUID:ecb1d8a4-0000-4000-8000-000000000001\r\nRECURRENCE-ID;TZID=America/New_York:20300115T100000\r\nDTSTART;TZID=America/New_York:20300115T100000\r\nDTEND;TZID=America/New_York:20300115T110000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk exception\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > rejects writes with a stale etag": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk etag\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk etag\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk etag\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk etag v2\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"b1c6efd13da23c2ccbb0f21c9355f0e74f228f5fa4e9cb3f7c6cacdc106c6ea6\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"b1c6efd13da23c2ccbb0f21c9355f0e74f228f5fa4e9cb3f7c6cacdc106c6ea6\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk etag v2\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"b1c6efd13da23c2ccbb0f21c9355f0e74f228f5fa4e9cb3f7c6cacdc106c6ea6\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk etag v2\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:68414ebc-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300110T090000\r\nDTEND;TZID=America/New_York:20300110T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:2\r\nSUMMARY:calsdk etag v3\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 412,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "Precondition failed."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "\"2e02b89445c40078549a90afc51c826c9973ec6db1d9407f8bc77d61512fc277\""
+        }
+      },
+      "response": {
+        "status": 412,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "Precondition failed."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > round-trips an all-day event with an exclusive end date": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/960909ff-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:960909ff-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk all-day\r\nDTSTART;VALUE=DATE:20300108\r\nDTEND;VALUE=DATE:20300110\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"de730f601cd05f86fac27101d00bff585b1df186bb599e86315710437e8cf29d\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/960909ff-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"de730f601cd05f86fac27101d00bff585b1df186bb599e86315710437e8cf29d\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:960909ff-0000-4000-8000-000000000001\r\nDTSTART;VALUE=DATE:20300108\r\nDTEND;VALUE=DATE:20300110\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk all-day\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/960909ff-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"de730f601cd05f86fac27101d00bff585b1df186bb599e86315710437e8cf29d\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:960909ff-0000-4000-8000-000000000001\r\nDTSTART;VALUE=DATE:20300108\r\nDTEND;VALUE=DATE:20300110\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk all-day\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/960909ff-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/960909ff-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    }
+  ],
+  "caldav provider conformance > syncs creates, updates and deletes incrementally": [
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk existing\r\nDTSTART;TZID=America/New_York:20300111T070000\r\nDTEND;TZID=America/New_York:20300111T080000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300111T070000\r\nDTEND;TZID=America/New_York:20300111T080000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk existing\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token></D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/2a6003be9e6df8955235d3453e74e281c67f059530febc58adadf72a728cdbdd</sync-token><response><href>/test/calsdk/ecb1d8a4-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/804e3fca-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/68414ebc-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000003.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/224c0f9e-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/605b803f-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/960909ff-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/16b7faae-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e0445ead-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/093328d5-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/e015a710-f88b-4ef2-9403-5b8da9b3aa26.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/9576cb02-8b0a-410e-9f1e-a540fda1ff3a.ics</href><status>HTTP/1.1 404 Not Found</status></response><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><propstat><prop><getetag>\"1d8e465aa29698e34c03155bbc5591f8108927e216365fc9338b49c308ec5dff\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000001\r\nDTSTART;TZID=America/New_York:20300111T070000\r\nDTEND;TZID=America/New_York:20300111T080000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk existing\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk sync\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "etag": "\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk sync\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/2a6003be9e6df8955235d3453e74e281c67f059530febc58adadf72a728cdbdd</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/5ef47915620f89fe5ad8e77fb3f59d30bc5113b675f85b0507a16c4a51d295ad</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk sync\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk sync\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics",
+        "headers": {
+          "if-match": "\"e93c5f97c1c74455b5e517d20cc59261eda5ae0d01b9e44c9449bbe0361085d1\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk sync v2\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "etag": "\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\""
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar; charset=utf-8",
+          "etag": "\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\""
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk sync v2\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/5ef47915620f89fe5ad8e77fb3f59d30bc5113b675f85b0507a16c4a51d295ad</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/401bbbf99aed57b97e56241fffc6b538f6bed80a20b1d052250da318c262c8f7</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\"</getetag></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><propstat><prop><getetag>\"92876bf294bb00375cbe0c4a8905359edb26667f5122a63ca45c7c9e41f4148e\"</getetag><C:calendar-data>BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VTIMEZONE\r\nTZID:America/New_York\r\nBEGIN:STANDARD\r\nDTSTART:20001029T020000\r\nRRULE:FREQ=YEARLY;BYDAY=-1SU;BYMONTH=10;UNTIL=20061029T060000Z\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:STANDARD\r\nDTSTART:20071104T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=11\r\nTZNAME:EST\r\nTZOFFSETFROM:-0400\r\nTZOFFSETTO:-0500\r\nEND:STANDARD\r\nBEGIN:DAYLIGHT\r\nDTSTART:20000402T020000\r\nRRULE:FREQ=YEARLY;BYDAY=1SU;BYMONTH=4;UNTIL=20060402T070000Z\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nBEGIN:DAYLIGHT\r\nDTSTART:20070311T020000\r\nRRULE:FREQ=YEARLY;BYDAY=2SU;BYMONTH=3\r\nTZNAME:EDT\r\nTZOFFSETFROM:-0500\r\nTZOFFSETTO:-0400\r\nEND:DAYLIGHT\r\nEND:VTIMEZONE\r\nBEGIN:VEVENT\r\nUID:7393ba34-0000-4000-8000-000000000002\r\nDTSTART;TZID=America/New_York:20300111T090000\r\nDTEND;TZID=America/New_York:20300111T100000\r\nCREATED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nSEQUENCE:1\r\nSUMMARY:calsdk sync v2\r\nEND:VEVENT\r\nEND:VCALENDAR\r\n</C:calendar-data></prop><status>HTTP/1.1 200 OK</status></propstat></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/401bbbf99aed57b97e56241fffc6b538f6bed80a20b1d052250da318c262c8f7</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</sync-token><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics</href><status>HTTP/1.1 404 Not Found</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "http://localhost:5232/test/calsdk/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:sync-collection xmlns:D=\"DAV:\"><D:sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</D:sync-token><D:sync-level>1</D:sync-level><D:prop><D:getetag/></D:prop></D:sync-collection>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><sync-token>http://radicale.org/ns/sync/b06e9567fad055a7b35a2be719ecd201b20e88559c05c66bd86942145d74824f</sync-token></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/xml; charset=utf-8"
+        },
+        "body": {
+          "text": "<?xml version='1.0' encoding='utf-8'?>\n<multistatus xmlns=\"DAV:\"><response><href>/test/calsdk/7393ba34-0000-4000-8000-000000000001.ics</href><status>HTTP/1.1 200 OK</status></response></multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:5232/test/calsdk/7393ba34-0000-4000-8000-000000000002.ics"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "text/plain; charset=utf-8"
+        },
+        "body": {
+          "text": "The requested resource could not be found."
+        }
+      }
+    }
+  ]
+}

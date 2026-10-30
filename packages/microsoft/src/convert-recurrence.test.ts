@@ -49,6 +49,12 @@ describe('Outlook recurrence', () => {
     expect(() => toGraphRecurrence(lines, start)).toThrow(
       expect.toSatisfy(UnsupportedFunctionalityError.isInstance),
     );
+    // Nor exclude another time on a deleted occurrence's date.
+    expect(() =>
+      toGraphRecurrence(['RRULE:FREQ=DAILY;COUNT=5', 'EXDATE:20300201T160000Z'], start, {
+        cancelled,
+      }),
+    ).toThrow(expect.toSatisfy(UnsupportedFunctionalityError.isInstance));
     // Nor bring a deleted one back.
     const warnings: WarningV1[] = [];
     toGraphRecurrence(['RRULE:FREQ=DAILY;COUNT=5'], start, { cancelled, warnings });

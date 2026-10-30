@@ -224,14 +224,20 @@ function lastDate(until: ICalDate, series: ReturnType<typeof seriesStart>): stri
   return occurrenceInstant(date, series) > limit ? addDaysToDate(date, -1) : date;
 }
 
-/** The date an EXDATE falls on in the series' zone. */
+/**
+ * The date an EXDATE falls on in the series' zone. Outlook deletes whole occurrences, so a
+ * timed EXDATE must name an occurrence's exact start.
+ */
 function localDate(date: ICalDate, series: ReturnType<typeof seriesStart>): string {
   if (date.type === 'date') return date.date;
   const local = parseLocalDateTime(date.local);
   if (!local) throw unsupported(`EXDATE ${date.local}`);
-  return formatLocalDate(
-    instantToLocal(localToInstant(local, date.timeZone ?? series.zone), series.zone),
-  );
+  const instant = localToInstant(local, date.timeZone ?? series.zone);
+  const day = formatLocalDate(instantToLocal(instant, series.zone));
+  if (occurrenceInstant(day, series) !== instant) {
+    throw unsupported(`EXDATE ${date.local}, which is not the start of an occurrence`);
+  }
+  return day;
 }
 
 function occurrenceInstant(date: string, series: ReturnType<typeof seriesStart>): number {

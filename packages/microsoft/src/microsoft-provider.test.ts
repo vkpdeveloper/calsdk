@@ -190,6 +190,7 @@ describe('microsoft', () => {
           if (token === 'expired') return graphError(410, 'SyncStateNotFound');
           return Response.json({
             value: [
+              event({ id: 'gone' }),
               event({ id: 's1', type: 'seriesMaster', recurrence: daily }),
               { id: 's1-occ', type: 'occurrence', seriesMasterId: 's1', start: event().start },
               { id: 'gone', '@removed': { reason: 'deleted' } },
@@ -207,8 +208,9 @@ describe('microsoft', () => {
     });
     expect(requests[0]?.url.searchParams.get('startDateTime')).toBe('2030-01-01T00:00:00Z');
     expect(requests[0]?.url.searchParams.get('endDateTime')).toBe('2031-01-01T00:00:00Z');
+    // In the page's order: an event created and deleted since the last sync ends deleted.
     expect(page.changes).toEqual([
-      { type: 'delete', eventId: 'gone' },
+      { type: 'upsert', event: expect.objectContaining({ id: 'gone' }) },
       {
         type: 'upsert',
         event: expect.objectContaining({
@@ -217,6 +219,7 @@ describe('microsoft', () => {
           recurrence: ['RRULE:FREQ=DAILY', 'EXDATE:20300108T140000Z'],
         }),
       },
+      { type: 'delete', eventId: 'gone' },
     ]);
     expect(requests[1]?.url.searchParams.get('$select')).toBe('cancelledOccurrences');
     expect(page.nextCursor).toBe(deltaLink);

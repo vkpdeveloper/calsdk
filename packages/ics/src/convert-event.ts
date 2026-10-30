@@ -28,8 +28,11 @@ import { type EventGroup, textOf } from './parse-icalendar';
  * (`FREQ=HOURLY`) takes long to expand. Expansion stops after this many.
  */
 const MAX_INSTANCES = 50_000;
-/** Candidate times tested for a rule, about 0.3 seconds of work: enough for years of hours. */
-const MAX_STEPS = 100_000;
+/**
+ * Candidate times tested to find one instance, about 0.15 seconds of work: enough for an
+ * hourly rule on February 29, whose instances are 35,000 hours apart.
+ */
+const MAX_STEPS = 50_000;
 const DAY_MS = 86_400_000;
 /**
  * Read as UTC, a wall-clock time is less than a day from its instant in any zone. Instances
@@ -178,15 +181,18 @@ function occurrences(
     });
   };
 
-  // RDATE periods come before DTSTART, as one starting with it gives it its own length.
-  for (const property of master.getAllProperties('rdate')) {
-    const rdateZone = zoneOf(property, context);
-    for (const value of property.getValues()) {
-      if (value instanceof ICAL.Time) add(value, rdateZone);
-      else if (value instanceof ICAL.Period) {
-        add(value.start, rdateZone, value.duration ? durationLength(value.duration) : value.end);
-      }
+  // RDATE periods come first, as a period gives its instance its own length.
+  const rdates = master
+    .getAllProperties('rdate')
+    .flatMap((property) => property.getValues().map((value) => ({ value, property })));
+  for (const { value, property } of rdates) {
+    if (value instanceof ICAL.Period) {
+      const end = value.duration ? durationLength(value.duration) : value.end;
+      add(value.start, zoneOf(property, context), end);
     }
+  }
+  for (const { value, property } of rdates) {
+    if (value instanceof ICAL.Time) add(value, zoneOf(property, context));
   }
   // DTSTART is always an instance, whether or not the rule matches it.
   add(startValue, zone);
@@ -211,22 +217,24 @@ function occurrences(
       until = rule.until.toUnixTime() * 1000;
       rule.until = null;
     }
-    const iterator = rule.iterator(startValue);
-    // ical.js tests candidate times until one matches, forever for a rule no date matches
-    // (FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30). Past the budget the test passes, and the loop stops.
-    let steps = 0;
-    const check = iterator.check_contracting_rules.bind(iterator);
-    iterator.check_contracting_rules = () => ++steps > MAX_STEPS || check();
+    const iterator = boundedSearch(() => new BoundedIterator({ rule, dtstart: startValue }));
+    if (iterator === TOO_SPARSE) {
+      warnings.push({
+        type: 'other',
+        message: `Stopped expanding series "${group.uid}": its rule matches too few times.`,
+      });
+      continue;
+    }
     for (let count = 0; ; count++) {
-      const time = iterator.next();
-      if (!time) break;
-      if (steps > MAX_STEPS) {
+      const time = boundedSearch(() => iterator.next());
+      if (time === TOO_SPARSE) {
         warnings.push({
           type: 'other',
           message: `Stopped expanding series "${group.uid}": its rule matches too few times.`,
         });
         break;
       }
+      if (!time) break;
       if (until !== undefined && instantOf(time, zone, context) > until) break;
       if (count === MAX_INSTANCES) {
         warnings.push({
@@ -249,6 +257,39 @@ function occurrences(
     }
   }
   return events;
+}
+
+const TOO_SPARSE = Symbol('too sparse');
+/** Steps left in the current search of a `BoundedIterator`. Searches run synchronously. */
+let stepsLeft = 0;
+
+/**
+ * ical.js steps through candidate times until one matches the rule, while starting
+ * (`FREQ=MONTHLY;INTERVAL=48;BYDAY=5MO` from a February) and for every instance
+ * (`FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30`): forever when no time matches. Each search here
+ * stops after `MAX_STEPS` candidates. Overriding the steps in a subclass also covers the
+ * search the constructor runs.
+ */
+class BoundedIterator extends ICAL.RecurIterator {
+  override increment_month() {
+    if (--stepsLeft < 0) throw TOO_SPARSE;
+    super.increment_month();
+  }
+
+  override check_contracting_rules() {
+    if (--stepsLeft < 0) throw TOO_SPARSE;
+    return super.check_contracting_rules();
+  }
+}
+
+function boundedSearch<Result>(search: () => Result): Result | typeof TOO_SPARSE {
+  stepsLeft = MAX_STEPS;
+  try {
+    return search();
+  } catch (error) {
+    if (error === TOO_SPARSE) return TOO_SPARSE;
+    throw error;
+  }
 }
 
 /** An instance's start or end, shown in the series' zone. */

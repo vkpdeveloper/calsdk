@@ -495,6 +495,7 @@ describe('ics provider', () => {
     await expect(provider.doListCalendars({})).rejects.toBeInstanceOf(InvalidResponseDataError);
   });
 
+  // Each bounded rule takes a fraction of a second, slower on CI.
   it('bounds the work of expanding a series', async () => {
     const extra = [
       'BEGIN:VEVENT',
@@ -514,13 +515,28 @@ describe('ics provider', () => {
       'DTSTART:20260101T100000Z',
       'RRULE:FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30',
       'END:VEVENT',
+      // Every fourth February from 2026 has four Mondays: ical.js would search while starting.
+      'BEGIN:VEVENT',
+      'UID:fifth@example.com',
+      'DTSTART:20260202T100000Z',
+      'RRULE:FREQ=MONTHLY;INTERVAL=48;BYDAY=5MO',
+      'END:VEVENT',
+      // Years of candidate hours, but each instance is found quickly.
+      'BEGIN:VEVENT',
+      'UID:shifts@example.com',
+      'DTSTART:20140101T100000Z',
+      'DURATION:PT1H',
+      'RRULE:FREQ=HOURLY;BYDAY=MO,WE,FR',
+      'END:VEVENT',
     ].join('\r\n');
     const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
-    const { warnings } = await provider.doListEvents({
+    const { events, warnings } = await provider.doListEvents({
       calendarId: 'primary',
       ...window,
       expandRecurring: true,
     });
+    // Every hour of the seven Mondays, Wednesdays and Fridays from November 2 to 16.
+    expect(events.filter((event) => event.seriesId === 'shifts@example.com')).toHaveLength(168);
     expect(warnings).toEqual([
       { type: 'other', message: expect.stringContaining('"ticker@example.com"') },
       {
@@ -529,8 +545,9 @@ describe('ics provider', () => {
         details: expect.stringContaining('"seconds@example.com"'),
       },
       { type: 'other', message: expect.stringContaining('"never@example.com"') },
+      { type: 'other', message: expect.stringContaining('"fifth@example.com"') },
     ]);
-  });
+  }, 15_000);
 
   it('reads each recurrence date in its own zone, and always starts at DTSTART', async () => {
     const extra = [
@@ -561,11 +578,12 @@ describe('ics provider', () => {
       'DURATION:PT30M',
       'RRULE:FREQ=DAILY;UNTIL=20261101T060000Z',
       'END:VEVENT',
-      // A period starting at DTSTART sets that instance's length.
+      // A period sets its instance's length, also when DTSTART or another RDATE is there too.
       'BEGIN:VEVENT',
       'UID:longer@example.com',
       'DTSTART:20261102T120000Z',
       'DURATION:PT1H',
+      'RDATE:20261102T120000Z',
       'RDATE;VALUE=PERIOD:20261102T120000Z/20261102T150000Z',
       'END:VEVENT',
     ].join('\r\n');

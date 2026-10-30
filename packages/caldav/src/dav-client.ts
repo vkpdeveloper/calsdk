@@ -98,6 +98,15 @@ export function createDavClient({
             isRetryable: false,
           });
         }
+        // The Location is not echoed: a malformed one can hold anything the server sent.
+        if (!URL.canParse(location, current)) {
+          throw new APICallError({
+            message: `${current.href} redirected to an address that is not a URL.`,
+            url: current.href,
+            statusCode: response.status,
+            isRetryable: false,
+          });
+        }
         current = new URL(location, current);
         continue;
       }

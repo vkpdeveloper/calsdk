@@ -1,4 +1,4 @@
-import { type ReadContext, type Zone, zoneOf } from '@calsdk/ics/icalendar';
+import { type ReadContext, wallClockOf, type Zone, zoneOf } from '@calsdk/ics/icalendar';
 import {
   type EventInputV1,
   type EventPatchV1,
@@ -143,34 +143,10 @@ export function instanceProperty(
   const zone: Zone = dtstart ? zoneOf(dtstart, context) : { type: 'utc' };
   const tzid = dtstart?.getParameter('tzid');
   if (typeof tzid === 'string' && zone.type !== 'utc') property.setParameter('tzid', tzid);
-  const value = wallClock(Date.parse(originalStart.dateTime), zone, context);
-  property.setValue(
-    zone.type === 'utc'
-      ? ICAL.Time.fromData(value, ICAL.Timezone.utcTimezone)
-      : ICAL.Time.fromData(value),
-  );
+  const value = wallClockOf(Date.parse(originalStart.dateTime), zone, context);
+  if (zone.type === 'utc') value.zone = ICAL.Timezone.utcTimezone;
+  property.setValue(value);
   return property;
-}
-
-/** The wall-clock time `instant` has in `zone`. */
-function wallClock(instant: number, zone: Zone, context: ReadContext) {
-  switch (zone.type) {
-    case 'utc':
-      return timeData(instantToLocal(instant, 'UTC'));
-    case 'iana':
-      return timeData(instantToLocal(instant, zone.name));
-    case 'floating':
-      return timeData(instantToLocal(instant, context.timeZone));
-    case 'custom': {
-      // The offset depends on the wall-clock time, so it is found by refining a guess.
-      let local = timeData(instantToLocal(instant, 'UTC'));
-      for (let step = 0; step < 2; step++) {
-        const offset = zone.timezone.utcOffset(ICAL.Time.fromData(local));
-        local = timeData(instantToLocal(instant + offset * 1000, 'UTC'));
-      }
-      return local;
-    }
-  }
 }
 
 const timeData = ({ year, month, day, hour, minute, second }: LocalDateTime) => ({

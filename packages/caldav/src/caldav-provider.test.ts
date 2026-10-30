@@ -197,6 +197,20 @@ describe('caldav credentials', () => {
     for (const request of requests) expect(request.authorization).toMatch(/^Basic /);
   });
 
+  it('does not echo a redirect address that is not a URL', async () => {
+    const fetch: FetchFunction = async () =>
+      new Response(null, { status: 302, headers: { location: 'http://[secret' } });
+    const provider = caldav({
+      serverUrl: 'https://caldav.example.com/',
+      username: 'me',
+      password: 'secret',
+      fetch,
+    });
+    await expect(provider.doListCalendars({})).rejects.toSatisfy(
+      (error) => APICallError.isInstance(error) && !error.message.includes('[secret'),
+    );
+  });
+
   it('does not send them to a calendar home on another host over plain HTTP', async () => {
     const { provider, requests } = server('http://p01-caldav.example.com/1/calendars/');
     await expect(provider.doListCalendars({})).rejects.toSatisfy(APICallError.isInstance);
@@ -204,5 +218,73 @@ describe('caldav credentials', () => {
       'caldav.example.com',
       'caldav.example.com',
     ]);
+  });
+});
+
+describe('caldav sync of cancellations', () => {
+  const series = (cancelled: boolean) =>
+    [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      'UID:standup',
+      'DTSTART:20300304T100000Z',
+      'DTEND:20300304T110000Z',
+      'RRULE:FREQ=DAILY;COUNT=3',
+      'SUMMARY:standup',
+      'END:VEVENT',
+      ...(cancelled
+        ? [
+            'BEGIN:VEVENT',
+            'UID:standup',
+            'RECURRENCE-ID:20300305T100000Z',
+            'DTSTART:20300305T100000Z',
+            'DTEND:20300305T110000Z',
+            'STATUS:CANCELLED',
+            'END:VEVENT',
+          ]
+        : []),
+      'END:VCALENDAR',
+    ].join('\r\n');
+
+  it('deletes a cancelled instance once, when the cancellation appears', async () => {
+    let cancelled = false;
+    const multistatus = (body: string) =>
+      new Response(
+        `<?xml version="1.0"?><D:multistatus xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">${body}</D:multistatus>`,
+        { status: 207 },
+      );
+    const fetch: FetchFunction = async (input, init) => {
+      const request = new Request(input, init);
+      const body = await request.text();
+      if (body.includes('sync-collection')) {
+        return multistatus(
+          '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:sync-token>next</D:sync-token>',
+        );
+      }
+      if (body.includes('calendar-multiget')) {
+        return multistatus(
+          `<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>${series(cancelled)}</C:calendar-data></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>`,
+        );
+      }
+      return multistatus(
+        '<D:response><D:href>/</D:href><D:propstat><D:prop><D:current-user-principal><D:href>/</D:href></D:current-user-principal><C:calendar-home-set><D:href>/</D:href></C:calendar-home-set></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/cal/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><C:calendar/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>',
+      );
+    };
+    const provider = caldav({
+      serverUrl: 'https://caldav.example.com/',
+      username: 'me',
+      password: 'secret',
+      fetch,
+    });
+    const deletes = (changes: SyncChangeV1[]) =>
+      changes.flatMap((change) => (change.type === 'delete' ? [change.eventId] : []));
+
+    const initial = await provider.doSyncEvents({ calendarId: '/cal/' });
+    cancelled = true;
+    const next = await provider.doSyncEvents({ calendarId: '/cal/', cursor: initial.nextCursor });
+    expect(deletes(next.changes)).toEqual(['standup_20300305T100000Z']);
+    const again = await provider.doSyncEvents({ calendarId: '/cal/', cursor: next.nextCursor });
+    expect(deletes(again.changes)).toEqual([]);
   });
 });

@@ -1,4 +1,5 @@
 import {
+  cancelledKeys,
   type EventGroup,
   findEvent,
   instancesBetween,
@@ -83,6 +84,8 @@ const DEFAULT_PAGE_SIZE = 250;
 const DAY_MS = 86_400_000;
 const MULTIGET_BATCH = 100;
 const MAX_SYNC_ROUNDS = 100;
+/** Marks the cursor's keys of cancelled instances, already reported as deleted. */
+const CANCELLED = '-';
 
 /** A stored `.ics` resource: one event or series with its exceptions. */
 type Resource = {
@@ -587,7 +590,8 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
         const removeAll = (id: string) => {
           changes.push({ type: 'delete', eventId: id });
           for (const key of exceptions.get(id) ?? []) {
-            changes.push({ type: 'delete', eventId: `${id}_${key}` });
+            if (!key.startsWith(CANCELLED))
+              changes.push({ type: 'delete', eventId: `${id}_${key}` });
           }
           exceptions.delete(id);
         };
@@ -612,9 +616,17 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
             found.add(resource.id);
             const events = storedEvents(resource.group, resource.calendar.context);
             const keys = new Set(events.flatMap((event) => instanceKeyOf(resource.id, event)));
-            for (const key of exceptions.get(resource.id) ?? []) {
-              if (!keys.has(key))
+            const known = new Set(exceptions.get(resource.id));
+            for (const key of known) {
+              if (!key.startsWith(CANCELLED) && !keys.has(key))
                 changes.push({ type: 'delete', eventId: `${resource.id}_${key}` });
+            }
+            // An instance cancelled by a STATUS:CANCELLED exception is deleted once, when the
+            // cancellation first appears. An exception it replaced was deleted just above.
+            for (const key of cancelledKeys(resource.group, resource.calendar.context)) {
+              if (previous && !known.has(key) && !known.has(`${CANCELLED}${key}`))
+                changes.push({ type: 'delete', eventId: `${resource.id}_${key}` });
+              keys.add(`${CANCELLED}${key}`);
             }
             if (keys.size > 0) exceptions.set(resource.id, [...keys]);
             else exceptions.delete(resource.id);

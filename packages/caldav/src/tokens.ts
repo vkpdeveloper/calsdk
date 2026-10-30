@@ -11,6 +11,7 @@ const syncCursorSchema = z.object({
   /**
    * Instance keys of the exceptions each event had, for events that had any. The server only
    * reports that a resource changed or went away, so this tells which exceptions went with it.
+   * Keys of cancelled instances, already reported as deleted, start with `-`.
    */
   exceptions: z.array(z.tuple([z.string(), z.array(z.string())])),
 });

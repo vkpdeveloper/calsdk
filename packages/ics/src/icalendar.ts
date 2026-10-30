@@ -8,5 +8,5 @@ export {
   recurrenceKey,
   storedEvents,
 } from './convert-event';
-export { instanceKey, type ReadContext, type Zone, wallClockOf, zoneOf } from './ical-time';
+export { instanceKey, type ReadContext, wallClockOf, type Zone, zoneOf } from './ical-time';
 export { type EventGroup, type ParsedICalendar, parseICalendar, textOf } from './parse-icalendar';

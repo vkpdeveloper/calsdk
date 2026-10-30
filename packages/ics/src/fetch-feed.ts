@@ -73,9 +73,11 @@ export async function fetchFeed({
     const location = response.headers.get('location');
     if (response.status >= 300 && response.status < 400 && location) {
       await response.body?.cancel().catch(() => {});
-      const next = new URL(location, current);
+      // URL errors quote the base, which is the private address.
+      const next = URL.canParse(location, current) ? new URL(location, current) : undefined;
       if (
         redirects === MAX_REDIRECTS ||
+        !next ||
         (next.protocol !== 'https:' && next.protocol !== 'http:')
       ) {
         throw new APICallError({

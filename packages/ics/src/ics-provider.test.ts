@@ -348,6 +348,51 @@ describe('ics provider', () => {
     await expect(sync('garbage')).rejects.toBeInstanceOf(InvalidArgumentError);
   });
 
+  it('deletes an instance once when the feed cancels it, also without its times', async () => {
+    const cancel = [
+      'BEGIN:VEVENT',
+      `UID:${STANDUP}`,
+      'RECURRENCE-ID;TZID=America/New_York:20261102T090000',
+      'STATUS:CANCELLED',
+      'END:VEVENT',
+    ].join('\r\n');
+    let text = feed();
+    const provider = ics({ url: URL_, fetch: serve(() => text).fetch });
+    const initial = await provider.doSyncEvents({ calendarId: 'primary' });
+
+    text = feed({ extra: cancel });
+    const cancelled = await provider.doSyncEvents({
+      calendarId: 'primary',
+      cursor: initial.nextCursor,
+    });
+    expect(cancelled.changes).toEqual([
+      { type: 'upsert', event: expect.objectContaining({ id: STANDUP }) },
+      { type: 'delete', eventId: `${STANDUP}_20261102T140000Z` },
+    ]);
+    const again = await provider.doSyncEvents({
+      calendarId: 'primary',
+      cursor: cancelled.nextCursor,
+    });
+    expect(again.changes).toEqual([]);
+
+    const { events } = await provider.doListEvents({
+      calendarId: 'primary',
+      ...window,
+      expandRecurring: true,
+    });
+    expect(events.map((event) => event.id)).not.toContain(`${STANDUP}_20261102T140000Z`);
+
+    // Restoring the instance changes the series again.
+    text = feed();
+    const restored = await provider.doSyncEvents({
+      calendarId: 'primary',
+      cursor: again.nextCursor,
+    });
+    expect(restored.changes).toEqual([
+      { type: 'upsert', event: expect.objectContaining({ id: STANDUP }) },
+    ]);
+  });
+
   it('skips the download when the feed has not changed', async () => {
     const { fetch, requests } = fakeFetch(
       () => new Response(feed(), { headers: { etag: '"v1"' } }),
@@ -402,7 +447,25 @@ describe('ics provider', () => {
     const failed = await failureOf(offline.doListCalendars({}));
     expect(APICallError.isInstance(failed) && failed.isRetryable).toBe(true);
 
-    for (const error of [missing, failed]) {
+    // An error page served as a success, and a redirect to an address that does not parse.
+    const echoed = await failureOf(
+      ics({
+        url,
+        fetch: fakeFetch(() => new Response(`<html>${url}</html>`)).fetch,
+      }).doListCalendars({}),
+    );
+    expect(echoed).toBeInstanceOf(InvalidResponseDataError);
+    const redirected = await failureOf(
+      ics({
+        url,
+        fetch: fakeFetch(
+          () => new Response(null, { status: 302, headers: { location: 'http://[s3cr3t' } }),
+        ).fetch,
+      }).doListCalendars({}),
+    );
+    expect(APICallError.isInstance(redirected)).toBe(true);
+
+    for (const error of [missing, failed, echoed, redirected]) {
       const seen = new Set<unknown>();
       let current: unknown = error;
       while (current instanceof Error && !seen.has(current)) {
@@ -418,12 +481,18 @@ describe('ics provider', () => {
     await expect(provider.doListCalendars({})).rejects.toBeInstanceOf(InvalidResponseDataError);
   });
 
-  it('stops expanding a series with too many instances', async () => {
+  it('bounds the work of expanding a series', async () => {
     const extra = [
       'BEGIN:VEVENT',
       'UID:ticker@example.com',
       'DTSTART:20200101T000000Z',
-      'RRULE:FREQ=MINUTELY',
+      'RRULE:FREQ=HOURLY',
+      'END:VEVENT',
+      // Each instance of this rule is a year of seconds after the last.
+      'BEGIN:VEVENT',
+      'UID:seconds@example.com',
+      'DTSTART:20251231T235959Z',
+      'RRULE:FREQ=SECONDLY;BYMONTH=12',
       'END:VEVENT',
     ].join('\r\n');
     const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
@@ -434,6 +503,107 @@ describe('ics provider', () => {
     });
     expect(warnings).toEqual([
       { type: 'other', message: expect.stringContaining('"ticker@example.com"') },
+      {
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: expect.stringContaining('"seconds@example.com"'),
+      },
+    ]);
+  });
+
+  it('reads each recurrence date in its own zone, and always starts at DTSTART', async () => {
+    const extra = [
+      'BEGIN:VEVENT',
+      'UID:until@example.com',
+      'DTSTART;TZID=America/New_York:20261102T090000',
+      'DTEND;TZID=America/New_York:20261102T100000',
+      // Until 08:30 New York on the 4th, so not the 4th; the 3rd is excluded in UTC.
+      'RRULE:FREQ=DAILY;UNTIL=20261104T133000Z',
+      'EXDATE:20261103T140000Z',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:dates@example.com',
+      'DTSTART;VALUE=DATE:20261102',
+      'RDATE;VALUE=DATE:20261103',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:extra@example.com',
+      'DTSTART;TZID=America/New_York:20261102T090000',
+      'DTEND;TZID=America/New_York:20261102T100000',
+      'RDATE:20261103T140000Z',
+      'RDATE;VALUE=PERIOD:20261105T150000Z/20261105T170000Z',
+      'END:VEVENT',
+    ].join('\r\n');
+    const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
+    const { events } = await provider.doListEvents({
+      calendarId: 'primary',
+      ...window,
+      expandRecurring: true,
+    });
+    const of = (uid: string) =>
+      events
+        .filter((event) => event.seriesId === uid)
+        .map((event) => [
+          event.id,
+          event.start.dateTime ?? event.start.date,
+          event.end.dateTime ?? event.end.date,
+        ]);
+    expect(of('until@example.com')).toEqual([
+      [
+        'until@example.com_20261102T140000Z',
+        '2026-11-02T09:00:00-05:00',
+        '2026-11-02T10:00:00-05:00',
+      ],
+    ]);
+    expect(of('dates@example.com')).toEqual([
+      ['dates@example.com_20261102', '2026-11-02', '2026-11-03'],
+      ['dates@example.com_20261103', '2026-11-03', '2026-11-04'],
+    ]);
+    expect(of('extra@example.com')).toEqual([
+      [
+        'extra@example.com_20261102T140000Z',
+        '2026-11-02T09:00:00-05:00',
+        '2026-11-02T10:00:00-05:00',
+      ],
+      [
+        'extra@example.com_20261103T140000Z',
+        '2026-11-03T09:00:00-05:00',
+        '2026-11-03T10:00:00-05:00',
+      ],
+      [
+        'extra@example.com_20261105T150000Z',
+        '2026-11-05T10:00:00-05:00',
+        '2026-11-05T12:00:00-05:00',
+      ],
+    ]);
+  });
+
+  it('counts the days of a DURATION as calendar days and its hours as elapsed time', async () => {
+    const extra = [
+      'BEGIN:VEVENT',
+      'UID:days@example.com',
+      'DTSTART;TZID=America/New_York:20260307T120000',
+      'DURATION:P1D',
+      'RRULE:FREQ=DAILY;COUNT=2',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:hours@example.com',
+      'DTSTART;TZID=America/New_York:20260307T120000',
+      'DURATION:PT24H',
+      'END:VEVENT',
+    ].join('\r\n');
+    const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
+    const { events } = await provider.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2026-03-07T00:00:00Z',
+      timeMax: '2026-03-10T00:00:00Z',
+      expandRecurring: true,
+    });
+    // Clocks move forward on March 8.
+    expect(events.map((event) => [event.id, event.end.dateTime])).toEqual([
+      ['days@example.com_20260307T170000Z', '2026-03-08T12:00:00-04:00'],
+      ['hours@example.com', '2026-03-08T13:00:00-04:00'],
+      ['days@example.com_20260308T160000Z', '2026-03-09T12:00:00-04:00'],
     ]);
   });
 });

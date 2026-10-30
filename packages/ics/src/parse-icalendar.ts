@@ -38,17 +38,18 @@ export function parseICalendar(
     const parsed: unknown = ICAL.parse(text);
     const list: unknown[][] = isJCalList(parsed) ? parsed : [parsed as unknown[]];
     calendars = list.map((jcal) => new ICAL.Component(jcal));
-  } catch (error) {
+  } catch {
+    // Neither the text nor the parser's error (which quotes it) is kept: an error page
+    // served with status 200 can echo a feed's secret address.
     throw new InvalidResponseDataError({
-      data: text,
+      data: undefined,
       message: 'The response is not valid iCalendar data.',
-      cause: error,
     });
   }
   const calendar = calendars.find((component) => component.name === 'vcalendar');
   if (!calendar) {
     throw new InvalidResponseDataError({
-      data: text,
+      data: undefined,
       message: 'The response holds no VCALENDAR.',
     });
   }
@@ -65,7 +66,8 @@ export function parseICalendar(
     }
     for (const vevent of component.getAllSubcomponents('vevent')) {
       const uid = textOf(vevent, 'uid');
-      if (!uid || !vevent.getFirstProperty('dtstart')) continue;
+      // Cancellations of one instance need no times of their own.
+      if (!uid || !(vevent.hasProperty('dtstart') || isCancellation(vevent))) continue;
       let group = groups.get(uid);
       if (!group) {
         group = { uid, exceptions: [] };
@@ -88,6 +90,12 @@ export function parseICalendar(
 // `ICAL.parse` returns one jCal component, or a list when the text holds several.
 function isJCalList(value: unknown): value is unknown[][] {
   return Array.isArray(value) && Array.isArray(value[0]);
+}
+
+function isCancellation(vevent: ICAL.Component): boolean {
+  return (
+    vevent.hasProperty('recurrence-id') && textOf(vevent, 'status')?.toUpperCase() === 'CANCELLED'
+  );
 }
 
 /** A trimmed text property, or `undefined` when missing or blank. */

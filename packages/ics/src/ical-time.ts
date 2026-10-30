@@ -3,7 +3,9 @@ import {
   formatICalDate,
   formatLocalDate,
   formatZonedDateTime,
+  getTimeZoneOffset,
   instantToICalDate,
+  instantToLocal,
   isValidTimeZone,
   localToInstant,
   windowsToIana,
@@ -31,9 +33,11 @@ export type ReadContext = {
   timezones: ReadonlyMap<string, ICAL.Timezone>;
 };
 
-/** The zone of a `DTSTART`, `DTEND` or `RECURRENCE-ID` property. */
+/** The zone of a `DTSTART`, `DTEND`, `RECURRENCE-ID`, `RDATE` or `EXDATE` property. */
 export function zoneOf(property: ICAL.Property, context: ReadContext): Zone {
-  const value = property.getFirstValue();
+  const first = property.getFirstValue();
+  // A PERIOD (in an RDATE) is in the zone of its start.
+  const value = first instanceof ICAL.Period ? first.start : first;
   if (value instanceof ICAL.Time && value.zone === ICAL.Timezone.utcTimezone)
     return { type: 'utc' };
   const tzid = property.getParameter('tzid');
@@ -86,6 +90,30 @@ export function instantOf(time: ICAL.Time, zone: Zone, context: ReadContext): nu
       return wallClock - zone.timezone.utcOffset(time) * 1000;
     case 'floating':
       return localToInstant(local, context.timeZone);
+  }
+}
+
+/** The wall-clock time `instant` has in `zone`, as a time without a zone. */
+export function wallClockOf(instant: number, zone: Zone, context: ReadContext): ICAL.Time {
+  const timeAt = (at: number) => {
+    const { year, month, day, hour, minute, second } = instantToLocal(at, 'UTC');
+    return ICAL.Time.fromData({ year, month, day, hour, minute, second, isDate: false });
+  };
+  switch (zone.type) {
+    case 'utc':
+      return timeAt(instant);
+    case 'iana':
+      return timeAt(instant + getTimeZoneOffset(instant, zone.name));
+    case 'floating':
+      return timeAt(instant + getTimeZoneOffset(instant, context.timeZone));
+    case 'custom': {
+      // A VTIMEZONE gives offsets by wall-clock time, so the wall clock is found by refining a guess.
+      let local = timeAt(instant);
+      for (let step = 0; step < 2; step++) {
+        local = timeAt(instant + zone.timezone.utcOffset(local) * 1000);
+      }
+      return local;
+    }
   }
 }
 

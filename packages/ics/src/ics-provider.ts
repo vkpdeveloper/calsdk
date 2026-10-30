@@ -15,7 +15,13 @@ import {
   isValidTimeZone,
   mapAPICallError,
 } from '@calsdk/provider-utils';
-import { findEvent, instancesBetween, masterOf, storedEvents } from './convert-event';
+import {
+  cancelledKeys,
+  findEvent,
+  instancesBetween,
+  masterOf,
+  storedEvents,
+} from './convert-event';
 import { type Feed, feedURL, fetchFeed } from './fetch-feed';
 import { type ParsedICalendar, parseICalendar } from './parse-icalendar';
 import { decodeListToken, decodeSyncCursor, encodeToken, hashOf, type ListToken } from './tokens';
@@ -48,6 +54,8 @@ export type IcsProvider = CalendarProviderV1<
 
 const PROVIDER = 'ics';
 const DEFAULT_PAGE_SIZE = 250;
+/** Stands for an instance's hash once a cancellation deleted it. */
+const CANCELLED = '-';
 const READ_ONLY = { condition: 'Read only: feeds cannot be changed.' };
 
 /**
@@ -241,15 +249,27 @@ export function ics(settings: IcsSettings): IcsProvider {
       const hashes = new Map<string, string>();
       const changes: SyncChangeV1[] = [];
       for (const group of calendar.groups.values()) {
+        const cancelled = cancelledKeys(group, calendar.context);
         for (const event of storedEvents(group, calendar.context)) {
           if (hashes.has(event.id)) continue;
-          const hash = hashOf(JSON.stringify(event));
+          // A series changes when it cancels an instance or stops cancelling one.
+          const hash = hashOf(
+            JSON.stringify(event.kind === 'exception' ? event : [event, cancelled]),
+          );
           hashes.set(event.id, hash);
           if (seen.get(event.id) !== hash) changes.push({ type: 'upsert', event });
         }
+        // A cancelled instance is deleted once, when the cancellation first appears.
+        for (const key of cancelled) {
+          const eventId = `${group.uid}_${key}`;
+          if (hashes.has(eventId)) continue;
+          hashes.set(eventId, CANCELLED);
+          if (previous && seen.get(eventId) !== CANCELLED)
+            changes.push({ type: 'delete', eventId });
+        }
       }
-      for (const eventId of seen.keys()) {
-        if (!hashes.has(eventId)) changes.push({ type: 'delete', eventId });
+      for (const [eventId, hash] of seen) {
+        if (!hashes.has(eventId) && hash !== CANCELLED) changes.push({ type: 'delete', eventId });
       }
       return {
         changes,

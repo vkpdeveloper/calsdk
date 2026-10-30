@@ -9,8 +9,11 @@ import type {
 import {
   addDaysToDate,
   eventTimeToInstant,
+  formatLocalDate,
   formatZonedDateTime,
+  instantToLocal,
   isAllDay,
+  localToInstant,
 } from '@calsdk/provider-utils';
 import ICAL from 'ical.js';
 import {
@@ -18,6 +21,7 @@ import {
   instanceKey,
   instantOf,
   type ReadContext,
+  wallClockOf,
   type Zone,
   zoneOf,
 } from './ical-time';
@@ -49,6 +53,16 @@ export function storedEvents(group: EventGroup, context: ReadContext): EventV1[]
     if (event) events.push(event);
   }
   return events;
+}
+
+/** Keys of the instances a series cancels with `STATUS:CANCELLED` exceptions. */
+export function cancelledKeys(group: EventGroup, context: ReadContext): string[] {
+  return group.exceptions.flatMap((exception) => {
+    const key =
+      textOf(exception, 'status')?.toUpperCase() === 'CANCELLED' &&
+      recurrenceKey(exception, context);
+    return key ? [key] : [];
+  });
 }
 
 /**
@@ -116,8 +130,12 @@ export function findEvent(
 }
 
 /**
- * Unmodified occurrences of a series that may overlap `[min, max)`, in start order, without
- * overridden and cancelled ones. Callers check the exact overlap.
+ * Unmodified occurrences of a series that may overlap `[min, max)`, without overridden and
+ * cancelled ones, unsorted. Callers check the exact overlap.
+ *
+ * The recurrence set is built here rather than by `ICAL.Event`, which reads every `TZID` it
+ * has no registered zone for as UTC: comparing an `EXDATE` or `UNTIL` in UTC with a start in
+ * New York would then be off by hours.
  */
 function occurrences(
   group: EventGroup,
@@ -129,41 +147,28 @@ function occurrences(
 ): EventV1[] {
   const master = group.master;
   const startProperty = master?.getFirstProperty('dtstart');
-  if (!master || !startProperty) return [];
+  const startValue = startProperty?.getFirstValue();
+  if (!master || !startProperty || !(startValue instanceof ICAL.Time)) return [];
   const zone = zoneOf(startProperty, context);
-  const overridden = new Set(
-    group.exceptions.map((component) => recurrenceKey(component, context)),
-  );
   const { recurrence: _recurrence, ...fields } = series;
-  const length = lengthOf(series, context);
-  const lengthMs = 'ms' in length ? length.ms : length.days * DAY_MS;
+  const length = lengthOf(master, series, context);
+  const lengthMs = length.days * DAY_MS + length.ms;
+
+  // Instances already produced, overridden or excluded, by key.
+  const skipped = new Set(group.exceptions.map((component) => recurrenceKey(component, context)));
+  for (const property of master.getAllProperties('exdate')) {
+    const exdateZone = zoneOf(property, context);
+    for (const value of property.getValues()) {
+      if (value instanceof ICAL.Time) skipped.add(instanceKey(value, exdateZone, context));
+    }
+  }
 
   const events: EventV1[] = [];
-  const iterator = new ICAL.Event(master).iterator();
-  for (let count = 0; ; count++) {
-    const time = iterator.next();
-    if (!time) return events;
-    if (count === MAX_INSTANCES) {
-      warnings.push({
-        type: 'other',
-        message: `Stopped expanding series "${group.uid}" after ${MAX_INSTANCES} instances.`,
-      });
-      return events;
-    }
-    const wallClock = Date.UTC(
-      time.year,
-      time.month - 1,
-      time.day,
-      time.hour,
-      time.minute,
-      time.second,
-    );
-    if (wallClock - ZONE_SLACK_MS >= max) return events;
-    if (wallClock + ZONE_SLACK_MS + lengthMs <= min) continue;
-
-    const key = instanceKey(time, zone, context);
-    if (overridden.has(key)) continue;
-    const start = eventTimeOf(time, zone, context);
+  const add = (time: ICAL.Time, timeZone: Zone, endTime?: ICAL.Time) => {
+    const key = instanceKey(time, timeZone, context);
+    if (skipped.has(key)) return;
+    skipped.add(key);
+    const start = instanceTime(time, timeZone, series.start, context);
     events.push({
       ...fields,
       id: `${group.uid}_${key}`,
@@ -171,9 +176,76 @@ function occurrences(
       seriesId: group.uid,
       originalStart: start,
       start,
-      end: shift(start, length, context),
+      end: endTime
+        ? instanceTime(endTime, timeZone, series.start, context)
+        : shift(start, length, context),
     });
+  };
+
+  // DTSTART is always the first instance, whether or not the rule matches it.
+  add(startValue, zone);
+  for (const property of master.getAllProperties('rdate')) {
+    const rdateZone = zoneOf(property, context);
+    for (const value of property.getValues()) {
+      if (value instanceof ICAL.Time) add(value, rdateZone);
+      else if (value instanceof ICAL.Period) add(value.start, rdateZone, value.getEnd());
+    }
   }
+
+  for (const property of master.getAllProperties('rrule')) {
+    const value = property.getFirstValue();
+    if (!(value instanceof ICAL.Recur)) continue;
+    // Each instance can take a year of steps to find, too slow to do for every listing.
+    if (value.freq === 'SECONDLY' || value.freq === 'MINUTELY') {
+      warnings.push({
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: `Series "${group.uid}" repeats every ${value.freq === 'SECONDLY' ? 'second' : 'minute'}: only its first instance is listed.`,
+      });
+      continue;
+    }
+    const rule = value.clone();
+    // Rules step through wall-clock times, so a UTC UNTIL is compared in the series' zone.
+    if (rule.until && !rule.until.isDate && rule.until.zone === ICAL.Timezone.utcTimezone) {
+      rule.until = wallClockOf(rule.until.toUnixTime() * 1000, zone, context);
+    }
+    const iterator = rule.iterator(startValue);
+    for (let count = 0; ; count++) {
+      const time = iterator.next();
+      if (!time) break;
+      if (count === MAX_INSTANCES) {
+        warnings.push({
+          type: 'other',
+          message: `Stopped expanding series "${group.uid}" after ${MAX_INSTANCES} instances.`,
+        });
+        break;
+      }
+      const wallClock = Date.UTC(
+        time.year,
+        time.month - 1,
+        time.day,
+        time.hour,
+        time.minute,
+        time.second,
+      );
+      if (wallClock - ZONE_SLACK_MS >= max) break;
+      if (wallClock + ZONE_SLACK_MS + lengthMs <= min) continue;
+      add(time, zone);
+    }
+  }
+  return events;
+}
+
+/** An instance's start or end, shown in the series' zone. */
+function instanceTime(
+  time: ICAL.Time,
+  zone: Zone,
+  seriesStart: EventTimeV1,
+  context: ReadContext,
+): EventTimeV1 {
+  if (time.isDate || isAllDay(seriesStart)) return eventTimeOf(time, zone, context);
+  const timeZone = seriesStart.timeZone;
+  return { dateTime: formatZonedDateTime(instantOf(time, zone, context), timeZone), timeZone };
 }
 
 function masterEvent(uid: string, vevent: ICAL.Component, context: ReadContext): EventV1 {
@@ -223,21 +295,17 @@ function timesOf(vevent: ICAL.Component, context: ReadContext): Pick<EventV1, 's
   const startProperty = vevent.getFirstProperty('dtstart');
   const startValue = startProperty?.getFirstValue();
   if (!startProperty || !(startValue instanceof ICAL.Time)) {
-    throw new Error('Grouped events always have a DTSTART.');
+    throw new Error('Events read for their times always have a DTSTART.');
   }
-  const startZone = zoneOf(startProperty, context);
-  const start = eventTimeOf(startValue, startZone, context);
+  const start = eventTimeOf(startValue, zoneOf(startProperty, context), context);
 
   let end: EventTimeV1 | undefined;
-  const endProperty = vevent.getFirstProperty('dtend');
-  const endValue = endProperty?.getFirstValue();
+  const endProperty = endPropertyOf(vevent, startValue);
   const duration = vevent.getFirstPropertyValue('duration');
-  if (endProperty && endValue instanceof ICAL.Time && endValue.isDate === startValue.isDate) {
-    end = eventTimeOf(endValue, zoneOf(endProperty, context), context);
+  if (endProperty) {
+    end = eventTimeOf(endProperty.value, zoneOf(endProperty.property, context), context);
   } else if (duration instanceof ICAL.Duration) {
-    const endTime = startValue.clone();
-    endTime.addDuration(duration);
-    end = eventTimeOf(endTime, startZone, context);
+    end = shift(start, durationLength(duration), context);
   }
   if (!end || instant(end, context) < instant(start, context)) {
     end = isAllDay(start) ? { date: addDaysToDate(start.date, 1) } : start;
@@ -245,22 +313,62 @@ function timesOf(vevent: ICAL.Component, context: ReadContext): Pick<EventV1, 's
   return { start, end };
 }
 
-type Length = { days: number } | { ms: number };
-
-function lengthOf(event: EventV1, context: ReadContext): Length {
-  if (isAllDay(event.start) && isAllDay(event.end)) {
-    return {
-      days: Math.round((Date.parse(event.end.date) - Date.parse(event.start.date)) / 86_400_000),
-    };
-  }
-  return { ms: instant(event.end, context) - instant(event.start, context) };
+function endPropertyOf(vevent: ICAL.Component, startValue: ICAL.Time) {
+  const property = vevent.getFirstProperty('dtend');
+  const value = property?.getFirstValue();
+  return property && value instanceof ICAL.Time && value.isDate === startValue.isDate
+    ? { property, value }
+    : undefined;
 }
 
-// RFC 5545 gives every instance the exact length of the series' first one.
+/** Calendar days, then elapsed time: a day is 23 or 25 hours long when the clocks change. */
+type Length = { days: number; ms: number };
+
+/**
+ * How long each instance of a series lasts. RFC 5545 gives every instance the exact length of
+ * the first one, except that the days of a `DURATION` are calendar days.
+ */
+function lengthOf(vevent: ICAL.Component, event: EventV1, context: ReadContext): Length {
+  const startValue = vevent.getFirstPropertyValue('dtstart');
+  const duration = vevent.getFirstPropertyValue('duration');
+  if (
+    startValue instanceof ICAL.Time &&
+    !endPropertyOf(vevent, startValue) &&
+    duration instanceof ICAL.Duration
+  ) {
+    return durationLength(duration);
+  }
+  if (isAllDay(event.start) && isAllDay(event.end)) {
+    return {
+      days: Math.round((Date.parse(event.end.date) - Date.parse(event.start.date)) / DAY_MS),
+      ms: 0,
+    };
+  }
+  return { days: 0, ms: instant(event.end, context) - instant(event.start, context) };
+}
+
+function durationLength(duration: ICAL.Duration): Length {
+  const sign = duration.isNegative ? -1 : 1;
+  return {
+    days: sign * (duration.weeks * 7 + duration.days),
+    ms: sign * (duration.hours * 3600 + duration.minutes * 60 + duration.seconds) * 1000,
+  };
+}
+
 function shift(start: EventTimeV1, length: Length, context: ReadContext): EventTimeV1 {
-  if (isAllDay(start))
-    return { date: addDaysToDate(start.date, 'days' in length ? length.days : 1) };
-  const end = instant(start, context) + ('ms' in length ? length.ms : 0);
+  if (isAllDay(start)) return { date: addDaysToDate(start.date, length.days) };
+  let end = instant(start, context);
+  if (length.days !== 0) {
+    const local = instantToLocal(end, start.timeZone);
+    const [year, month, day] = addDaysToDate(formatLocalDate(local), length.days)
+      .split('-')
+      .map(Number);
+    end = localToInstant(
+      { ...local, year: year ?? 0, month: month ?? 0, day: day ?? 0 },
+      start.timeZone,
+    );
+  }
+  end += length.ms;
   return { dateTime: formatZonedDateTime(end, start.timeZone), timeZone: start.timeZone };
 }
 

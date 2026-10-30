@@ -168,23 +168,31 @@ function workingHoursOf(hours: WorkingHours) {
 
   const offsetAt = (instant: number) => getTimeZoneOffset(instant, timeZone);
 
+  /** The first instant in `[from, to)` whose offset is not `offset`, or `to`. */
+  const nextChange = (from: number, to: number, offset: number) => {
+    // Offsets can change and change back within a long range, so look one day at a time;
+    // zones change offset at most once a day.
+    for (let low = from; low < to; low += DAY_MS) {
+      let high = Math.min(low + DAY_MS, to) - 1;
+      if (offsetAt(high) === offset) continue;
+      // Binary search for the first instant with another offset.
+      let same = low;
+      while (high - same > 1) {
+        const middle = Math.floor((same + high) / 2);
+        if (offsetAt(middle) === offset) same = middle;
+        else high = middle;
+      }
+      return high;
+    }
+    return to;
+  };
+
   /** Splits `[from, to)` into stretches with one UTC offset each. */
   const stretches = (from: number, to: number) => {
     const result: { start: number; end: number; offset: number }[] = [];
     for (let start = from; start < to; ) {
       const offset = offsetAt(start);
-      let end = to;
-      if (offsetAt(to - 1) !== offset) {
-        // Binary search for the first instant with another offset.
-        let low = start;
-        let high = to - 1;
-        while (high - low > 1) {
-          const middle = Math.floor((low + high) / 2);
-          if (offsetAt(middle) === offset) low = middle;
-          else high = middle;
-        }
-        end = high;
-      }
+      const end = nextChange(start, to, offset);
       result.push({ start, end, offset });
       start = end;
     }
@@ -213,10 +221,11 @@ function workingHoursOf(hours: WorkingHours) {
       const lastDay = localDay(stretch.end - 1, stretch.offset);
       for (let day = localDay(stretch.start, stretch.offset); day <= lastDay; day++) {
         if (!days.has((((day + 4) % 7) + 7) % 7)) continue;
-        // Candidates on the local grid from midnight, inside working hours.
+        // Candidates on the local grid from midnight. Across a fold a slot can last longer
+        // than its wall-clock span, so `fits` decides where it ends.
         for (
           let local = Math.ceil(dayStart / interval) * interval;
-          local + duration <= dayEnd;
+          local < dayEnd;
           local += interval
         ) {
           const start = day * DAY_MS + local - stretch.offset;

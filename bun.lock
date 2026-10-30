@@ -18,6 +18,7 @@
       "dependencies": {
         "@calsdk/calcom": "workspace:*",
         "@calsdk/google": "workspace:*",
+        "@calsdk/ics": "workspace:*",
         "@calsdk/microsoft": "workspace:*",
         "@calsdk/mock": "workspace:*",
         "calsdk": "workspace:*",
@@ -56,6 +57,16 @@
       },
       "devDependencies": {
         "@calsdk/provider-tests": "workspace:*",
+      },
+    },
+    "packages/ics": {
+      "name": "@calsdk/ics",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
+        "ical.js": "^2.2.1",
+        "zod": "^4.6.7",
       },
     },
     "packages/microsoft": {
@@ -138,6 +149,8 @@
     "@calsdk/calcom": ["@calsdk/calcom@workspace:packages/calcom"],
 
     "@calsdk/google": ["@calsdk/google@workspace:packages/google"],
+
+    "@calsdk/ics": ["@calsdk/ics@workspace:packages/ics"],
 
     "@calsdk/microsoft": ["@calsdk/microsoft@workspace:packages/microsoft"],
 
@@ -352,6 +365,8 @@
     "hookable": ["hookable@6.1.2", "", {}, "sha512-+abwxtiEA52GCVIsQqut3S/uKTbUwYIp4Pe/vv+6py5XiXBCqMZHg6pA6Y5qhgLSEys0/cYuPbO0z1QFj5ZCmg=="],
 
     "human-id": ["human-id@4.2.2", "", { "bin": { "human-id": "dist/cli.js" } }, "sha512-Z+8unD6em/MJwyrkWQ2M3wygRGI1+MztbutiNwk1DCuEPXOZRWGjtcMPZYP1exY9iNZMhd7ZOSMQSo9WYtiQRw=="],
+
+    "ical.js": ["ical.js@2.2.1", "", {}, "sha512-yK/UlPbEs316igb/tjRgbFA8ZV75rCsBJp/hWOatpyaPNlgw0dGDmU+FoicOcwX4xXkeXOkYiOmCqNPFpNPkQg=="],
 
     "import-meta-resolve": ["import-meta-resolve@4.2.0", "", {}, "sha512-Iqv2fzaTQN28s/FwZAoFq0ZSs/7hMAHJVX+w8PZl3cY19Pxk6jFFalxQoIfW2826i/fDLXv8IiEZRIT0lDuWcg=="],
 

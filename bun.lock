@@ -13,6 +13,15 @@
         "vitest": "5.0.5",
       },
     },
+    "examples/quickstart": {
+      "name": "calsdk-quickstart",
+      "dependencies": {
+        "@calsdk/google": "workspace:*",
+        "@calsdk/microsoft": "workspace:*",
+        "@calsdk/mock": "workspace:*",
+        "calsdk": "workspace:*",
+      },
+    },
     "packages/calsdk": {
       "name": "calsdk",
       "version": "0.0.0",
@@ -294,6 +303,8 @@
     "cac": ["cac@7.1.0", "", {}, "sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA=="],
 
     "calsdk": ["calsdk@workspace:packages/calsdk"],
+
+    "calsdk-quickstart": ["calsdk-quickstart@workspace:examples/quickstart"],
 
     "chai": ["chai@6.3.0", "", {}, "sha512-XWAtwJ6OHO+tj0EKCs0Y2UamnyOxseZWltU4x2U2wh8g4AigdjwvtUjvLP2tqkA/avxHEtzxNaqGq/YGNwckKg=="],
 

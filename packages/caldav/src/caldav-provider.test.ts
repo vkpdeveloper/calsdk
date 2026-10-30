@@ -301,6 +301,35 @@ describe('caldav with a stubbed server', () => {
     expect(deletes(first.changes)).toEqual(['standup_20300305T100000Z']);
   });
 
+  it('fails a sync whose events cannot be read, and deletes only events the server says are gone', async () => {
+    const ok = `<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>${series(false)}</C:calendar-data></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>`;
+    let multiget = ok;
+    const provider = stub((_request, body) => {
+      if (body.includes('sync-collection')) {
+        return multistatus(
+          '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:sync-token>next</D:sync-token>',
+        );
+      }
+      if (body.includes('calendar-multiget')) return multistatus(multiget);
+    });
+    const { nextCursor: cursor } = await provider.doSyncEvents({ calendarId: '/cal/' });
+
+    for (const failed of [
+      '<D:response><D:href>/cal/standup.ics</D:href><D:status>HTTP/1.1 500 Internal Server Error</D:status></D:response>',
+      '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><C:calendar-data/></D:prop><D:status>HTTP/1.1 500 Internal Server Error</D:status></D:propstat></D:response>',
+      '',
+    ]) {
+      multiget = failed;
+      await expect(provider.doSyncEvents({ calendarId: '/cal/', cursor })).rejects.toSatisfy(
+        APICallError.isInstance,
+      );
+    }
+    multiget =
+      '<D:response><D:href>/cal/standup.ics</D:href><D:status>HTTP/1.1 404 Not Found</D:status></D:response>';
+    const { changes } = await provider.doSyncEvents({ calendarId: '/cal/', cursor });
+    expect(changes).toEqual([{ type: 'delete', eventId: 'standup' }]);
+  });
+
   it('deletes an instance with ifMatch on a server that checks it before the address', async () => {
     const writes: string[] = [];
     const provider = stub((request) => {

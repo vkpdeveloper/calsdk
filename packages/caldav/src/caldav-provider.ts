@@ -614,12 +614,24 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
             call,
             body: calendarMultiget(batch),
           });
+          // Ids read as events, and ids gone: deleted since the sync report, or not an event
+          // (a task in a mixed calendar). Anything else failed to read, and the sync with it.
           const found = new Set<string>();
+          const gone = new Set<string>();
           for (const item of parseMultistatus(response.text, response.url).resources) {
+            const id = resourceId(item.url);
+            if (id === undefined) continue;
+            if (item.status === 404 || item.status === 410) {
+              gone.add(id);
+              continue;
+            }
             const data = propText(item, CALDAV, 'calendar-data');
-            const resource =
-              data && toResource(calendarId, item.url, propText(item, DAV, 'getetag'), data);
-            if (!resource) continue;
+            if (!data) throw unreadable(item.url, item.status);
+            const resource = toResource(calendarId, item.url, propText(item, DAV, 'getetag'), data);
+            if (!resource) {
+              gone.add(id);
+              continue;
+            }
             found.add(resource.id);
             const events = storedEvents(resource.group, resource.calendar.context);
             const keys = new Set(events.flatMap((event) => instanceKeyOf(resource.id, event)));
@@ -642,10 +654,11 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
               changes.push({ type: 'upsert', event: { ...event, etag: resource.etag } });
             }
           }
-          // Deleted since the sync report, or not an event (a task in a mixed calendar).
           for (const url of batch) {
             const id = resourceId(url);
-            if (id !== undefined && !found.has(id) && previous) removeAll(id);
+            if (id === undefined || found.has(id)) continue;
+            if (!gone.has(id)) throw unreadable(url);
+            if (previous) removeAll(id);
           }
         }
 
@@ -764,6 +777,15 @@ const isAfter = (item: { start: number; event: EventV1 }, token: ListToken) =>
   item.start > token.start || (item.start === token.start && compare(item.event.id, token.id) > 0);
 
 /** A sync token the server no longer accepts (RFC 6578, section 3.2). */
+/** A resource a sync could not read. Its changes are not lost: the cursor does not advance. */
+const unreadable = (url: URL, statusCode?: number) =>
+  new APICallError({
+    message: `The CalDAV server did not return ${url.href}.`,
+    url: url.href,
+    statusCode,
+    isRetryable: true,
+  });
+
 function isInvalidSyncToken(error: unknown): boolean {
   return (
     APICallError.isInstance(error) &&

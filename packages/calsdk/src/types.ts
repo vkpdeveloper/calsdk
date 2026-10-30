@@ -12,6 +12,7 @@ import type {
   ProviderMetadataV1,
   ProviderOperationV1,
   ProviderOptionsV1,
+  ProviderTypesV1,
   SendUpdatesV1,
   SyncChangeV1,
   UpdateScopeV1,
@@ -36,29 +37,46 @@ export type Warning = WarningV1;
 export type ProviderOptions = ProviderOptionsV1;
 export type ProviderMetadata = ProviderMetadataV1;
 
-type TypesOf<P extends CalendarProvider> = NonNullable<P['~types']>;
+/**
+ * The types `P` declares, or `undefined` when it declares none: it has no `~types`, or
+ * keeps the default of `CalendarProviderV1`.
+ */
+type DeclaredTypes<P> = P extends { readonly '~types'?: infer Types }
+  ? unknown extends Types
+    ? undefined
+    : ProviderTypesV1 extends NonNullable<Types>
+      ? undefined
+      : NonNullable<Types>
+  : undefined;
+
+type OptionsOf<P, Operation extends ProviderOperationV1> =
+  DeclaredTypes<P> extends infer Types extends ProviderTypesV1
+    ? Operation extends keyof Types['options']
+      ? Types['options'][Operation]
+      : never
+    : JSONObject;
+
+type MetadataOf<P> =
+  DeclaredTypes<P> extends infer Types extends ProviderTypesV1
+    ? Types['eventMetadata']
+    : JSONObject;
 
 /**
  * `providerOptions` for `operation`, typed by the provider passed as `calendar`: only its
  * key is allowed, with the options it declares for the operation. Providers without
- * declared types accept any JSON object under any key.
+ * declared types accept any JSON object under their key, or under any key when their id
+ * is a plain `string`.
  */
 export type ProviderOptionsFor<
   C extends CalendarProvider,
   Operation extends ProviderOperationV1,
-> = {
-  [P in C as P['provider']]?: string extends P['provider']
-    ? JSONObject
-    : Operation extends keyof TypesOf<P>['options']
-      ? TypesOf<P>['options'][Operation]
-      : never;
-};
+> = { [P in C as P['provider']]?: OptionsOf<P, Operation> };
 
 /** An event read through `C`, with `providerMetadata` typed by the provider's declared types. */
 export type EventOf<C extends CalendarProvider> = string extends C['provider']
   ? CalendarEvent
   : Omit<CalendarEvent, 'providerMetadata'> & {
-      providerMetadata?: { [P in C as P['provider']]?: TypesOf<P>['eventMetadata'] };
+      providerMetadata?: { [P in C as P['provider']]?: MetadataOf<P> };
     };
 
 /** A sync change read through `C`. */

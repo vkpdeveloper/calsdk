@@ -1,6 +1,7 @@
 export type {
   MicrosoftEventMetadata,
   MicrosoftEventOptions,
+  MicrosoftProviderTypes,
   MicrosoftSyncOptions,
 } from './microsoft-options';
 export {

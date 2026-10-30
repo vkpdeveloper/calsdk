@@ -50,7 +50,11 @@ export type MockCalendarSettings = {
   defaultPageSize?: number;
 };
 
-export type MockCalendarProvider = CalendarProviderV1 &
+// The mock reads no provider options and sets no metadata.
+export type MockCalendarProvider = CalendarProviderV1<
+  'mock',
+  { options: Record<never, never>; eventMetadata: never }
+> &
   Required<Pick<CalendarProviderV1, 'doSyncEvents'>> & {
     /** Current calendars. Copies: mutating them does not change the mock. */
     readonly calendars: CalendarV1[];

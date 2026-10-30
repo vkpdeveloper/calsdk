@@ -1,9 +1,18 @@
 import { NotFoundError } from '@calsdk/provider';
-import type { CallSettings, ResultMetadata, SendUpdates, UpdateScope } from './types';
+import type {
+  CalendarProvider,
+  CallSettings,
+  ResultMetadata,
+  SendUpdates,
+  UpdateScope,
+} from './types';
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId } from './util/validate';
 
-export type DeleteEventOptions = CallSettings & {
+export type DeleteEventOptions<C extends CalendarProvider = CalendarProvider> = CallSettings<
+  C,
+  'deleteEvent'
+> & {
   /** Defaults to `'primary'`, the user's default calendar. */
   calendarId?: string;
   eventId: string;
@@ -24,6 +33,9 @@ export type DeleteEventResult = ResultMetadata;
  * @example
  * await deleteEvent({ calendar, eventId });
  */
+export async function deleteEvent<C extends CalendarProvider>(
+  options: DeleteEventOptions<C>,
+): Promise<DeleteEventResult>;
 export async function deleteEvent(options: DeleteEventOptions): Promise<DeleteEventResult> {
   const calendarId = requireId(options.calendarId ?? 'primary', 'calendarId');
   const eventId = requireId(options.eventId, 'eventId');

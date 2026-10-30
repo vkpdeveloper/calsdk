@@ -41,6 +41,18 @@ const { slots } = await findFreeTime({
 
 Every function takes `calendar`, plus optional `maxRetries` (default 2), `abortSignal`, `headers` and `providerOptions`. `calendarId` defaults to `'primary'`.
 
+`providerOptions` and `providerMetadata` are typed by the provider passed as `calendar`:
+
+```ts
+const calendar = google({ accessToken });
+
+// Type error: Google has no `guestsCanModfy` option.
+await createEvent({ calendar, event, providerOptions: { google: { guestsCanModfy: true } } });
+
+const { event: created } = await createEvent({ calendar, event });
+created.providerMetadata?.google?.iCalUID; // string | undefined
+```
+
 ## Time
 
 Timed values are `{ dateTime, timeZone }` with an IANA zone. A `dateTime` without an offset is read as wall-clock time in `timeZone`. All-day values are `{ date: 'YYYY-MM-DD' }`, and all-day end dates are exclusive.

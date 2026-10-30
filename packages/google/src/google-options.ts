@@ -26,6 +26,16 @@ export const googleListEventsOptionsSchema = z.object({
 });
 export type GoogleListEventsOptions = z.infer<typeof googleListEventsOptionsSchema>;
 
+/** The option and metadata types of the Google provider, for type checking in `calsdk`. */
+export type GoogleProviderTypes = {
+  options: {
+    listEvents: GoogleListEventsOptions;
+    createEvent: GoogleEventOptions;
+    updateEvent: GoogleEventOptions;
+  };
+  eventMetadata: GoogleEventMetadata;
+};
+
 /** `providerMetadata.google` on events. */
 export type GoogleEventMetadata = {
   iCalUID?: string;

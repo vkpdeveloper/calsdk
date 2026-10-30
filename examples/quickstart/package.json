@@ -6,6 +6,7 @@
     "start": "bun --conditions=@calsdk/source src/index.ts"
   },
   "dependencies": {
+    "@calsdk/calcom": "workspace:*",
     "@calsdk/google": "workspace:*",
     "@calsdk/microsoft": "workspace:*",
     "@calsdk/mock": "workspace:*",

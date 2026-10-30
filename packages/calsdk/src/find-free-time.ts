@@ -173,6 +173,7 @@ function workingHoursOf(hours: WorkingHours) {
     // Offsets can change and change back within a long range, so look one day at a time;
     // zones change offset at most once a day.
     for (let low = from; low < to; low += DAY_MS) {
+      if (offsetAt(low) !== offset) return low;
       let high = Math.min(low + DAY_MS, to) - 1;
       if (offsetAt(high) === offset) continue;
       // Binary search for the first instant with another offset.
@@ -217,6 +218,9 @@ function workingHoursOf(hours: WorkingHours) {
   };
 
   return function* (bounds: Bounds, duration: number, interval: number) {
+    // A slot inside working hours lasts at most their span plus a fold, which is under a
+    // day. Longer durations never fit, and checking each candidate would scan all of it.
+    if (duration > dayEnd - dayStart + DAY_MS) return;
     for (const stretch of stretches(bounds.start, bounds.end)) {
       const lastDay = localDay(stretch.end - 1, stretch.offset);
       for (let day = localDay(stretch.start, stretch.offset); day <= lastDay; day++) {

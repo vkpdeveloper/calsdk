@@ -250,6 +250,50 @@ describe('findFreeTime', () => {
     ]);
   });
 
+  it('finds an offset change that falls exactly on a day of the scan', async () => {
+    // New York skips 02:00-03:00 at 07:00Z, exactly one day after timeMin.
+    const { slots } = await findFreeTime({
+      ...newYork('03:00', '04:00'),
+      timeMin: '2026-03-07T07:00:00Z',
+      timeMax: '2026-03-09T00:00:00Z',
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-03-08T07:00:00.000Z', // 03:00 EDT
+      '2026-03-08T07:30:00.000Z',
+    ]);
+  });
+
+  it('finds a half-hour fold that falls exactly on a day of the scan', async () => {
+    // Lord Howe Island moves from +11:00 back to +10:30 at 15:00Z on 2026-04-04.
+    const { slots } = await findFreeTime({
+      calendars: [{ calendar: mockCalendar() }],
+      timeMin: '2026-04-03T15:00:00Z',
+      timeMax: '2026-04-05T15:00:00Z',
+      duration: 60,
+      slotInterval: 60,
+      workingHours: { start: '00:00', end: '03:00', timeZone: 'Australia/Lord_Howe', days: [0] },
+    });
+    expect(slots.map((slot) => slot.start)).toEqual([
+      '2026-04-04T13:00:00.000Z', // 00:00 +11:00
+      '2026-04-04T14:00:00.000Z', // 01:00 +11:00, ends 01:30 +10:30
+      '2026-04-04T15:30:00.000Z', // 02:00 +10:30
+    ]);
+  });
+
+  it('rejects durations longer than any working day quickly', async () => {
+    const started = performance.now();
+    const { slots } = await findFreeTime({
+      calendars: [{ calendar: mockCalendar() }],
+      timeMin: '2026-01-01T00:00:00Z',
+      timeMax: '2030-01-01T00:00:00Z',
+      duration: 1_051_200,
+      slotInterval: 60,
+      workingHours: { start: '09:00', end: '10:00', timeZone: 'UTC' },
+    });
+    expect(slots).toEqual([]);
+    expect(performance.now() - started).toBeLessThan(500);
+  });
+
   it('follows offset changes that cancel out over a long range', async () => {
     // New York has the same offset on 2026-01-01 and 2027-01-01, with summer time between.
     const { slots } = await findFreeTime({

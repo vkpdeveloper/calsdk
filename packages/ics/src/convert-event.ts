@@ -47,7 +47,7 @@ const ZONE_SLACK_MS = DAY_MS;
 
 /** The single event or series of a group, when the calendar has it. */
 export function masterOf(group: EventGroup, context: ReadContext): EventV1 | undefined {
-  return group.master ? masterEvent(group.uid, group.master, context) : undefined;
+  return group.master ? masterEvent(group.id, group.master, context) : undefined;
 }
 
 /** The single event or series of a group, followed by its exceptions. Cancelled exceptions are deleted instances. */
@@ -55,7 +55,7 @@ export function storedEvents(group: EventGroup, context: ReadContext): EventV1[]
   const master = masterOf(group, context);
   const events = master ? [master] : [];
   for (const exception of group.exceptions) {
-    const event = exceptionEvent(group.uid, exception, context);
+    const event = exceptionEvent(group.id, exception, context);
     if (event) events.push(event);
   }
   return events;
@@ -86,7 +86,7 @@ export function instancesBetween(
     instant(event.end, context) > min && instant(event.start, context) < max;
   const events: EventV1[] = [];
   if (group.master) {
-    const master = masterEvent(group.uid, group.master, context);
+    const master = masterEvent(group.id, group.master, context);
     if (master.kind === 'single') {
       if (overlaps(master)) events.push(master);
     } else {
@@ -96,7 +96,7 @@ export function instancesBetween(
     }
   }
   for (const exception of group.exceptions) {
-    const event = exceptionEvent(group.uid, exception, context);
+    const event = exceptionEvent(group.id, exception, context);
     if (event && overlaps(event)) events.push(event);
   }
   return events;
@@ -113,7 +113,7 @@ export function findEvent(
   warnings: WarningV1[],
 ): EventV1 | undefined {
   const group = groups.get(eventId);
-  if (group?.master) return masterEvent(group.uid, group.master, context);
+  if (group?.master) return masterEvent(group.id, group.master, context);
 
   const separator = eventId.lastIndexOf('_');
   if (separator <= 0) return undefined;
@@ -123,10 +123,10 @@ export function findEvent(
   const exception = series.exceptions.find(
     (component) => recurrenceKey(component, context) === key,
   );
-  if (exception) return exceptionEvent(series.uid, exception, context);
+  if (exception) return exceptionEvent(series.id, exception, context);
   if (!series.master) return undefined;
 
-  const master = masterEvent(series.uid, series.master, context);
+  const master = masterEvent(series.id, series.master, context);
   if (master.kind !== 'series') return undefined;
   const target = keyInstant(key);
   if (target === undefined) return undefined;
@@ -177,9 +177,9 @@ function occurrences(
     const start = instanceTime(time, timeZone, series.start, context);
     events.push({
       ...fields,
-      id: `${group.uid}_${key}`,
+      id: `${group.id}_${key}`,
       kind: 'occurrence',
-      seriesId: group.uid,
+      seriesId: group.id,
       originalStart: start,
       start,
       end: endOf(time, timeZone, start, end ?? length, context),
@@ -210,7 +210,7 @@ function occurrences(
       warnings.push({
         type: 'unsupported',
         feature: 'recurrence',
-        details: `Series "${group.uid}" repeats every ${value.freq === 'SECONDLY' ? 'second' : 'minute'}: only its first instance is listed.`,
+        details: `Series "${group.id}" repeats every ${value.freq === 'SECONDLY' ? 'second' : 'minute'}: only its first instance is listed.`,
       });
       continue;
     }
@@ -218,7 +218,7 @@ function occurrences(
       warnings.push({
         type: 'unsupported',
         feature: 'recurrence',
-        details: `Series "${group.uid}" has an INTERVAL of ${value.interval}: only its first instance is listed.`,
+        details: `Series "${group.id}" has an INTERVAL of ${value.interval}: only its first instance is listed.`,
       });
       continue;
     }
@@ -233,7 +233,7 @@ function occurrences(
     const outOfTime = () =>
       warnings.push({
         type: 'other',
-        message: `Stopped expanding series "${group.uid}" after ${MAX_EXPANSION_MS} ms.`,
+        message: `Stopped expanding series "${group.id}" after ${MAX_EXPANSION_MS} ms.`,
       });
     // While starting a monthly rule, ical.js searches for each BYDAY day from the first month
     // again, so one search passing the window says nothing of the others: only time bounds them.
@@ -251,7 +251,7 @@ function occurrences(
       warnings.push({
         type: 'unsupported',
         feature: 'recurrence',
-        details: `Series "${group.uid}" has a rule calsdk cannot expand (${error instanceof Error ? error.message : String(error)}): only its first instance is listed.`,
+        details: `Series "${group.id}" has a rule calsdk cannot expand (${error instanceof Error ? error.message : String(error)}): only its first instance is listed.`,
       });
       continue;
     }
@@ -265,7 +265,7 @@ function occurrences(
       if (count === MAX_INSTANCES) {
         warnings.push({
           type: 'other',
-          message: `Stopped expanding series "${group.uid}" after ${MAX_INSTANCES} instances.`,
+          message: `Stopped expanding series "${group.id}" after ${MAX_INSTANCES} instances.`,
         });
         break;
       }
@@ -402,7 +402,8 @@ function exceptionEvent(
   };
 }
 
-function recurrenceKey(vevent: ICAL.Component, context: ReadContext): string | undefined {
+/** The id suffix of an exception, from its `RECURRENCE-ID`. */
+export function recurrenceKey(vevent: ICAL.Component, context: ReadContext): string | undefined {
   const property = vevent.getFirstProperty('recurrence-id');
   const value = property?.getFirstValue();
   if (!property || !(value instanceof ICAL.Time)) return undefined;

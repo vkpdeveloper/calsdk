@@ -5,7 +5,7 @@ import type { ReadContext } from './ical-time';
 
 /** A series or single event with the instances that override it, all sharing one `UID`. */
 export type EventGroup = {
-  uid: string;
+  id: string;
   /** Missing when only overridden instances were shared, as in some invitations. */
   master?: ICAL.Component;
   /** `VEVENT`s with a `RECURRENCE-ID`. */
@@ -19,6 +19,8 @@ export type ParsedICalendar = {
   description?: string;
   /** `X-WR-TIMEZONE`, when the runtime knows it. */
   timeZone?: string;
+  /** The `VCALENDAR`. The groups' components belong to it, so changes to them show in its text. */
+  component: ICAL.Component;
   context: ReadContext;
   /** By `UID`, in document order. */
   groups: Map<string, EventGroup>;
@@ -70,7 +72,7 @@ export function parseICalendar(
       if (!uid || !(vevent.hasProperty('dtstart') || isCancellation(vevent))) continue;
       let group = groups.get(uid);
       if (!group) {
-        group = { uid, exceptions: [] };
+        group = { id: uid, exceptions: [] };
         groups.set(uid, group);
       }
       if (vevent.hasProperty('recurrence-id')) group.exceptions.push(vevent);
@@ -82,6 +84,7 @@ export function parseICalendar(
     name: textOf(calendar, 'x-wr-calname'),
     description: textOf(calendar, 'x-wr-caldesc'),
     timeZone,
+    component: calendar,
     context: { calendarId, timeZone: timeZone ?? defaultTimeZone ?? 'UTC', timezones },
     groups,
   };

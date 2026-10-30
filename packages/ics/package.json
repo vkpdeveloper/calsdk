@@ -11,6 +11,11 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./icalendar": {
+      "@calsdk/source": "./src/icalendar.ts",
+      "types": "./dist/icalendar.d.ts",
+      "default": "./dist/icalendar.js"
+    },
     "./package.json": "./package.json"
   },
   "types": "./dist/index.d.ts",

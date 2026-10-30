@@ -182,7 +182,7 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
 
   /** Adds a series master's deleted occurrences, which become EXDATE lines. */
   async function withCancelled(call: Call, calendarId: string, raw: GraphEvent) {
-    if (raw.type !== 'seriesMaster') return raw;
+    if (raw.type !== 'seriesMaster' || raw['@removed'] !== undefined) return raw;
     try {
       return { ...raw, cancelledOccurrences: await readCancelled(call, calendarId, raw.id) };
     } catch (error) {
@@ -480,17 +480,16 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
       // Unmodified occurrences arrive as stubs without details. Like other providers'
       // syncs, changes cover singles, series masters and exceptions only. Deleting one
       // occurrence changes its master, whose EXDATE lines then show the deletion.
-      const removed = page.value.filter((raw) => raw['@removed'] !== undefined);
-      const kept = page.value.filter(
-        (raw) => raw['@removed'] === undefined && raw.type !== 'occurrence',
+      // An event can appear more than once in a page, so changes keep the page's order.
+      const relevant = page.value.filter(
+        (raw) => raw['@removed'] !== undefined || raw.type !== 'occurrence',
       );
-      const changes: SyncChangeV1[] = [
-        ...removed.map((raw) => ({ type: 'delete' as const, eventId: raw.id })),
-        ...(await allWithCancelled(call, calendarId, kept)).map((raw) => ({
-          type: 'upsert' as const,
-          event: fromGraphEvent(raw, { calendarId }),
-        })),
-      ];
+      const changes = (await allWithCancelled(call, calendarId, relevant)).map(
+        (raw): SyncChangeV1 =>
+          raw['@removed'] !== undefined
+            ? { type: 'delete', eventId: raw.id }
+            : { type: 'upsert', event: fromGraphEvent(raw, { calendarId }) },
+      );
       return {
         changes,
         nextPageToken: page['@odata.nextLink'],

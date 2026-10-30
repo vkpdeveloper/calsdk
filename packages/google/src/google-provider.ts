@@ -446,6 +446,8 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
     provider: PROVIDER,
     capabilities: {
       events: {
+        details: true,
+        allDay: true,
         recurrence: true,
         recurrenceScopeThisAndFollowing: true,
         serverSideExpansion: true,

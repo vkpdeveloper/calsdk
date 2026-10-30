@@ -72,6 +72,8 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
   const recording = options.recording && createRecordingFetch(options.recording);
   const provider = options.createProvider({ fetch: recording?.fetch ?? globalThis.fetch });
   const { capabilities } = provider;
+  // Without kept details (booking tools), titles are not checked and updates move events.
+  const details = isSupported(capabilities.events.details);
   // Live tests make several API calls in a row.
   const timeout = 30_000;
 
@@ -159,16 +161,48 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
       async () => {
         const input = { title: 'calsdk conformance', start: at(0, 9), end: at(0, 10) };
         const event = await create(input);
-        expect(event).toMatchObject({ kind: 'single', title: input.title, showAs: 'busy' });
+        expect(event).toMatchObject({ kind: 'single', showAs: 'busy' });
+        if (details) expect(event.title).toBe(input.title);
         expectSameTime(event.start, input.start);
         expectSameTime(event.end, input.end);
 
         const fetched = await provider.doGetEvent({ calendarId, eventId: event.id });
         expectValidEvent(fetched.event);
-        expect(fetched.event).toMatchObject({ id: event.id, title: input.title });
+        expect(fetched.event.id).toBe(event.id);
+        if (details) expect(fetched.event.title).toBe(input.title);
 
         const listed = await list(dayRange(0));
         expect(listed.map((item) => item.id)).toContain(event.id);
+
+        if (!details) {
+          // An update can still move the event, possibly replacing it under a new id.
+          const moved = (
+            await provider.doUpdateEvent({
+              calendarId,
+              eventId: event.id,
+              patch: { start: at(0, 11), end: at(0, 12) },
+            })
+          ).event;
+          if (moved.id !== event.id) created.push(moved.id);
+          expectValidEvent(moved);
+          expectSameTime(moved.start, at(0, 11));
+          expectSameTime(moved.end, at(0, 12));
+          const stored = (await provider.doGetEvent({ calendarId, eventId: moved.id })).event;
+          expectSameTime(stored.start, at(0, 11));
+
+          await provider.doDeleteEvent({ calendarId, eventId: moved.id });
+          await expect(provider.doGetEvent({ calendarId, eventId: moved.id })).rejects.toSatisfy(
+            NotFoundError.isInstance,
+          );
+          await expect(
+            provider.doUpdateEvent({
+              calendarId,
+              eventId: moved.id,
+              patch: { start: at(0, 13), end: at(0, 14) },
+            }),
+          ).rejects.toSatisfy(NotFoundError.isInstance);
+          return;
+        }
 
         const updated = await provider.doUpdateEvent({
           calendarId,
@@ -211,7 +245,7 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
       timeout,
     );
 
-    it(
+    it.runIf(isSupported(capabilities.events.allDay))(
       'round-trips an all-day event with an exclusive end date',
       async () => {
         const start = addDaysToDate(firstDay, 1);
@@ -467,40 +501,58 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
             change.type === 'upsert' && change.event.id === eventId ? [change.event] : [],
           );
 
+        const ids = new Set<string>();
         const ours = (changes: SyncChangeV1[]) =>
           changes.filter((change) =>
-            [existing.id, event.id].includes(
-              change.type === 'upsert' ? change.event.id : change.eventId,
-            ),
+            ids.has(change.type === 'upsert' ? change.event.id : change.eventId),
           );
 
         const existing = await create({ title: 'calsdk existing', start: at(4, 7), end: at(4, 8) });
+        ids.add(existing.id);
         const initial = await sync();
         expect(upserted(initial.changes, existing.id)).toHaveLength(1);
 
         const event = await create({ title: 'calsdk sync', start: at(4, 9), end: at(4, 10) });
+        ids.add(event.id);
         const afterCreate = await sync(initial.cursor);
         // Incremental: only what changed since the cursor, not the event from before.
         expect(ours(afterCreate.changes)).toEqual([
           { type: 'upsert', event: expect.objectContaining({ id: event.id }) },
         ]);
 
-        await provider.doUpdateEvent({
-          calendarId,
-          eventId: event.id,
-          patch: { title: 'calsdk sync v2' },
-        });
+        const updated = (
+          await provider.doUpdateEvent({
+            calendarId,
+            eventId: event.id,
+            patch: details ? { title: 'calsdk sync v2' } : { start: at(4, 11), end: at(4, 12) },
+          })
+        ).event;
+        ids.add(updated.id);
+        if (updated.id !== event.id) created.push(updated.id);
         const afterUpdate = await sync(afterCreate.cursor);
-        expect(ours(afterUpdate.changes)).toEqual([
-          {
-            type: 'upsert',
-            event: expect.objectContaining({ id: event.id, title: 'calsdk sync v2' }),
-          },
-        ]);
+        if (updated.id === event.id) {
+          expect(ours(afterUpdate.changes)).toEqual([
+            {
+              type: 'upsert',
+              event: expect.objectContaining(
+                details ? { id: event.id, title: 'calsdk sync v2' } : { id: event.id },
+              ),
+            },
+          ]);
+        } else {
+          // A replaced event is the old one deleted and the new one created.
+          expect(ours(afterUpdate.changes)).toHaveLength(2);
+          expect(ours(afterUpdate.changes)).toEqual(
+            expect.arrayContaining([
+              { type: 'delete', eventId: event.id },
+              { type: 'upsert', event: expect.objectContaining({ id: updated.id }) },
+            ]),
+          );
+        }
 
-        await provider.doDeleteEvent({ calendarId, eventId: event.id });
+        await provider.doDeleteEvent({ calendarId, eventId: updated.id });
         const afterDelete = await sync(afterUpdate.cursor);
-        expect(ours(afterDelete.changes)).toEqual([{ type: 'delete', eventId: event.id }]);
+        expect(ours(afterDelete.changes)).toEqual([{ type: 'delete', eventId: updated.id }]);
         const quiet = await sync(afterDelete.cursor);
         expect(ours(quiet.changes)).toEqual([]);
         for (const change of [...afterCreate.changes, ...afterUpdate.changes]) {

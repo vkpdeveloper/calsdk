@@ -226,7 +226,192 @@ describe('google', () => {
     expect(trimmed?.headers.get('if-match')).toBe('"m1"');
   });
 
-  it('removes the new series when trimming the old one fails', async () => {
+  it('counts COUNT positions, not listed instances, when splitting', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20261104T150000Z$/,
+        respond: () => Response.json(instance(4)),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1$/,
+        respond: () =>
+          Response.json({
+            ...series,
+            recurrence: [
+              'RRULE:FREQ=DAILY;COUNT=5',
+              'EXDATE;TZID=America/New_York:20261103T100000',
+            ],
+          }),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1\/instances$/,
+        // November 3 is excluded, so not listed. November 2 was moved past the cut.
+        respond: () =>
+          Response.json({
+            items: [
+              instance(2, { start: instance(10).start, end: instance(10).end }),
+              instance(4),
+              instance(5),
+              instance(6),
+            ],
+          }),
+      },
+      {
+        method: 'POST',
+        path: /\/events$/,
+        respond: async (request) => Response.json({ ...(await request.json()), id: 'series2' }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => Response.json(series) },
+    ]);
+    await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'series1_20261104T150000Z',
+      patch: { title: 'x' },
+      scope: 'thisAndFollowing',
+    });
+    // November 2 and the excluded November 3 used two of the five positions.
+    const created = requests.find((request) => request.method === 'POST');
+    expect(created?.body).toMatchObject({ recurrence: ['RRULE:FREQ=DAILY;COUNT=3'] });
+  });
+
+  it('moves rule dates with a new start, and splits RDATEs between the halves', async () => {
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20261104T150000Z$/,
+        respond: () => Response.json(instance(4)),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1$/,
+        respond: () =>
+          Response.json({
+            ...series,
+            recurrence: [
+              'RRULE:FREQ=DAILY',
+              'EXDATE;TZID=America/New_York:20261105T100000',
+              'RDATE;TZID=America/New_York:20261101T150000,20261109T150000',
+            ],
+          }),
+      },
+      {
+        method: 'POST',
+        path: /\/events$/,
+        respond: () => Response.json({ ...series, id: 'series2' }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => Response.json(series) },
+    ]);
+    const zone = 'America/New_York';
+    await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'series1_20261104T150000Z',
+      patch: {
+        start: { dateTime: '2026-11-04T12:00:00-05:00', timeZone: zone },
+        end: { dateTime: '2026-11-04T12:15:00-05:00', timeZone: zone },
+      },
+      scope: 'thisAndFollowing',
+    });
+    const created = requests.find((request) => request.method === 'POST');
+    expect(created?.body).toMatchObject({
+      recurrence: [
+        'RRULE:FREQ=DAILY',
+        'EXDATE;TZID=America/New_York:20261105T120000',
+        'RDATE;TZID=America/New_York:20261109T170000',
+      ],
+    });
+    const trimmed = requests.find((request) => request.method === 'PATCH');
+    expect(trimmed?.body).toEqual({
+      recurrence: [
+        'RRULE:FREQ=DAILY;UNTIL=20261104T145959Z',
+        'RDATE;TZID=America/New_York:20261101T150000',
+      ],
+    });
+  });
+
+  it('moves a whole series on its wall clock, with its weekdays and exclusions', async () => {
+    // Weekly on Mondays at 10:00 in New York from February 23. The March 2 occurrence moves
+    // to Tuesday March 10 at 10:00, after summer time starts on March 8.
+    const zone = 'America/New_York';
+    const at = (dateTime: string) => ({ dateTime, timeZone: zone });
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20260302T150000Z$/,
+        respond: () =>
+          Response.json({
+            ...instance(2),
+            id: 'series1_20260302T150000Z',
+            originalStartTime: at('2026-03-02T10:00:00-05:00'),
+            start: at('2026-03-02T10:00:00-05:00'),
+            end: at('2026-03-02T10:15:00-05:00'),
+          }),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1$/,
+        respond: () =>
+          Response.json({
+            ...series,
+            iCalUID: 'series1@google.com',
+            start: at('2026-02-23T10:00:00-05:00'),
+            end: at('2026-02-23T10:15:00-05:00'),
+            recurrence: [
+              'RRULE:FREQ=WEEKLY;BYDAY=MO',
+              'EXDATE;TZID=America/New_York:20260316T100000',
+            ],
+          }),
+      },
+      {
+        method: 'GET',
+        path: /\/calendars\/primary\/events$/,
+        // Google drops these when the start moves: one deleted occurrence, one edited.
+        respond: () =>
+          Response.json({
+            items: [
+              { id: 'series1', iCalUID: 'series1@google.com' },
+              {
+                id: 'series1_20260309T140000Z',
+                recurringEventId: 'series1',
+                status: 'cancelled',
+                originalStartTime: at('2026-03-09T10:00:00-04:00'),
+              },
+              {
+                id: 'series1_20260323T140000Z',
+                recurringEventId: 'series1',
+                summary: 'Edited',
+                originalStartTime: at('2026-03-23T10:00:00-04:00'),
+              },
+            ],
+          }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => Response.json(series) },
+    ]);
+    const { warnings } = await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'series1_20260302T150000Z',
+      patch: { start: at('2026-03-10T10:00:00-04:00'), end: at('2026-03-10T10:15:00-04:00') },
+      scope: 'all',
+    });
+    const patch = requests.find((request) => request.method === 'PATCH');
+    expect(patch?.body).toMatchObject({
+      start: at('2026-03-03T10:00:00-05:00'),
+      end: at('2026-03-03T10:15:00-05:00'),
+      recurrence: [
+        'RRULE:FREQ=WEEKLY;BYDAY=TU',
+        'EXDATE;TZID=America/New_York:20260324T100000',
+        // The deleted March 9 occurrence, moved to March 17.
+        'EXDATE:20260317T140000Z',
+      ],
+    });
+    expect(warnings).toMatchObject([{ type: 'compatibility', feature: 'scope' }]);
+  });
+
+  it('removes the new series when trimming the old one fails, even after cancellation', async () => {
+    let controller = new AbortController();
+    let deleteResponse = 204;
     const { calendar, requests } = fakeGoogle([
       {
         method: 'GET',
@@ -241,24 +426,33 @@ describe('google', () => {
       {
         method: 'POST',
         path: /\/events$/,
-        respond: () => Response.json({ ...series, id: 'series2' }),
+        respond: () => {
+          // The caller gives up after the new series exists.
+          controller.abort(new Error('cancelled'));
+          return Response.json({ ...series, id: 'series2' });
+        },
       },
-      { method: 'PATCH', path: /\/events\/series1$/, respond: () => googleError(412) },
       {
         method: 'DELETE',
         path: /\/events\/series2$/,
-        respond: () => new Response(null, { status: 204 }),
+        respond: () =>
+          deleteResponse === 204 ? new Response(null, { status: 204 }) : googleError(500),
       },
     ]);
-    await expect(
+    const split = () =>
       calendar.doUpdateEvent({
         calendarId: 'primary',
         eventId: 'series1_20261104T150000Z',
         patch: { title: 'x' },
         scope: 'thisAndFollowing',
-      }),
-    ).rejects.toThrow();
+        abortSignal: controller.signal,
+      });
+    await expect(split()).rejects.toThrow('cancelled');
     expect(requests.at(-1)).toMatchObject({ method: 'DELETE' });
+
+    controller = new AbortController();
+    deleteResponse = 500;
+    await expect(split()).rejects.toThrow(/"series2" it created could not be removed/);
   });
 
   it('treats deleted events as not found', async () => {

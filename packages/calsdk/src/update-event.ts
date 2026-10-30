@@ -1,6 +1,7 @@
 import type {
-  CalendarEvent,
+  CalendarProvider,
   CallSettings,
+  EventOf,
   EventPatch,
   ResultMetadata,
   SendUpdates,
@@ -9,7 +10,10 @@ import type {
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId, validateEventPatch } from './util/validate';
 
-export type UpdateEventOptions = CallSettings & {
+export type UpdateEventOptions<C extends CalendarProvider = CalendarProvider> = CallSettings<
+  C,
+  'updateEvent'
+> & {
   /** Defaults to `'primary'`, the user's default calendar. */
   calendarId?: string;
   eventId: string;
@@ -24,7 +28,9 @@ export type UpdateEventOptions = CallSettings & {
   ifMatch?: string;
   sendUpdates?: SendUpdates;
 };
-export type UpdateEventResult = ResultMetadata & { event: CalendarEvent };
+export type UpdateEventResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
+  event: EventOf<C>;
+};
 
 /**
  * Applies a partial update to an event.
@@ -37,6 +43,9 @@ export type UpdateEventResult = ResultMetadata & { event: CalendarEvent };
  *   ifMatch: previous.etag,
  * });
  */
+export async function updateEvent<C extends CalendarProvider>(
+  options: UpdateEventOptions<C>,
+): Promise<UpdateEventResult<C>>;
 export async function updateEvent(options: UpdateEventOptions): Promise<UpdateEventResult> {
   const calendarId = requireId(options.calendarId ?? 'primary', 'calendarId');
   const eventId = requireId(options.eventId, 'eventId');

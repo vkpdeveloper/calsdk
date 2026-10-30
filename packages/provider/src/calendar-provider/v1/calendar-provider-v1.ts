@@ -1,3 +1,4 @@
+import type { JSONObject } from '../../json-value';
 import type { CalendarCapabilitiesV1 } from './capabilities';
 import type {
   CreateEventOptionsV1,
@@ -24,6 +25,29 @@ import type {
   WebhookResultV1,
 } from './webhooks';
 
+/** The operations a provider can read `providerOptions` for. */
+export type ProviderOperationV1 =
+  | 'listCalendars'
+  | 'getEvent'
+  | 'listEvents'
+  | 'createEvent'
+  | 'updateEvent'
+  | 'deleteEvent'
+  | 'freeBusy'
+  | 'syncEvents';
+
+/**
+ * The types of a provider's own `providerOptions` and `providerMetadata` entries. Only a
+ * type: providers never set it at runtime. `calsdk` reads it to check options and to type
+ * metadata against the provider passed as `calendar`.
+ */
+export type ProviderTypesV1 = {
+  /** What each operation reads from `providerOptions[provider]`. Operations left out read nothing. */
+  options: { [Operation in ProviderOperationV1]?: JSONObject };
+  /** `providerMetadata[provider]` on events, or `never` when the provider sets none. */
+  eventMetadata: JSONObject;
+};
+
 /**
  * The contract every calendar provider implements.
  *
@@ -34,12 +58,17 @@ import type {
  *
  * Every provider must resolve the calendar id `'primary'` to the user's default calendar.
  */
-export type CalendarProviderV1 = {
+export type CalendarProviderV1<
+  PROVIDER extends string = string,
+  TYPES extends ProviderTypesV1 = ProviderTypesV1,
+> = {
   /** Contract version. Core rejects providers with a version it does not know. */
   readonly specificationVersion: 'v1';
   /** Stable provider id, e.g. `'google'`. Also the key in `providerOptions` and `providerMetadata`. */
-  readonly provider: string;
+  readonly provider: PROVIDER;
   readonly capabilities: CalendarCapabilitiesV1;
+  /** Type-only: see `ProviderTypesV1`. Never set at runtime. */
+  readonly '~types'?: TYPES;
 
   doListCalendars(options: ListCalendarsOptionsV1): PromiseLike<ListCalendarsResultV1>;
   doGetEvent(options: GetEventOptionsV1): PromiseLike<EventResultV1>;

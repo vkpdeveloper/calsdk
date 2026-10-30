@@ -45,7 +45,11 @@ import {
   graphEventListSchema,
   graphEventSchema,
 } from './microsoft-api';
-import { microsoftEventOptionsSchema, microsoftSyncOptionsSchema } from './microsoft-options';
+import {
+  type MicrosoftProviderTypes,
+  microsoftEventOptionsSchema,
+  microsoftSyncOptionsSchema,
+} from './microsoft-options';
 
 export type MicrosoftCalendarSettings = {
   /**
@@ -61,7 +65,7 @@ export type MicrosoftCalendarSettings = {
   fetch?: FetchFunction;
 };
 
-export type MicrosoftCalendarProvider = CalendarProviderV1 &
+export type MicrosoftCalendarProvider = CalendarProviderV1<'microsoft', MicrosoftProviderTypes> &
   Required<Pick<CalendarProviderV1, 'doSyncEvents'>>;
 
 const PROVIDER = 'microsoft';

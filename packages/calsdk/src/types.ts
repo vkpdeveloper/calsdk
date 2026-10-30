@@ -8,8 +8,11 @@ import type {
   EventPatchV1,
   EventTimeV1,
   EventV1,
+  JSONObject,
   ProviderMetadataV1,
+  ProviderOperationV1,
   ProviderOptionsV1,
+  ProviderTypesV1,
   SendUpdatesV1,
   SyncChangeV1,
   UpdateScopeV1,
@@ -34,10 +37,67 @@ export type Warning = WarningV1;
 export type ProviderOptions = ProviderOptionsV1;
 export type ProviderMetadata = ProviderMetadataV1;
 
+/**
+ * Whether `A` and `B` are the same type. Assignability is not enough: the default
+ * `ProviderTypesV1` also satisfies declarations whose options are all optional.
+ */
+type IsExactly<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+
+/**
+ * The types `P` declares, or `undefined` when it declares none: it has no `~types`, or
+ * keeps the default of `CalendarProviderV1`.
+ */
+type DeclaredTypes<P> = P extends { readonly '~types'?: infer Types }
+  ? unknown extends Types
+    ? undefined
+    : IsExactly<NonNullable<Types>, ProviderTypesV1> extends true
+      ? undefined
+      : NonNullable<Types>
+  : undefined;
+
+type OptionsOf<P, Operation extends ProviderOperationV1> =
+  DeclaredTypes<P> extends infer Types extends ProviderTypesV1
+    ? Operation extends keyof Types['options']
+      ? Types['options'][Operation]
+      : never
+    : JSONObject;
+
+type MetadataOf<P> =
+  DeclaredTypes<P> extends infer Types extends ProviderTypesV1
+    ? Types['eventMetadata']
+    : JSONObject;
+
+/**
+ * `providerOptions` for `operation`, typed by the provider passed as `calendar`: only its
+ * key is allowed, with the options it declares for the operation. Providers without
+ * declared types accept any JSON object under their key, or under any key when their id
+ * is a plain `string`.
+ */
+export type ProviderOptionsFor<
+  C extends CalendarProvider,
+  Operation extends ProviderOperationV1,
+> = { [P in C as P['provider']]?: OptionsOf<P, Operation> };
+
+/** An event read through `C`, with `providerMetadata` typed by the provider's declared types. */
+export type EventOf<C extends CalendarProvider> = string extends C['provider']
+  ? CalendarEvent
+  : Omit<CalendarEvent, 'providerMetadata'> & {
+      providerMetadata?: { [P in C as P['provider']]?: MetadataOf<P> };
+    };
+
+/** A sync change read through `C`. */
+export type SyncChangeOf<C extends CalendarProvider> =
+  | { type: 'upsert'; event: EventOf<C> }
+  | { type: 'delete'; eventId: string };
+
 /** Options every calsdk function accepts. */
-export type CallSettings = {
+export type CallSettings<
+  C extends CalendarProvider = CalendarProvider,
+  Operation extends ProviderOperationV1 = ProviderOperationV1,
+> = {
   /** The provider to call, e.g. `google({ accessToken })`. */
-  calendar: CalendarProvider;
+  calendar: C;
   /**
    * Retries for failures the provider marks as retryable (rate limits, 5xx,
    * network errors), with exponential backoff that honors `Retry-After`. Default 2.
@@ -47,7 +107,7 @@ export type CallSettings = {
   /** Extra HTTP headers sent with each provider request. */
   headers?: Record<string, string>;
   /** Provider-specific input, keyed by provider id: `{ google: { ... } }`. */
-  providerOptions?: ProviderOptions;
+  providerOptions?: ProviderOptionsFor<C, Operation>;
 };
 
 /** Fields every calsdk result carries. */

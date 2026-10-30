@@ -1,9 +1,19 @@
 import { InvalidResponseDataError, type ListEventsResultV1 } from '@calsdk/provider';
-import type { CalendarEvent, CallSettings, ResultMetadata, TimeInput } from './types';
+import type {
+  CalendarEvent,
+  CalendarProvider,
+  CallSettings,
+  EventOf,
+  ResultMetadata,
+  TimeInput,
+} from './types';
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId, toTimeRange, validatePageSize } from './util/validate';
 
-export type ListEventsOptions = CallSettings & {
+export type ListEventsOptions<C extends CalendarProvider = CalendarProvider> = CallSettings<
+  C,
+  'listEvents'
+> & {
   /** Defaults to `'primary'`, the user's default calendar. */
   calendarId?: string;
   /** Start of the window (inclusive). Events ending after it are returned. */
@@ -22,8 +32,8 @@ export type ListEventsOptions = CallSettings & {
   /** `nextPageToken` from the previous page. */
   pageToken?: string;
 };
-export type ListEventsResult = ResultMetadata & {
-  events: CalendarEvent[];
+export type ListEventsResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
+  events: EventOf<C>[];
   /** Pass as `pageToken` to get the next page. Missing on the last page. */
   nextPageToken?: string;
 };
@@ -48,6 +58,9 @@ function prepare(options: Omit<ListEventsOptions, keyof CallSettings>) {
  *   timeMax: '2026-12-31T00:00:00Z',
  * });
  */
+export async function listEvents<C extends CalendarProvider>(
+  options: ListEventsOptions<C>,
+): Promise<ListEventsResult<C>>;
 export async function listEvents(options: ListEventsOptions): Promise<ListEventsResult> {
   const request = prepare(options);
   const result = await runCall(options, 'listEvents', 'retryable', (callOptions) =>
@@ -65,6 +78,9 @@ export async function listEvents(options: ListEventsOptions): Promise<ListEvents
  *   console.log(event.title);
  * }
  */
+export function iterateEvents<C extends CalendarProvider>(
+  options: Omit<ListEventsOptions<C>, 'pageToken'>,
+): AsyncGenerator<EventOf<C>, void, undefined>;
 export async function* iterateEvents(
   options: Omit<ListEventsOptions, 'pageToken'>,
 ): AsyncGenerator<CalendarEvent, void, undefined> {

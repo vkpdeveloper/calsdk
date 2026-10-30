@@ -7,7 +7,15 @@ Apps use [`calsdk`](../calsdk) and a provider package. You only need this packag
 ```ts
 import type { CalendarProviderV1 } from '@calsdk/provider';
 
-export function fastmail(settings: FastmailSettings): CalendarProviderV1 {
+// Optional: declare your `providerOptions` and `providerMetadata` entries so calsdk checks them.
+type FastmailTypes = {
+  options: { createEvent: { sendReminder?: boolean } };
+  eventMetadata: { uid?: string };
+};
+
+export function fastmail(
+  settings: FastmailSettings,
+): CalendarProviderV1<'fastmail', FastmailTypes> {
   return {
     specificationVersion: 'v1',
     provider: 'fastmail',

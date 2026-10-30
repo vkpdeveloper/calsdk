@@ -1,8 +1,10 @@
 import {
+  InvalidArgumentError,
   NotFoundError,
   PermissionDeniedError,
   RateLimitError,
   SyncCursorExpiredError,
+  UnsupportedFunctionalityError,
 } from '@calsdk/provider';
 import { describe, expect, it } from 'vitest';
 import { google } from './google-provider';
@@ -227,6 +229,7 @@ describe('google', () => {
   });
 
   it('counts COUNT positions, not listed instances, when splitting', async () => {
+    let recurrence = ['RRULE:FREQ=DAILY;COUNT=5'];
     const { calendar, requests } = fakeGoogle([
       {
         method: 'GET',
@@ -236,23 +239,17 @@ describe('google', () => {
       {
         method: 'GET',
         path: /\/events\/series1$/,
-        respond: () =>
-          Response.json({
-            ...series,
-            recurrence: [
-              'RRULE:FREQ=DAILY;COUNT=5',
-              'EXDATE;TZID=America/New_York:20261103T100000',
-            ],
-          }),
+        respond: () => Response.json({ ...series, recurrence }),
       },
       {
         method: 'GET',
         path: /\/events\/series1\/instances$/,
-        // November 3 is excluded, so not listed. November 2 was moved past the cut.
+        // November 2 was moved past the cut, and November 3 was deleted.
         respond: () =>
           Response.json({
             items: [
               instance(2, { start: instance(10).start, end: instance(10).end }),
+              instance(3, { status: 'cancelled' }),
               instance(4),
               instance(5),
               instance(6),
@@ -272,9 +269,22 @@ describe('google', () => {
       patch: { title: 'x' },
       scope: 'thisAndFollowing',
     });
-    // November 2 and the excluded November 3 used two of the five positions.
+    // November 2 and the deleted November 3 used two of the five positions.
     const created = requests.find((request) => request.method === 'POST');
     expect(created?.body).toMatchObject({ recurrence: ['RRULE:FREQ=DAILY;COUNT=3'] });
+
+    // An EXDATE may or may not be one of the rule's positions, so it is not guessed.
+    recurrence = ['RRULE:FREQ=DAILY;COUNT=5', 'EXDATE;TZID=America/New_York:20261103T100000'];
+    requests.length = 0;
+    await expect(
+      calendar.doUpdateEvent({
+        calendarId: 'primary',
+        eventId: 'series1_20261104T150000Z',
+        patch: { title: 'x' },
+        scope: 'thisAndFollowing',
+      }),
+    ).rejects.toSatisfy(UnsupportedFunctionalityError.isInstance);
+    expect(requests.some((request) => request.method === 'POST')).toBe(false);
   });
 
   it('moves rule dates with a new start, and splits RDATEs between the halves', async () => {
@@ -407,6 +417,74 @@ describe('google', () => {
       ],
     });
     expect(warnings).toMatchObject([{ type: 'compatibility', feature: 'scope' }]);
+  });
+
+  it('keeps a series two hours long across DST, and keeps its time zone', async () => {
+    // Daily at 01:30-03:30 in New York from March 6. Summer time starts on March 8 at 02:00.
+    const zone = 'America/New_York';
+    const at = (dateTime: string, timeZone = zone) => ({ dateTime, timeZone });
+    const { calendar, requests } = fakeGoogle([
+      {
+        method: 'GET',
+        path: /\/events\/series1_20260308T063000Z$/,
+        respond: () =>
+          Response.json({
+            ...instance(8),
+            id: 'series1_20260308T063000Z',
+            originalStartTime: at('2026-03-08T01:30:00-05:00'),
+            start: at('2026-03-08T01:30:00-05:00'),
+            end: at('2026-03-08T04:30:00-04:00'),
+          }),
+      },
+      {
+        method: 'GET',
+        path: /\/events\/series1$/,
+        respond: () =>
+          Response.json({
+            ...series,
+            start: at('2026-03-06T01:30:00-05:00'),
+            end: at('2026-03-06T03:30:00-05:00'),
+            recurrence: ['RRULE:FREQ=DAILY'],
+          }),
+      },
+      {
+        method: 'POST',
+        path: /\/events$/,
+        respond: async (request) => Response.json({ ...(await request.json()), id: 'series2' }),
+      },
+      { method: 'PATCH', path: /\/events\/series1$/, respond: () => Response.json(series) },
+    ]);
+    const update = (
+      patch: Parameters<typeof calendar.doUpdateEvent>[0]['patch'],
+      scope: 'all' | 'thisAndFollowing',
+    ) =>
+      calendar.doUpdateEvent({
+        calendarId: 'primary',
+        eventId: 'series1_20260308T063000Z',
+        patch,
+        scope,
+      });
+
+    await update({ title: 'x' }, 'thisAndFollowing');
+    expect(requests.find((request) => request.method === 'POST')?.body).toMatchObject({
+      start: at('2026-03-08T01:30:00-05:00'),
+      end: at('2026-03-08T04:30:00-04:00'),
+    });
+
+    requests.length = 0;
+    await update(
+      { start: at('2026-03-09T01:30:00-04:00'), end: at('2026-03-09T03:30:00-04:00') },
+      'all',
+    );
+    expect(requests.find((request) => request.method === 'PATCH')?.body).toMatchObject({
+      start: at('2026-03-07T01:30:00-05:00'),
+      end: at('2026-03-07T03:30:00-05:00'),
+    });
+
+    // The rule's dates are in New York time, so the series cannot switch zones here.
+    await expect(update({ start: at('2026-03-08T06:30:00Z', 'UTC') }, 'all')).rejects.toSatisfy(
+      InvalidArgumentError.isInstance,
+    );
   });
 
   it('removes the new series when trimming the old one fails, even after cancellation', async () => {

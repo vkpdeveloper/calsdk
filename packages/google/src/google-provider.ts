@@ -12,6 +12,7 @@ import {
   RateLimitError,
   type SyncChangeV1,
   SyncCursorExpiredError,
+  UnsupportedFunctionalityError,
   type WarningV1,
 } from '@calsdk/provider';
 import {
@@ -55,7 +56,7 @@ import {
   googleFreeBusySchema,
 } from './google-api';
 import { googleEventOptionsSchema, googleListEventsOptionsSchema } from './google-options';
-import { moveRecurrence, moveTime, seriesMove } from './move-series';
+import { endAfter, moveRecurrence, moveTime, seriesMove } from './move-series';
 
 export type GoogleCalendarSettings = {
   /** An OAuth access token with a Calendar scope, or a function returning a fresh one per request. */
@@ -281,9 +282,10 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
 
   /**
    * How many of a `COUNT` series' positions come before `cut`. COUNT counts every position
-   * the RRULE generates, including excluded ones. Google lists instances by their current
-   * start, so the finite series is read whole and counted by original start. EXDATE
-   * positions are not listed, and RDATEs are listed but are not positions.
+   * the RRULE generates, including excluded ones. Google lists instances, deleted ones too,
+   * by original start, so the finite series is read whole and counted. Whether an EXDATE or
+   * RDATE value is one of the rule's positions cannot be told from that listing, so a split
+   * with such values before `cut` is refused rather than guessed.
    */
   async function positionsBefore(
     call: Call,
@@ -293,6 +295,14 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
     zone: string,
     cut: number,
   ) {
+    if ([...exdates, ...rdates].some((date) => icalInstant(date, zone) < cut)) {
+      throw new UnsupportedFunctionalityError({
+        provider: PROVIDER,
+        functionality: 'splitting a series with COUNT and EXDATE or RDATE lines',
+        message:
+          'This series ends after a COUNT and has EXDATE or RDATE lines before the split, so the occurrences left cannot be counted. Update the series id to end on a date (UNTIL) first.',
+      });
+    }
     const positions = new Set<number>();
     let pageToken: string | undefined;
     do {
@@ -311,17 +321,15 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
       }
       pageToken = page.nextPageToken;
     } while (pageToken !== undefined);
-    for (const date of exdates) positions.add(icalInstant(date, zone));
-    for (const date of rdates) positions.delete(icalInstant(date, zone));
     return [...positions].filter((position) => position < cut).length;
   }
 
   /**
-   * Splits a series at `cut`: the master's rule gets an `UNTIL` just before it, and the
-   * returned lines continue the rule from `cut` (with the remaining `COUNT`, if any).
-   * `EXDATE` and `RDATE` values go to the half they fall in.
+   * Splits a series at `cut`: the master's rule gets an `UNTIL` just before it, and `tail`
+   * continues the rule from `cut` (with the remaining `COUNT`, if any). `EXDATE` and
+   * `RDATE` values go to the half they fall in. The tail is only read when it is needed.
    */
-  async function splitRecurrence(
+  function splitRecurrence(
     call: Call,
     calendarId: string,
     master: GoogleEvent,
@@ -342,10 +350,6 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
     const until: ICalDate = isAllDay(masterStart)
       ? { type: 'date', date: addDaysToDate(new Date(cut).toISOString().slice(0, 10), -1) }
       : instantToICalDate(cut - 1000);
-    const remaining =
-      count === undefined
-        ? undefined
-        : count - (await positionsBefore(call, calendarId, master.id, parsed, zone, cut));
     return {
       head: [
         formatRRule({ ...rest, until }),
@@ -353,8 +357,14 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
         ...formatRdates(parsed.rdates.filter(isBefore)),
         ...parsed.other,
       ],
-      tail: [
-        formatRRule({ ...rule, count: remaining }),
+      tail: async () => [
+        formatRRule({
+          ...rule,
+          count:
+            count === undefined
+              ? undefined
+              : count - (await positionsBefore(call, calendarId, master.id, parsed, zone, cut)),
+        }),
         ...formatExdates(parsed.exdates.filter((date) => !isBefore(date))),
         ...formatRdates(parsed.rdates.filter((date) => !isBefore(date))),
         ...parsed.other,
@@ -587,16 +597,22 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
       };
       const end = fromGoogleTime(series.master.end, series.master.end?.timeZone);
       const zone = isAllDay(series.start) ? 'UTC' : series.start.timeZone;
+      // Occurrences keep the series' length in elapsed time, unless the patch sets an end.
+      const duration = (from: EventTimeV1) =>
+        patch.end
+          ? eventTimeToInstant(patch.end) - eventTimeToInstant(patch.start ?? from)
+          : eventTimeToInstant(end) - eventTimeToInstant(series.start);
 
       if (scope === 'all' || series.isFirst) {
         // Times move the whole series by the distance this instance moves, and its rule's
         // dates move with it.
         const shifted: GoogleEventWrite & Record<string, unknown> = { ...body };
         const move = patch.start && seriesMove(instance.start, patch.start, zone);
-        if (move) shifted.start = toGoogleTime(moveTime(series.start, move), true);
-        if (patch.end) {
+        const start = move ? moveTime(series.start, move) : series.start;
+        if (move) shifted.start = toGoogleTime(start, true);
+        if (patch.start || patch.end) {
           shifted.end = toGoogleTime(
-            moveTime(end, seriesMove(instance.end, patch.end, zone)),
+            endAfter(start, duration(instance.start), patch.end ?? end),
             true,
           );
         }
@@ -619,7 +635,7 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
       }
 
       // thisAndFollowing: a new series from this instance on, then end the old one before it.
-      const { head, tail } = await splitRecurrence(
+      const { head, tail } = splitRecurrence(
         call,
         calendarId,
         series.master,
@@ -636,7 +652,7 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
         call,
         calendarId,
         series.master,
-        tail,
+        await tail(),
         series.cut,
         warnings,
       );
@@ -646,7 +662,10 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
         {
           ...copyableFields(series.master),
           start: toGoogleTime(originalStart, false),
-          end: toGoogleTime(moveTime(end, seriesMove(series.start, originalStart, zone)), false),
+          end: toGoogleTime(
+            endAfter(patch.start ?? originalStart, duration(originalStart), patch.end ?? end),
+            false,
+          ),
           recurrence: move ? moveRecurrence(tailLines, originalStart, move) : tailLines,
           ...body,
         },
@@ -696,13 +715,7 @@ export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider
           sendUpdates,
         });
       } else {
-        const { head } = await splitRecurrence(
-          call,
-          calendarId,
-          series.master,
-          series.start,
-          series.cut,
-        );
+        const { head } = splitRecurrence(call, calendarId, series.master, series.start, series.cut);
         await patchRaw(
           call,
           calendarId,

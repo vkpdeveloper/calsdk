@@ -218,7 +218,7 @@ function occurrences(
       warnings.push({
         type: 'unsupported',
         feature: 'recurrence',
-        details: `Series "${group.uid}" has an INTERVAL of ${value.interval}: only its first instance is listed.`,
+        details: `Series "${group.id}" has an INTERVAL of ${value.interval}: only its first instance is listed.`,
       });
       continue;
     }
@@ -233,7 +233,7 @@ function occurrences(
     const outOfTime = () =>
       warnings.push({
         type: 'other',
-        message: `Stopped expanding series "${group.uid}" after ${MAX_EXPANSION_MS} ms.`,
+        message: `Stopped expanding series "${group.id}" after ${MAX_EXPANSION_MS} ms.`,
       });
     // While starting a monthly rule, ical.js searches for each BYDAY day from the first month
     // again, so one search passing the window says nothing of the others: only time bounds them.
@@ -251,7 +251,7 @@ function occurrences(
       warnings.push({
         type: 'unsupported',
         feature: 'recurrence',
-        details: `Series "${group.uid}" has a rule calsdk cannot expand (${error instanceof Error ? error.message : String(error)}): only its first instance is listed.`,
+        details: `Series "${group.id}" has a rule calsdk cannot expand (${error instanceof Error ? error.message : String(error)}): only its first instance is listed.`,
       });
       continue;
     }

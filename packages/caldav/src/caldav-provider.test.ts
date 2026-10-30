@@ -247,7 +247,7 @@ describe('caldav sync of cancellations', () => {
       'END:VCALENDAR',
     ].join('\r\n');
 
-  it('deletes a cancelled instance once, when the cancellation appears', async () => {
+  it('deletes a cancelled instance once, also in a first sync', async () => {
     let cancelled = false;
     const multistatus = (body: string) =>
       new Response(
@@ -286,5 +286,8 @@ describe('caldav sync of cancellations', () => {
     expect(deletes(next.changes)).toEqual(['standup_20300305T100000Z']);
     const again = await provider.doSyncEvents({ calendarId: '/cal/', cursor: next.nextCursor });
     expect(deletes(again.changes)).toEqual([]);
+    // A first sync reports a cancellation the series already has.
+    const first = await provider.doSyncEvents({ calendarId: '/cal/' });
+    expect(deletes(first.changes)).toEqual(['standup_20300305T100000Z']);
   });
 });

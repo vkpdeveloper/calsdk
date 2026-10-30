@@ -622,9 +622,10 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
                 changes.push({ type: 'delete', eventId: `${resource.id}_${key}` });
             }
             // An instance cancelled by a STATUS:CANCELLED exception is deleted once, when the
-            // cancellation first appears. An exception it replaced was deleted just above.
+            // cancellation first appears, in a first sync too. An exception it replaced was
+            // deleted just above.
             for (const key of cancelledKeys(resource.group, resource.calendar.context)) {
-              if (previous && !known.has(key) && !known.has(`${CANCELLED}${key}`))
+              if (!known.has(key) && !known.has(`${CANCELLED}${key}`))
                 changes.push({ type: 'delete', eventId: `${resource.id}_${key}` });
               keys.add(`${CANCELLED}${key}`);
             }

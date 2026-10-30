@@ -48,7 +48,9 @@ for (const event of events)
   console.log(`  ${event.start.dateTime}  ${event.title} [${event.kind}]`);
 
 // Changing one occurrence turns it into an exception; the rest of the series is untouched.
-const wednesday = events.find((event) => event.start.dateTime?.startsWith('2026-11-04'));
+const wednesday = events.find(
+  (event) => event.seriesId === standup.id && event.start.dateTime?.startsWith('2026-11-04'),
+);
 if (wednesday) {
   const { event } = await updateEvent({
     calendar,

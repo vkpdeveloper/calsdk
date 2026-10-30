@@ -13,6 +13,7 @@
     "lint": "biome check .",
     "format": "biome check --write .",
     "test": "vitest run",
+    "check:runtime": "bun build examples/quickstart/src/check-runtime.ts --target=browser --conditions=@calsdk/source --outfile=node_modules/.cache/check-runtime.js && deno run --no-prompt node_modules/.cache/check-runtime.js",
     "changeset": "changeset",
     "release": "bun run build && changeset publish"
   },

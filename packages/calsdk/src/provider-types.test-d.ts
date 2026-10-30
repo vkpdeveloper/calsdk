@@ -18,6 +18,15 @@ type Other = CalendarProviderV1<
   'other',
   { options: { createEvent: { flag?: boolean } }; eventMetadata: { score?: number } }
 >;
+// Declarations that every default-typed provider would also satisfy.
+type Narrow = CalendarProviderV1<
+  'narrow',
+  { options: { createEvent?: { flag?: boolean } }; eventMetadata: { tag?: string } }
+>;
+type Empty = CalendarProviderV1<
+  'empty',
+  { options: Record<never, never>; eventMetadata: Record<never, never> }
+>;
 
 // Payloads must be JSON: options are sent as JSON and metadata is read from it.
 type BigOptions = CalendarProviderV1<
@@ -32,6 +41,8 @@ type Legacy = Omit<CalendarProviderV1, 'provider' | '~types'> & { readonly provi
 declare const acme: Acme;
 declare const legacy: Legacy;
 declare const either: Acme | Other;
+declare const narrow: Narrow;
+declare const empty: Empty;
 declare const untyped: CalendarProviderV1;
 declare const event: EventInput;
 const window = { timeMin: '2026-11-01T00:00:00Z', timeMax: '2026-11-02T00:00:00Z' };
@@ -66,6 +77,16 @@ export async function checks() {
   const legacyEvent = (await getEvent({ calendar: legacy, eventId: 'e' })).event;
   expectTypeOf(legacyEvent.providerMetadata?.legacy?.custom).toEqualTypeOf<JSONValue | undefined>();
   await createEvent({ calendar: untyped, event, providerOptions: { anything: { a: [1] } } });
+
+  await createEvent({ calendar: narrow, event, providerOptions: { narrow: { flag: true } } });
+  // @ts-expect-error undeclared option of an optional operation key
+  await createEvent({ calendar: narrow, event, providerOptions: { narrow: { bogus: true } } });
+  // @ts-expect-error options for an operation the provider reads none for
+  await getEvent({ calendar: narrow, eventId: 'e', providerOptions: { narrow: { flag: true } } });
+  const narrowEvent = (await getEvent({ calendar: narrow, eventId: 'e' })).event;
+  expectTypeOf(narrowEvent.providerMetadata?.narrow).toEqualTypeOf<{ tag?: string } | undefined>();
+  // @ts-expect-error a provider that declares no options
+  await createEvent({ calendar: empty, event, providerOptions: { empty: { bogus: true } } });
 
   const created = await createEvent({ calendar: acme, event });
   expectTypeOf(created.event.providerMetadata).toEqualTypeOf<

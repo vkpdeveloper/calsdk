@@ -42,7 +42,11 @@ export const bookingOutputSchema = z.object({
   data: z.union([bookingSchema, z.array(z.unknown())]),
 });
 
-export const bookingListSchema = z.object({ data: z.array(bookingSchema) });
+export const bookingListSchema = z.object({
+  data: z.array(bookingSchema),
+  // Pages by booking uid whatever the sort, so only a walk over a fixed filter can use it.
+  pagination: z.object({ nextCursor: z.string().nullish(), hasMore: z.boolean() }).nullish(),
+});
 
 export const eventTypeSchema = z.object({
   id: z.number(),

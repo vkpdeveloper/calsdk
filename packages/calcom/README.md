@@ -38,7 +38,7 @@ await createEvent({
 - **Updating** can only move a booking. Cal.com moves a booking by replacing it, so the returned event has a new id and the old id reads as deleted. Changes to other fields are ignored with a warning, and the booking keeps the time zone it was made in.
 - **Deleting** cancels the booking. Cancelled and rejected bookings are deleted events. Bookings waiting for confirmation are `tentative`.
 - **Not supported:** all-day and recurring events, `ifMatch` and search, which throw `UnsupportedFunctionalityError`.
-- **Listing** finds bookings by their start. A booking longer than a day that started more than a day before `timeMin` is not listed.
+- **Listing** finds bookings by their start, looking back as far as the longest length your event types allow (at least a day). A booking of a team event type you do not own that started before that lookback is not listed.
 - **`sendUpdates`.** Cal.com always emails attendees, so values other than `'all'` return a warning.
 - **Free/busy** is computed by calsdk from bookings.
 - **Sync** reads bookings by the time they last changed. Each sync rereads the minute before the newest change it saw, so a slow save is not missed. An initial sync returns active bookings only.

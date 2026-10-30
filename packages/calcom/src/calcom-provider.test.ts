@@ -17,8 +17,8 @@ type Booking = {
 };
 
 /**
- * A fake Cal.com holding `bookings`. Listing filters and sorts like Cal.com: `afterStart`
- * and `afterUpdatedAt` include their bound.
+ * A fake Cal.com holding `bookings`. Listing filters and sorts like Cal.com: bounds are
+ * inclusive, at most 100 bookings come back, and without a sort the cursor pages by uid.
  */
 function fakeCalcom(
   bookings: Booking[],
@@ -46,17 +46,29 @@ function fakeCalcom(
       const query = url.searchParams;
 
       if (request.method === 'GET' && path === '/bookings') {
-        const sort = query.has('sortStart') ? 'start' : 'updatedAt';
-        const data = bookings
+        const limit = Number(query.get('limit'));
+        if (limit > 100) return Response.json({ status: 'error' }, { status: 400 });
+        const sort = query.has('sortStart')
+          ? 'start'
+          : query.has('sortUpdatedAt')
+            ? 'updatedAt'
+            : 'uid';
+        const matching = bookings
           .filter((booking) => {
             const type = query.get('eventTypeId');
             return type === null || booking.eventTypeId === Number(type);
           })
           .filter((booking) => booking.start >= (query.get('afterStart') ?? ''))
           .filter((booking) => booking.updatedAt >= (query.get('afterUpdatedAt') ?? ''))
-          .sort((a, b) => a[sort].localeCompare(b[sort]))
-          .slice(0, Number(query.get('limit')));
-        return Response.json({ status: 'success', data: data.map(toApi) });
+          .filter((booking) => booking.updatedAt <= (query.get('beforeUpdatedAt') ?? '~'))
+          .filter((booking) => booking.uid > (query.get('cursor') ?? ''))
+          .sort((a, b) => a[sort].localeCompare(b[sort]));
+        const data = matching.slice(0, limit);
+        return Response.json({
+          status: 'success',
+          data: data.map(toApi),
+          pagination: { hasMore: matching.length > limit, nextCursor: data.at(-1)?.uid ?? null },
+        });
       }
       const booking = bookings.find((item) => path.startsWith(`/bookings/${item.uid}`));
       if (request.method === 'GET' && booking) {
@@ -68,6 +80,12 @@ function fakeCalcom(
       }
       if (request.method === 'POST' && path.endsWith('/cancel') && booking) {
         return Response.json({ status: 'success', data: toApi(booking) });
+      }
+      if (request.method === 'GET' && path === '/event-types') {
+        return Response.json({
+          status: 'success',
+          data: [{ id: 42, title: 'Intro', ...eventType }],
+        });
       }
       if (request.method === 'GET' && path.startsWith('/event-types/')) {
         return Response.json({
@@ -164,6 +182,65 @@ describe('calcom', () => {
     await expect(calendar.doGetEvent({ calendarId: '7', eventId: 'a' })).rejects.toSatisfy(
       NotFoundError.isInstance,
     );
+  });
+
+  it("pages past Cal.com's limit of 100 bookings a request", async () => {
+    const minutes = Array.from({ length: 150 }, (_, index) => index);
+    const { calendar } = fakeCalcom(
+      minutes.map((minute) =>
+        booking(`b${String(minute).padStart(3, '0')}`, 12, {
+          start: new Date(Date.parse('2030-01-07T12:00:00Z') + minute * 60_000).toISOString(),
+          end: new Date(Date.parse('2030-01-07T13:00:00Z') + minute * 60_000).toISOString(),
+        }),
+      ),
+    );
+    const ids: string[] = [];
+    let pageToken: string | undefined;
+    do {
+      const page = await calendar.doListEvents({ ...window, pageToken });
+      ids.push(...page.events.map((event) => event.id));
+      pageToken = page.nextPageToken;
+    } while (pageToken);
+    expect(ids).toEqual(minutes.map((minute) => `b${String(minute).padStart(3, '0')}`));
+  });
+
+  it('lists bookings that started before the window, as far back as the event type allows', async () => {
+    const { calendar } = fakeCalcom(
+      [
+        booking('retreat', 10, {
+          start: '2030-01-05T10:00:00.000Z',
+          end: '2030-01-08T10:00:00.000Z',
+        }),
+      ],
+      { lengthInMinutes: 3 * 24 * 60 },
+    );
+    const { events } = await calendar.doListEvents(window);
+    expect(events.map((event) => event.id)).toEqual(['retreat']);
+  });
+
+  it.each([100, 101, 250])('syncs %i bookings changed at the same time', async (count) => {
+    const tied = Array.from({ length: count }, (_, index) =>
+      booking(`t${String(index).padStart(3, '0')}`, 12, { updatedAt: '2026-10-01T00:00:00.000Z' }),
+    );
+    const { calendar } = fakeCalcom([
+      ...tied,
+      booking('later', 13, { updatedAt: '2026-10-01T00:00:00.001Z' }),
+    ]);
+    const round = async (cursor?: string) => {
+      const ids: string[] = [];
+      let pageToken: string | undefined;
+      for (;;) {
+        const page = await calendar.doSyncEvents({ calendarId: '42', cursor, pageToken });
+        ids.push(
+          ...page.changes.map((change) => (change.type === 'upsert' ? change.event.id : '')),
+        );
+        if (page.nextCursor) return { ids, cursor: page.nextCursor };
+        pageToken = page.nextPageToken;
+      }
+    };
+    const initial = await round();
+    expect(initial.ids.toSorted()).toEqual([...tied.map((item) => item.uid), 'later'].toSorted());
+    expect((await round(initial.cursor)).ids).toEqual([]);
   });
 
   it('syncs by update time, rereading recent changes without repeating them', async () => {

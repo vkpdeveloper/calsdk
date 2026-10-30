@@ -1,3 +1,4 @@
+import type { JSONObject } from '../../json-value';
 import type { CalendarCapabilitiesV1 } from './capabilities';
 import type {
   CreateEventOptionsV1,
@@ -42,9 +43,9 @@ export type ProviderOperationV1 =
  */
 export type ProviderTypesV1 = {
   /** What each operation reads from `providerOptions[provider]`. Operations left out read nothing. */
-  options: { [Operation in ProviderOperationV1]?: object };
+  options: { [Operation in ProviderOperationV1]?: JSONObject };
   /** `providerMetadata[provider]` on events, or `never` when the provider sets none. */
-  eventMetadata: object;
+  eventMetadata: JSONObject;
 };
 
 /**

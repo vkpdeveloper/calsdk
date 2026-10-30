@@ -1,5 +1,5 @@
 // Compile-time checks for provider-typed options and metadata. `bun run typecheck` runs them.
-import type { CalendarProviderV1 } from '@calsdk/provider';
+import type { CalendarProviderV1, JSONValue } from '@calsdk/provider';
 import { expectTypeOf } from 'vitest';
 import { createEvent } from './create-event';
 import { getEvent } from './get-event';
@@ -19,11 +19,24 @@ type Other = CalendarProviderV1<
   { options: { createEvent: { flag?: boolean } }; eventMetadata: { score?: number } }
 >;
 
+// Payloads must be JSON: options are sent as JSON and metadata is read from it.
+type BigOptions = CalendarProviderV1<
+  'big',
+  // @ts-expect-error a bigint option
+  { options: { createEvent: { n: bigint } }; eventMetadata: never }
+>;
+
+// A provider written before declared types: a literal id and no `~types`.
+type Legacy = Omit<CalendarProviderV1, 'provider' | '~types'> & { readonly provider: 'legacy' };
+
 declare const acme: Acme;
+declare const legacy: Legacy;
 declare const either: Acme | Other;
 declare const untyped: CalendarProviderV1;
 declare const event: EventInput;
 const window = { timeMin: '2026-11-01T00:00:00Z', timeMax: '2026-11-02T00:00:00Z' };
+
+export type { BigOptions };
 
 export async function checks() {
   await createEvent({ calendar: acme, event, providerOptions: { acme: { color: 'red' } } });
@@ -46,7 +59,12 @@ export async function checks() {
   // @ts-expect-error wrong value for one member of the union
   await createEvent({ calendar: either, event, providerOptions: { other: { flag: 'yes' } } });
 
-  // Providers without declared types accept any JSON options.
+  // Providers without declared types accept any JSON options, under their own key.
+  await createEvent({ calendar: legacy, event, providerOptions: { legacy: { custom: true } } });
+  // @ts-expect-error another provider's key
+  await createEvent({ calendar: legacy, event, providerOptions: { other: { custom: true } } });
+  const legacyEvent = (await getEvent({ calendar: legacy, eventId: 'e' })).event;
+  expectTypeOf(legacyEvent.providerMetadata?.legacy?.custom).toEqualTypeOf<JSONValue | undefined>();
   await createEvent({ calendar: untyped, event, providerOptions: { anything: { a: [1] } } });
 
   const created = await createEvent({ calendar: acme, event });

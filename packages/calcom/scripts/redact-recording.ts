@@ -1,6 +1,6 @@
 // Removes personal data from a conformance recording before it is committed: event types
 // other than the test one, event type and profile fields calsdk does not read (owners carry
-// billing ids), avatars, the user's uuid, and the account's address, name and username.
+// billing ids), avatars, the user's id and uuid, and the account's address, name and username.
 //
 // bun packages/calcom/scripts/redact-recording.ts <recording.json> <event type id> <address> <name> <username>
 import { readFile, writeFile } from 'node:fs/promises';
@@ -46,12 +46,17 @@ for (const interactions of Object.values(recording)) {
     }
   }
 }
-// Hosts and event type owners carry the profile photo and uuid of the account.
+// Hosts and event type owners carry the profile photo, user id and uuid of the account.
 function scrub(value: unknown) {
   if (typeof value !== 'object' || value === null) return;
   const record = value as Record<string, unknown>;
   delete record.avatarUrl;
   if (typeof record.uuid === 'string') record.uuid = '00000000-0000-4000-8000-000000000000';
+  if (Array.isArray(record.hosts)) {
+    for (const host of record.hosts as { id?: unknown }[]) {
+      if (typeof host.id === 'number') host.id = 1;
+    }
+  }
   Object.values(record).forEach(scrub);
 }
 scrub(recording);

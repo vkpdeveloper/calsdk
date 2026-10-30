@@ -13,6 +13,13 @@ export type CapabilityV1 = boolean | 'unknown' | { condition: string };
  */
 export type CalendarCapabilitiesV1 = {
   events: {
+    /**
+     * Events keep the title and description they are written with, on create and update.
+     * Booking tools such as Cal.com name events from a template instead.
+     */
+    details: CapabilityV1;
+    /** Create all-day events. */
+    allDay: CapabilityV1;
     /** Create and read recurring series. */
     recurrence: CapabilityV1;
     /** `scope: 'thisAndFollowing'` on update and delete. */

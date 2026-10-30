@@ -111,3 +111,27 @@ describeProviderConformance({
   // Without a recording the suite passes the global fetch: route it to the local server.
   createProvider: ({ fetch }) => httpCalendar(fetch === globalThis.fetch ? server : fetch),
 });
+
+// A provider that keeps titles but replaces an event on every update, which the contract
+// allows. Recurrence and etags are off: a replaced instance or etag has nothing to match.
+const replacing = mockCalendar({ calendars: [{ id: 'primary' }] });
+
+describeProviderConformance({
+  name: 'replacing',
+  http: false,
+  createProvider: () => ({
+    ...replacing,
+    provider: 'replacing',
+    capabilities: {
+      ...replacing.capabilities,
+      events: { ...replacing.capabilities.events, recurrence: false, etag: false },
+    },
+    async doUpdateEvent(options) {
+      const { event } = await replacing.doUpdateEvent(options);
+      const { id, calendarId, kind, status, etag, createdAt, updatedAt, ...input } = event;
+      const copy = await replacing.doCreateEvent({ calendarId: options.calendarId, event: input });
+      await replacing.doDeleteEvent({ calendarId: options.calendarId, eventId: id });
+      return copy;
+    },
+  }),
+});

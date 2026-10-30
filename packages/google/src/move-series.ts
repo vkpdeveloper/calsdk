@@ -5,6 +5,7 @@ import {
 } from '@calsdk/provider';
 import {
   addDaysToDate,
+  eventTimeToInstant,
   formatExdates,
   formatLocalDate,
   formatLocalDateTime,
@@ -27,13 +28,7 @@ const DAY_MS = 86_400_000;
  * Moving a series by the distance one occurrence moves. The distance is measured on the
  * wall clock of the series' zone, so occurrences keep their local time across DST changes.
  */
-export type SeriesMove = {
-  zone: string;
-  ms: number;
-  allDay: boolean;
-  /** The zone moved timed values are written in: the one the caller used. */
-  timeZone?: string;
-};
+export type SeriesMove = { zone: string; ms: number; allDay: boolean };
 
 /** A time on the wall clock of `zone`, as epoch milliseconds read as UTC. */
 function wallClock(time: EventTimeV1, zone: string): number {
@@ -41,7 +36,10 @@ function wallClock(time: EventTimeV1, zone: string): number {
   return localToInstant(instantToLocal(Date.parse(time.dateTime), zone), 'UTC');
 }
 
-/** The move that takes `from` to `to`, in the series' `zone`. */
+/**
+ * The move that takes `from` to `to`, in the series' `zone`. The series' rule repeats in
+ * that zone, so `to` must keep it: its rule dates could not be translated to another.
+ */
 export function seriesMove(from: EventTimeV1, to: EventTimeV1, zone: string): SeriesMove {
   if (isAllDay(from) !== isAllDay(to)) {
     throw new InvalidArgumentError({
@@ -50,12 +48,13 @@ export function seriesMove(from: EventTimeV1, to: EventTimeV1, zone: string): Se
         'Switching a whole series between all-day and timed through one instance is not supported. Update the series id instead.',
     });
   }
-  return {
-    zone,
-    ms: wallClock(to, zone) - wallClock(from, zone),
-    allDay: isAllDay(to),
-    timeZone: isAllDay(to) ? undefined : to.timeZone,
-  };
+  if (!isAllDay(to) && to.timeZone !== zone) {
+    throw new InvalidArgumentError({
+      argument: 'patch.start',
+      message: `The series repeats in ${zone}. Changing its time zone through one instance is not supported. Update the series id instead.`,
+    });
+  }
+  return { zone, ms: wallClock(to, zone) - wallClock(from, zone), allDay: isAllDay(to) };
 }
 
 export function moveTime(time: EventTimeV1, move: SeriesMove): EventTimeV1 {
@@ -68,10 +67,29 @@ export function moveTime(time: EventTimeV1, move: SeriesMove): EventTimeV1 {
   if (isAllDay(time)) {
     return { date: formatLocalDate(instantToLocal(Date.parse(time.date) + move.ms, 'UTC')) };
   }
-  const timeZone = move.timeZone ?? time.timeZone;
   return {
-    dateTime: formatZonedDateTime(moveInstant(Date.parse(time.dateTime), move), timeZone),
-    timeZone,
+    dateTime: formatZonedDateTime(moveInstant(Date.parse(time.dateTime), move), time.timeZone),
+    timeZone: time.timeZone,
+  };
+}
+
+/**
+ * The end of an event starting at `start` that lasts `ms` of elapsed time, written in the
+ * form and zone of `like`. Elapsed, so a series keeps its length on DST days.
+ */
+export function endAfter(start: EventTimeV1, ms: number, like: EventTimeV1): EventTimeV1 {
+  if (isAllDay(start) !== isAllDay(like)) {
+    throw new InvalidArgumentError({
+      argument: 'patch.end',
+      message: 'The start and end must both be all-day or both be timed.',
+    });
+  }
+  if (isAllDay(like)) {
+    return { date: formatLocalDate(instantToLocal(eventTimeToInstant(start) + ms, 'UTC')) };
+  }
+  return {
+    dateTime: formatZonedDateTime(eventTimeToInstant(start) + ms, like.timeZone),
+    timeZone: like.timeZone,
   };
 }
 

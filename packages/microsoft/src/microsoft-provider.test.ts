@@ -43,6 +43,11 @@ function fakeGraph(routes: Route[]) {
 const graphError = (status: number, code: string, message = 'stubbed') =>
   Response.json({ error: { code, message } }, { status });
 
+const daily = {
+  pattern: { type: 'daily', interval: 1 },
+  range: { type: 'noEnd', startDate: '2030-01-07', recurrenceTimeZone: 'Eastern Standard Time' },
+};
+
 const event = (extra: Record<string, unknown> = {}) => ({
   id: 'e1',
   '@odata.etag': 'W/"v2"',
@@ -168,10 +173,15 @@ describe('microsoft', () => {
     );
   });
 
-  it('syncs a fixed window and skips unmodified occurrences', async () => {
+  it('syncs a fixed window, skips unmodified occurrences and reports deleted ones', async () => {
     const deltaLink =
       'https://graph.microsoft.com/v1.0/me/calendar/calendarView/delta?$deltatoken=t1';
     const { calendar, requests } = fakeGraph([
+      {
+        method: 'GET',
+        path: /\/events\/s1$/,
+        respond: () => Response.json({ id: 's1', cancelledOccurrences: ['OID.s1.2030-01-08'] }),
+      },
       {
         method: 'GET',
         path: /\/calendarView\/delta$/,
@@ -180,7 +190,7 @@ describe('microsoft', () => {
           if (token === 'expired') return graphError(410, 'SyncStateNotFound');
           return Response.json({
             value: [
-              event({ id: 's1', type: 'seriesMaster' }),
+              event({ id: 's1', type: 'seriesMaster', recurrence: daily }),
               { id: 's1-occ', type: 'occurrence', seriesMasterId: 's1', start: event().start },
               { id: 'gone', '@removed': { reason: 'deleted' } },
             ],
@@ -198,13 +208,26 @@ describe('microsoft', () => {
     expect(requests[0]?.url.searchParams.get('startDateTime')).toBe('2030-01-01T00:00:00Z');
     expect(requests[0]?.url.searchParams.get('endDateTime')).toBe('2031-01-01T00:00:00Z');
     expect(page.changes).toEqual([
-      { type: 'upsert', event: expect.objectContaining({ id: 's1', kind: 'series' }) },
       { type: 'delete', eventId: 'gone' },
+      {
+        type: 'upsert',
+        event: expect.objectContaining({
+          id: 's1',
+          kind: 'series',
+          recurrence: ['RRULE:FREQ=DAILY', 'EXDATE:20300108T140000Z'],
+        }),
+      },
     ]);
+    expect(requests[1]?.url.searchParams.get('$select')).toBe('cancelledOccurrences');
     expect(page.nextCursor).toBe(deltaLink);
 
-    await calendar.doSyncEvents({ calendarId: 'primary', cursor: deltaLink });
-    expect(requests[1]?.url.href).toBe(deltaLink);
+    // Only a cursor's query is used, so it cannot point at another calendar.
+    await calendar.doSyncEvents({
+      calendarId: 'primary',
+      cursor: deltaLink.replace('/me/calendar/', "/me/calendars('other')/"),
+    });
+    expect(requests[2]?.url.pathname).toBe('/v1.0/me/calendar/calendarView/delta');
+    expect(requests[2]?.url.searchParams.get('$deltatoken')).toBe('t1');
     await expect(
       calendar.doSyncEvents({ calendarId: 'primary', cursor: deltaLink.replace('t1', 'expired') }),
     ).rejects.toSatisfy(SyncCursorExpiredError.isInstance);
@@ -232,9 +255,14 @@ describe('microsoft', () => {
               master('ended', '2029-01-01T14:00:00', { type: 'endDate', endDate: '2029-02-01' }),
               master('ongoing', '2029-01-01T14:00:00', { type: 'noEnd' }),
               master('later', '2031-01-01T14:00:00', { type: 'noEnd' }),
+              master('counted', '2029-01-01T14:00:00', {
+                type: 'numbered',
+                numberOfOccurrences: 30,
+              }),
             ],
           }),
       },
+      { method: 'GET', path: /\/events\/\w+$/, respond: () => Response.json({ id: 'any' }) },
     ]);
     const { events } = await calendar.doListEvents({
       calendarId: 'primary',
@@ -246,6 +274,61 @@ describe('microsoft', () => {
     expect(requests[0]?.url.searchParams.get('$filter')).toBe(
       "type eq 'seriesMaster' or (start/dateTime lt '2030-02-01T00:00:00.000Z' and end/dateTime gt '2030-01-01T00:00:00.000Z')",
     );
+  });
+
+  it('moves a series on its wall clock and weekdays when one occurrence moves', async () => {
+    // Weekly on Saturdays at 09:00 in New York. The March 9 occurrence moves to Sunday
+    // March 10 at 09:00, the day summer time starts.
+    const master = event({
+      id: 's1',
+      type: 'seriesMaster',
+      start: { dateTime: '2030-01-05T14:00:00.0000000', timeZone: 'UTC' },
+      end: { dateTime: '2030-01-05T15:00:00.0000000', timeZone: 'UTC' },
+      recurrence: {
+        pattern: {
+          type: 'weekly',
+          interval: 1,
+          daysOfWeek: ['saturday'],
+          firstDayOfWeek: 'sunday',
+        },
+        range: {
+          type: 'noEnd',
+          startDate: '2030-01-05',
+          recurrenceTimeZone: 'Eastern Standard Time',
+        },
+      },
+    });
+    const occurrence = event({
+      id: 'o1',
+      type: 'occurrence',
+      seriesMasterId: 's1',
+      start: { dateTime: '2030-03-09T14:00:00.0000000', timeZone: 'UTC' },
+      end: { dateTime: '2030-03-09T15:00:00.0000000', timeZone: 'UTC' },
+    });
+    const { calendar, requests } = fakeGraph([
+      { method: 'GET', path: /\/events\/o1$/, respond: () => Response.json(occurrence) },
+      { method: 'GET', path: /\/events\/s1$/, respond: () => Response.json(master) },
+      { method: 'PATCH', path: /\/events\/s1$/, respond: () => Response.json(master) },
+    ]);
+    const zone = 'America/New_York';
+    await calendar.doUpdateEvent({
+      calendarId: 'primary',
+      eventId: 'o1',
+      scope: 'all',
+      patch: {
+        start: { dateTime: '2030-03-10T09:00:00-04:00', timeZone: zone },
+        end: { dateTime: '2030-03-10T10:00:00-04:00', timeZone: zone },
+      },
+    });
+    const patch = requests.find((request) => request.method === 'PATCH');
+    expect(patch?.body).toMatchObject({
+      start: { dateTime: '2030-01-06T09:00:00', timeZone: zone },
+      end: { dateTime: '2030-01-06T10:00:00', timeZone: zone },
+      recurrence: {
+        pattern: { daysOfWeek: ['sunday'] },
+        range: { startDate: '2030-01-06' },
+      },
+    });
   });
 
   it('refuses thisAndFollowing on an occurrence instead of changing more or less', async () => {

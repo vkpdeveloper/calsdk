@@ -73,7 +73,9 @@ export function fromGraphEvent(raw: GraphEvent, { calendarId }: { calendarId: st
     start,
     end,
     recurrence:
-      kind === 'series' && raw.recurrence ? fromGraphRecurrence(raw.recurrence, start) : undefined,
+      kind === 'series' && raw.recurrence
+        ? fromGraphRecurrence(raw.recurrence, start, cancelledDates(raw.cancelledOccurrences))
+        : undefined,
     status: raw.isCancelled ? 'cancelled' : 'confirmed',
     showAs: raw.showAs === 'free' ? 'free' : 'busy',
     visibility: raw.sensitivity === undefined ? undefined : fromSensitivity(raw.sensitivity),
@@ -114,6 +116,14 @@ export function fromGraphEvent(raw: GraphEvent, { calendarId }: { calendarId: st
     updatedAt: raw.lastModifiedDateTime,
     providerMetadata: { microsoft: metadata },
   };
+}
+
+/** The local dates of a series' deleted occurrences, from their ids. */
+export function cancelledDates(ids: readonly string[] = []): string[] {
+  return ids.flatMap((id) => {
+    const date = id.slice(id.lastIndexOf('.') + 1);
+    return /^\d{4}-\d{2}-\d{2}$/.test(date) ? [date] : [];
+  });
 }
 
 function fromSensitivity(sensitivity: string): EventV1['visibility'] {
@@ -161,11 +171,16 @@ export type GraphEventWrite = {
  * Converts a patch (or a full event input) to a Graph request body. Outlook has no
  * "cleared" state for text fields, so `null` writes an empty value.
  *
- * `seriesStart` is where the series starts, needed to write `recurrence`.
+ * `seriesStart` is where the series starts, needed to write `recurrence`, and `cancelled`
+ * the local dates of its deleted occurrences.
  */
 export function toGraphWrite(
   patch: EventPatchV1,
-  { seriesStart, warnings }: { seriesStart: EventTimeV1 | undefined; warnings: WarningV1[] },
+  {
+    seriesStart,
+    cancelled,
+    warnings,
+  }: { seriesStart: EventTimeV1 | undefined; cancelled?: readonly string[]; warnings: WarningV1[] },
 ): GraphEventWrite {
   const body: GraphEventWrite = {};
   if (patch.title !== undefined) body.subject = patch.title ?? '';
@@ -182,7 +197,9 @@ export function toGraphWrite(
     body.recurrence = null;
   } else if (patch.recurrence !== undefined) {
     // Callers pass the start whenever recurrence is set.
-    if (seriesStart) body.recurrence = toGraphRecurrence(patch.recurrence, seriesStart);
+    if (seriesStart) {
+      body.recurrence = toGraphRecurrence(patch.recurrence, seriesStart, { cancelled, warnings });
+    }
   }
   if (patch.showAs !== undefined) body.showAs = patch.showAs ?? 'busy';
   if (patch.visibility !== undefined) {

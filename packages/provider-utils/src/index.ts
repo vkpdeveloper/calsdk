@@ -14,6 +14,7 @@ export { parseProviderOptions } from './parse-provider-options';
 export {
   formatExdates,
   formatICalDate,
+  formatRdates,
   formatRRule,
   type ICalDate,
   instantToICalDate,

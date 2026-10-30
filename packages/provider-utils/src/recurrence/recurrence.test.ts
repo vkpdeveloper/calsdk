@@ -2,6 +2,7 @@ import { InvalidArgumentError } from '@calsdk/provider';
 import { describe, expect, it } from 'vitest';
 import {
   formatExdates,
+  formatRdates,
   formatRRule,
   instantToICalDate,
   parseICalDate,
@@ -103,6 +104,13 @@ describe('formatExdates', () => {
       'EXDATE:20261124T043000Z',
       'EXDATE;VALUE=DATE:20261201',
     ]);
+  });
+
+  it('formats RDATE lines that parse back', () => {
+    const dates = [parseICalDate('20261110T100000', 'Asia/Kolkata'), parseICalDate('20261201')];
+    const lines = formatRdates(dates);
+    expect(lines).toEqual(['RDATE;TZID=Asia/Kolkata:20261110T100000', 'RDATE;VALUE=DATE:20261201']);
+    expect(parseRecurrence(lines).rdates).toEqual(dates);
   });
 
   it('formats instants as UTC date-times, dropping milliseconds', () => {

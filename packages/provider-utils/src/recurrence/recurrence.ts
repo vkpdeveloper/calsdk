@@ -305,6 +305,15 @@ export function parseRecurrence(lines: readonly string[]): ParsedRecurrence {
  * // ['EXDATE;TZID=Asia/Kolkata:20261110T100000']
  */
 export function formatExdates(dates: readonly ICalDate[]): string[] {
+  return formatDateList('EXDATE', dates);
+}
+
+/** Formats extra occurrence dates as one `RDATE` line per zone and value type. */
+export function formatRdates(dates: readonly ICalDate[]): string[] {
+  return formatDateList('RDATE', dates);
+}
+
+function formatDateList(name: 'EXDATE' | 'RDATE', dates: readonly ICalDate[]): string[] {
   const groups = new Map<string, string[]>();
   for (const date of dates) {
     let params = '';
@@ -317,5 +326,5 @@ export function formatExdates(dates: readonly ICalDate[]): string[] {
     values.push(formatICalDate(date));
     groups.set(params, values);
   }
-  return [...groups].map(([params, values]) => `EXDATE${params}:${values.join(',')}`);
+  return [...groups].map(([params, values]) => `${name}${params}:${values.join(',')}`);
 }

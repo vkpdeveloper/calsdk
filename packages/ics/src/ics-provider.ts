@@ -259,13 +259,13 @@ export function ics(settings: IcsSettings): IcsProvider {
           hashes.set(event.id, hash);
           if (seen.get(event.id) !== hash) changes.push({ type: 'upsert', event });
         }
-        // A cancelled instance is deleted once, when the cancellation first appears.
+        // A cancelled instance is deleted once, when the cancellation first appears. A first
+        // sync reports it too, as the series it returns still has the instance.
         for (const key of cancelled) {
           const eventId = `${group.uid}_${key}`;
           if (hashes.has(eventId)) continue;
           hashes.set(eventId, CANCELLED);
-          if (previous && seen.get(eventId) !== CANCELLED)
-            changes.push({ type: 'delete', eventId });
+          if (seen.get(eventId) !== CANCELLED) changes.push({ type: 'delete', eventId });
         }
       }
       for (const [eventId, hash] of seen) {

@@ -9,11 +9,8 @@ import type {
 import {
   addDaysToDate,
   eventTimeToInstant,
-  formatLocalDate,
   formatZonedDateTime,
-  instantToLocal,
   isAllDay,
-  localToInstant,
 } from '@calsdk/provider-utils';
 import ICAL from 'ical.js';
 import {
@@ -21,17 +18,18 @@ import {
   instanceKey,
   instantOf,
   type ReadContext,
-  wallClockOf,
   type Zone,
   zoneOf,
 } from './ical-time';
 import { type EventGroup, textOf } from './parse-icalendar';
 
 /**
- * Instances of a series are computed one by one from its start. Rules such as
- * `FREQ=MINUTELY` running for years would take very long, so expansion stops here.
+ * Instances of a series are computed one by one from its start, so a rule running for years
+ * (`FREQ=HOURLY`) takes long to expand. Expansion stops after this many.
  */
 const MAX_INSTANCES = 50_000;
+/** Candidate times tested for a rule, about 0.3 seconds of work: enough for years of hours. */
+const MAX_STEPS = 100_000;
 const DAY_MS = 86_400_000;
 /**
  * Read as UTC, a wall-clock time is less than a day from its instant in any zone. Instances
@@ -164,7 +162,7 @@ function occurrences(
   }
 
   const events: EventV1[] = [];
-  const add = (time: ICAL.Time, timeZone: Zone, endTime?: ICAL.Time) => {
+  const add = (time: ICAL.Time, timeZone: Zone, end?: ICAL.Time | Length | null) => {
     const key = instanceKey(time, timeZone, context);
     if (skipped.has(key)) return;
     skipped.add(key);
@@ -176,21 +174,22 @@ function occurrences(
       seriesId: group.uid,
       originalStart: start,
       start,
-      end: endTime
-        ? instanceTime(endTime, timeZone, series.start, context)
-        : shift(start, length, context),
+      end: endOf(time, timeZone, start, end ?? length, context),
     });
   };
 
-  // DTSTART is always the first instance, whether or not the rule matches it.
-  add(startValue, zone);
+  // RDATE periods come before DTSTART, as one starting with it gives it its own length.
   for (const property of master.getAllProperties('rdate')) {
     const rdateZone = zoneOf(property, context);
     for (const value of property.getValues()) {
       if (value instanceof ICAL.Time) add(value, rdateZone);
-      else if (value instanceof ICAL.Period) add(value.start, rdateZone, value.getEnd());
+      else if (value instanceof ICAL.Period) {
+        add(value.start, rdateZone, value.duration ? durationLength(value.duration) : value.end);
+      }
     }
   }
+  // DTSTART is always an instance, whether or not the rule matches it.
+  add(startValue, zone);
 
   for (const property of master.getAllProperties('rrule')) {
     const value = property.getFirstValue();
@@ -205,14 +204,30 @@ function occurrences(
       continue;
     }
     const rule = value.clone();
-    // Rules step through wall-clock times, so a UTC UNTIL is compared in the series' zone.
+    // Rules step through wall-clock times, and a UTC UNTIL is an instant: it is compared with
+    // each instance's instant below, which also places instances in a repeated hour right.
+    let until: number | undefined;
     if (rule.until && !rule.until.isDate && rule.until.zone === ICAL.Timezone.utcTimezone) {
-      rule.until = wallClockOf(rule.until.toUnixTime() * 1000, zone, context);
+      until = rule.until.toUnixTime() * 1000;
+      rule.until = null;
     }
     const iterator = rule.iterator(startValue);
+    // ical.js tests candidate times until one matches, forever for a rule no date matches
+    // (FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30). Past the budget the test passes, and the loop stops.
+    let steps = 0;
+    const check = iterator.check_contracting_rules.bind(iterator);
+    iterator.check_contracting_rules = () => ++steps > MAX_STEPS || check();
     for (let count = 0; ; count++) {
       const time = iterator.next();
       if (!time) break;
+      if (steps > MAX_STEPS) {
+        warnings.push({
+          type: 'other',
+          message: `Stopped expanding series "${group.uid}": its rule matches too few times.`,
+        });
+        break;
+      }
+      if (until !== undefined && instantOf(time, zone, context) > until) break;
       if (count === MAX_INSTANCES) {
         warnings.push({
           type: 'other',
@@ -305,7 +320,13 @@ function timesOf(vevent: ICAL.Component, context: ReadContext): Pick<EventV1, 's
   if (endProperty) {
     end = eventTimeOf(endProperty.value, zoneOf(endProperty.property, context), context);
   } else if (duration instanceof ICAL.Duration) {
-    end = shift(start, durationLength(duration), context);
+    end = endOf(
+      startValue,
+      zoneOf(startProperty, context),
+      start,
+      durationLength(duration),
+      context,
+    );
   }
   if (!end || instant(end, context) < instant(start, context)) {
     end = isAllDay(start) ? { date: addDaysToDate(start.date, 1) } : start;
@@ -355,21 +376,23 @@ function durationLength(duration: ICAL.Duration): Length {
   };
 }
 
-function shift(start: EventTimeV1, length: Length, context: ReadContext): EventTimeV1 {
-  if (isAllDay(start)) return { date: addDaysToDate(start.date, length.days) };
-  let end = instant(start, context);
-  if (length.days !== 0) {
-    const local = instantToLocal(end, start.timeZone);
-    const [year, month, day] = addDaysToDate(formatLocalDate(local), length.days)
-      .split('-')
-      .map(Number);
-    end = localToInstant(
-      { ...local, year: year ?? 0, month: month ?? 0, day: day ?? 0 },
-      start.timeZone,
-    );
-  }
-  end += length.ms;
-  return { dateTime: formatZonedDateTime(end, start.timeZone), timeZone: start.timeZone };
+/**
+ * The end of an instance starting at `time` in `zone`: `end` itself, or `start` plus a length.
+ * The days of a length are counted in `zone`, the instance's own, not the one it is shown in.
+ */
+function endOf(
+  time: ICAL.Time,
+  zone: Zone,
+  start: EventTimeV1,
+  end: ICAL.Time | Length,
+  context: ReadContext,
+): EventTimeV1 {
+  if (end instanceof ICAL.Time) return instanceTime(end, zone, start, context);
+  if (isAllDay(start)) return { date: addDaysToDate(start.date, end.days) };
+  const shifted = time.clone();
+  shifted.adjust(end.days, 0, 0, 0);
+  const instant = instantOf(shifted, zone, context) + end.ms;
+  return { dateTime: formatZonedDateTime(instant, start.timeZone), timeZone: start.timeZone };
 }
 
 const instant = (time: EventTimeV1, context: ReadContext) =>

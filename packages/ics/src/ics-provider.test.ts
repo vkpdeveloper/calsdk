@@ -320,10 +320,16 @@ describe('ics provider', () => {
     const sync = (cursor?: string) => provider.doSyncEvents({ calendarId: 'primary', cursor });
 
     const initial = await sync();
-    // Single events, the series and its moved instance: never computed occurrences.
-    expect(initial.changes.map((change) => change.type === 'upsert' && change.event.id)).toEqual([
+    // Single events, the series and its moved instance, never computed occurrences, and the
+    // instance the series cancels.
+    expect(
+      initial.changes.map((change) =>
+        change.type === 'upsert' ? change.event.id : `deleted ${change.eventId}`,
+      ),
+    ).toEqual([
       STANDUP,
       `${STANDUP}_20261109T140000Z`,
+      `deleted ${STANDUP}_20261111T140000Z`,
       'review@example.com',
       'trip@example.com',
       'outlook@example.com',
@@ -391,6 +397,14 @@ describe('ics provider', () => {
     expect(restored.changes).toEqual([
       { type: 'upsert', event: expect.objectContaining({ id: STANDUP }) },
     ]);
+
+    // A first sync reports a cancellation the feed already has.
+    text = feed({ extra: cancel });
+    const first = await provider.doSyncEvents({ calendarId: 'primary' });
+    expect(first.changes).toContainEqual({
+      type: 'delete',
+      eventId: `${STANDUP}_20261102T140000Z`,
+    });
   });
 
   it('skips the download when the feed has not changed', async () => {
@@ -494,6 +508,12 @@ describe('ics provider', () => {
       'DTSTART:20251231T235959Z',
       'RRULE:FREQ=SECONDLY;BYMONTH=12',
       'END:VEVENT',
+      // No date matches: ical.js would search for one forever.
+      'BEGIN:VEVENT',
+      'UID:never@example.com',
+      'DTSTART:20260101T100000Z',
+      'RRULE:FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30',
+      'END:VEVENT',
     ].join('\r\n');
     const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
     const { warnings } = await provider.doListEvents({
@@ -508,6 +528,7 @@ describe('ics provider', () => {
         feature: 'recurrence',
         details: expect.stringContaining('"seconds@example.com"'),
       },
+      { type: 'other', message: expect.stringContaining('"never@example.com"') },
     ]);
   });
 
@@ -533,11 +554,26 @@ describe('ics provider', () => {
       'RDATE:20261103T140000Z',
       'RDATE;VALUE=PERIOD:20261105T150000Z/20261105T170000Z',
       'END:VEVENT',
+      // Clocks go back at 02:00 on November 1, so 01:30 comes twice: first at 05:30 UTC.
+      'BEGIN:VEVENT',
+      'UID:fold@example.com',
+      'DTSTART;TZID=America/New_York:20261031T013000',
+      'DURATION:PT30M',
+      'RRULE:FREQ=DAILY;UNTIL=20261101T060000Z',
+      'END:VEVENT',
+      // A period starting at DTSTART sets that instance's length.
+      'BEGIN:VEVENT',
+      'UID:longer@example.com',
+      'DTSTART:20261102T120000Z',
+      'DURATION:PT1H',
+      'RDATE;VALUE=PERIOD:20261102T120000Z/20261102T150000Z',
+      'END:VEVENT',
     ].join('\r\n');
     const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
     const { events } = await provider.doListEvents({
       calendarId: 'primary',
-      ...window,
+      timeMin: '2026-10-30T00:00:00Z',
+      timeMax: window.timeMax,
       expandRecurring: true,
     });
     const of = (uid: string) =>
@@ -576,9 +612,20 @@ describe('ics provider', () => {
         '2026-11-05T12:00:00-05:00',
       ],
     ]);
+    expect(of('fold@example.com').map(([id]) => id)).toEqual([
+      'fold@example.com_20261031T053000Z',
+      'fold@example.com_20261101T053000Z',
+    ]);
+    expect(of('longer@example.com')).toEqual([
+      [
+        'longer@example.com_20261102T120000Z',
+        '2026-11-02T17:30:00+05:30',
+        '2026-11-02T20:30:00+05:30',
+      ],
+    ]);
   });
 
-  it('counts the days of a DURATION as calendar days and its hours as elapsed time', async () => {
+  it('counts the days of a length in the zone of the event, and its hours as elapsed time', async () => {
     const extra = [
       'BEGIN:VEVENT',
       'UID:days@example.com',
@@ -591,8 +638,24 @@ describe('ics provider', () => {
       'DTSTART;TZID=America/New_York:20260307T120000',
       'DURATION:PT24H',
       'END:VEVENT',
+      // Days in UTC are 24 hours, also when shown in New York.
+      'BEGIN:VEVENT',
+      'UID:utc@example.com',
+      'DTSTART:20260307T170000Z',
+      'DURATION:P1D',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:period@example.com',
+      'DTSTART;TZID=America/New_York:20260306T120000',
+      'DTEND;TZID=America/New_York:20260306T130000',
+      'RDATE;TZID=America/New_York;VALUE=PERIOD:20260307T120000/PT24H',
+      'END:VEVENT',
     ].join('\r\n');
-    const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
+    const text = feed({ extra }).replace(
+      'X-WR-TIMEZONE:Asia/Kolkata',
+      'X-WR-TIMEZONE:America/New_York',
+    );
+    const provider = ics({ url: URL_, fetch: serve(() => text).fetch });
     const { events } = await provider.doListEvents({
       calendarId: 'primary',
       timeMin: '2026-03-07T00:00:00Z',
@@ -603,6 +666,8 @@ describe('ics provider', () => {
     expect(events.map((event) => [event.id, event.end.dateTime])).toEqual([
       ['days@example.com_20260307T170000Z', '2026-03-08T12:00:00-04:00'],
       ['hours@example.com', '2026-03-08T13:00:00-04:00'],
+      ['period@example.com_20260307T170000Z', '2026-03-08T13:00:00-04:00'],
+      ['utc@example.com', '2026-03-08T13:00:00-04:00'],
       ['days@example.com_20260308T160000Z', '2026-03-09T12:00:00-04:00'],
     ]);
   });

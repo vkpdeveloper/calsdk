@@ -528,6 +528,18 @@ describe('ics provider', () => {
       'DURATION:PT1H',
       'RRULE:FREQ=HOURLY;BYDAY=MO,WE,FR',
       'END:VEVENT',
+      // ical.js reads this INTERVAL as Infinity, and would move a date by it forever.
+      'BEGIN:VEVENT',
+      'UID:huge@example.com',
+      'DTSTART:20260101T100000Z',
+      `RRULE:FREQ=MONTHLY;INTERVAL=${'9'.repeat(309)}`,
+      'END:VEVENT',
+      // Finite, but ical.js would move the date by it one month at a time.
+      'BEGIN:VEVENT',
+      'UID:rare@example.com',
+      'DTSTART:20260101T100000Z',
+      'RRULE:FREQ=DAILY;INTERVAL=100000000',
+      'END:VEVENT',
     ].join('\r\n');
     const provider = ics({ url: URL_, fetch: serve(() => feed({ extra })).fetch });
     const { events, warnings } = await provider.doListEvents({
@@ -546,7 +558,36 @@ describe('ics provider', () => {
       },
       { type: 'other', message: expect.stringContaining('"never@example.com"') },
       { type: 'other', message: expect.stringContaining('"fifth@example.com"') },
+      {
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: expect.stringContaining('"huge@example.com"'),
+      },
+      {
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: expect.stringContaining('"rare@example.com"'),
+      },
     ]);
+    // 2100 is not a leap year, so this rule skips from 2096 to 2104.
+    const leap = [
+      'BEGIN:VEVENT',
+      'UID:leap@example.com',
+      'DTSTART:20960229T100000Z',
+      'DURATION:PT1H',
+      'RRULE:FREQ=HOURLY;BYMONTH=2;BYMONTHDAY=29',
+      'END:VEVENT',
+    ].join('\r\n');
+    const leapFeed = ics({ url: URL_, fetch: serve(() => feed({ extra: leap })).fetch });
+    const leapDay = await leapFeed.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2104-02-29T00:00:00Z',
+      timeMax: '2104-03-01T00:00:00Z',
+      expandRecurring: true,
+    });
+    expect(leapDay.events.filter((event) => event.seriesId === 'leap@example.com')).toHaveLength(
+      24,
+    );
   }, 15_000);
 
   it('reads each recurrence date in its own zone, and always starts at DTSTART', async () => {

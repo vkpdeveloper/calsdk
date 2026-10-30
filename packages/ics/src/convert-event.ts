@@ -29,10 +29,15 @@ import { type EventGroup, textOf } from './parse-icalendar';
  */
 const MAX_INSTANCES = 50_000;
 /**
- * Candidate times tested to find one instance, about 0.15 seconds of work: enough for an
- * hourly rule on February 29, whose instances are 35,000 hours apart.
+ * Candidate times tested to find one instance, about 0.25 seconds of work: enough for an
+ * hourly rule on February 29, whose instances can be eight years apart (2096 to 2104).
  */
-const MAX_STEPS = 50_000;
+const MAX_STEPS = 80_000;
+/**
+ * The largest `INTERVAL` expanded. ical.js moves a date one month at a time, so a huge one
+ * takes forever to apply. Calendars repeat at most every few years.
+ */
+const MAX_INTERVAL = 1000;
 const DAY_MS = 86_400_000;
 /**
  * Read as UTC, a wall-clock time is less than a day from its instant in any zone. Instances
@@ -206,6 +211,14 @@ function occurrences(
         type: 'unsupported',
         feature: 'recurrence',
         details: `Series "${group.uid}" repeats every ${value.freq === 'SECONDLY' ? 'second' : 'minute'}: only its first instance is listed.`,
+      });
+      continue;
+    }
+    if (!Number.isInteger(value.interval) || value.interval < 1 || value.interval > MAX_INTERVAL) {
+      warnings.push({
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: `Series "${group.uid}" has an INTERVAL of ${value.interval}: only its first instance is listed.`,
       });
       continue;
     }

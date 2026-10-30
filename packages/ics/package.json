@@ -1,0 +1,40 @@
+{
+  "name": "@calsdk/ics",
+  "version": "0.0.0",
+  "description": "ICS feed provider for calsdk: read subscribed iCalendar feeds.",
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "@calsdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/ics"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@calsdk/provider": "workspace:*",
+    "@calsdk/provider-utils": "workspace:*",
+    "ical.js": "^2.2.1",
+    "zod": "^4.6.7"
+  }
+}

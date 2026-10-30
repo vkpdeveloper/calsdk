@@ -8,6 +8,7 @@
   "dependencies": {
     "@calsdk/calcom": "workspace:*",
     "@calsdk/google": "workspace:*",
+    "@calsdk/ics": "workspace:*",
     "@calsdk/microsoft": "workspace:*",
     "@calsdk/mock": "workspace:*",
     "calsdk": "workspace:*"

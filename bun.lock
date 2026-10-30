@@ -18,6 +18,7 @@
       "dependencies": {
         "@calsdk/calcom": "workspace:*",
         "@calsdk/caldav": "workspace:*",
+        "@calsdk/calendly": "workspace:*",
         "@calsdk/google": "workspace:*",
         "@calsdk/ics": "workspace:*",
         "@calsdk/microsoft": "workspace:*",
@@ -46,6 +47,18 @@
         "@calsdk/provider-utils": "workspace:*",
         "@xmldom/xmldom": "^0.9.12",
         "ical.js": "^2.2.1",
+        "zod": "^4.6.7",
+      },
+      "devDependencies": {
+        "@calsdk/provider-tests": "workspace:*",
+      },
+    },
+    "packages/calendly": {
+      "name": "@calsdk/calendly",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
@@ -165,6 +178,8 @@
     "@calsdk/calcom": ["@calsdk/calcom@workspace:packages/calcom"],
 
     "@calsdk/caldav": ["@calsdk/caldav@workspace:packages/caldav"],
+
+    "@calsdk/calendly": ["@calsdk/calendly@workspace:packages/calendly"],
 
     "@calsdk/google": ["@calsdk/google@workspace:packages/google"],
 

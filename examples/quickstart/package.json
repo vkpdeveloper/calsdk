@@ -8,6 +8,7 @@
   "dependencies": {
     "@calsdk/calcom": "workspace:*",
     "@calsdk/caldav": "workspace:*",
+    "@calsdk/calendly": "workspace:*",
     "@calsdk/google": "workspace:*",
     "@calsdk/ics": "workspace:*",
     "@calsdk/microsoft": "workspace:*",

@@ -495,7 +495,7 @@ describe('ics provider', () => {
     await expect(provider.doListCalendars({})).rejects.toBeInstanceOf(InvalidResponseDataError);
   });
 
-  // Each bounded rule takes a fraction of a second, slower on CI.
+  // One series runs into the time limit of a second.
   it('bounds the work of expanding a series', async () => {
     const extra = [
       'BEGIN:VEVENT',
@@ -509,11 +509,16 @@ describe('ics provider', () => {
       'DTSTART:20251231T235959Z',
       'RRULE:FREQ=SECONDLY;BYMONTH=12',
       'END:VEVENT',
-      // No date matches: ical.js would search for one forever.
+      // No date matches: ical.js would search for one forever, but stops at the window.
       'BEGIN:VEVENT',
       'UID:never@example.com',
       'DTSTART:20260101T100000Z',
       'RRULE:FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30',
+      'END:VEVENT',
+      'BEGIN:VEVENT',
+      'UID:rarely-never@example.com',
+      'DTSTART:20260101T100000Z',
+      'RRULE:FREQ=DAILY;INTERVAL=1000;BYMONTH=2;BYMONTHDAY=30',
       'END:VEVENT',
       // Every fourth February from 2026 has four Mondays: ical.js would search while starting.
       'BEGIN:VEVENT',
@@ -521,10 +526,22 @@ describe('ics provider', () => {
       'DTSTART:20260202T100000Z',
       'RRULE:FREQ=MONTHLY;INTERVAL=48;BYDAY=5MO',
       'END:VEVENT',
+      // Searched for hour by hour since the year 4, more than a second of work.
+      'BEGIN:VEVENT',
+      'UID:ancient@example.com',
+      'DTSTART:00040229T000000Z',
+      'RRULE:FREQ=HOURLY;BYMONTH=2;BYMONTHDAY=29',
+      'END:VEVENT',
+      // RFC 5545 does not allow BYMONTHDAY in weekly rules, and ical.js rejects them.
+      'BEGIN:VEVENT',
+      'UID:weekly@example.com',
+      'DTSTART:20260101T100000Z',
+      'RRULE:FREQ=WEEKLY;BYMONTHDAY=1',
+      'END:VEVENT',
       // Years of candidate hours, but each instance is found quickly.
       'BEGIN:VEVENT',
       'UID:shifts@example.com',
-      'DTSTART:20140101T100000Z',
+      'DTSTART:20180101T100000Z',
       'DURATION:PT1H',
       'RRULE:FREQ=HOURLY;BYDAY=MO,WE,FR',
       'END:VEVENT',
@@ -547,8 +564,10 @@ describe('ics provider', () => {
       ...window,
       expandRecurring: true,
     });
+    const of = (uid: string) => events.filter((event) => event.seriesId === uid);
     // Every hour of the seven Mondays, Wednesdays and Fridays from November 2 to 16.
-    expect(events.filter((event) => event.seriesId === 'shifts@example.com')).toHaveLength(168);
+    expect(of('shifts@example.com')).toHaveLength(168);
+    expect(of('never@example.com')).toEqual([]);
     expect(warnings).toEqual([
       { type: 'other', message: expect.stringContaining('"ticker@example.com"') },
       {
@@ -556,8 +575,12 @@ describe('ics provider', () => {
         feature: 'recurrence',
         details: expect.stringContaining('"seconds@example.com"'),
       },
-      { type: 'other', message: expect.stringContaining('"never@example.com"') },
-      { type: 'other', message: expect.stringContaining('"fifth@example.com"') },
+      { type: 'other', message: expect.stringContaining('"ancient@example.com" after 1000 ms') },
+      {
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: expect.stringContaining('"weekly@example.com"'),
+      },
       {
         type: 'unsupported',
         feature: 'recurrence',
@@ -569,7 +592,7 @@ describe('ics provider', () => {
         details: expect.stringContaining('"rare@example.com"'),
       },
     ]);
-    // 2100 is not a leap year, so this rule skips from 2096 to 2104.
+    // A sparse rule that is not cut short: 2100 is not a leap year, so it skips from 2096 to 2104.
     const leap = [
       'BEGIN:VEVENT',
       'UID:leap@example.com',

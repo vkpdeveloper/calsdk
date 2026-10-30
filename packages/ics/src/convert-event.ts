@@ -29,10 +29,10 @@ import { type EventGroup, textOf } from './parse-icalendar';
  */
 const MAX_INSTANCES = 50_000;
 /**
- * Candidate times tested to find one instance, about 0.25 seconds of work: enough for an
- * hourly rule on February 29, whose instances can be eight years apart (2096 to 2104).
+ * How long one series may be expanded. ical.js searches from DTSTART for times matching the
+ * rule, so a sparse rule from long ago can take any amount of work.
  */
-const MAX_STEPS = 80_000;
+const MAX_EXPANSION_MS = 1000;
 /**
  * The largest `INTERVAL` expanded. ical.js moves a date one month at a time, so a huge one
  * takes forever to apply. Calendars repeat at most every few years.
@@ -230,24 +230,30 @@ function occurrences(
       until = rule.until.toUnixTime() * 1000;
       rule.until = null;
     }
-    const iterator = boundedSearch(() => new BoundedIterator({ rule, dtstart: startValue }));
-    if (iterator === TOO_SPARSE) {
+    const outOfTime = () =>
       warnings.push({
         type: 'other',
-        message: `Stopped expanding series "${group.uid}": its rule matches too few times.`,
+        message: `Stopped expanding series "${group.uid}" after ${MAX_EXPANSION_MS} ms.`,
+      });
+    search = { max, deadline: performance.now() + MAX_EXPANSION_MS };
+    let iterator: BoundedIterator | symbol;
+    try {
+      iterator = bounded(() => new BoundedIterator({ rule, dtstart: startValue }));
+    } catch (error) {
+      // ical.js rejects rules RFC 5545 forbids, such as FREQ=WEEKLY with BYMONTHDAY.
+      warnings.push({
+        type: 'unsupported',
+        feature: 'recurrence',
+        details: `Series "${group.uid}" has a rule calsdk cannot expand (${error instanceof Error ? error.message : String(error)}): only its first instance is listed.`,
       });
       continue;
     }
+    if (iterator === OUT_OF_TIME) outOfTime();
+    if (typeof iterator === 'symbol') continue;
     for (let count = 0; ; count++) {
-      const time = boundedSearch(() => iterator.next());
-      if (time === TOO_SPARSE) {
-        warnings.push({
-          type: 'other',
-          message: `Stopped expanding series "${group.uid}": its rule matches too few times.`,
-        });
-        break;
-      }
-      if (!time) break;
+      const time = bounded(() => iterator.next());
+      if (time === OUT_OF_TIME) outOfTime();
+      if (typeof time === 'symbol' || !time) break;
       if (until !== undefined && instantOf(time, zone, context) > until) break;
       if (count === MAX_INSTANCES) {
         warnings.push({
@@ -272,35 +278,41 @@ function occurrences(
   return events;
 }
 
-const TOO_SPARSE = Symbol('too sparse');
-/** Steps left in the current search of a `BoundedIterator`. Searches run synchronously. */
-let stepsLeft = 0;
+const PAST_WINDOW = Symbol('past the window');
+const OUT_OF_TIME = Symbol('out of time');
+/** Where the current expansion may search to, and until when. Expansions run synchronously. */
+let search = { max: 0, deadline: 0 };
 
 /**
  * ical.js steps through candidate times until one matches the rule, while starting
  * (`FREQ=MONTHLY;INTERVAL=48;BYDAY=5MO` from a February) and for every instance
- * (`FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30`): forever when no time matches. Each search here
- * stops after `MAX_STEPS` candidates. Overriding the steps in a subclass also covers the
- * search the constructor runs.
+ * (`FREQ=DAILY;BYMONTH=2;BYMONTHDAY=30`), forever when no time matches. Each step here stops
+ * the search once it passes the window, or the expansion once it runs out of time.
+ * Overriding the steps in a subclass also covers the search the constructor runs.
  */
 class BoundedIterator extends ICAL.RecurIterator {
   override increment_month() {
-    if (--stepsLeft < 0) throw TOO_SPARSE;
+    checkpoint(this.last);
     super.increment_month();
   }
 
   override check_contracting_rules() {
-    if (--stepsLeft < 0) throw TOO_SPARSE;
+    checkpoint(this.last);
     return super.check_contracting_rules();
   }
 }
 
-function boundedSearch<Result>(search: () => Result): Result | typeof TOO_SPARSE {
-  stepsLeft = MAX_STEPS;
+function checkpoint(time: ICAL.Time) {
+  const wallClock = Date.UTC(time.year, time.month - 1, time.day, time.hour, time.minute);
+  if (wallClock - ZONE_SLACK_MS >= search.max) throw PAST_WINDOW;
+  if (performance.now() > search.deadline) throw OUT_OF_TIME;
+}
+
+function bounded<Result>(step: () => Result): Result | typeof PAST_WINDOW | typeof OUT_OF_TIME {
   try {
-    return search();
+    return step();
   } catch (error) {
-    if (error === TOO_SPARSE) return TOO_SPARSE;
+    if (error === PAST_WINDOW || error === OUT_OF_TIME) return error;
     throw error;
   }
 }

@@ -613,11 +613,15 @@ describe('ics provider', () => {
     );
     // Searching for a fifth Monday passes the window, but the second Tuesday is inside it.
     // ical.js starts these rules on a time BYSETPOS may rule out: February 8 is not the second
-    // of its month, nor February 7 the last.
+    // of its month, nor February 7 the last. With several times a day, it also lists the first
+    // of each month at the next time, though March 1 and April 1 match no rule here.
     const monthly = [
       ['mixed', 'FREQ=MONTHLY;BYDAY=5MO,2TU'],
       ['second', 'FREQ=MONTHLY;BYDAY=5MO,2TU;BYSETPOS=2'],
       ['last', 'FREQ=MONTHLY;BYDAY=-1FR,1MO;BYSETPOS=-1;COUNT=2'],
+      ['hours', 'FREQ=MONTHLY;BYDAY=-1FR,1MO;BYSETPOS=-1;BYHOUR=10,11;BYMINUTE=0,30;COUNT=5'],
+      ['until', 'FREQ=MONTHLY;BYDAY=-1FR,1MO;BYSETPOS=-1;BYHOUR=10,11;UNTIL=20280226T000000Z'],
+      ['minutes', 'FREQ=MONTHLY;BYDAY=-1FR;BYMINUTE=0,30'],
     ].flatMap(([uid, rule]) => [
       'BEGIN:VEVENT',
       `UID:${uid}@example.com`,
@@ -643,6 +647,26 @@ describe('ics provider', () => {
     expect(days('mixed@example.com')).toEqual(['2028-02-08', '2028-03-14', '2028-04-11']);
     expect(days('second@example.com')).toEqual([]);
     expect(days('last@example.com')).toEqual(['2028-02-25', '2028-03-31']);
+    const times = (uid: string) =>
+      spring.events
+        .filter((event) => event.seriesId === uid)
+        .map((event) => event.start.dateTime?.slice(5, 16));
+    expect(times('hours@example.com')).toEqual([
+      '02-25T15:30',
+      '02-25T16:00',
+      '02-25T16:30',
+      '02-25T17:00',
+      '03-31T15:30',
+    ]);
+    expect(times('until@example.com')).toEqual(['02-25T15:30', '02-25T16:30']);
+    expect(times('minutes@example.com')).toEqual([
+      '02-25T15:30',
+      '02-25T16:00',
+      '03-31T15:30',
+      '03-31T16:00',
+      '04-28T15:30',
+      '04-28T16:00',
+    ]);
     expect(spring.warnings).toEqual([]);
   }, 15_000);
 

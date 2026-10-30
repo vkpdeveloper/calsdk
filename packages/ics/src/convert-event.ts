@@ -257,11 +257,6 @@ function occurrences(
     }
     if (iterator === OUT_OF_TIME) outOfTime();
     if (typeof iterator === 'symbol') continue;
-    if (startsOutsideSet(iterator)) {
-      // Skipped without using up COUNT, which the iterator reads from this same rule.
-      iterator.next();
-      if (rule.count) rule.count += 1;
-    }
     for (let count = 0; ; count++) {
       const time = bounded(() => iterator.next());
       if (time === OUT_OF_TIME) outOfTime();
@@ -283,6 +278,11 @@ function occurrences(
         time.second,
       );
       if (wallClock - ZONE_SLACK_MS >= max) break;
+      if (leftOut(iterator, time)) {
+        // Skipped without using up COUNT, which the iterator reads from this same rule.
+        if (rule.count) rule.count += 1;
+        continue;
+      }
       if (wallClock + ZONE_SLACK_MS + lengthMs <= min) continue;
       add(time, zone);
     }
@@ -315,26 +315,27 @@ class BoundedIterator extends ICAL.RecurIterator {
 }
 
 /**
- * Whether `BYSETPOS` rules out the first time ical.js found. ical.js picks it while starting a
- * monthly `BYDAY` rule without applying `BYSETPOS`, as it does for every later month, so
- * `FREQ=MONTHLY;BYDAY=1MO;BYSETPOS=2` would list a first Monday. This counts its position the
- * way ical.js does for later months. `DTSTART` is always an instance.
+ * Whether ical.js returned a time of a monthly `BYDAY` rule on a day the rule leaves out. While
+ * starting, it picks the first day without applying `BYSETPOS`, so `FREQ=MONTHLY;BYDAY=1MO;
+ * BYSETPOS=2` would list a first Monday. And when the first of a month does not match, it still
+ * returns the first with the next `BYHOUR` or `BYMINUTE` time. Set positions are counted the way
+ * ical.js counts them. `DTSTART` is always an instance.
  */
-function startsOutsideSet(iterator: ICAL.RecurIterator) {
-  const { rule, last, dtstart } = iterator;
+function leftOut(iterator: ICAL.RecurIterator, time: ICAL.Time) {
+  const { rule, dtstart } = iterator;
+  if (rule.freq !== 'MONTHLY' || !rule.parts.BYDAY || rule.parts.BYMONTHDAY) return false;
+  if (time.compare(dtstart) === 0) return false;
+  if (!iterator.is_day_in_byday(time)) return true;
   const positions = rule.parts.BYSETPOS;
-  if (rule.freq !== 'MONTHLY' || !positions || !rule.parts.BYDAY || rule.parts.BYMONTHDAY) {
-    return false;
-  }
-  if (last.compare(dtstart) <= 0) return false;
-  const day = last.clone();
+  if (!positions) return false;
+  const day = time.clone();
   let position = 0;
   let total = 0;
-  for (let date = 1; date <= ICAL.Time.daysInMonth(last.month, last.year); date++) {
+  for (let date = 1; date <= ICAL.Time.daysInMonth(time.month, time.year); date++) {
     day.day = date;
     if (!iterator.is_day_in_byday(day)) continue;
     total++;
-    if (date <= last.day) position++;
+    if (date <= time.day) position++;
   }
   return !positions.includes(position) && !positions.includes(position - total - 1);
 }

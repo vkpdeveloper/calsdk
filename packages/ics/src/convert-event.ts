@@ -235,10 +235,17 @@ function occurrences(
         type: 'other',
         message: `Stopped expanding series "${group.uid}" after ${MAX_EXPANSION_MS} ms.`,
       });
-    search = { max, deadline: performance.now() + MAX_EXPANSION_MS };
+    // While starting a monthly rule, ical.js searches for each BYDAY day from the first month
+    // again, so one search passing the window says nothing of the others: only time bounds them.
+    const searches = rule.freq === 'MONTHLY' ? (rule.parts.BYDAY?.length ?? 0) : 0;
+    search = {
+      max: searches > 1 ? Number.POSITIVE_INFINITY : max,
+      deadline: performance.now() + MAX_EXPANSION_MS,
+    };
     let iterator: BoundedIterator | symbol;
     try {
       iterator = bounded(() => new BoundedIterator({ rule, dtstart: startValue }));
+      search.max = max;
     } catch (error) {
       // ical.js rejects rules RFC 5545 forbids, such as FREQ=WEEKLY with BYMONTHDAY.
       warnings.push({

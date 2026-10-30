@@ -611,6 +611,28 @@ describe('ics provider', () => {
     expect(leapDay.events.filter((event) => event.seriesId === 'leap@example.com')).toHaveLength(
       24,
     );
+    // Searching for a fifth Monday passes the window, but the second Tuesday is inside it.
+    const mixed = [
+      'BEGIN:VEVENT',
+      'UID:mixed@example.com',
+      'DTSTART:20280201T100000Z',
+      'DURATION:PT1H',
+      'RRULE:FREQ=MONTHLY;BYDAY=5MO,2TU',
+      'END:VEVENT',
+    ].join('\r\n');
+    const mixedFeed = ics({ url: URL_, fetch: serve(() => feed({ extra: mixed })).fetch });
+    const february = await mixedFeed.doListEvents({
+      calendarId: 'primary',
+      timeMin: '2028-02-02T00:00:00Z',
+      timeMax: '2028-03-01T00:00:00Z',
+      expandRecurring: true,
+    });
+    expect(
+      february.events
+        .filter((event) => event.seriesId === 'mixed@example.com')
+        .map((event) => event.start),
+    ).toEqual([{ dateTime: '2028-02-08T15:30:00+05:30', timeZone: 'Asia/Kolkata' }]);
+    expect(february.warnings).toEqual([]);
   }, 15_000);
 
   it('reads each recurrence date in its own zone, and always starts at DTSTART', async () => {

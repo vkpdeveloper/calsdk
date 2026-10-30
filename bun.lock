@@ -36,6 +36,18 @@
         "@calsdk/provider-tests": "workspace:*",
       },
     },
+    "packages/microsoft": {
+      "name": "@calsdk/microsoft",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
+        "zod": "^4.6.7",
+      },
+      "devDependencies": {
+        "@calsdk/provider-tests": "workspace:*",
+      },
+    },
     "packages/mock": {
       "name": "@calsdk/mock",
       "version": "0.0.0",
@@ -102,6 +114,8 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.6.4", "", { "os": "win32", "cpu": "x64" }, "sha512-pYsMy5AThiHFOZAsngg8qN4PurM6nInKBhVX7sbj3eNpRQqo1Hb0MgCwPL7VqVMrmcEEMj9Ks3qbkallR65e8g=="],
 
     "@calsdk/google": ["@calsdk/google@workspace:packages/google"],
+
+    "@calsdk/microsoft": ["@calsdk/microsoft@workspace:packages/microsoft"],
 
     "@calsdk/mock": ["@calsdk/mock@workspace:packages/mock"],
 

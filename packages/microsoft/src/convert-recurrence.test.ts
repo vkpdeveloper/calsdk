@@ -1,6 +1,7 @@
-import { UnsupportedFunctionalityError } from '@calsdk/provider';
+import { UnsupportedFunctionalityError, type WarningV1 } from '@calsdk/provider';
 import { describe, expect, it } from 'vitest';
-import { fromGraphRecurrence, toGraphRecurrence } from './convert-recurrence';
+import { fromGraphRecurrence, shiftRecurrence, toGraphRecurrence } from './convert-recurrence';
+import type { GraphRecurrence, GraphWeekday } from './microsoft-api';
 
 const start = { dateTime: '2030-01-31T10:00:00-05:00', timeZone: 'America/New_York' };
 
@@ -39,13 +40,51 @@ describe('Outlook recurrence', () => {
     ]);
   });
 
+  it('keeps EXDATE lines only for deleted occurrences', () => {
+    const lines = ['RRULE:FREQ=DAILY;COUNT=5', 'EXDATE:20300201T150000Z'];
+    const cancelled = ['2030-02-01'];
+    const recurrence = toGraphRecurrence(lines, start, { cancelled });
+    expect(fromGraphRecurrence(recurrence, start, cancelled)).toEqual(lines);
+    // Outlook cannot exclude an occurrence that was not deleted.
+    expect(() => toGraphRecurrence(lines, start)).toThrow(
+      expect.toSatisfy(UnsupportedFunctionalityError.isInstance),
+    );
+    // Nor bring a deleted one back.
+    const warnings: WarningV1[] = [];
+    toGraphRecurrence(['RRULE:FREQ=DAILY;COUNT=5'], start, { cancelled, warnings });
+    expect(warnings).toMatchObject([{ type: 'unsupported', feature: 'recurrence' }]);
+  });
+
+  it('moves weekly series to other weekdays', () => {
+    const weekly = (daysOfWeek: GraphWeekday[], interval = 1): GraphRecurrence => ({
+      pattern: { type: 'weekly', interval, daysOfWeek, firstDayOfWeek: 'sunday' },
+      range: { type: 'endDate', startDate: '2030-01-05', endDate: '2030-03-30' },
+    });
+    expect(shiftRecurrence(weekly(['saturday']), 1)).toEqual({
+      pattern: { type: 'weekly', interval: 1, daysOfWeek: ['sunday'], firstDayOfWeek: 'sunday' },
+      range: { type: 'endDate', startDate: '2030-01-06', endDate: '2030-03-31' },
+    });
+    // Every other week, Saturday would move into the next week while Friday stays.
+    expect(() => shiftRecurrence(weekly(['friday', 'saturday'], 2), 1)).toThrow(
+      expect.toSatisfy(UnsupportedFunctionalityError.isInstance),
+    );
+    const monthly: GraphRecurrence = {
+      pattern: { type: 'absoluteMonthly', interval: 1, dayOfMonth: 5 },
+      range: { type: 'noEnd', startDate: '2030-01-05' },
+    };
+    expect(() => shiftRecurrence(monthly, 1)).toThrow(
+      expect.toSatisfy(UnsupportedFunctionalityError.isInstance),
+    );
+  });
+
   it.each([
-    ['EXDATE', ['RRULE:FREQ=DAILY', 'EXDATE:20300201T150000Z']],
     ['HOURLY', ['RRULE:FREQ=HOURLY']],
     ['a day past the 28th', ['RRULE:FREQ=MONTHLY;BYMONTHDAY=31']],
     ['a start past the 28th without BYMONTHDAY', ['RRULE:FREQ=MONTHLY']],
     ['different nth weekdays', ['RRULE:FREQ=MONTHLY;BYDAY=1MO,2TU']],
     ['BYHOUR', ['RRULE:FREQ=DAILY;BYHOUR=9']],
+    // Without BYMONTH this is the 7th of every month.
+    ['YEARLY BYMONTHDAY without BYMONTH', ['RRULE:FREQ=YEARLY;BYMONTHDAY=7']],
   ])('refuses rules Outlook would schedule differently: %s', (_, lines) => {
     expect(() => toGraphRecurrence(lines, start)).toThrow(
       expect.toSatisfy(UnsupportedFunctionalityError.isInstance),

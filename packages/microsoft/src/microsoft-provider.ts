@@ -15,19 +15,29 @@ import {
 } from '@calsdk/provider';
 import {
   type AccessToken,
-  addDaysToDate,
   createJsonFetcher,
   type FetchFunction,
+  formatLocalDate,
   formatZonedDateTime,
+  instantToLocal,
   isAllDay,
+  localToInstant,
   mapAPICallError,
   parseProviderOptions,
   type QueryValue,
   urlPath,
 } from '@calsdk/provider-utils';
 import type { z } from 'zod';
-import { eventTimes, fromGraphEvent, type GraphEventWrite, toGraphWrite } from './convert-event';
-import { graphTimeToInstant, toGraphTime } from './graph-time';
+import {
+  cancelledDates,
+  eventTimes,
+  eventZone,
+  fromGraphEvent,
+  type GraphEventWrite,
+  toGraphWrite,
+} from './convert-event';
+import { shiftRecurrence } from './convert-recurrence';
+import { graphTimeToInstant } from './graph-time';
 import {
   type GraphEvent,
   graphCalendarListSchema,
@@ -155,6 +165,43 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
     );
   }
 
+  /** Ids of a series' deleted occurrences. Graph returns them only for one event by id. */
+  async function readCancelled(call: Call, calendarId: string, eventId: string) {
+    const raw = await request(
+      call,
+      { resource: { type: 'event', id: eventId } },
+      {
+        method: 'GET',
+        path: eventPath(calendarId, eventId),
+        query: { $select: 'cancelledOccurrences' },
+        schema: graphEventSchema,
+      },
+    );
+    return raw.cancelledOccurrences;
+  }
+
+  /** Adds a series master's deleted occurrences, which become EXDATE lines. */
+  async function withCancelled(call: Call, calendarId: string, raw: GraphEvent) {
+    if (raw.type !== 'seriesMaster') return raw;
+    try {
+      return { ...raw, cancelledOccurrences: await readCancelled(call, calendarId, raw.id) };
+    } catch (error) {
+      // Deleted since it was read. A sync reports the deletion next round.
+      if (NotFoundError.isInstance(error)) return raw;
+      throw error;
+    }
+  }
+
+  async function allWithCancelled(call: Call, calendarId: string, raws: GraphEvent[]) {
+    const result: GraphEvent[] = [];
+    // One request per master, at most four at a time: Outlook's limit per mailbox.
+    for (let index = 0; index < raws.length; index += 4) {
+      const batch = raws.slice(index, index + 4);
+      result.push(...(await Promise.all(batch.map((raw) => withCancelled(call, calendarId, raw)))));
+    }
+    return result;
+  }
+
   function assertEtag(raw: GraphEvent, ifMatch: string | undefined) {
     if (ifMatch !== undefined && raw['@odata.etag'] !== ifMatch) {
       throw new ConflictError({ provider: PROVIDER, eventId: raw.id });
@@ -237,7 +284,7 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
     },
 
     async doGetEvent({ calendarId, eventId, ...call }) {
-      const raw = await getRaw(call, calendarId, eventId);
+      const raw = await withCancelled(call, calendarId, await getRaw(call, calendarId, eventId));
       return { event: fromGraphEvent(raw, { calendarId }), warnings: [] };
     },
 
@@ -265,38 +312,30 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
       const page = await request(
         call,
         { resource: { type: 'calendar', id: calendarId } },
-        pageToken !== undefined
-          ? { method: 'GET', path: pageToken, schema: graphEventListSchema }
-          : expandRecurring
-            ? {
-                method: 'GET',
-                path: `${calendarPath(calendarId)}/calendarView`,
-                query: {
-                  startDateTime: min,
-                  endDateTime: max,
-                  $orderby: 'start/dateTime',
-                  $top: top,
-                },
-                schema: graphEventListSchema,
-              }
-            : {
-                method: 'GET',
-                path: `${calendarPath(calendarId)}/events`,
-                query: {
-                  // A series master's own times are its first occurrence, so masters are
-                  // fetched by type and narrowed below.
-                  $filter: `type eq 'seriesMaster' or (start/dateTime lt '${max}' and end/dateTime gt '${min}')`,
-                  $orderby: 'start/dateTime',
-                  $top: top,
-                },
-                schema: graphEventListSchema,
-              },
+        {
+          method: 'GET',
+          path: `${calendarPath(calendarId)}/${expandRecurring ? 'calendarView' : 'events'}`,
+          query:
+            pageToken !== undefined
+              ? linkQuery(pageToken)
+              : expandRecurring
+                ? { startDateTime: min, endDateTime: max, $orderby: 'start/dateTime', $top: top }
+                : {
+                    // A series master's own times are its first occurrence, so masters are
+                    // fetched by type and narrowed below.
+                    $filter: `type eq 'seriesMaster' or (start/dateTime lt '${max}' and end/dateTime gt '${min}')`,
+                    $orderby: 'start/dateTime',
+                    $top: top,
+                  },
+          schema: graphEventListSchema,
+        },
       );
-      const events = page.value
-        .filter(
-          (raw) => expandRecurring || raw.type !== 'seriesMaster' || seriesOverlaps(raw, min, max),
-        )
-        .map((raw) => fromGraphEvent(raw, { calendarId }));
+      const inWindow = page.value.filter(
+        (raw) => expandRecurring || raw.type !== 'seriesMaster' || seriesOverlaps(raw, min, max),
+      );
+      const events = (await allWithCancelled(call, calendarId, inWindow)).map((raw) =>
+        fromGraphEvent(raw, { calendarId }),
+      );
       return { events, nextPageToken: page['@odata.nextLink'], warnings: [] };
     },
 
@@ -348,9 +387,13 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
 
       if (!current || !series) {
         const seriesStart = patch.start ?? (current && eventTimes(current).start);
-        const body = { ...toGraphWrite(patch, { seriesStart, warnings }), ...options };
+        const cancelled = patch.recurrence
+          ? cancelledDates(await readCancelled(call, calendarId, eventId))
+          : undefined;
+        const body = { ...toGraphWrite(patch, { seriesStart, cancelled, warnings }), ...options };
         const raw = await patchRaw(call, calendarId, eventId, body, ifMatch);
-        return { event: fromGraphEvent(raw, { calendarId }), warnings };
+        const updated = await withCancelled(call, calendarId, raw);
+        return { event: fromGraphEvent(updated, { calendarId }), warnings };
       }
       if (scope === 'thisAndFollowing') throw thisAndFollowingUnsupported();
       assertEtag(current, ifMatch);
@@ -361,29 +404,30 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
             'Recurrence cannot be changed through a single instance. Update the series id instead.',
         });
       }
-      // Times move the whole series by the distance this instance moves.
+      // Times move the whole series by the distance this instance moves, measured on the
+      // series' wall clock so occurrences keep their local time across DST changes.
+      const zone = eventZone(series);
       const instance = eventTimes(current);
       const master = eventTimes(series);
       const shifted = {
         ...patch,
-        ...(patch.start && { start: shiftTime(master.start, instance.start, patch.start) }),
-        ...(patch.end && { end: shiftTime(master.end, instance.end, patch.end) }),
+        ...(patch.start && { start: shiftTime(master.start, instance.start, patch.start, zone) }),
+        ...(patch.end && { end: shiftTime(master.end, instance.end, patch.end, zone) }),
       };
       const body = {
         ...toGraphWrite(shifted, { seriesStart: shifted.start ?? master.start, warnings }),
         ...options,
       };
-      // Outlook ties the pattern's start date to the series start, so moving the series to
-      // another day rewrites the pattern from there.
+      // Outlook's pattern names the series' first date and weekdays, so they move too.
       if (shifted.start && series.recurrence) {
-        const startDate = toGraphTime(shifted.start).dateTime.slice(0, 10);
-        body.recurrence = {
-          ...series.recurrence,
-          range: { ...series.recurrence.range, startDate },
-        };
+        const days =
+          Math.floor(wallClock(shifted.start, zone) / DAY_MS) -
+          Math.floor(wallClock(master.start, zone) / DAY_MS);
+        body.recurrence = shiftRecurrence(series.recurrence, days);
       }
       const raw = await patchRaw(call, calendarId, series.id, body, series['@odata.etag']);
-      return { event: fromGraphEvent(raw, { calendarId }), warnings };
+      const updated = await withCancelled(call, calendarId, raw);
+      return { event: fromGraphEvent(updated, { calendarId }), warnings };
     },
 
     async doDeleteEvent({ calendarId, eventId, scope = 'this', ifMatch, sendUpdates, ...call }) {
@@ -420,28 +464,33 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
         { resource: { type: 'calendar', id: calendarId }, syncCalendarId: calendarId },
         {
           method: 'GET',
+          path: `${calendarPath(calendarId)}/calendarView/delta`,
           // Graph links carry the window and the sync state.
-          path: link ?? `${calendarPath(calendarId)}/calendarView/delta`,
           query:
             link === undefined
               ? {
                   startDateTime: options?.timeMin ?? new Date(now - 365 * DAY_MS).toISOString(),
                   endDateTime: options?.timeMax ?? new Date(now + 2 * 365 * DAY_MS).toISOString(),
                 }
-              : undefined,
+              : linkQuery(link),
           headers: { prefer: `${PREFER}, odata.maxpagesize=${SYNC_PAGE_SIZE}` },
           schema: graphEventListSchema,
         },
       );
       // Unmodified occurrences arrive as stubs without details. Like other providers'
-      // syncs, changes cover singles, series masters and exceptions only.
-      const changes = page.value.flatMap((raw): SyncChangeV1[] =>
-        raw['@removed'] !== undefined
-          ? [{ type: 'delete', eventId: raw.id }]
-          : raw.type === 'occurrence'
-            ? []
-            : [{ type: 'upsert', event: fromGraphEvent(raw, { calendarId }) }],
+      // syncs, changes cover singles, series masters and exceptions only. Deleting one
+      // occurrence changes its master, whose EXDATE lines then show the deletion.
+      const removed = page.value.filter((raw) => raw['@removed'] !== undefined);
+      const kept = page.value.filter(
+        (raw) => raw['@removed'] === undefined && raw.type !== 'occurrence',
       );
+      const changes: SyncChangeV1[] = [
+        ...removed.map((raw) => ({ type: 'delete' as const, eventId: raw.id })),
+        ...(await allWithCancelled(call, calendarId, kept)).map((raw) => ({
+          type: 'upsert' as const,
+          event: fromGraphEvent(raw, { calendarId }),
+        })),
+      ];
       return {
         changes,
         nextPageToken: page['@odata.nextLink'],
@@ -452,16 +501,45 @@ export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalenda
   };
 }
 
+// The longest each pattern unit can be, in days.
+const UNIT_DAYS = {
+  daily: 1,
+  weekly: 7,
+  absoluteMonthly: 31,
+  relativeMonthly: 31,
+  absoluteYearly: 366,
+  relativeYearly: 366,
+};
+
 /** Whether a series master's occurrences can fall inside `[min, max)`. */
 function seriesOverlaps(master: GraphEvent, min: string, max: string): boolean {
-  if (graphTimeToInstant(master.start) >= Date.parse(max)) return false;
-  const { type, endDate } = master.recurrence?.range ?? {};
-  // The last occurrence is on `endDate` in the series' zone: a day of margin covers any zone.
-  return (
-    type !== 'endDate' ||
-    !endDate ||
-    Date.parse(`${endDate}T00:00:00Z`) + 2 * DAY_MS > Date.parse(min)
-  );
+  const start = graphTimeToInstant(master.start);
+  if (start >= Date.parse(max)) return false;
+  if (!master.recurrence) return true;
+  const { pattern, range } = master.recurrence;
+  // A bound on when the last occurrence starts. Outlook puts at least one occurrence in
+  // each pattern unit (a month, a week), so counted series end within that many units.
+  let lastStart: number;
+  if (range.type === 'numbered' && range.numberOfOccurrences) {
+    lastStart =
+      start + range.numberOfOccurrences * pattern.interval * UNIT_DAYS[pattern.type] * DAY_MS;
+  } else if (range.type === 'endDate' && range.endDate) {
+    // The last occurrence is on `endDate` in the series' zone: a day of margin covers any zone.
+    lastStart = Date.parse(`${range.endDate}T00:00:00Z`) + 2 * DAY_MS;
+  } else {
+    return true;
+  }
+  const duration = graphTimeToInstant(master.end) - start;
+  return lastStart + duration > Date.parse(min);
+}
+
+/**
+ * The query of a Graph paging or delta link. Tokens and cursors come back from callers, so
+ * only their query is reused: the path always comes from the requested calendar, and a
+ * tampered link cannot reach another calendar or endpoint.
+ */
+function linkQuery(link: string): Record<string, string> {
+  return Object.fromEntries(new URL(link, 'https://graph.microsoft.com').searchParams);
 }
 
 function warnSendUpdates(sendUpdates: SendUpdatesV1 | undefined, warnings: WarningV1[]) {
@@ -474,14 +552,20 @@ function warnSendUpdates(sendUpdates: SendUpdatesV1 | undefined, warnings: Warni
   }
 }
 
-/** Moves `time` by the distance between `from` and `to`. */
-function shiftTime(time: EventTimeV1, from: EventTimeV1, to: EventTimeV1): EventTimeV1 {
+/** A time on the wall clock of `zone`, as epoch milliseconds read as UTC. */
+function wallClock(time: EventTimeV1, zone: string): number {
+  if (isAllDay(time)) return Date.parse(time.date);
+  return localToInstant(instantToLocal(Date.parse(time.dateTime), zone), 'UTC');
+}
+
+/** Moves `time` by the wall-clock distance between `from` and `to` in `zone`. */
+function shiftTime(time: EventTimeV1, from: EventTimeV1, to: EventTimeV1, zone: string) {
+  const moved = wallClock(time, zone) + wallClock(to, zone) - wallClock(from, zone);
   if (isAllDay(time) && isAllDay(from) && isAllDay(to)) {
-    const days = Math.round((Date.parse(to.date) - Date.parse(from.date)) / DAY_MS);
-    return { date: addDaysToDate(time.date, days) };
+    return { date: formatLocalDate(instantToLocal(moved, 'UTC')) };
   }
   if (!isAllDay(time) && !isAllDay(from) && !isAllDay(to)) {
-    const instant = Date.parse(time.dateTime) + Date.parse(to.dateTime) - Date.parse(from.dateTime);
+    const instant = localToInstant(instantToLocal(moved, 'UTC'), zone);
     return { dateTime: formatZonedDateTime(instant, to.timeZone), timeZone: to.timeZone };
   }
   throw new InvalidArgumentError({

@@ -2,10 +2,12 @@ import {
   type EventTimeV1,
   InvalidArgumentError,
   UnsupportedFunctionalityError,
+  type WarningV1,
 } from '@calsdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
+  formatExdates,
   formatLocalDate,
   formatRRule,
   type ICalDate,
@@ -69,13 +71,33 @@ function seriesStart(start: EventTimeV1) {
 /**
  * Converts RFC 5545 lines to an Outlook recurrence for a series starting at `start`.
  * Throws `UnsupportedFunctionalityError` for rules Outlook cannot represent exactly.
+ *
+ * Outlook keeps no exclusion list, only occurrences deleted one by one. So EXDATE lines are
+ * accepted only for `cancelled` dates (the series' deleted occurrences, as local dates).
  */
-export function toGraphRecurrence(lines: readonly string[], start: EventTimeV1): GraphRecurrence {
+export function toGraphRecurrence(
+  lines: readonly string[],
+  start: EventTimeV1,
+  { cancelled = [], warnings }: { cancelled?: readonly string[]; warnings?: WarningV1[] } = {},
+): GraphRecurrence {
   const parsed = parseRecurrence(lines);
-  if (parsed.exdates.length > 0 || parsed.rdates.length > 0) {
-    throw unsupported('EXDATE or RDATE lines. Delete single occurrences after creating the series');
-  }
+  if (parsed.rdates.length > 0) throw unsupported('RDATE lines');
   if (parsed.other.length > 0) throw unsupported(`"${parsed.other[0]}"`);
+  const series = seriesStart(start);
+  const excluded = new Set(parsed.exdates.map((date) => localDate(date, series)));
+  const added = [...excluded].filter((date) => !cancelled.includes(date));
+  if (added.length > 0) {
+    throw unsupported(
+      `EXDATE lines for occurrences that were not deleted (${added.join(', ')}). Delete those occurrences instead`,
+    );
+  }
+  if (cancelled.some((date) => !excluded.has(date))) {
+    warnings?.push({
+      type: 'unsupported',
+      feature: 'recurrence',
+      details: 'Outlook cannot restore deleted occurrences. They stay deleted.',
+    });
+  }
   const rule = parsed.rrule;
   if (!rule) {
     throw new InvalidArgumentError({
@@ -84,7 +106,6 @@ export function toGraphRecurrence(lines: readonly string[], start: EventTimeV1):
     });
   }
   if (rule.other) throw unsupported(`the RRULE parts ${Object.keys(rule.other).join(', ')}`);
-  const series = seriesStart(start);
   return {
     pattern: toPattern(rule, series),
     range: {
@@ -124,6 +145,10 @@ function toPattern(rule: RRule, series: ReturnType<typeof seriesStart>): Pattern
         : { type: 'absoluteMonthly', interval, dayOfMonth: monthDay(rule, series.local.day) };
     case 'YEARLY': {
       if (byMonth && byMonth.length > 1) throw unsupported('YEARLY rules with several months');
+      // Without BYMONTH, BYDAY and BYMONTHDAY pick days in every month of the year.
+      if (!byMonth && (byDay || byMonthDay)) {
+        throw unsupported('YEARLY rules with BYDAY or BYMONTHDAY but no BYMONTH');
+      }
       const month = byMonth?.[0] ?? series.local.month;
       return byDay
         ? { type: 'relativeYearly', interval, month, ...relativeDays(rule) }
@@ -199,6 +224,16 @@ function lastDate(until: ICalDate, series: ReturnType<typeof seriesStart>): stri
   return occurrenceInstant(date, series) > limit ? addDaysToDate(date, -1) : date;
 }
 
+/** The date an EXDATE falls on in the series' zone. */
+function localDate(date: ICalDate, series: ReturnType<typeof seriesStart>): string {
+  if (date.type === 'date') return date.date;
+  const local = parseLocalDateTime(date.local);
+  if (!local) throw unsupported(`EXDATE ${date.local}`);
+  return formatLocalDate(
+    instantToLocal(localToInstant(local, date.timeZone ?? series.zone), series.zone),
+  );
+}
+
 function occurrenceInstant(date: string, series: ReturnType<typeof seriesStart>): number {
   const day = parseLocalDateTime(date);
   if (!day) return Number.NaN;
@@ -206,8 +241,15 @@ function occurrenceInstant(date: string, series: ReturnType<typeof seriesStart>)
   return localToInstant({ ...day, hour, minute, second }, series.zone);
 }
 
-/** Converts an Outlook recurrence to RFC 5545 lines for a series starting at `start`. */
-export function fromGraphRecurrence(recurrence: GraphRecurrence, start: EventTimeV1): string[] {
+/**
+ * Converts an Outlook recurrence to RFC 5545 lines for a series starting at `start`.
+ * `cancelled` local dates of deleted occurrences become EXDATE lines.
+ */
+export function fromGraphRecurrence(
+  recurrence: GraphRecurrence,
+  start: EventTimeV1,
+  cancelled: readonly string[] = [],
+): string[] {
   const { pattern, range } = recurrence;
   const rule: RRule = { freq: 'DAILY', interval: pattern.interval };
   switch (pattern.type) {
@@ -253,5 +295,59 @@ export function fromGraphRecurrence(recurrence: GraphRecurrence, start: EventTim
       ? { type: 'date', date: range.endDate }
       : instantToICalDate(occurrenceInstant(range.endDate, seriesStart(start)));
   }
-  return [formatRRule(rule)];
+  const exdates = cancelled.map(
+    (date): ICalDate =>
+      isAllDay(start)
+        ? { type: 'date', date }
+        : instantToICalDate(occurrenceInstant(date, seriesStart(start))),
+  );
+  return [formatRRule(rule), ...formatExdates(exdates)];
+}
+
+const GRAPH_WEEKDAYS = Object.values(TO_GRAPH_WEEKDAY);
+
+/**
+ * Moves a series `days` days, keeping every occurrence the same distance from the first.
+ * Throws for monthly and yearly patterns, which pick days by date and do not move with it.
+ */
+export function shiftRecurrence(recurrence: GraphRecurrence, days: number): GraphRecurrence {
+  if (days === 0) return recurrence;
+  const { pattern, range } = recurrence;
+  return {
+    pattern: shiftPattern(pattern, days),
+    range: {
+      ...range,
+      startDate: addDaysToDate(range.startDate, days),
+      ...(range.type === 'endDate' && range.endDate
+        ? { endDate: addDaysToDate(range.endDate, days) }
+        : {}),
+    },
+  };
+}
+
+function shiftPattern(pattern: Pattern, days: number): Pattern {
+  if (pattern.type === 'daily') return pattern;
+  if (pattern.type === 'weekly') {
+    const first = GRAPH_WEEKDAYS.indexOf(pattern.firstDayOfWeek ?? 'sunday');
+    const step = ((days % 7) + 7) % 7;
+    // Each day's place in the week, counted from the first day of the week.
+    const places = (pattern.daysOfWeek ?? []).map(
+      (day) => (GRAPH_WEEKDAYS.indexOf(day) - first + 7) % 7,
+    );
+    const wraps = places.map((place) => place + step >= 7);
+    // Every few weeks, days moving into the next week while others stay would no longer
+    // share a week.
+    if (pattern.interval === 1 || wraps.every((wrap) => wrap === wraps[0])) {
+      return {
+        ...pattern,
+        daysOfWeek: places.map((place) => GRAPH_WEEKDAYS[(first + place + step) % 7] ?? 'sunday'),
+      };
+    }
+  }
+  throw new UnsupportedFunctionalityError({
+    provider: 'microsoft',
+    functionality: 'moving a series to another day',
+    message:
+      'Outlook cannot move this series to another day through one occurrence: its pattern would pick different days. Update the series id with a new start and recurrence instead.',
+  });
 }

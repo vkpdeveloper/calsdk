@@ -67,6 +67,9 @@ export const graphEventSchema = z.object({
   end: graphTimeSchema.optional(),
   isAllDay: z.boolean().optional(),
   isCancelled: z.boolean().optional(),
+  // Ids of deleted occurrences, `OID.<series id>.<local date>`. Only returned when one
+  // series master is read with `$select`.
+  cancelledOccurrences: z.array(z.string()).optional(),
   recurrence: graphRecurrenceSchema.nullish(),
   showAs: z.string().optional(),
   sensitivity: z.string().optional(),

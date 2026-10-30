@@ -4,7 +4,7 @@ import { vi } from 'vitest';
 import { microsoft } from './microsoft-provider';
 
 // A dedicated calendar created for recording and deleted afterwards.
-const CALENDAR_ID = 'AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0AfpKkyEv5x0_7_nu4Sv5u3wAJDb-C5AAA';
+const CALENDAR_ID = 'AAkALgAAAAAAHYQDEapmEc2byACqAC-EWg0AfpKkyEv5x0_7_nu4Sv5u3wAJDb-XlwAA';
 
 // An initial sync covers a window around today, so today is fixed for the recorded URLs.
 vi.useFakeTimers({ toFake: ['Date'], now: new Date('2029-12-01T00:00:00Z') });

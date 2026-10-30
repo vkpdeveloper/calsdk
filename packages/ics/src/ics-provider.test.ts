@@ -612,27 +612,38 @@ describe('ics provider', () => {
       24,
     );
     // Searching for a fifth Monday passes the window, but the second Tuesday is inside it.
-    const mixed = [
+    // ical.js starts these rules on a time BYSETPOS may rule out: February 8 is not the second
+    // of its month, nor February 7 the last.
+    const monthly = [
+      ['mixed', 'FREQ=MONTHLY;BYDAY=5MO,2TU'],
+      ['second', 'FREQ=MONTHLY;BYDAY=5MO,2TU;BYSETPOS=2'],
+      ['last', 'FREQ=MONTHLY;BYDAY=-1FR,1MO;BYSETPOS=-1;COUNT=2'],
+    ].flatMap(([uid, rule]) => [
       'BEGIN:VEVENT',
-      'UID:mixed@example.com',
+      `UID:${uid}@example.com`,
       'DTSTART:20280201T100000Z',
       'DURATION:PT1H',
-      'RRULE:FREQ=MONTHLY;BYDAY=5MO,2TU',
+      `RRULE:${rule}`,
       'END:VEVENT',
-    ].join('\r\n');
-    const mixedFeed = ics({ url: URL_, fetch: serve(() => feed({ extra: mixed })).fetch });
-    const february = await mixedFeed.doListEvents({
+    ]);
+    const monthlyFeed = ics({
+      url: URL_,
+      fetch: serve(() => feed({ extra: monthly.join('\r\n') })).fetch,
+    });
+    const spring = await monthlyFeed.doListEvents({
       calendarId: 'primary',
       timeMin: '2028-02-02T00:00:00Z',
-      timeMax: '2028-03-01T00:00:00Z',
+      timeMax: '2028-05-01T00:00:00Z',
       expandRecurring: true,
     });
-    expect(
-      february.events
-        .filter((event) => event.seriesId === 'mixed@example.com')
-        .map((event) => event.start),
-    ).toEqual([{ dateTime: '2028-02-08T15:30:00+05:30', timeZone: 'Asia/Kolkata' }]);
-    expect(february.warnings).toEqual([]);
+    const days = (uid: string) =>
+      spring.events
+        .filter((event) => event.seriesId === uid)
+        .map((event) => event.start.dateTime?.slice(0, 10));
+    expect(days('mixed@example.com')).toEqual(['2028-02-08', '2028-03-14', '2028-04-11']);
+    expect(days('second@example.com')).toEqual([]);
+    expect(days('last@example.com')).toEqual(['2028-02-25', '2028-03-31']);
+    expect(spring.warnings).toEqual([]);
   }, 15_000);
 
   it('reads each recurrence date in its own zone, and always starts at DTSTART', async () => {

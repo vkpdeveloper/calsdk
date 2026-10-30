@@ -1,0 +1,14 @@
+{
+  "name": "calsdk-quickstart",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "bun --conditions=@calsdk/source src/index.ts"
+  },
+  "dependencies": {
+    "@calsdk/google": "workspace:*",
+    "@calsdk/microsoft": "workspace:*",
+    "@calsdk/mock": "workspace:*",
+    "calsdk": "workspace:*"
+  }
+}

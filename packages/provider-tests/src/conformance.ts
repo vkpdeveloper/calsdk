@@ -210,14 +210,16 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
           patch: { title: 'calsdk conformance (renamed)', description: 'notes' },
         });
         expectValidEvent(updated.event);
+        // The provider may replace the event on any update: use the returned id from here on.
+        let id = updated.event.id;
+        if (id !== event.id) created.push(id);
         expect(updated.event).toMatchObject({
-          id: event.id,
           title: 'calsdk conformance (renamed)',
           description: 'notes',
         });
         expectSameTime(updated.event.start, input.start);
 
-        const stored = (await provider.doGetEvent({ calendarId, eventId: event.id })).event;
+        const stored = (await provider.doGetEvent({ calendarId, eventId: id })).event;
         expect(stored).toMatchObject({
           title: 'calsdk conformance (renamed)',
           description: 'notes',
@@ -225,21 +227,23 @@ export function describeProviderConformance(options: ProviderConformanceOptions)
         expectSameTime(stored.start, input.start);
         expectSameTime(stored.end, input.end);
 
-        await provider.doUpdateEvent({
+        const clearing = await provider.doUpdateEvent({
           calendarId,
-          eventId: event.id,
+          eventId: id,
           patch: { description: null },
         });
-        const cleared = (await provider.doGetEvent({ calendarId, eventId: event.id })).event;
+        if (clearing.event.id !== id) created.push(clearing.event.id);
+        id = clearing.event.id;
+        const cleared = (await provider.doGetEvent({ calendarId, eventId: id })).event;
         expect(cleared.description ?? '').toBe('');
         expect(cleared.title).toBe('calsdk conformance (renamed)');
 
-        await provider.doDeleteEvent({ calendarId, eventId: event.id });
-        await expect(provider.doGetEvent({ calendarId, eventId: event.id })).rejects.toSatisfy(
+        await provider.doDeleteEvent({ calendarId, eventId: id });
+        await expect(provider.doGetEvent({ calendarId, eventId: id })).rejects.toSatisfy(
           NotFoundError.isInstance,
         );
         await expect(
-          provider.doUpdateEvent({ calendarId, eventId: event.id, patch: { title: 'gone' } }),
+          provider.doUpdateEvent({ calendarId, eventId: id, patch: { title: 'gone' } }),
         ).rejects.toSatisfy(NotFoundError.isInstance);
       },
       timeout,

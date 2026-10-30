@@ -4,7 +4,7 @@ import { google } from './google-provider';
 
 // A dedicated calendar created for recording and deleted afterwards.
 const CALENDAR_ID =
-  'ad710f205f415aa90281028b3d83fae05c4a7bba7bcb17126acbcc734e53c94d@group.calendar.google.com';
+  'ba0f94bfb3fb80b2a5805cf9040d6a5b2f94173fb79357bb1d16c2d91662350c@group.calendar.google.com';
 
 // Replays test/fixtures/conformance.json. To re-record, create a test calendar, set
 // CALENDAR_ID, and run with CALSDK_RECORD=1 and GOOGLE_ACCESS_TOKEN set.

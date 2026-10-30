@@ -38,13 +38,20 @@ export type ProviderOptions = ProviderOptionsV1;
 export type ProviderMetadata = ProviderMetadataV1;
 
 /**
+ * Whether `A` and `B` are the same type. Assignability is not enough: the default
+ * `ProviderTypesV1` also satisfies declarations whose options are all optional.
+ */
+type IsExactly<A, B> =
+  (<T>() => T extends A ? 1 : 2) extends <T>() => T extends B ? 1 : 2 ? true : false;
+
+/**
  * The types `P` declares, or `undefined` when it declares none: it has no `~types`, or
  * keeps the default of `CalendarProviderV1`.
  */
 type DeclaredTypes<P> = P extends { readonly '~types'?: infer Types }
   ? unknown extends Types
     ? undefined
-    : ProviderTypesV1 extends NonNullable<Types>
+    : IsExactly<NonNullable<Types>, ProviderTypesV1> extends true
       ? undefined
       : NonNullable<Types>
   : undefined;

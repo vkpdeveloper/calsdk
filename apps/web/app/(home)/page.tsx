@@ -126,7 +126,10 @@ const PAYLOADS = [
         "thursday", "friday"«repeat»
       ]«repeat»
     },«repeat»
-    "range": { "type": "noEnd" }«repeat»
+    "range": {«repeat»
+      "type": "noEnd",«repeat»
+      "startDate": "2026-11-09"«repeat»
+    }«repeat»
   },«repeat»
   "onlineMeeting": {«link»
     "joinUrl": "https://teams.microsoft.com/l/..."«link»
@@ -154,14 +157,22 @@ END:VEVENT`,
 {
   "topic": "Standup",«title»
   "type": 8,
-  "start_time": "2026-11-09T14:30:00Z",«start»
   "timezone": "America/New_York",«start»
-  "duration": 15,
   "recurrence": {«repeat»
     "type": 2,«repeat»
     "repeat_interval": 1,«repeat»
     "weekly_days": "2,3,4,5,6"«repeat»
   },«repeat»
+  "occurrences": [«start»
+    {«start»
+      "start_time": "2026-11-09T14:30:00Z",«start»
+      "duration": 15«start»
+    },«start»
+    {
+      "start_time": "2026-11-10T14:30:00Z",
+      "duration": 15
+    }
+  ],
   "join_url": "https://zoom.us/j/85512345678"«link»
 }`,
   },
@@ -178,6 +189,7 @@ const EVENT_CODE = `
   recurrence: [«repeat»
     'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',«repeat»
   ],«repeat»
+  // Meet, Teams or Zoom. None on iCloud.
   conference: {«link»
     provider: 'teams',«link»
     joinUrl: 'https://teams.microsoft.com/l/...',«link»
@@ -620,11 +632,15 @@ function Capability({ label, value }: { label: string; value: Support }) {
   return (
     <li className="flex items-center gap-2 sm:gap-3">
       <span
+        aria-hidden
         className={`size-2 shrink-0 rounded-full ${
           value === false ? 'border border-neutral-700' : 'bg-accent-blue'
         }`}
       />
-      <span className={value === false ? 'text-neutral-600' : 'text-neutral-200'}>{label}</span>
+      <span className={value === false ? 'text-neutral-600' : 'text-neutral-200'}>
+        {label}
+        <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
+      </span>
       {typeof value === 'string' && (
         <span className="text-xs text-neutral-500 sm:ml-auto sm:text-right">{value}</span>
       )}

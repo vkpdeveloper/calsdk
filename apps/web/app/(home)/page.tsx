@@ -82,7 +82,7 @@ event.conference?.joinUrl;`,
     label: 'Recurring events',
     note: 'Series are plain RRULEs. Listing expands them, and each instance has its own id.',
     code: `
-await createEvent({
+const { event: series } = await createEvent({
   calendar,
   event: {
     title: 'Standup',
@@ -92,8 +92,9 @@ await createEvent({
   },
 });
 
-const { events } = await listEvents({ calendar, timeMin: '2026-11-09', timeMax: '2026-11-14' });
-const [, , , , friday] = events; // Monday to Friday
+const { events } = await listEvents({ calendar, timeMin: '2026-11-13', timeMax: '2026-11-14' });
+const friday = events.find((event) => event.seriesId === series.id);
+if (!friday) throw new Error('No standup on Friday');
 
 // Move only Friday's standup. 'all' and 'thisAndFollowing' change more of the series.
 await updateEvent({
@@ -286,8 +287,8 @@ export default async function HomePage() {
             No vendor SDKs. It runs on Node, Bun, Deno and edge runtimes.
           </Point>
           <Point title="Tested against real accounts">
-            Every provider is recorded against its real API and replayed in CI by one shared test
-            suite.
+            Each provider that connects to an account is recorded against its real API, and the
+            recordings replay in CI.
           </Point>
           <Point title="Clear about gaps">
             When a provider cannot do something, you get a warning or an error, never a quietly

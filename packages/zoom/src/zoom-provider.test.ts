@@ -226,7 +226,10 @@ function stub(meetings: Meeting[]) {
 const calendarId = 'primary';
 
 describe('zoom with a stubbed API', () => {
-  afterEach(() => vi.useRealTimers());
+  afterEach(() => {
+    vi.useRealTimers();
+    vi.restoreAllMocks();
+  });
 
   it('expands series into occurrences and exceptions, and pages in start order', async () => {
     const moved = series(2, {
@@ -395,21 +398,30 @@ describe('zoom with a stubbed API', () => {
   });
 
   it('undoes a move Zoom schedules no meetings for, and deletes series without meetings', async () => {
-    let current = series(2);
+    // The second meeting was moved on its own, and the third deleted.
+    const before = series(2, {
+      1: { start_time: '2030-01-02T11:00:00Z' },
+      2: { status: 'deleted' },
+    });
+    let current = before;
     const patches: unknown[] = [];
     const methods: string[] = [];
     const provider = zoom({
       accessToken: 'test',
       fetch: async (input, init) => {
         const request = new Request(input, init);
-        methods.push(request.method);
+        const occurrence = new URL(request.url).searchParams.get('occurrence_id');
+        methods.push(`${request.method}${occurrence ? ` ${occurrence}` : ''}`);
         if (request.method === 'GET') return Response.json(current);
         if (request.method === 'PATCH') {
           const body = (await request.json()) as { start_time?: string };
           patches.push(body);
-          // Zoom keeps the series, but schedules none of its meetings years ahead.
-          const ahead = body.start_time?.startsWith('2040');
-          current = ahead ? { ...series(2), occurrences: [] } : series(2);
+          // Moving a series schedules all its meetings anew, and none of them years ahead.
+          if (!occurrence) {
+            current = body.start_time?.startsWith('2040')
+              ? { ...series(2), occurrences: [] }
+              : series(2);
+          }
         }
         return new Response(null, { status: 204 });
       },
@@ -433,14 +445,39 @@ describe('zoom with a stubbed API', () => {
       timezone: ZONE,
       recurrence: { type: 1, repeat_interval: 1, end_times: 3 },
     });
-    expect((await provider.doGetEvent({ calendarId, eventId: '2' })).event.start.dateTime).toBe(
-      '2030-01-01T10:00:00+00:00',
-    );
+    // The meetings changed on their own are changed again.
+    const [, second, third] = before.occurrences ?? [];
+    expect(methods.slice(-2)).toEqual([
+      `PATCH ${second?.occurrence_id}`,
+      `DELETE ${third?.occurrence_id}`,
+    ]);
+    expect(patches[2]).toEqual({ start_time: '2030-01-02T11:00:00Z', duration: 15 });
 
     current = { ...series(2), occurrences: [] };
     await expect(provider.doGetEvent({ calendarId, eventId: '2' })).rejects.toThrow(NotFoundError);
     await provider.doDeleteEvent({ calendarId, eventId: '2' });
     expect(methods.at(-1)).toBe('DELETE');
+  });
+
+  it('sends a request Zoom turned away over its per-second limit again', async () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0);
+    let calls = 0;
+    const provider = zoom({
+      accessToken: 'test',
+      fetch: async () => {
+        calls += 1;
+        if (calls < 3) {
+          return Response.json(
+            { code: 429, message: 'You have reached the maximum per-second rate limit.' },
+            { status: 429, headers: { 'x-ratelimit-type': 'QPS', 'retry-after-ms': '0' } },
+          );
+        }
+        return Response.json({ email: 'me@example.com', timezone: ZONE });
+      },
+    });
+    const { calendars } = await provider.doListCalendars({});
+    expect(calendars[0]?.timeZone).toBe(ZONE);
+    expect(calls).toBe(3);
   });
 
   it('reads the meetings of one series at a time, as Zoom limits requests per second', async () => {

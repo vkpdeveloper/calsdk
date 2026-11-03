@@ -22,6 +22,7 @@ import {
   isAllDay,
   isValidTimeZone,
   mapAPICallError,
+  parseRetryAfterMs,
   type QueryValue,
   urlPath,
 } from '@calsdk/provider-utils';
@@ -67,6 +68,8 @@ const BASE_URL = 'https://api.zoom.us/v2';
 const MAX_PAGE_SIZE = 300;
 const MINUTE = 60_000;
 const MAX_MINUTES = 1440;
+const SECOND = 1000;
+const MAX_ATTEMPTS = 5;
 
 type Call = Pick<CallOptionsV1, 'headers' | 'abortSignal'>;
 type Resource = { type: 'calendar' | 'event'; id: string };
@@ -98,19 +101,29 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
       schema?: z.ZodType<Output>;
     },
   ): Promise<Output> {
-    try {
-      const { value } = await api({
-        ...options,
-        headers: call.headers,
-        abortSignal: call.abortSignal,
-      });
-      return value;
-    } catch (error) {
-      // Zoom answers ids that name no meeting or occurrence with a 400 and code 300.
-      if (resource && isInvalidId(error)) {
-        throw new NotFoundError({ provider: PROVIDER, resource: resource.type, id: resource.id });
+    for (let attempt = 1; ; attempt++) {
+      try {
+        const { value } = await api({
+          ...options,
+          headers: call.headers,
+          abortSignal: call.abortSignal,
+        });
+        return value;
+      } catch (error) {
+        // Zoom allows a few requests per second, and listing reads every series. A request
+        // over that limit was not carried out, so it is sent again a little later, at a
+        // random point so that requests turned away together do not collide again.
+        if (attempt < MAX_ATTEMPTS && isPerSecondLimit(error)) {
+          const delay = parseRetryAfterMs(error.responseHeaders) ?? SECOND * attempt;
+          await wait(delay + Math.random() * SECOND, call.abortSignal);
+          continue;
+        }
+        // Zoom answers ids that name no meeting or occurrence with a 400 and code 300.
+        if (resource && isInvalidId(error)) {
+          throw new NotFoundError({ provider: PROVIDER, resource: resource.type, id: resource.id });
+        }
+        throw mapAPICallError(error, { provider: PROVIDER, resource });
       }
-      throw mapAPICallError(error, { provider: PROVIDER, resource });
     }
   }
 
@@ -290,6 +303,25 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
           },
         },
       );
+      // Rescheduling the series brought back its meetings changed on their own. Their ids
+      // are their original starts again, as the schedule is.
+      for (const occurrence of meeting.occurrences ?? []) {
+        const query = { occurrence_id: occurrence.occurrence_id };
+        if (isDeleted(occurrence)) {
+          await request(call, { type: 'event', id: eventId }, { method: 'DELETE', path, query });
+        } else if (fromOccurrence(meeting, occurrence, { details: false }).kind === 'exception') {
+          await request(
+            call,
+            { type: 'event', id: eventId },
+            {
+              method: 'PATCH',
+              path,
+              query,
+              body: { start_time: occurrence.start_time, duration: occurrence.duration },
+            },
+          );
+        }
+      }
       throw unsupported(
         'recurrence',
         'Zoom does not schedule the meetings of a series that starts this far ahead, so the change was undone.',
@@ -648,6 +680,30 @@ function overlaps(start: EventTimeV1, end: EventTimeV1, min: number, max: number
 const compare = (a: string, b: string) => (a < b ? -1 : a > b ? 1 : 0);
 
 const invitees = (attendees: { email: string }[]) => attendees.map(({ email }) => ({ email }));
+
+function isPerSecondLimit(error: unknown): error is APICallError {
+  return (
+    APICallError.isInstance(error) &&
+    error.statusCode === 429 &&
+    // Daily limits last until the next day, so those fail at once.
+    error.responseHeaders?.['x-ratelimit-type'] === 'QPS'
+  );
+}
+
+function wait(ms: number, abortSignal: AbortSignal | undefined): Promise<void> {
+  return new Promise((resolve, reject) => {
+    abortSignal?.throwIfAborted();
+    const onAbort = () => {
+      clearTimeout(timeout);
+      reject(abortSignal?.reason);
+    };
+    const timeout = setTimeout(() => {
+      abortSignal?.removeEventListener('abort', onAbort);
+      resolve();
+    }, ms);
+    abortSignal?.addEventListener('abort', onAbort, { once: true });
+  });
+}
 
 function isInvalidId(error: unknown): boolean {
   if (!APICallError.isInstance(error) || error.statusCode !== 400) return false;

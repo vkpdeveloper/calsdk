@@ -8,11 +8,12 @@ import { calendly } from '@calsdk/calendly';
 import { google } from '@calsdk/google';
 import { ics } from '@calsdk/ics';
 import { microsoft } from '@calsdk/microsoft';
+import { zoom } from '@calsdk/zoom';
 import { listCalendars } from 'calsdk';
 import './index';
 
 // One body that every API's calendar list schemas accept. Cal.com reads a profile and a
-// list of event types, Calendly a profile.
+// list of event types, Calendly and Zoom a profile.
 const fetch = async (input: RequestInfo | URL) =>
   Response.json({
     items: [{ id: 'g', primary: true, accessRole: 'owner' }],
@@ -35,6 +36,7 @@ for (const calendar of [
   microsoft({ accessToken: 't', fetch }),
   calcom({ accessToken: 't', fetch }),
   calendly({ accessToken: 't', fetch }),
+  zoom({ accessToken: 't', fetch }),
   ics({ url: 'https://example.com/feed.ics', fetch: async () => new Response(FEED) }),
   caldav({
     serverUrl: 'https://dav.example.com/',

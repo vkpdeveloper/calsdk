@@ -1,0 +1,1580 @@
+{
+  "zoom provider conformance > creates, reads, updates and deletes a timed event": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk conformance",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 88588171547,
+                "uuid": "meeting-uuid-1",
+                "topic": "calsdk series",
+                "type": 8,
+                "start_time": "2027-01-25T15:30:00Z",
+                "duration": 30,
+                "timezone": "America/New_York",
+                "agenda": "Weekly",
+                "created_at": "2026-11-03T20:27:36Z",
+                "join_url": "https://us05web.zoom.us/j/88588171547"
+              },
+              {
+                "id": 84096017761,
+                "uuid": "meeting-uuid-0",
+                "topic": "calsdk conformance",
+                "type": 2,
+                "start_time": "2030-01-07T14:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:37Z",
+                "join_url": "https://us05web.zoom.us/j/84096017761"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/88588171547?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 88588171547,
+            "uuid": "meeting-uuid-1",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:27:36Z",
+            "join_url": "https://us05web.zoom.us/j/88588171547",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/84096017761",
+        "body": {
+          "json": {
+            "topic": "calsdk conformance (renamed)",
+            "agenda": "notes"
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "notes",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "notes",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "notes",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/84096017761",
+        "body": {
+          "json": {
+            "agenda": ""
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 84096017761,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk conformance (renamed)",
+            "type": 2,
+            "start_time": "2030-01-07T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:37Z",
+            "join_url": "https://us05web.zoom.us/j/84096017761",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/84096017761"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 84096017761."
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 84096017761."
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/84096017761?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 84096017761."
+          }
+        }
+      }
+    }
+  ],
+  "zoom provider conformance > keeps the time zone an event was scheduled in": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "type": 2,
+            "start_time": "2030-01-08T09:30:00Z",
+            "timezone": "Asia/Kolkata",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87111772832,
+            "uuid": "meeting-uuid-2",
+            "topic": "Zoom Meeting",
+            "type": 2,
+            "start_time": "2030-01-08T09:30:00Z",
+            "duration": 60,
+            "timezone": "Asia/Kolkata",
+            "created_at": "2026-11-03T20:27:44Z",
+            "join_url": "https://us05web.zoom.us/j/87111772832",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/87111772832?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87111772832,
+            "uuid": "meeting-uuid-2",
+            "topic": "Zoom Meeting",
+            "type": 2,
+            "start_time": "2030-01-08T09:30:00Z",
+            "duration": 60,
+            "timezone": "Asia/Kolkata",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:44Z",
+            "join_url": "https://us05web.zoom.us/j/87111772832",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/87111772832?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87111772832,
+            "uuid": "meeting-uuid-2",
+            "topic": "Zoom Meeting",
+            "type": 2,
+            "start_time": "2030-01-08T09:30:00Z",
+            "duration": 60,
+            "timezone": "Asia/Kolkata",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:44Z",
+            "join_url": "https://us05web.zoom.us/j/87111772832",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/87111772832?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87111772832,
+            "uuid": "meeting-uuid-2",
+            "topic": "Zoom Meeting",
+            "type": 2,
+            "start_time": "2030-01-08T09:30:00Z",
+            "duration": 60,
+            "timezone": "Asia/Kolkata",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:44Z",
+            "join_url": "https://us05web.zoom.us/j/87111772832",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/87111772832"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    }
+  ],
+  "zoom provider conformance > lists calendars with exactly one primary": [
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "email": "me@example.com",
+            "timezone": "America/Los_Angeles"
+          }
+        }
+      }
+    }
+  ],
+  "zoom provider conformance > pages through events in start order": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk page 9",
+            "type": 2,
+            "start_time": "2030-01-09T14:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89967984345,
+            "uuid": "meeting-uuid-3",
+            "topic": "calsdk page 9",
+            "type": 2,
+            "start_time": "2030-01-09T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:47Z",
+            "join_url": "https://us05web.zoom.us/j/89967984345",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/89967984345?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89967984345,
+            "uuid": "meeting-uuid-3",
+            "topic": "calsdk page 9",
+            "type": 2,
+            "start_time": "2030-01-09T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:47Z",
+            "join_url": "https://us05web.zoom.us/j/89967984345",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk page 11",
+            "type": 2,
+            "start_time": "2030-01-09T16:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89839259833,
+            "uuid": "meeting-uuid-4",
+            "topic": "calsdk page 11",
+            "type": 2,
+            "start_time": "2030-01-09T16:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:48Z",
+            "join_url": "https://us05web.zoom.us/j/89839259833",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/89839259833?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89839259833,
+            "uuid": "meeting-uuid-4",
+            "topic": "calsdk page 11",
+            "type": 2,
+            "start_time": "2030-01-09T16:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:48Z",
+            "join_url": "https://us05web.zoom.us/j/89839259833",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk page 13",
+            "type": 2,
+            "start_time": "2030-01-09T18:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87363190018,
+            "uuid": "meeting-uuid-5",
+            "topic": "calsdk page 13",
+            "type": 2,
+            "start_time": "2030-01-09T18:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:49Z",
+            "join_url": "https://us05web.zoom.us/j/87363190018",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/87363190018?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87363190018,
+            "uuid": "meeting-uuid-5",
+            "topic": "calsdk page 13",
+            "type": 2,
+            "start_time": "2030-01-09T18:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:49Z",
+            "join_url": "https://us05web.zoom.us/j/87363190018",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 89967984345,
+                "uuid": "meeting-uuid-3",
+                "topic": "calsdk page 9",
+                "type": 2,
+                "start_time": "2030-01-09T14:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:47Z",
+                "join_url": "https://us05web.zoom.us/j/89967984345"
+              },
+              {
+                "id": 89839259833,
+                "uuid": "meeting-uuid-4",
+                "topic": "calsdk page 11",
+                "type": 2,
+                "start_time": "2030-01-09T16:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:48Z",
+                "join_url": "https://us05web.zoom.us/j/89839259833"
+              },
+              {
+                "id": 87363190018,
+                "uuid": "meeting-uuid-5",
+                "topic": "calsdk page 13",
+                "type": 2,
+                "start_time": "2030-01-09T18:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:49Z",
+                "join_url": "https://us05web.zoom.us/j/87363190018"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 89967984345,
+                "uuid": "meeting-uuid-3",
+                "topic": "calsdk page 9",
+                "type": 2,
+                "start_time": "2030-01-09T14:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:47Z",
+                "join_url": "https://us05web.zoom.us/j/89967984345"
+              },
+              {
+                "id": 89839259833,
+                "uuid": "meeting-uuid-4",
+                "topic": "calsdk page 11",
+                "type": 2,
+                "start_time": "2030-01-09T16:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:48Z",
+                "join_url": "https://us05web.zoom.us/j/89839259833"
+              },
+              {
+                "id": 87363190018,
+                "uuid": "meeting-uuid-5",
+                "topic": "calsdk page 13",
+                "type": 2,
+                "start_time": "2030-01-09T18:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:49Z",
+                "join_url": "https://us05web.zoom.us/j/87363190018"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/89967984345?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89967984345,
+            "uuid": "meeting-uuid-3",
+            "topic": "calsdk page 9",
+            "type": 2,
+            "start_time": "2030-01-09T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:47Z",
+            "join_url": "https://us05web.zoom.us/j/89967984345",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/89967984345"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/89839259833?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 89839259833,
+            "uuid": "meeting-uuid-4",
+            "topic": "calsdk page 11",
+            "type": 2,
+            "start_time": "2030-01-09T16:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:48Z",
+            "join_url": "https://us05web.zoom.us/j/89839259833",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/89839259833"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/87363190018?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 87363190018,
+            "uuid": "meeting-uuid-5",
+            "topic": "calsdk page 13",
+            "type": 2,
+            "start_time": "2030-01-09T18:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:49Z",
+            "join_url": "https://us05web.zoom.us/j/87363190018",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/87363190018"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    }
+  ],
+  "zoom provider conformance > syncs creates, updates and deletes incrementally": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk existing",
+            "type": 2,
+            "start_time": "2030-01-11T12:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 85221677916,
+            "uuid": "meeting-uuid-6",
+            "topic": "calsdk existing",
+            "type": 2,
+            "start_time": "2030-01-11T12:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:53Z",
+            "join_url": "https://us05web.zoom.us/j/85221677916",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/85221677916?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 85221677916,
+            "uuid": "meeting-uuid-6",
+            "topic": "calsdk existing",
+            "type": 2,
+            "start_time": "2030-01-11T12:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:53Z",
+            "join_url": "https://us05web.zoom.us/j/85221677916",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 85221677916,
+                "uuid": "meeting-uuid-6",
+                "topic": "calsdk existing",
+                "type": 2,
+                "start_time": "2030-01-11T12:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:53Z",
+                "join_url": "https://us05web.zoom.us/j/85221677916"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk sync",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 86988490155,
+            "uuid": "meeting-uuid-7",
+            "topic": "calsdk sync",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "created_at": "2026-11-03T20:27:55Z",
+            "join_url": "https://us05web.zoom.us/j/86988490155",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/86988490155?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 86988490155,
+            "uuid": "meeting-uuid-7",
+            "topic": "calsdk sync",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:55Z",
+            "join_url": "https://us05web.zoom.us/j/86988490155",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 85221677916,
+                "uuid": "meeting-uuid-6",
+                "topic": "calsdk existing",
+                "type": 2,
+                "start_time": "2030-01-11T12:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:53Z",
+                "join_url": "https://us05web.zoom.us/j/85221677916"
+              },
+              {
+                "id": 86988490155,
+                "uuid": "meeting-uuid-7",
+                "topic": "calsdk sync",
+                "type": 2,
+                "start_time": "2030-01-11T14:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:55Z",
+                "join_url": "https://us05web.zoom.us/j/86988490155"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/86988490155?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 86988490155,
+            "uuid": "meeting-uuid-7",
+            "topic": "calsdk sync",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:55Z",
+            "join_url": "https://us05web.zoom.us/j/86988490155",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/86988490155",
+        "body": {
+          "json": {
+            "topic": "calsdk sync v2"
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/86988490155?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 86988490155,
+            "uuid": "meeting-uuid-7",
+            "topic": "calsdk sync v2",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:55Z",
+            "join_url": "https://us05web.zoom.us/j/86988490155",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 85221677916,
+                "uuid": "meeting-uuid-6",
+                "topic": "calsdk existing",
+                "type": 2,
+                "start_time": "2030-01-11T12:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:53Z",
+                "join_url": "https://us05web.zoom.us/j/85221677916"
+              },
+              {
+                "id": 86988490155,
+                "uuid": "meeting-uuid-7",
+                "topic": "calsdk sync v2",
+                "type": 2,
+                "start_time": "2030-01-11T14:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:55Z",
+                "join_url": "https://us05web.zoom.us/j/86988490155"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/86988490155?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 86988490155,
+            "uuid": "meeting-uuid-7",
+            "topic": "calsdk sync v2",
+            "type": 2,
+            "start_time": "2030-01-11T14:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:55Z",
+            "join_url": "https://us05web.zoom.us/j/86988490155",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/86988490155"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 85221677916,
+                "uuid": "meeting-uuid-6",
+                "topic": "calsdk existing",
+                "type": 2,
+                "start_time": "2030-01-11T12:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:53Z",
+                "join_url": "https://us05web.zoom.us/j/85221677916"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 85221677916,
+                "uuid": "meeting-uuid-6",
+                "topic": "calsdk existing",
+                "type": 2,
+                "start_time": "2030-01-11T12:00:00Z",
+                "duration": 60,
+                "timezone": "America/New_York",
+                "created_at": "2026-11-03T20:27:53Z",
+                "join_url": "https://us05web.zoom.us/j/85221677916"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/85221677916?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 85221677916,
+            "uuid": "meeting-uuid-6",
+            "topic": "calsdk existing",
+            "type": 2,
+            "start_time": "2030-01-11T12:00:00Z",
+            "duration": 60,
+            "timezone": "America/New_York",
+            "agenda": "",
+            "created_at": "2026-11-03T20:27:53Z",
+            "join_url": "https://us05web.zoom.us/j/85221677916",
+            "host_email": "me@example.com",
+            "settings": {
+              "meeting_invitees": []
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/85221677916"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/86988490155?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 86988490155."
+          }
+        }
+      }
+    }
+  ]
+}

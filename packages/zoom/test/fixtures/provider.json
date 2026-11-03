@@ -1,0 +1,1233 @@
+{
+  "zoom against the API > creates a series, changes and deletes single meetings of it, and deletes it": [
+    {
+      "request": {
+        "method": "POST",
+        "url": "https://api.zoom.us/v2/users/me/meetings",
+        "body": {
+          "json": {
+            "topic": "calsdk series",
+            "agenda": "Weekly",
+            "type": 8,
+            "start_time": "2027-01-11T15:00:00Z",
+            "timezone": "America/New_York",
+            "duration": 30,
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "end_times": 3,
+              "weekly_days": "2"
+            },
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com"
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 81766864222,
+                "uuid": "meeting-uuid-0",
+                "topic": "calsdk series",
+                "type": 8,
+                "start_time": "2027-01-25T15:30:00Z",
+                "duration": 30,
+                "timezone": "America/New_York",
+                "agenda": "Weekly",
+                "created_at": "2026-11-03T20:28:13Z",
+                "join_url": "https://us05web.zoom.us/j/81766864222"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?occurrence_id=1800284400000",
+        "body": {
+          "json": {
+            "start_time": "2027-01-18T16:00:00Z",
+            "duration": 60
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?occurrence_id=1800889200000"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 81766864222,
+                "uuid": "meeting-uuid-0",
+                "topic": "calsdk series",
+                "type": 8,
+                "start_time": "2027-01-25T15:30:00Z",
+                "duration": 30,
+                "timezone": "America/New_York",
+                "agenda": "Weekly",
+                "created_at": "2026-11-03T20:28:13Z",
+                "join_url": "https://us05web.zoom.us/j/81766864222"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/81766864222",
+        "body": {
+          "json": {
+            "topic": "calsdk series (renamed)"
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799679600000",
+                "start_time": "2027-01-11T15:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800284400000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 60,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800889200000",
+                "start_time": "2027-01-25T15:00:00Z",
+                "duration": 30,
+                "status": "deleted"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PATCH",
+        "url": "https://api.zoom.us/v2/meetings/81766864222",
+        "body": {
+          "json": {
+            "start_time": "2027-01-11T16:00:00Z",
+            "duration": 30,
+            "timezone": "America/New_York",
+            "type": 8,
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "end_times": 3,
+              "weekly_days": "2"
+            }
+          }
+        }
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799683200000",
+                "start_time": "2027-01-11T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800288000000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800892800000",
+                "start_time": "2027-01-25T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/users/me/meetings?type=scheduled&page_size=300"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "meetings": [
+              {
+                "id": 81766864222,
+                "uuid": "meeting-uuid-0",
+                "topic": "calsdk series (renamed)",
+                "type": 8,
+                "start_time": "2027-01-25T16:30:00Z",
+                "duration": 30,
+                "timezone": "America/New_York",
+                "agenda": "Weekly",
+                "created_at": "2026-11-03T20:28:13Z",
+                "join_url": "https://us05web.zoom.us/j/81766864222"
+              }
+            ],
+            "next_page_token": ""
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799683200000",
+                "start_time": "2027-01-11T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800288000000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800892800000",
+                "start_time": "2027-01-25T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "application/json;charset=UTF-8"
+        },
+        "body": {
+          "json": {
+            "id": 81766864222,
+            "uuid": "meeting-uuid-0",
+            "topic": "calsdk series (renamed)",
+            "type": 8,
+            "timezone": "America/New_York",
+            "agenda": "Weekly",
+            "created_at": "2026-11-03T20:28:13Z",
+            "join_url": "https://us05web.zoom.us/j/81766864222",
+            "host_email": "me@example.com",
+            "recurrence": {
+              "type": 2,
+              "repeat_interval": 1,
+              "weekly_days": "2",
+              "end_times": 3
+            },
+            "occurrences": [
+              {
+                "occurrence_id": "1799683200000",
+                "start_time": "2027-01-11T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800288000000",
+                "start_time": "2027-01-18T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              },
+              {
+                "occurrence_id": "1800892800000",
+                "start_time": "2027-01-25T16:00:00Z",
+                "duration": 30,
+                "status": "available"
+              }
+            ],
+            "settings": {
+              "meeting_invitees": [
+                {
+                  "email": "invitee@example.com",
+                  "internal_user": false
+                }
+              ]
+            }
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://api.zoom.us/v2/meetings/81766864222"
+      },
+      "response": {
+        "status": 204,
+        "headers": {}
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 81766864222."
+          }
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://api.zoom.us/v2/meetings/81766864222?show_previous_occurrences=true"
+      },
+      "response": {
+        "status": 404,
+        "headers": {
+          "content-type": "application/json"
+        },
+        "body": {
+          "json": {
+            "code": 3001,
+            "message": "Meeting does not exist: 81766864222."
+          }
+        }
+      }
+    }
+  ]
+}

@@ -329,21 +329,37 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
         });
         const items = parseMultistatus(response.text, response.url).resources;
         // Zoho answers calendar queries without the events' data, so those are read again.
-        const missing = items
-          .filter(
-            (item) =>
-              resourceId(item.url) !== undefined && !propText(item, CALDAV, 'calendar-data'),
-          )
-          .map((item) => item.url);
+        // Events gone since the query are skipped. Any other event that cannot be read fails
+        // the listing, as leaving it out would show its time as free.
+        const missing = items.flatMap((item) => {
+          const id = resourceId(item.url);
+          return id !== undefined && !propText(item, CALDAV, 'calendar-data')
+            ? [{ id, url: item.url }]
+            : [];
+        });
         for (let index = 0; index < missing.length; index += MULTIGET_BATCH) {
+          const requested = missing.slice(index, index + MULTIGET_BATCH);
           const batch = await client.request({
             method: 'REPORT',
             url,
             depth: '1',
             call,
-            body: calendarMultiget(missing.slice(index, index + MULTIGET_BATCH)),
+            body: calendarMultiget(requested.map((item) => item.url)),
           });
-          items.push(...parseMultistatus(batch.text, batch.url).resources);
+          const read = new Map(
+            parseMultistatus(batch.text, batch.url).resources.flatMap((item) => {
+              const id = resourceId(item.url);
+              return id === undefined ? [] : [[id, item] as const];
+            }),
+          );
+          for (const { id, url: href } of requested) {
+            const item = read.get(id);
+            if (item?.status === 404 || item?.status === 410) continue;
+            if (!item || !propText(item, CALDAV, 'calendar-data')) {
+              throw unreadable(href, item?.status);
+            }
+            items.push(item);
+          }
         }
         const warnings: WarningV1[] = [];
         const events: { start: number; event: EventV1 }[] = [];

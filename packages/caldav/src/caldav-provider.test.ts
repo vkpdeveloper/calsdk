@@ -337,6 +337,39 @@ describe('caldav with a stubbed server', () => {
     expect(changes).toEqual([{ type: 'delete', eventId: 'standup' }]);
   });
 
+  it('reads events a calendar query returns without their data, and fails if one cannot be read', async () => {
+    const ok = `<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag><C:calendar-data>${series(false)}</C:calendar-data></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>`;
+    let multiget = ok;
+    // As Zoho answers: the event's address and etag, without calendar-data.
+    const provider = stub((_request, body) => {
+      if (body.includes('calendar-query')) {
+        return multistatus(
+          '<D:response><D:href>/cal/standup.ics</D:href><D:propstat><D:prop><D:getetag>"1"</D:getetag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response>',
+        );
+      }
+      if (body.includes('calendar-multiget')) return multistatus(multiget);
+    });
+    const list = () =>
+      provider.doListEvents({
+        calendarId: '/cal/',
+        timeMin: '2030-03-04T00:00:00Z',
+        timeMax: '2030-03-05T00:00:00Z',
+        expandRecurring: true,
+      });
+
+    expect((await list()).events.map((event) => event.id)).toEqual(['standup_20300304T100000Z']);
+    multiget =
+      '<D:response><D:href>/cal/standup.ics</D:href><D:status>HTTP/1.1 404 Not Found</D:status></D:response>';
+    expect((await list()).events).toEqual([]);
+    for (const failed of [
+      '<D:response><D:href>/cal/standup.ics</D:href><D:status>HTTP/1.1 503 Service Unavailable</D:status></D:response>',
+      '',
+    ]) {
+      multiget = failed;
+      await expect(list()).rejects.toSatisfy(APICallError.isInstance);
+    }
+  });
+
   it('deletes an instance with ifMatch on a server that checks it before the address', async () => {
     const writes: string[] = [];
     const provider = stub((request) => {

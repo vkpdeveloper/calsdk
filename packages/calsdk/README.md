@@ -1,4 +1,9 @@
-# calsdk
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/vkpdeveloper/calsdk/main/assets/logo-dark.svg">
+    <img src="https://raw.githubusercontent.com/vkpdeveloper/calsdk/main/assets/logo-light.svg" alt="calsdk" height="44">
+  </picture>
+</h1>
 
 One TypeScript API for Google Calendar, Microsoft Outlook, iCloud, Zoho Calendar and other CalDAV servers, Cal.com, Calendly, Zoom meetings, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
 

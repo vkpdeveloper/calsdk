@@ -1,0 +1,77 @@
+---
+title: Quickstart
+description: Create, list and find free time in a few lines.
+---
+
+## Install
+
+Install `calsdk` and a provider. The in-memory `@calsdk/mock` provider needs no credentials, so it is a good place to start.
+
+```bash
+bun add calsdk @calsdk/mock
+```
+
+## Create and list events
+
+```ts
+import { createEvent, listEvents } from 'calsdk';
+import { mockCalendar } from '@calsdk/mock';
+
+const calendar = mockCalendar();
+
+await createEvent({
+  calendar,
+  event: {
+    title: 'Design review',
+    start: { dateTime: '2026-11-03T10:00:00', timeZone: 'Asia/Kolkata' },
+    end: { dateTime: '2026-11-03T11:00:00', timeZone: 'Asia/Kolkata' },
+  },
+});
+
+const { events } = await listEvents({ calendar, timeMin: '2026-11-01', timeMax: '2026-12-01' });
+```
+
+Timed values are `{ dateTime, timeZone }` with an IANA zone. A `dateTime` without an offset is read as wall-clock time in `timeZone`. All-day values are `{ date: 'YYYY-MM-DD' }`, and all-day end dates are exclusive.
+
+## Find free time
+
+`findFreeTime` takes calendars from any mix of providers and returns the slots when all of them are free.
+
+```ts
+import { findFreeTime } from 'calsdk';
+
+const { slots } = await findFreeTime({
+  calendars: [{ calendar }],
+  timeMin: new Date(),
+  timeMax: new Date(Date.now() + 7 * 86_400_000),
+  duration: 30,
+  workingHours: { start: '09:00', end: '18:00', timeZone: 'Asia/Kolkata' },
+});
+```
+
+## Use a real calendar
+
+Replace the mock with a provider. calsdk does not run OAuth flows: pass a token, or a function that returns a fresh one.
+
+```ts
+import { google } from '@calsdk/google';
+
+const calendar = google({ accessToken: () => getFreshAccessToken() });
+```
+
+## Warnings and errors
+
+When a provider cannot honor part of a request, the call still succeeds and returns `warnings`. Set `globalThis.CALSDK_WARNINGS` to `'console'` (default), `'silent'` or a function.
+
+Errors extend `CalsdkError`. Check them with `isInstance`, which works across duplicated package copies:
+
+```ts
+import { SyncCursorExpiredError, syncEvents } from 'calsdk';
+
+try {
+  await syncEvents({ calendar, cursor });
+} catch (error) {
+  if (SyncCursorExpiredError.isInstance(error)) await fullResync();
+  else throw error;
+}
+```

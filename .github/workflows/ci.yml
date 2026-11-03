@@ -36,6 +36,8 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      # The docs site reads the built packages.
+      - run: bun run --filter @calsdk/web typecheck
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x

@@ -64,6 +64,21 @@ describe('toZoomRecurrence', () => {
     }
   });
 
+  it('keeps the Monday week start Zoom uses for rules repeating every few weeks', () => {
+    // Every other week on Monday and Sunday: Zoom pairs each Monday with the Sunday after it.
+    for (const rule of [
+      'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,SU',
+      'RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,SU;WKST=MO',
+      // One day a week picks the same days whatever the week start.
+      'RRULE:FREQ=WEEKLY;INTERVAL=2;WKST=SU',
+    ]) {
+      expect(convert(rule), rule).toMatchObject({ type: 2, repeat_interval: 2 });
+    }
+    expect(() => convert('RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,SU;WKST=SU')).toThrow(
+      UnsupportedFunctionalityError,
+    );
+  });
+
   it('accepts EXDATEs only for meetings already deleted', () => {
     const deleted = Date.parse('2030-01-08T15:00:00Z');
     expect(

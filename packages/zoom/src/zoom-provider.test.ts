@@ -394,6 +394,80 @@ describe('zoom with a stubbed API', () => {
     );
   });
 
+  it('undoes a move Zoom schedules no meetings for, and deletes series without meetings', async () => {
+    let current = series(2);
+    const patches: unknown[] = [];
+    const methods: string[] = [];
+    const provider = zoom({
+      accessToken: 'test',
+      fetch: async (input, init) => {
+        const request = new Request(input, init);
+        methods.push(request.method);
+        if (request.method === 'GET') return Response.json(current);
+        if (request.method === 'PATCH') {
+          const body = (await request.json()) as { start_time?: string };
+          patches.push(body);
+          // Zoom keeps the series, but schedules none of its meetings years ahead.
+          const ahead = body.start_time?.startsWith('2040');
+          current = ahead ? { ...series(2), occurrences: [] } : series(2);
+        }
+        return new Response(null, { status: 204 });
+      },
+    });
+    await expect(
+      provider.doUpdateEvent({
+        calendarId,
+        eventId: '2',
+        patch: {
+          title: 'Moved',
+          start: { dateTime: '2040-01-02T10:00:00+00:00', timeZone: ZONE },
+          end: { dateTime: '2040-01-02T10:15:00+00:00', timeZone: ZONE },
+        },
+      }),
+    ).rejects.toThrow(UnsupportedFunctionalityError);
+    expect(patches[1]).toMatchObject({
+      topic: 'Standup',
+      type: 8,
+      start_time: '2030-01-01T10:00:00Z',
+      duration: 15,
+      timezone: ZONE,
+      recurrence: { type: 1, repeat_interval: 1, end_times: 3 },
+    });
+    expect((await provider.doGetEvent({ calendarId, eventId: '2' })).event.start.dateTime).toBe(
+      '2030-01-01T10:00:00+00:00',
+    );
+
+    current = { ...series(2), occurrences: [] };
+    await expect(provider.doGetEvent({ calendarId, eventId: '2' })).rejects.toThrow(NotFoundError);
+    await provider.doDeleteEvent({ calendarId, eventId: '2' });
+    expect(methods.at(-1)).toBe('DELETE');
+  });
+
+  it('reads the meetings of one series at a time, as Zoom limits requests per second', async () => {
+    let reading = 0;
+    let most = 0;
+    const meetings = [series(2), series(3), series(4)];
+    const provider = zoom({
+      accessToken: 'test',
+      fetch: async (input, init) => {
+        const url = new URL(new Request(input, init).url);
+        if (url.pathname === '/v2/users/me/meetings') {
+          return Response.json({
+            meetings: meetings.map(({ occurrences, ...meeting }) => meeting),
+          });
+        }
+        reading += 1;
+        most = Math.max(most, reading);
+        await new Promise((resolve) => setTimeout(resolve, 1));
+        reading -= 1;
+        return Response.json(meetings.find(({ id }) => url.pathname === `/v2/meetings/${id}`));
+      },
+    });
+    const { changes } = await provider.doSyncEvents({ calendarId });
+    expect(changes).toHaveLength(3);
+    expect(most).toBe(1);
+  });
+
   it('deletes a series Zoom does not schedule, as it starts too far ahead', async () => {
     const { provider, requests } = stub([]);
     await expect(

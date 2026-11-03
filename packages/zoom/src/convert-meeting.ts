@@ -66,15 +66,11 @@ export function occurrencesOf(meeting: Meeting, options: Options): EventV1[] {
  * occurrence, so this is the length most of its occurrences have, the earliest one's on a tie.
  */
 export function seriesMinutes(meeting: Meeting): number {
+  const durations = (meeting.occurrences ?? []).map((occurrence) => occurrence.duration ?? 0);
   const counts = new Map<number, number>();
-  let minutes = 0;
-  for (const occurrence of meeting.occurrences ?? []) {
-    const duration = occurrence.duration ?? 0;
-    const count = (counts.get(duration) ?? 0) + 1;
-    counts.set(duration, count);
-    if (count > (counts.get(minutes) ?? 0)) minutes = duration;
-  }
-  return minutes;
+  for (const duration of durations) counts.set(duration, (counts.get(duration) ?? 0) + 1);
+  const most = Math.max(0, ...counts.values());
+  return durations.find((duration) => counts.get(duration) === most) ?? 0;
 }
 
 /** A single meeting, or the master of a series. */

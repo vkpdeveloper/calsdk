@@ -61,10 +61,6 @@ export function toZoomRecurrence(
   const interval = rule.interval ?? 1;
   if (interval > MAX_INTERVAL[rule.freq])
     throw unsupported(`INTERVAL=${interval} with FREQ=${rule.freq}`);
-  // The week start only changes which weeks a rule repeating every few weeks picks.
-  if (rule.weekStart && rule.weekStart !== 'SU' && rule.freq === 'WEEKLY' && interval > 1) {
-    throw unsupported(`WKST=${rule.weekStart}`);
-  }
   if (rule.count !== undefined && rule.count > MAX_COUNT) throw unsupported(`COUNT=${rule.count}`);
 
   const local = instantToLocal(start, timeZone);
@@ -86,6 +82,11 @@ export function toZoomRecurrence(
     if (rule.byMonthDay || rule.bySetPos)
       throw unsupported('a weekly rule with BYMONTHDAY or BYSETPOS');
     const days = rule.byDay?.map((day) => day.weekday) ?? [weekday];
+    // Zoom's weeks start on Monday, as RFC 5545's do by default. The week start changes
+    // which days a rule repeating every few weeks on several days picks.
+    if (rule.weekStart && rule.weekStart !== 'MO' && interval > 1 && new Set(days).size > 1) {
+      throw unsupported(`WKST=${rule.weekStart} with INTERVAL=${interval}`);
+    }
     // RFC 5545 counts the start as a meeting even off the rule's days. Zoom does not.
     if (!days.includes(weekday))
       throw unsupported('a weekly rule whose days leave out the first meeting');

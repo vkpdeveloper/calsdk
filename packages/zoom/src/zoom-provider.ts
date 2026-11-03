@@ -33,6 +33,7 @@ import {
   occurrencesOf,
   originalStartOf,
   parseEventId,
+  seriesMinutes,
 } from './convert-meeting';
 import { isoSeconds, toZoomRecurrence } from './convert-recurrence';
 import { hashOf, pageToken as pageTokens, syncCursor } from './tokens';
@@ -113,8 +114,12 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
     }
   }
 
-  /** A meeting with fixed times, with every occurrence of a series, deleted ones too. */
-  async function getMeeting(call: Call, eventId: string, meetingId: string): Promise<Meeting> {
+  /**
+   * A single meeting or series, with every occurrence of a series, deleted ones too.
+   * Instant meetings, personal meeting rooms and recurring meetings without a fixed time
+   * have no times to show, so they read as missing.
+   */
+  async function readMeeting(call: Call, eventId: string, meetingId: string): Promise<Meeting> {
     const meeting = await request(
       call,
       { type: 'event', id: eventId },
@@ -125,9 +130,18 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
         schema: meetingSchema,
       },
     );
-    // Instant meetings, personal meeting rooms and recurring meetings without a fixed time
-    // have no times to show, nor do series that start so far ahead that Zoom has not
-    // scheduled their occurrences yet.
+    if (meeting.type !== SCHEDULED && meeting.type !== RECURRING) {
+      throw new NotFoundError({ provider: PROVIDER, resource: 'event', id: eventId });
+    }
+    return meeting;
+  }
+
+  /**
+   * A meeting calsdk can show: like `readMeeting`, but series that start so far ahead that
+   * Zoom has not scheduled their occurrences read as missing too.
+   */
+  async function getMeeting(call: Call, eventId: string, meetingId: string): Promise<Meeting> {
+    const meeting = await readMeeting(call, eventId, meetingId);
     if (!hasTimes(meeting)) {
       throw new NotFoundError({ provider: PROVIDER, resource: 'event', id: eventId });
     }
@@ -180,18 +194,22 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
         seen.add(next);
       }
     } while (next !== undefined);
-    return Promise.all(
-      [...listed.values()].map(async (meeting) => {
-        if (meeting.type !== RECURRING) return meeting;
-        try {
-          return await getMeeting(call, String(meeting.id), String(meeting.id));
-        } catch (error) {
-          // Deleted since it was listed, or not scheduled yet.
-          if (NotFoundError.isInstance(error)) return undefined;
-          throw error;
-        }
-      }),
-    ).then((meetings) => meetings.filter((meeting) => meeting !== undefined));
+    // One series at a time, as Zoom limits requests per second and an account can have
+    // many series.
+    const meetings: Meeting[] = [];
+    for (const meeting of listed.values()) {
+      if (meeting.type !== RECURRING) {
+        meetings.push(meeting);
+        continue;
+      }
+      try {
+        meetings.push(await getMeeting(call, String(meeting.id), String(meeting.id)));
+      } catch (error) {
+        // Deleted since it was listed, or not scheduled yet.
+        if (!NotFoundError.isInstance(error)) throw error;
+      }
+    }
+    return meetings;
   }
 
   /** Changes a whole meeting or series, then reads it back. */
@@ -246,11 +264,35 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
         deleted,
       });
     }
-    if (Object.keys(body).length > 0) {
+    if (Object.keys(body).length === 0) return current;
+    const path = urlPath`/meetings/${String(meeting.id)}`;
+    await request(call, { type: 'event', id: eventId }, { method: 'PATCH', path, body });
+    const updated = await readMeeting(call, eventId, String(meeting.id));
+    if (!hasTimes(updated)) {
+      // Moved so far ahead that Zoom schedules none of its meetings: put it back, so it
+      // does not disappear from calsdk.
+      const series = meeting.type === RECURRING;
       await request(
         call,
         { type: 'event', id: eventId },
-        { method: 'PATCH', path: urlPath`/meetings/${String(meeting.id)}`, body },
+        {
+          method: 'PATCH',
+          path,
+          body: {
+            topic: meeting.topic ?? '',
+            agenda: meeting.agenda ?? '',
+            settings: { meeting_invitees: meeting.settings?.meeting_invitees ?? [] },
+            type: meeting.type,
+            start_time: isoSeconds(eventTimeToInstant(current.start)),
+            duration: series ? seriesMinutes(meeting) : meeting.duration,
+            timezone: meeting.timezone ?? undefined,
+            recurrence: series ? meeting.recurrence : undefined,
+          },
+        },
+      );
+      throw unsupported(
+        'recurrence',
+        'Zoom does not schedule the meetings of a series that starts this far ahead, so the change was undone.',
       );
     }
     if (restored) {
@@ -260,7 +302,7 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
           'Zoom restored the meetings of the series that were deleted, moved or resized on their own, as it does when a series moves.',
       });
     }
-    return getEvent(call, String(meeting.id));
+    return fromMeeting(updated, { details: true });
   }
 
   return {
@@ -489,8 +531,11 @@ export function zoom(settings: ZoomSettings): ZoomProvider {
       warnSendUpdates(sendUpdates, warnings);
       const { meetingId, originalStart } = parseEventId(eventId);
       // Reads first, so a meeting calsdk does not show, or an occurrence deleted before,
-      // reads as missing.
-      const meeting = await getMeeting(call, eventId, meetingId);
+      // reads as missing. A whole series Zoom has not scheduled yet can still be deleted.
+      const meeting =
+        originalStart === undefined
+          ? await readMeeting(call, eventId, meetingId)
+          : await getMeeting(call, eventId, meetingId);
       const occurrence =
         originalStart === undefined ? undefined : findOccurrence(meeting, eventId, originalStart);
       await request(

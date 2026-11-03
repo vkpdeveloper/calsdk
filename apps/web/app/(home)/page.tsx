@@ -92,20 +92,21 @@ const { event: series } = await createEvent({
   },
 });
 
-const { events } = await listEvents({ calendar, timeMin: '2026-11-13', timeMax: '2026-11-14' });
-const friday = events.find((event) => event.seriesId === series.id);
-if (!friday) throw new Error('No standup on Friday');
-
 // Move only Friday's standup. 'all' and 'thisAndFollowing' change more of the series.
-await updateEvent({
-  calendar,
-  eventId: friday.id,
-  scope: 'this',
-  patch: {
-    start: { dateTime: '2026-11-13T10:00:00', timeZone: 'America/New_York' },
-    end: { dateTime: '2026-11-13T10:15:00', timeZone: 'America/New_York' },
-  },
-});`,
+const friday = { timeMin: '2026-11-13', timeMax: '2026-11-14' };
+for await (const event of iterateEvents({ calendar, ...friday })) {
+  if (event.seriesId !== series.id) continue;
+  await updateEvent({
+    calendar,
+    eventId: event.id,
+    scope: 'this',
+    patch: {
+      start: { dateTime: '2026-11-13T10:00:00', timeZone: 'America/New_York' },
+      end: { dateTime: '2026-11-13T10:15:00', timeZone: 'America/New_York' },
+    },
+  });
+  break;
+}`,
   },
   {
     id: 'sync',
@@ -287,8 +288,8 @@ export default async function HomePage() {
             No vendor SDKs. It runs on Node, Bun, Deno and edge runtimes.
           </Point>
           <Point title="Tested against real accounts">
-            Each provider that connects to an account is recorded against its real API, and the
-            recordings replay in CI.
+            Google, Outlook, Zoho, Zoom, Cal.com and Calendly are recorded against their real APIs,
+            and the recordings replay in CI.
           </Point>
           <Point title="Clear about gaps">
             When a provider cannot do something, you get a warning or an error, never a quietly
@@ -331,7 +332,7 @@ export default async function HomePage() {
       <Section
         id="your-provider"
         title="Add any calendar"
-        intro="A provider is one object with a few functions. Run the same conformance suite the official providers pass."
+        intro="A provider is one object with a few functions. Test it with the conformance suite most official providers run."
       >
         <div className="grid gap-4 lg:grid-cols-2">
           <div className="code overflow-hidden rounded-xl border border-line bg-panel">

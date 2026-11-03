@@ -147,6 +147,7 @@ SUMMARY:Standup«title»
 DTSTART;TZID=America/New_York:20261109T093000«start»
 DTEND;TZID=America/New_York:20261109T094500
 RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR«repeat»
+URL:https://meet.google.com/abc-defg-hij«link»
 END:VEVENT`,
   },
   {
@@ -189,7 +190,7 @@ const EVENT_CODE = `
   recurrence: [«repeat»
     'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',«repeat»
   ],«repeat»
-  // Meet, Teams or Zoom. None on iCloud.
+  // From any Meet, Teams or Zoom link.
   conference: {«link»
     provider: 'teams',«link»
     joinUrl: 'https://teams.microsoft.com/l/...',«link»
@@ -347,7 +348,7 @@ try {
 ];
 
 type Support = boolean | string;
-const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Video links', 'Sync'];
+const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Adds video links', 'Sync'];
 const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['Google Calendar', 'google', [true, true, true, 'Google Meet', true]],
   ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams', true]],

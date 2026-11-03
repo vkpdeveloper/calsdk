@@ -102,7 +102,7 @@ type Target = { resource: Resource; instance?: EventV1 };
 
 /**
  * Creates a provider for a CalDAV server (RFC 4791), such as Fastmail, Nextcloud or
- * Radicale. Use `icloud()` for iCloud.
+ * Radicale. Use `icloud()` for iCloud and `zoho()` for Zoho Calendar.
  *
  * Calendar ids are the paths of the calendar collections, such as `/dav/calendars/user/me/work/`.
  * Event ids are the names of the event resources without `.ics`, normally their `UID`.
@@ -194,6 +194,8 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
   async function getResource(calendarId: string, url: URL, call: Call) {
     const response = await client.request({ method: 'GET', url, call, allow: [404, 410] });
     if (response.status === 404 || response.status === 410) return undefined;
+    // Zoho answers events it deleted with an empty 200 instead of a 404.
+    if (response.text.trim() === '') return undefined;
     return toResource(calendarId, url, response.etag, response.text);
   }
 
@@ -325,9 +327,27 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
           call,
           body: calendarQuery(min - DAY_MS, max + DAY_MS),
         });
+        const items = parseMultistatus(response.text, response.url).resources;
+        // Zoho answers calendar queries without the events' data, so those are read again.
+        const missing = items
+          .filter(
+            (item) =>
+              resourceId(item.url) !== undefined && !propText(item, CALDAV, 'calendar-data'),
+          )
+          .map((item) => item.url);
+        for (let index = 0; index < missing.length; index += MULTIGET_BATCH) {
+          const batch = await client.request({
+            method: 'REPORT',
+            url,
+            depth: '1',
+            call,
+            body: calendarMultiget(missing.slice(index, index + MULTIGET_BATCH)),
+          });
+          items.push(...parseMultistatus(batch.text, batch.url).resources);
+        }
         const warnings: WarningV1[] = [];
         const events: { start: number; event: EventV1 }[] = [];
-        for (const item of parseMultistatus(response.text, response.url).resources) {
+        for (const item of items) {
           const data = propText(item, CALDAV, 'calendar-data');
           const resource =
             data && toResource(calendarId, item.url, propText(item, DAV, 'getetag'), data);
@@ -691,6 +711,32 @@ export function icloud({
     username: appleId,
     password: appPassword,
   });
+}
+
+/**
+ * Creates a provider for Zoho Calendar. Sign in with the account's email address and its
+ * password, or an app-specific password (made in Zoho Accounts under Security, App
+ * Passwords) when two-factor authentication is on.
+ *
+ * @example
+ * import { zoho } from '@calsdk/caldav';
+ * const calendar = zoho({ email: 'me@example.com', password: process.env.ZOHO_APP_PASSWORD });
+ */
+export function zoho({
+  email,
+  password,
+  // Zoho answers CalDAV discovery at its well-known address only, not at the host's root.
+  serverUrl = 'https://calendar.zoho.com/.well-known/caldav',
+  ...settings
+}: Omit<CaldavSettings, 'serverUrl' | 'username'> & {
+  email: string;
+  /**
+   * Defaults to Zoho's US data center. Accounts in other data centers pass the CalDAV
+   * address Zoho Calendar shows under Settings, Synchronize, CalDAV.
+   */
+  serverUrl?: string;
+}): CaldavProvider {
+  return caldav({ ...settings, serverUrl, username: email, password });
 }
 
 function parseServerUrl(address: string): URL {

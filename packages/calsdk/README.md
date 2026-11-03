@@ -1,6 +1,6 @@
 # calsdk
 
-One TypeScript API for Google Calendar, Microsoft Outlook, iCloud and other CalDAV servers, Cal.com, Calendly, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
+One TypeScript API for Google Calendar, Microsoft Outlook, iCloud, Zoho Calendar and other CalDAV servers, Cal.com, Calendly, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
 
 ```ts
 import { createEvent, findFreeTime, listEvents } from 'calsdk';

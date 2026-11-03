@@ -1,13 +1,18 @@
 # @calsdk/caldav
 
-CalDAV provider for calsdk: iCloud, Fastmail, Nextcloud, Radicale and other CalDAV servers (RFC 4791). Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
+CalDAV provider for calsdk: iCloud, Zoho Calendar, Fastmail, Nextcloud, Radicale and other CalDAV servers (RFC 4791). Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { caldav, icloud } from '@calsdk/caldav';
+import { caldav, icloud, zoho } from '@calsdk/caldav';
 import { createEvent, listCalendars } from 'calsdk';
 
 // iCloud needs an app-specific password, made at account.apple.com under Sign-In and Security.
 const calendar = icloud({ appleId: 'me@icloud.com', appPassword: process.env.ICLOUD_APP_PASSWORD });
+
+// Zoho Calendar: the account's password, or an app-specific password when two-factor
+// authentication is on. Accounts outside the US data center pass the CalDAV address Zoho
+// Calendar shows under Settings, Synchronize, CalDAV as `serverUrl`.
+const zohoCalendar = zoho({ email: 'me@example.com', password: process.env.ZOHO_APP_PASSWORD });
 
 // Any other server: its CalDAV address and the account's credentials.
 const fastmail = caldav({

@@ -3,6 +3,8 @@ title: Mock
 description: An in-memory calendar for trying calsdk, testing your app offline and checking a provider against a reference.
 ---
 
+The mock needs no credentials and makes no requests, so it's the quickest way to try calsdk and the right thing to put in your tests. It supports everything calsdk models except a free/busy endpoint, which also makes it the reference implementation for [provider authors](/docs/build-a-provider).
+
 ```npm
 npm install calsdk @calsdk/mock
 ```
@@ -31,14 +33,12 @@ const { events } = await listEvents({
 console.log(calendar.events); // the stored state
 ```
 
-The mock needs no credentials and makes no requests. It supports everything calsdk models except a free/busy endpoint, so it is also the reference implementation for [provider authors](/docs/build-a-provider).
-
 ## How it behaves
 
-- **Ids** are predictable: `evt_1`, `evt_2` and so on. An occurrence is `<series id>_<UTC start>`, like Google's.
-- **Recurrence** follows RFC 5545: one `RRULE` line plus `EXDATE` lines. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`.
-- **Seed events** passed in `events` skip the checks `createEvent` runs, so give every `dateTime` an offset.
-- **Video links.** `createConference: true` adds a placeholder link with `provider: 'other'`.
-- **Free/busy** is computed from events by calsdk, with a `compatibility` warning.
+Ids are predictable, `evt_1`, `evt_2` and so on, so your test assertions can name them. An occurrence is `<series id>_<UTC start>`, like Google's.
+
+Recurrence follows RFC 5545: one `RRULE` line plus `EXDATE` lines. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`.
+
+Seed events passed in `events` skip the checks `createEvent` runs, so give every `dateTime` an offset. `createConference: true` adds a placeholder link with `provider: 'other'`. Free/busy is computed from events by calsdk, with a `compatibility` warning, as it is for any provider without an endpoint.
 
 [Test your code](/docs/guides/testing) covers the settings and how to use the mock in tests.

@@ -28,7 +28,7 @@ export type SyncEventsOptions<C extends CalendarProvider = CalendarProvider> = C
 };
 
 export type SyncEventsResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
-  /** Every change since `cursor`, oldest first. Apply them in order. */
+  /** Every change since `cursor`. Apply them in the order given: a later change to an event replaces an earlier one. */
   changes: SyncChangeOf<C>[];
   /** Store it and pass it as `cursor` next time. */
   nextCursor: string;

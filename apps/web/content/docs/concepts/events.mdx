@@ -3,7 +3,7 @@ title: The event model
 description: The one event shape every provider returns, and what each field means.
 ---
 
-Every provider returns the same `CalendarEvent`. Here is one read from Outlook:
+On the wire, a Google event and an Outlook event have little in common: different ids, different time formats, different names for the same status. calsdk turns both into one `CalendarEvent`, so the rest of your code only learns one shape. Here is one read from Outlook:
 
 ```ts
 {
@@ -30,47 +30,40 @@ Every provider returns the same `CalendarEvent`. Here is one read from Outlook:
 }
 ```
 
-The same meeting from Google has a different id, a Meet link and Google's metadata, and every other field the same.
+Read the same meeting from Google and you get the same shape, with the title, times and attendees in the same places. What belongs to Google still differs: the id, the etag, the links and the metadata.
 
 ## Identity
 
-- **`id`** is the provider's id for the event. Pass it to `getEvent`, `updateEvent` and `deleteEvent`, with the same `calendarId`.
-- **`calendarId`** is the calendar the event was read from.
-- **`kind`** is `single`, `series`, `occurrence` or `exception`. See [Recurring events](/docs/guides/recurring-events).
-- **`seriesId`** and **`originalStart`** are set on occurrences and exceptions: the series they belong to, and where its rule placed them.
+Every event carries the provider's own `id` and the `calendarId` it was read from. Pass both back to `getEvent`, `updateEvent` and `deleteEvent`. Ids are strings with no fixed format, and each provider shapes them its own way, so store them as they are rather than parsing them.
 
-Ids are strings with no fixed format. Store them as they are.
+`kind` tells you what you're looking at: a `single` event, a recurring `series`, one `occurrence` of a series, or an `exception`, an occurrence someone moved or edited. Occurrences and exceptions also carry `seriesId`, the series they belong to, and `originalStart`, where the series' rule placed them. [Recurring events](/docs/guides/recurring-events) covers how to work with them.
 
 ## When
 
-- **`start`** and **`end`** are either both timed, `{ dateTime, timeZone }`, or both all-day, `{ date }`. All-day end dates are exclusive. See [Time zones](/docs/concepts/time-zones).
-- **`recurrence`** holds the RFC 5545 lines of a series, such as `['RRULE:FREQ=WEEKLY;BYDAY=MO', 'EXDATE:20261110T100000Z']`.
+`start` and `end` are either both timed, `{ dateTime, timeZone }`, or both all-day, `{ date }`. An all-day event's end date is exclusive, so a one-day event on 3 November ends on the 4th. [Time zones](/docs/concepts/time-zones) explains why timed events keep their zone.
+
+A series keeps its rule in `recurrence`, as RFC 5545 lines such as `['RRULE:FREQ=WEEKLY;BYDAY=MO', 'EXDATE:20261110T100000Z']`.
 
 ## Status and availability
 
-- **`status`** is `confirmed`, `tentative` or `cancelled`. `cancelled` is rare: it is for events that still have their details, such as an Outlook meeting the organizer cancelled. Deleted events are not returned at all, and sync reports them as `delete` changes.
-- **`showAs`** is `busy` or `free`, which decides whether the event blocks time in free/busy. Providers with more states, such as Outlook's out of office, put the original in `providerMetadata`.
-- **`visibility`** is `default`, `public` or `private`.
+`status` is `confirmed`, `tentative` or `cancelled`. You'll rarely see `cancelled`: it's for events that still have their details, such as an Outlook meeting the organizer cancelled. Deleted events aren't returned at all, and sync reports them as `delete` changes.
+
+`showAs` is `busy` or `free`, and decides whether the event blocks time in free/busy. Providers with more states, such as Outlook's out of office, keep the original in `providerMetadata`. `visibility` is `default`, `public` or `private`.
 
 ## People
 
-- **`organizer`** is a `{ email, name?, self? }`. `self` is `true` when it is the signed-in user.
-- **`attendees`** add `responseStatus` (`needsAction`, `accepted`, `declined`, `tentative`), `optional` and `organizer`.
+The `organizer` is a `{ email, name?, self? }`, where `self` is `true` when it's the signed-in user. `attendees` have the same fields plus `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`), `optional` and `organizer`.
 
 Some providers leave attendees out of listings because reading them costs a request per event. Fetch the event with `getEvent` when you need them. The provider pages say which.
 
 ## Extras
 
-- **`conference`** is the video link: `{ provider, joinUrl, id? }`, where `provider` is `google-meet`, `teams`, `zoom` or `other`.
-- **`reminders`** is `{ useDefault, overrides? }`, each override a `{ method: 'popup' | 'email', minutesBefore }`.
-- **`color`** is a hex color, `'#RRGGBB'`.
-- **`htmlLink`** opens the event in the provider's own app.
-- **`etag`** is a version tag. Pass it as `ifMatch` to write only if nobody changed the event since.
-- **`createdAt`** and **`updatedAt`** are ISO 8601 timestamps.
-- **`providerMetadata`** holds fields only one provider has, keyed by provider id. See [Provider options](/docs/guides/provider-options).
+`conference` is the video link, `{ provider, joinUrl, id? }`, where `provider` is `google-meet`, `teams`, `zoom` or `other`. `reminders` is `{ useDefault, overrides? }`, and each override is a `{ method: 'popup' | 'email', minutesBefore }`. `color` is a hex color like `'#RRGGBB'`, and `htmlLink` opens the event in the provider's own app.
 
-Every field except `id`, `calendarId`, `kind`, `start`, `end`, `status` and `showAs` is optional. A provider leaves out what it does not have.
+`etag` is a version tag: pass it back as `ifMatch` and an update only lands if nobody changed the event since you read it. Deletes take it too, though [Outlook can miss a change](/docs/providers/microsoft#writing-events) made just before the delete. `createdAt` and `updatedAt` are ISO 8601 timestamps. `providerMetadata` holds whatever only one provider has, keyed by provider id; [Provider options](/docs/guides/provider-options) covers it.
+
+Every field except `id`, `calendarId`, `kind`, `start`, `end`, `status` and `showAs` is optional, because a provider leaves out what it doesn't have. A Cal.com booking has no color, and an ICS feed has no etag.
 
 ## Writing events
 
-`createEvent` takes an `EventInput`, a smaller shape with only the fields you can set: `title`, `description`, `location`, `start`, `end`, `recurrence`, `showAs`, `visibility`, `attendees`, `createConference`, `reminders` and `color`. `updateEvent` takes the same fields as a partial `EventPatch`, where `null` clears a field. See [Types](/docs/reference/types) for both.
+You don't write a `CalendarEvent` back. `createEvent` takes an `EventInput`, a smaller shape with only the fields you can set: `title`, `description`, `location`, `start`, `end`, `recurrence`, `showAs`, `visibility`, `attendees`, `createConference`, `reminders` and `color`. `updateEvent` takes the same fields as a partial `EventPatch`, where `null` clears a field. See [Types](/docs/reference/types) for both.

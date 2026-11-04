@@ -3,13 +3,13 @@ title: Types
 description: The calendar, event and time shapes every provider returns.
 ---
 
-Import types from `calsdk`:
+These are the shapes every function takes and returns, the same for every provider. Import them from `calsdk`:
 
 ```ts
 import type { Calendar, CalendarEvent, EventInput, EventPatch, EventTime } from 'calsdk';
 ```
 
-The event type is named `CalendarEvent` so it does not clash with the DOM's `Event`.
+The event type is named `CalendarEvent` so it doesn't clash with the DOM's `Event`.
 
 ## CalendarEvent
 
@@ -26,19 +26,19 @@ The event type is named `CalendarEvent` so it does not clash with the DOM's `Eve
     start: { type: 'EventTime', required: true },
     end: { type: 'EventTime', required: true },
     recurrence: { type: 'string[]', description: 'RFC 5545 lines. Set on series.' },
-    status: { type: "'confirmed' | 'tentative' | 'cancelled'", description: 'cancelled is for events that keep their details, such as a cancelled Outlook meeting. Deleted events are not returned.', required: true },
+    status: { type: "'confirmed' | 'tentative' | 'cancelled'", description: "`'cancelled'` means the event still exists with its details, such as a cancelled Outlook meeting. Deleted events aren't returned.", required: true },
     showAs: { type: "'busy' | 'free'", description: 'Whether the event blocks time in free/busy.', required: true },
     visibility: { type: "'default' | 'public' | 'private'" },
     organizer: { type: 'Person' },
     attendees: { type: 'Attendee[]' },
     conference: { type: 'Conference' },
     reminders: { type: 'Reminders' },
-    color: { type: 'string', description: "'#RRGGBB'." },
+    color: { type: 'string', description: "A hex color, `'#RRGGBB'`." },
     htmlLink: { type: 'string', description: "Opens the event in the provider's app." },
-    etag: { type: 'string', description: 'Version tag. Pass as ifMatch.' },
+    etag: { type: 'string', description: 'Version tag. Pass as `ifMatch`.' },
     createdAt: { type: 'string', description: 'ISO 8601.' },
     updatedAt: { type: 'string', description: 'ISO 8601.' },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id. Typed by the provider.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific fields, keyed by provider id. Typed by the provider.' },
   }}
 />
 
@@ -46,11 +46,20 @@ The event type is named `CalendarEvent` so it does not clash with the DOM's `Eve
 
 Either timed or all-day, never both. `start` and `end` of one event use the same form.
 
+A timed event has both fields:
+
 <TypeTable
   type={{
-    dateTime: { type: 'string', description: "Timed. ISO 8601 with an offset, such as '2026-11-03T10:00:00+05:30'. On input, the offset may be left out." },
-    timeZone: { type: 'string', description: "Timed. The IANA zone the event was scheduled in, such as 'Asia/Kolkata'." },
-    date: { type: 'string', description: "All-day. 'YYYY-MM-DD'. Exclusive on end." },
+    dateTime: { type: 'string', description: "ISO 8601 with an offset, such as `'2026-11-03T10:00:00+05:30'`. On input, the offset may be left out.", required: true },
+    timeZone: { type: 'string', description: "The IANA zone the event was scheduled in, such as `'Asia/Kolkata'`.", required: true },
+  }}
+/>
+
+An all-day event has only a date:
+
+<TypeTable
+  type={{
+    date: { type: 'string', description: "`'YYYY-MM-DD'`. Exclusive on `end`: a one-day event on the 3rd ends on the 4th.", required: true },
   }}
 />
 
@@ -83,27 +92,36 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
     name: { type: 'string', required: true },
     description: { type: 'string' },
     timeZone: { type: 'string', description: 'IANA time zone.' },
-    color: { type: 'string', description: "'#RRGGBB'." },
-    isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
+    color: { type: 'string', description: "A hex color, `'#RRGGBB'`." },
+    isPrimary: { type: 'boolean', description: "The user's default calendar. `'primary'` resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>' },
+    providerMetadata: { type: 'ProviderMetadata' },
   }}
 />
 
-## People
+## Person
+
+An event's `organizer`.
 
 <TypeTable
   type={{
     email: { type: 'string', required: true },
     name: { type: 'string' },
-    self: { type: 'boolean', description: 'true when this person is the signed-in user.' },
-    responseStatus: { type: "'needsAction' | 'accepted' | 'declined' | 'tentative'", description: 'Attendee only.' },
-    optional: { type: 'boolean', description: 'Attendee only.' },
-    organizer: { type: 'boolean', description: 'Attendee only.' },
+    self: { type: 'boolean', description: '`true` when this person is the signed-in user.' },
   }}
 />
 
-`Person` has `email`, `name` and `self`. `Attendee` adds the rest, with `responseStatus` required.
+## Attendee
+
+Every `Person` field, plus:
+
+<TypeTable
+  type={{
+    responseStatus: { type: "'needsAction' | 'accepted' | 'declined' | 'tentative'", description: 'Their reply to the invitation.', required: true },
+    optional: { type: 'boolean', description: 'Their attendance is optional.' },
+    organizer: { type: 'boolean', description: '`true` when this attendee also organizes the event.' },
+  }}
+/>
 
 ## Conference
 
@@ -119,7 +137,7 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
 
 <TypeTable
   type={{
-    useDefault: { type: 'boolean', description: "true uses the calendar's default reminders and ignores overrides.", required: true },
+    useDefault: { type: 'boolean', description: "`true` uses the calendar's default reminders and ignores `overrides`.", required: true },
     overrides: { type: "{ method: 'popup' | 'email'; minutesBefore: number }[]" },
   }}
 />
@@ -145,3 +163,4 @@ type Warning =
 | `CalendarCapabilities` | See [Capabilities](/docs/reference/capabilities) |
 | `EventOf<C>` | `CalendarEvent` with `providerMetadata` typed by provider `C` |
 | `ProviderOptionsFor<C, Operation>` | The `providerOptions` provider `C` accepts for an operation |
+| `ProviderMetadata` | `Record<string, JSONObject>`: one plain JSON object per provider id |

@@ -3,6 +3,8 @@ title: listCalendars
 description: Lists the calendars the user can see.
 ---
 
+Most users have more than one calendar, such as work, personal and a shared team calendar. `listCalendars` returns every one they can see, so you can let them pick.
+
 ```ts
 import { listCalendars } from 'calsdk';
 
@@ -17,7 +19,7 @@ Only the [common options](/docs/reference#common-options).
 
 <TypeTable
   type={{
-    calendars: { type: 'Calendar[]', description: 'Every calendar the user can see. Exactly one has isPrimary: true.', required: true },
+    calendars: { type: 'Calendar[]', description: 'Every calendar the user can see. Exactly one has `isPrimary: true`.', required: true },
     warnings: { type: 'Warning[]', required: true },
   }}
 />

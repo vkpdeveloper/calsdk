@@ -3,11 +3,11 @@ title: Cal.com
 description: Read, book, move and cancel Cal.com bookings as calendar events.
 ---
 
+Cal.com is a scheduling tool, not a calendar, so here the events are bookings. Use this provider to read a user's bookings, book a slot on one of their event types, reschedule it or cancel it, with the same functions you'd use for Google. Expect the booking rules to win: the event type decides the title, the length and most other fields.
+
 ```npm
 npm install calsdk @calsdk/calcom
 ```
-
-In Cal.com, bookings are the events.
 
 ```ts
 import { createEvent, listEvents } from 'calsdk';
@@ -50,24 +50,31 @@ await createEvent({
 
 ## Calendars
 
-- **`'primary'`** holds every booking of the user.
-- **Each event type** is a calendar whose id is the event type id, such as `'123456'`. It holds that event type's bookings.
+`'primary'` holds every booking of the user. Each event type is also a calendar, whose id is the event type id (such as `'123456'`), holding that event type's bookings.
 
-## Supports
+## Not supported
 
-Booking, moving and cancelling, attendees and sync. Not supported: all-day and recurring events, `ifMatch` and search, which throw `UnsupportedFunctionalityError`. Free/busy is computed from bookings.
+All-day and recurring events, `ifMatch` and search throw `UnsupportedFunctionalityError`. Free/busy is computed from bookings. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-- **Ids.** An event id is the booking's `uid`.
-- **Creating** books an event type: the calendar's, or `providerOptions.calcom.eventTypeId` on `'primary'`. The first attendee books the slot and the others are added as guests. Without attendees, the user books it for themselves. The description becomes the booking's notes. Cal.com names bookings after their event type, so `title`, and fields the event type sets (`location`, `createConference`, `reminders`, `color`, `visibility`), are ignored with a warning.
-- **Lengths.** A booking lasts as long as its event type, or one of the lengths the event type offers. Other lengths throw `InvalidArgumentError`.
-- **Availability.** calsdk writes the times it is given, so bookings may overlap others and fall outside the event type's availability. Set `allowConflicts` or `allowBookingOutOfBounds` to `false` to enforce them.
-- **Updating** can only move a booking. Cal.com moves a booking by replacing it, so the returned event has a **new id** and the old id reads as deleted. Changes to other fields are ignored with a warning, and the booking keeps the time zone it was made in.
-- **Deleting** cancels the booking. Cancelled and rejected bookings are deleted events. Bookings waiting for confirmation are `tentative`.
-- **Listing** finds bookings by their start, looking back as far as the longest length your event types allow (at least a day). Cal.com cannot filter bookings by their end, so a booking that started before that lookback is not listed: one of a team event type you do not own, or one longer than its event type now allows.
-- **`sendUpdates`.** Cal.com always emails attendees, so values other than `'all'` return a warning.
-- **Sync** reads bookings by the time they last changed. Each sync reads the minute before the newest change it saw again, so a slow save is not missed. A first sync returns active bookings only.
+### Booking
+
+Creating an event books an event type: the calendar's, or `providerOptions.calcom.eventTypeId` on `'primary'`. The first attendee books the slot and the others are added as guests. Without attendees, the user books it for themselves. The description becomes the booking's notes. Cal.com names bookings after their event type, so `title`, and fields the event type sets (`location`, `createConference`, `reminders`, `color`, `visibility`), are ignored with a warning.
+
+A booking lasts as long as its event type, or one of the lengths the event type offers. Other lengths throw `InvalidArgumentError`. As with any other calendar, calsdk writes the times you give it, so by default a booking may overlap others and fall outside the event type's availability. To have Cal.com enforce its rules, set `allowConflicts` or `allowBookingOutOfBounds` to `false`.
+
+### Moving and cancelling
+
+An event id is the booking's `uid`, and that id doesn't survive a move. Updating can only move a booking, and Cal.com moves a booking by replacing it, so the returned event has a **new id** and the old id reads as deleted. If you store booking ids, update them after every move. Changes to other fields are ignored with a warning, and the booking keeps the time zone it was made in.
+
+Deleting cancels the booking. Cancelled and rejected bookings read as deleted events, and bookings waiting for confirmation are `tentative`. Cal.com always emails attendees, so `sendUpdates` values other than `'all'` return a warning.
+
+### Listing and sync
+
+Listing finds bookings by their start, because Cal.com can't filter them by their end. To catch bookings that started before `timeMin` and are still running, calsdk looks back as far as the longest length your event types allow (at least a day). A booking that started before that lookback is missed: one of a team event type you don't own, or one longer than its event type now allows.
+
+Sync reads bookings by the time they last changed. A booking saved in a slow transaction can show up after later ones, so each sync reads the minute before the newest change it saw again, and that booking isn't missed. A first sync returns active bookings only.
 
 ## Provider options
 
@@ -94,20 +101,40 @@ await deleteEvent({
 });
 ```
 
-| Function      | Option                    | Type |
-| ------------- | ------------------------- | ---- |
-| `createEvent` | `eventTypeId`             | `number`. Required on `'primary'` |
-| `createEvent` | `metadata`                | `Record<string, string>`, stored on the booking |
-| `createEvent`, `updateEvent` | `allowConflicts` | `boolean`, default `true`. Book over other bookings and busy time |
-| `createEvent`, `updateEvent` | `allowBookingOutOfBounds` | `boolean`, default `true`. Book outside the event type's availability, notice and booking window |
-| `updateEvent` | `reschedulingReason`      | `string`, shown in the reschedule email |
-| `deleteEvent` | `cancellationReason`      | `string`, shown in the cancellation email. Default `'Cancelled'` |
+### createEvent
+
+<TypeTable
+  type={{
+    eventTypeId: { type: 'number', description: "Required on `'primary'`." },
+    metadata: { type: 'Record<string, string>', description: 'Stored on the booking.' },
+    allowConflicts: { type: 'boolean', description: 'Book over other bookings and busy time.', default: 'true' },
+    allowBookingOutOfBounds: { type: 'boolean', description: "Book outside the event type's availability, notice and booking window.", default: 'true' },
+  }}
+/>
+
+### updateEvent
+
+<TypeTable
+  type={{
+    reschedulingReason: { type: 'string', description: 'Shown in the reschedule email.' },
+    allowConflicts: { type: 'boolean', description: 'As on `createEvent`.', default: 'true' },
+    allowBookingOutOfBounds: { type: 'boolean', description: 'As on `createEvent`.', default: 'true' },
+  }}
+/>
+
+### deleteEvent
+
+<TypeTable
+  type={{
+    cancellationReason: { type: 'string', description: 'Shown in the cancellation email.', default: "'Cancelled'" },
+  }}
+/>
 
 ## Metadata
 
 Events carry `providerMetadata.calcom`:
 
-| Field                | Type |
+| Field                | Type and notes |
 | -------------------- | ---- |
 | `bookingId`          | `number`, Cal.com's numeric id. The event id is the `uid` |
 | `eventTypeId`        | `number` |

@@ -3,7 +3,7 @@ title: Helpers
 description: The fetch client, error mapping, options parsing, time zone and recurrence helpers in @calsdk/provider-utils.
 ---
 
-`@calsdk/provider-utils` holds the helpers the official providers are built on.
+Most of a provider is the same few chores: authenticated JSON requests, mapping HTTP errors, time zone arithmetic and recurrence rules. `@calsdk/provider-utils` holds the helpers the official providers use for them, so you can skip the parts that are easy to get subtly wrong.
 
 ```npm
 npm install @calsdk/provider-utils
@@ -15,7 +15,7 @@ npm install @calsdk/provider-utils
 | --- | --- |
 | `createJsonFetcher({ baseURL, accessToken, headers?, fetch? })` | A JSON client. Sends `Authorization: Bearer`, resolving the token per request; validates responses with a schema; throws `APICallError` for non-2xx responses and network failures; never follows redirects |
 | `urlPath` | A template tag that percent-encodes every value: ``urlPath`/calendars/${id}/events` `` |
-| `mapAPICallError(error, { provider, resource?, eventId? })` | Turns 401, 403, 404, 410, 412 and 429 into `AuthenticationError`, `PermissionDeniedError`, `NotFoundError`, `ConflictError` and `RateLimitError` |
+| `mapAPICallError(error, { provider, resource?, eventId? })` | Turns 401 into `AuthenticationError`, 403 into `PermissionDeniedError`, 404 and 410 into `NotFoundError` (given `resource`), 412 into `ConflictError` (given `eventId`) and 429 into `RateLimitError`. Other errors pass through unchanged |
 | `parseRetryAfterMs(headers)` | Reads `Retry-After` as milliseconds |
 | `combineHeaders`, `withUserAgentSuffix` | Merge header objects, and add your provider to the user agent |
 
@@ -50,4 +50,4 @@ npm install @calsdk/provider-utils
 | `formatExdates`, `formatRdates` | Build `EXDATE` and `RDATE` lines |
 | `WEEKDAYS` | `['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']` |
 
-Read each function's doc comment in the package for exact signatures.
+Each function's doc comment in the package has its exact signature.

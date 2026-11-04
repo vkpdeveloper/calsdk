@@ -3,11 +3,11 @@ title: Choose a provider
 description: Which package to install, and what credentials it needs, for each calendar your users have.
 ---
 
-Most apps need one provider per calendar their users connect. Providers are plain objects, so one app can hold a Google provider for one user and an Outlook provider for another, and pass whichever applies to the same functions.
+You rarely get to choose your users' calendar. One team lives in Google Workspace, the next in Microsoft 365, and someone always books through Calendly. So most apps end up with one provider per calendar their users connect. Providers are plain objects, so your app can hold a Google provider for Priya and an Outlook provider for Tom, and pass whichever applies to the same functions.
 
 ## Full calendars
 
-Use these when users keep their schedule in the calendar itself. They read and write any event, invite attendees and repeat events.
+Use these when your users keep their schedule in the calendar itself. You can read and write any event, invite attendees and create repeating series.
 
 | Calendar                          | Use                                                     | Credentials                                               |
 | --------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
@@ -15,11 +15,13 @@ Use these when users keep their schedule in the calendar itself. They read and w
 | Outlook, Microsoft 365            | [`microsoft()`](/docs/providers/microsoft)              | Microsoft Graph token with `Calendars.ReadWrite`          |
 | iCloud                            | [`icloud()`](/docs/providers/caldav)                    | Apple ID and an app-specific password                     |
 | Zoho Calendar                     | [`zoho()`](/docs/providers/caldav)                      | Email and password, or an app-specific password           |
-| Fastmail, Nextcloud, Radicale and other CalDAV servers | [`caldav()`](/docs/providers/caldav) | Server address, username and password            |
+| Other CalDAV servers              | [`caldav()`](/docs/providers/caldav)                    | Server address, username and password                     |
+
+Fastmail, Nextcloud and Radicale are CalDAV servers, so they use `caldav()`.
 
 ## Scheduling tools
 
-Use these to read and make bookings. Events are bookings or meetings, created on an event type, and the tool decides their title and length.
+Use these when your app reads and makes bookings or meetings rather than managing someone's whole calendar. Cal.com and Calendly book an event type, and the event type sets the booking's name and length, not you. Zoom meetings keep the title and length you give them.
 
 | Tool     | Use                                      | Credentials                                       |
 | -------- | ---------------------------------------- | ------------------------------------------------- |
@@ -31,12 +33,12 @@ Use these to read and make bookings. Events are bookings or meetings, created on
 
 | Source                                  | Use                                  | Credentials                     |
 | --------------------------------------- | ------------------------------------ | ------------------------------- |
-| A `.ics` or `webcal://` subscription    | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
+| A `.ics` or `webcal://` feed            | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
 | An in-memory calendar                   | [`mockCalendar()`](/docs/providers/mock) | None                        |
 
 ## Check before you rely on a feature
 
-Providers differ. Outlook cannot change "this and following" occurrences, Zoom has no all-day meetings, and an ICS feed is read only. Each provider lists what it supports in `capabilities`:
+The same function doesn't mean the same features. Outlook can't change "this and following" occurrences, Zoom has no all-day meetings, and an ICS feed is read only. Each provider lists what it supports in `capabilities`, so you can check before you show a feature to a user:
 
 ```ts
 if (calendar.capabilities.events.search === true) {
@@ -44,6 +46,6 @@ if (calendar.capabilities.events.search === true) {
 }
 ```
 
-A capability is `true`, `false`, `'unknown'` or `{ condition }` when it depends on something, such as Teams meetings needing a work account. The [comparison table](/docs/providers) shows them all side by side.
+A capability is `true`, `false`, `'unknown'`, or `{ condition }` when it depends on something, such as Teams meetings needing a work or school account. The [comparison table](/docs/providers) shows them all side by side.
 
-When you ask for something a provider cannot do, the call either succeeds with a [warning](/docs/concepts/warnings), when the rest of the event is still right (an Outlook event cannot have a color), or throws `UnsupportedFunctionalityError`, when going ahead would save something you did not ask for (a rule Outlook cannot repeat). Each provider page lists which is which.
+If you ask for something a provider can't do anyway, calsdk picks one of two outcomes. When the rest of the event is still right, the call succeeds with a [warning](/docs/concepts/warnings): an Outlook event can't have a color, so the color is dropped. When going ahead would save something you didn't ask for, such as a rule Outlook can't repeat, it throws `UnsupportedFunctionalityError`. Each provider page lists which is which.

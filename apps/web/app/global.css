@@ -24,6 +24,16 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Fumadocs keeps the docs top bar inside the centred layout, so on wide screens its
+   bottom border stops short of the window edges. Extend the line, not the bar. */
+#nd-subnav::before {
+  content: "";
+  position: absolute;
+  inset: auto -100vmax 0;
+  border-bottom: 1px solid var(--color-fd-border);
+  pointer-events: none;
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;
@@ -50,16 +60,40 @@ html > body[data-scroll-locked] {
   background: rgb(79 124 255 / 0.1);
   border-left-color: #4f7cff;
 }
+/* The provider showcase: the lines a switch changed light up once, then settle. */
+.code-flash .line.changed {
+  animation: line-flash 0.9s ease-out;
+}
+@keyframes line-flash {
+  from {
+    background-color: rgb(79 124 255 / 0.38);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .code-flash .line.changed {
+    animation: none;
+  }
+}
 .code-sm pre {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 .code-sm .line {
   padding: 0 0.75rem;
 }
 
-/* The landing page is framed at 1200px, so the nav lines up with it. */
+/* The landing page is framed at 1360px, so the nav lines up with it. */
 #nd-home-layout {
-  --fd-layout-width: 1200px;
+  --fd-layout-width: 1360px;
+}
+/* Same insets as the page sections (px-5, sm:px-10), so the logo and GitHub icon sit on
+   the content edges. */
+#nd-home-layout #nd-nav nav > div {
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  #nd-home-layout #nd-nav nav > div {
+    padding-inline: 2.5rem;
+  }
 }
 
 /* A faint week grid behind the hero and the closing section. */
@@ -168,7 +202,7 @@ html > body[data-scroll-locked] {
 
 /* FieldCompare: the picked field stays bright in every payload. */
 .compare .line {
-  opacity: 0.42;
+  opacity: 0.62;
   transition:
     opacity 0.2s,
     background-color 0.2s;
@@ -180,4 +214,119 @@ html > body[data-scroll-locked] {
   opacity: 1;
   background: rgb(79 124 255 / 0.12);
   border-left-color: #4f7cff;
+}
+
+/* Running text keeps a readable line length on wide screens; code, tables and cards still use
+   the full column. */
+.prose > :is(p, ul, ol, blockquote) {
+  max-width: 75ch;
+}
+
+/* Output meant for reading, not copying, wraps like a terminal instead of scrolling. */
+.wrap-code pre {
+  width: auto;
+}
+.wrap-code .line {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* Inline code is short; splitting `google({ accessToken })` across lines makes it unreadable.
+   Phones keep wrapping so a long span can't push the page sideways. */
+@media (min-width: 640px) {
+  .prose :not(pre) > code {
+    white-space: nowrap;
+  }
+}
+
+/* On phones, wide docs tables scroll inside their own box with the header row in view.
+   Short tables never reach the height cap. */
+@media (max-width: 767px) {
+  /* Tall enough for the provider comparison to fit on a typical phone. */
+  .prose div:has(> table) {
+    max-height: min(85dvh, 44rem);
+  }
+  /* `hidden` would stop the cells sticking; `clip` still rounds the corners. */
+  .prose table {
+    overflow: clip;
+  }
+  .prose table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: rgb(20 20 20);
+    box-shadow: inset 0 -1px 0 var(--color-fd-border);
+  }
+  /* Only wide matrices (five or more columns) pin their row labels. On narrower tables a
+     pinned first column, such as a long RRULE, can cover the column next to it. */
+  .prose table:has(th:nth-child(5)) :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--color-fd-card);
+    box-shadow: inset -1px 0 0 var(--color-fd-border);
+  }
+  .prose table:has(th:nth-child(5)) th:first-child {
+    z-index: 3;
+    background-color: rgb(20 20 20);
+    box-shadow:
+      inset -1px 0 0 var(--color-fd-border),
+      inset 0 -1px 0 var(--color-fd-border);
+  }
+  /* Narrower tables hold prose after the first column; keep those columns wide enough to
+     read, and let the table scroll instead of squeezing them into strips. A cell holding
+     just a link, such as a function name, stays narrow. Four-column tables end in longer
+     notes. */
+  .prose table:not(:has(th:nth-child(5))) td:not(:first-child):not(:has(> a:only-child)) {
+    min-width: 9rem;
+  }
+  .prose table:not(:has(th:nth-child(5))) td:last-child {
+    min-width: 11rem;
+  }
+  .prose table:has(th:nth-child(4)):not(:has(th:nth-child(5))) td:last-child {
+    min-width: 18rem;
+  }
+  /* A code block without a title floats its copy button over the first line, and phone
+     lines run to the edge. Start the code below the button instead. */
+  figure.shiki > div.absolute + .fd-scroll-container pre {
+    padding-top: 1.75rem;
+  }
+}
+
+/* Code and tables wider than their box fade at the right edge until scrolled to the end,
+   so they read as scrollable rather than cut off. With nothing to scroll the timeline is inactive
+   and the fade never applies. Browsers without scroll timelines just show no fade. */
+@supports (animation-timeline: scroll()) {
+  .code pre,
+  .fd-scroll-container,
+  .prose div:has(> table),
+  .x-scroll {
+    animation: scroll-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+@keyframes scroll-fade {
+  0%,
+  96% {
+    mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+  }
+  100% {
+    mask-image: none;
+  }
+}
+
+/* The hero's field names arrive one by one, once. */
+.chip-in {
+  animation: chip-in 0.4s ease-out both;
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip-in {
+    animation: none;
+  }
 }

@@ -3,6 +3,8 @@ title: deleteEvent
 description: Deletes an event, one occurrence, or a series.
 ---
 
+For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes. Pass `sendUpdates` to tell the guests, where the provider can.
+
 ```ts
 import { deleteEvent } from 'calsdk';
 
@@ -16,7 +18,7 @@ await deleteEvent({ calendar, eventId });
     eventId: { type: 'string', required: true },
     calendarId: { type: 'string', default: "'primary'" },
     scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: delete only this instance, the whole series, or this and later instances.', default: "'this'" },
-    ifMatch: { type: 'string', description: "Only delete if the event's etag still matches. Otherwise throws ConflictError." },
+    ifMatch: { type: 'string', description: "Only delete if the event's `etag` still matches, otherwise throw `ConflictError`. On Outlook, calsdk checks it just before deleting, so a change in between isn't caught." },
     sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
   }}
 />

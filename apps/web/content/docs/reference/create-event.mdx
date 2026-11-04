@@ -3,6 +3,8 @@ title: createEvent
 description: Creates an event or a recurring series and returns it as the provider stored it.
 ---
 
+Keep the returned `id` for later updates, and check `warnings` for anything the provider changed or ignored, such as the title Cal.com replaces with its event type's name.
+
 ```ts
 import { createEvent } from 'calsdk';
 
@@ -32,18 +34,18 @@ Plus the [common options](/docs/reference#common-options). Only rate limits are 
 
 <TypeTable
   type={{
-    start: { type: 'EventTime', description: "{ dateTime, timeZone } or { date }. A dateTime without an offset is wall-clock time in timeZone.", required: true },
+    start: { type: 'EventTime', description: "`{ dateTime, timeZone }` or `{ date }`. A `dateTime` without an offset is wall-clock time in `timeZone`.", required: true },
     end: { type: 'EventTime', description: 'The same form as start. All-day end dates are exclusive.', required: true },
     title: { type: 'string' },
     description: { type: 'string' },
     location: { type: 'string' },
-    recurrence: { type: 'string[]', description: "RFC 5545 lines, such as ['RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=10']." },
+    recurrence: { type: 'string[]', description: "RFC 5545 lines, such as `['RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=10']`." },
     showAs: { type: "'busy' | 'free'", default: "'busy'" },
     visibility: { type: "'default' | 'public' | 'private'" },
     attendees: { type: '{ email: string; name?: string; optional?: boolean }[]' },
     createConference: { type: 'boolean', description: 'Ask the provider for a video link: Meet on Google, Teams on Outlook.' },
     reminders: { type: "{ useDefault: boolean; overrides?: { method: 'popup' | 'email'; minutesBefore: number }[] }" },
-    color: { type: 'string', description: "Hex color, '#RRGGBB'. Providers with a fixed palette pick the nearest and warn." },
+    color: { type: 'string', description: "Hex color, `'#RRGGBB'`. Providers with a fixed palette pick the nearest and warn." },
   }}
 />
 
@@ -51,7 +53,7 @@ Plus the [common options](/docs/reference#common-options). Only rate limits are 
 
 <TypeTable
   type={{
-    event: { type: 'CalendarEvent', description: 'The stored event, with its id and etag.', required: true },
+    event: { type: 'CalendarEvent', description: 'The stored event, with its id, and an `etag` where the provider has one.', required: true },
     warnings: { type: 'Warning[]', description: 'Fields the provider ignored or changed.', required: true },
   }}
 />

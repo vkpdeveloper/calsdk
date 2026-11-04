@@ -1,5 +1,7 @@
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { ClockChange } from '@/components/landing/clock-change';
 import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
@@ -77,8 +79,8 @@ const calendar = ${setup};
 
 const { events } = await listEvents({
   calendar,
-  timeMin: '2026-11-01',
-  timeMax: '2026-12-01',
+  timeMin: '2026-11-01T00:00:00Z',
+  timeMax: '2026-12-01T00:00:00Z',
 });`;
 
 // One weekday standup with a video link, as each API returns it. `«field»` marks the lines
@@ -86,8 +88,15 @@ const { events } = await listEvents({
 const PAYLOADS = [
   {
     name: 'Google Calendar',
+    notes: {
+      title: 'Called summary, after iCalendar.',
+      start: 'An offset and a zone, both.',
+      repeat: 'Plain RRULE strings. The easy one.',
+      link: 'Three levels deep for one URL.',
+    },
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
     code: `
 {
   "summary": "Standup",«title»
@@ -108,15 +117,24 @@ const PAYLOADS = [
   },
   {
     name: 'Outlook',
+    notes: {
+      title: 'Called subject, like an email.',
+      start: 'UTC, with the zone in another field as a Windows name.',
+      repeat: 'A pattern object instead of an RRULE.',
+      link: 'Under onlineMeeting.',
+    },
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'teams', joinUrl: 'https://teams.microsoft.com/l/...' },
     code: `
 {
   "subject": "Standup",«title»
+  "type": "seriesMaster",«repeat»
   "start": {«start»
-    "dateTime": "2026-11-09T09:30:00.0000000",«start»
-    "timeZone": "Eastern Standard Time"«start»
+    "dateTime": "2026-11-09T14:30:00.0000000",«start»
+    "timeZone": "UTC"«start»
   },«start»
+  "originalStartTimeZone": "Eastern Standard Time",«start»
   "recurrence": {«repeat»
     "pattern": {«repeat»
       "type": "weekly",«repeat»
@@ -138,8 +156,15 @@ const PAYLOADS = [
   },
   {
     name: 'iCloud',
+    notes: {
+      title: 'Not JSON at all: one text line per field.',
+      start: 'Wall time, with the zone as a parameter.',
+      repeat: 'An RRULE line, straight from the standard.',
+      link: "No video field, so it's just a URL.",
+    },
     format: 'iCalendar',
     lang: 'text',
+    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
     code: `
 BEGIN:VEVENT
 UID:8C1F2A70-standup
@@ -152,8 +177,15 @@ END:VEVENT`,
   },
   {
     name: 'Zoom',
+    notes: {
+      title: 'Called topic.',
+      start: 'No start field: UTC occurrences plus a zone.',
+      repeat: 'Sunday is 1, so weekdays are 2 to 6.',
+      link: 'A Zoom link, always.',
+    },
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'zoom', joinUrl: 'https://zoom.us/j/85512345678' },
     code: `
 {
   "topic": "Standup",«title»
@@ -166,10 +198,12 @@ END:VEVENT`,
   },«repeat»
   "occurrences": [«start»
     {«start»
+      "occurrence_id": "1794234600000",«start»
       "start_time": "2026-11-09T14:30:00Z",«start»
       "duration": 15«start»
     },«start»
     {
+      "occurrence_id": "1794321000000",
       "start_time": "2026-11-10T14:30:00Z",
       "duration": 15
     }
@@ -179,7 +213,8 @@ END:VEVENT`,
   },
 ];
 
-const EVENT_CODE = `
+// The calsdk event each payload above becomes. Only the conference differs.
+const eventCode = ({ provider, joinUrl }: { provider: string; joinUrl: string }) => `
 {
   kind: 'series',
   title: 'Standup',«title»
@@ -192,14 +227,18 @@ const EVENT_CODE = `
   ],«repeat»
   // From any Meet, Teams or Zoom link.
   conference: {«link»
-    provider: 'teams',«link»
-    joinUrl: 'https://teams.microsoft.com/l/...',«link»
+    provider: '${provider}',«link»
+    joinUrl: '${joinUrl}',«link»
   },«link»
+  // Plus id, end, status and more.
 }`;
 
 const demoCode = (duration: number) => `
 const { slots } = await findFreeTime({
-  calendars: [{ calendar: you }, { calendar: sam }],
+  calendars: [
+    { calendar: you },
+    { calendar: sam },
+  ],
   timeMin: '2027-01-11T00:00:00-05:00',
   timeMax: '2027-01-16T00:00:00-05:00',
   duration: ${duration},
@@ -217,7 +256,7 @@ const FEATURES = [
     label: 'Book',
     title: 'Book a meeting, with the video link',
     points: [
-      'createConference adds Google Meet on Google and Teams on Outlook.',
+      'createConference adds Google Meet on Google and Teams on Outlook work accounts.',
       'sendUpdates emails the guests, where the provider can.',
       'Anything the provider changed or ignored comes back in warnings.',
     ],
@@ -244,7 +283,7 @@ event.conference?.joinUrl;`,
     title: 'Recurring events are plain RRULEs',
     points: [
       'Listing expands a series, and each occurrence has its own id.',
-      "Move one occurrence, or 'thisAndFollowing', or the whole series.",
+      'Move one occurrence or the whole series. On Google, also everything after one.',
       'Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
     ],
     code: `
@@ -279,7 +318,7 @@ for await (const event of iterateEvents({ calendar, ...friday })) {
     label: 'Sync',
     title: 'Keep a copy in your database',
     points: [
-      'The first call returns every event. Later calls return only changes.',
+      'The first call returns what the provider syncs. Later calls return only changes.',
       'Changes are upserts and deletes, ready to apply.',
       'An expired cursor is its own error, so a full resync is one branch.',
     ],
@@ -351,19 +390,56 @@ type Support = boolean | string;
 const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Adds video links', 'Sync'];
 const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['Google Calendar', 'google', [true, true, true, 'Google Meet', true]],
-  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams', true]],
+  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams (work)', true]],
   ['iCloud', 'caldav', [true, true, true, false, true]],
   ['Zoho Calendar', 'caldav', [true, true, true, false, true]],
   ['Any CalDAV server', 'caldav', [true, true, true, false, true]],
   ['Zoom', 'zoom', [true, true, "Zoom's patterns", 'Zoom', true]],
   ['Cal.com', 'calcom', [true, 'Book, move, cancel', false, false, true]],
   ['Calendly', 'calendly', [true, 'Book, cancel', false, false, true]],
-  ['ICS feeds', 'ics', [true, false, true, false, true]],
+  ['ICS feeds', 'ics', [true, false, 'Read only', false, true]],
+];
+
+// Real warnings, word for word from the provider packages, for a call each provider can't
+// honor exactly.
+const WARNINGS = [
+  {
+    provider: 'Google Calendar',
+    asked: "color: '#ec4899'",
+    type: 'compatibility',
+    feature: 'color',
+    details:
+      'Google Calendar has a fixed palette. #ec4899 was saved as the nearest color, #e67c73.',
+    colors: { asked: '#ec4899', saved: '#e67c73' },
+  },
+  {
+    provider: 'Outlook',
+    asked: 'createConference: true',
+    type: 'unsupported',
+    feature: 'createConference',
+    details:
+      'Outlook did not create a Teams meeting. Personal Microsoft accounts and some work accounts cannot create Teams meetings through Graph.',
+  },
+  {
+    provider: 'Cal.com',
+    asked: "title: 'Intro call'",
+    type: 'unsupported',
+    feature: 'title',
+    details: 'Cal.com names bookings after their event type.',
+  },
+];
+
+// What each API calls an event's title, as in the payloads above.
+const TITLE_NAMES = [
+  ['Google', 'summary'],
+  ['Outlook', 'subject'],
+  ['iCloud', 'SUMMARY:'],
+  ['Zoom', 'topic'],
 ];
 
 const STATS = [
   ['9', 'calendars'],
-  ['1', 'Event type'],
+  ['1', 'event shape'],
   ['0', 'vendor SDKs'],
   ['4', 'runtimes: Node, Bun, Deno, edge'],
 ];
@@ -384,7 +460,9 @@ export function fastmail(settings: Settings): Fastmail {
 }`;
 
 const CONFORMANCE_CODE = `
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import {
+  describeProviderConformance,
+} from '@calsdk/provider-tests';
 
 describeProviderConformance({
   name: 'fastmail',
@@ -396,8 +474,8 @@ describeProviderConformance({
 });`;
 
 export default async function HomePage() {
-  const [providers, payloads, eventCode, lengths, features, contractCode, conformanceCode] =
-    await Promise.all([
+  const [providers, payloads, lengths, features, contractCode, conformanceCode] = await Promise.all(
+    [
       Promise.all(
         PROVIDERS.map(async ({ id, label, pkg, color, setup }) => ({
           id,
@@ -407,17 +485,18 @@ export default async function HomePage() {
         })),
       ),
       Promise.all(
-        PAYLOADS.map(async ({ name, format, lang, code }) => ({
+        PAYLOADS.map(async ({ name, format, lang, code, conference, notes }) => ({
           name,
           format,
+          notes,
           code: await highlightCode(code, { lang }),
+          result: await highlightCode(eventCode(conference)),
         })),
       ),
-      highlightCode(EVENT_CODE),
       Promise.all(
         [30, 60, 90].map(async (minutes) => ({
           minutes,
-          code: await highlightCode(demoCode(minutes), { changed: [5] }),
+          code: await highlightCode(demoCode(minutes), { changed: [8] }),
         })),
       ),
       Promise.all(
@@ -428,24 +507,30 @@ export default async function HomePage() {
       ),
       highlightCode(PROVIDER_CODE),
       highlightCode(CONFORMANCE_CODE),
-    ]);
+    ],
+  );
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] border-x border-line">
-      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
-          Calendar SDK for TypeScript
-        </p>
-        <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
-          <h1 className="text-[clamp(3.25rem,10vw,7.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
-            Every calendar.
-            <br />
-            <span className="text-neutral-500">One API.</span>
-          </h1>
+    <div className="mx-auto w-full max-w-[1360px] border-x border-line">
+      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-20 sm:pb-16">
+        {/* The eyebrow travels with the headline, so no gap opens above it when the copy beside
+            it is taller. */}
+        <div className="grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
+              Calendar SDK for TypeScript
+            </p>
+            <h1 className="mt-6 text-[clamp(3.25rem,10vw,5.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
+              <span className="whitespace-nowrap">Every calendar.</span>
+              <br />
+              <span className="text-neutral-500">One API.</span>
+            </h1>
+          </div>
           <div>
             <p className="text-lg leading-relaxed text-neutral-300">
               Read, write and sync events on Google, Outlook, iCloud, Zoom, Cal.com, Calendly and
-              any CalDAV server. Same functions, same types, on every one.
+              any CalDAV server. One set of typed functions, and a clear warning or error wherever a
+              provider falls short.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link
@@ -462,9 +547,31 @@ export default async function HomePage() {
               </a>
             </div>
             <div className="mt-4">
-              <CopyCommand command="bun add calsdk @calsdk/google" />
+              <CopyCommand command="npm i calsdk @calsdk/google" />
             </div>
           </div>
+        </div>
+        <div className="mt-12 flex flex-wrap items-center gap-2 font-mono text-sm sm:mt-16">
+          {TITLE_NAMES.map(([provider, name], i) => (
+            <span
+              key={provider}
+              style={{ animationDelay: `${300 + i * 120}ms` }}
+              className="chip-in rounded-md border border-line bg-panel px-2.5 py-1.5"
+            >
+              <span className="font-sans text-neutral-400">{provider}</span>{' '}
+              <span className="text-neutral-300">{name}</span>
+            </span>
+          ))}
+          <span className="flex items-center gap-2">
+            <ArrowRight aria-hidden className="mx-1 size-4 text-neutral-500" />
+            <span
+              style={{ animationDelay: '840ms' }}
+              className="chip-in rounded-md border border-accent-blue/60 bg-accent-blue/10 px-2.5 py-1.5"
+            >
+              <span className="font-sans text-neutral-400">calsdk</span>{' '}
+              <span className="text-white">title</span>
+            </span>
+          </span>
         </div>
       </section>
 
@@ -486,9 +593,34 @@ export default async function HomePage() {
         id="why"
         index="01"
         eyebrow="The problem"
-        title="Four APIs. Four ways to write one standup."
+        title="Four APIs, four ways to write one standup"
       >
-        <FieldCompare payloads={payloads} result={eventCode} />
+        <FieldCompare payloads={payloads} />
+        <p className="mt-12 mb-4 text-neutral-300">
+          And when a provider can't do exactly what you asked, the result tells you in{' '}
+          <code className="font-mono text-sm text-white">warnings</code>:
+        </p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {WARNINGS.map(({ provider, asked, type, feature, details, colors }) => (
+            <div key={provider} className="rounded-xl border border-line bg-panel p-4">
+              <div className="flex items-baseline justify-between gap-3 text-xs">
+                <span className="font-medium text-neutral-200">{provider}</span>
+                <code className="font-mono text-neutral-400">{asked}</code>
+              </div>
+              <p className="mt-3 font-mono text-xs text-accent-blue">
+                {type} · {feature}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{details}</p>
+              {colors && (
+                <div className="mt-3 flex items-center gap-2 font-mono text-xs text-neutral-400">
+                  <Swatch color={colors.asked} label="asked" />
+                  <ArrowRight className="size-3.5" aria-hidden />
+                  <Swatch color={colors.saved} label="saved" />
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </Section>
 
       <Section
@@ -501,22 +633,37 @@ export default async function HomePage() {
         <FreeTimeDemo lengths={lengths} />
       </Section>
 
+      <Section
+        id="time-zones"
+        index="03"
+        eyebrow="Time zones"
+        title="Clocks change. Your standup shouldn't."
+        intro="A weekly 9:30 standup in New York, through March 2027. The US moves its clocks on the 14th, Europe on the 28th."
+      >
+        <ClockChange />
+        <p className="mt-5 max-w-3xl text-sm text-neutral-400">
+          calsdk keeps the time and the zone, so the series is expanded in New York time. Berlin
+          sees it an hour early for the two weeks Europe hasn't changed yet, which is right: the
+          meeting belongs to New York.
+        </p>
+      </Section>
+
       <section id="features" className="scroll-mt-20 border-t border-line">
         <SectionHeading
-          index="03"
+          index="04"
           eyebrow="Features"
           title="The calendar code you'd rather not write"
         />
         <FeatureTabs features={features} />
       </section>
 
-      <Section id="providers" index="04" eyebrow="Providers" title="Nine calendars today">
+      <Section id="providers" index="05" eyebrow="Providers" title="Nine calendars today">
         <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {SUPPORT.map(([name, pkg, support]) => (
             <div key={name} className="bg-fd-background p-6">
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{name}</h3>
-                <span className="font-mono text-xs text-neutral-500">@calsdk/{pkg}</span>
+                <span className="font-mono text-xs text-neutral-400">@calsdk/{pkg}</span>
               </div>
               <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm sm:mt-5 sm:block sm:space-y-2">
                 {CAPABILITIES.map((capability, i) => (
@@ -535,7 +682,7 @@ export default async function HomePage() {
 
       <Section
         id="your-provider"
-        index="05"
+        index="06"
         eyebrow="Extend"
         title="Bring your own calendar"
         intro="A provider is one object with a few functions. Test it with the conformance suite most official providers run."
@@ -552,7 +699,7 @@ export default async function HomePage() {
 
       <section className="hero-grid relative flex flex-col items-center overflow-hidden border-t border-line px-5 py-24 text-center sm:py-32">
         <Mark className="size-14 text-white" />
-        <h2 className="mt-8 max-w-3xl text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
+        <h2 className="mt-8 max-w-3xl text-balance text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
           Try it without an account
         </h2>
         <p className="mt-5 max-w-md text-neutral-400">
@@ -560,7 +707,7 @@ export default async function HomePage() {
           ready.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4">
-          <CopyCommand command="bun add calsdk @calsdk/mock" />
+          <CopyCommand command="npm i calsdk @calsdk/mock" />
           <Link
             href="/docs/quickstart"
             className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
@@ -570,7 +717,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-500 sm:px-10">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-400 sm:px-10">
         <span>MIT License</span>
         <div className="flex gap-5">
           <Link href="/docs" className="hover:text-white">
@@ -597,11 +744,11 @@ function SectionHeading({
   intro?: string;
 }) {
   return (
-    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-24 sm:pb-10">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
+    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-20 sm:pb-10">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
         <span className="text-accent-blue">{index}</span> / {eyebrow}
       </p>
-      <h2 className="mt-4 max-w-4xl text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
+      <h2 className="mt-4 max-w-4xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
         {title}
       </h2>
       {intro && <p className="mt-5 max-w-2xl text-lg text-neutral-400">{intro}</p>}
@@ -624,7 +771,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-20 border-t border-line">
       <SectionHeading {...heading} />
-      <div className="px-5 pb-16 sm:px-10 sm:pb-24">{children}</div>
+      <div className="px-5 pb-16 sm:px-10 sm:pb-20">{children}</div>
     </section>
   );
 }
@@ -635,16 +782,25 @@ function Capability({ label, value }: { label: string; value: Support }) {
       <span
         aria-hidden
         className={`size-2 shrink-0 rounded-full ${
-          value === false ? 'border border-neutral-700' : 'bg-accent-blue'
+          value === false ? 'border border-neutral-500' : 'bg-accent-blue'
         }`}
       />
-      <span className={value === false ? 'text-neutral-600' : 'text-neutral-200'}>
+      <span className={value === false ? 'text-neutral-400' : 'text-neutral-200'}>
         {label}
         <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
       </span>
       {typeof value === 'string' && (
-        <span className="text-xs text-neutral-500 sm:ml-auto sm:text-right">{value}</span>
+        <span className="text-xs text-neutral-400 sm:ml-auto sm:text-right">{value}</span>
       )}
     </li>
+  );
+}
+
+function Swatch({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="size-4 rounded" style={{ background: color }} />
+      {color} {label}
+    </span>
   );
 }

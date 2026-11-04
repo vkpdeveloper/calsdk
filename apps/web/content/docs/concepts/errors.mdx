@@ -3,7 +3,7 @@ title: Errors and retries
 description: Which errors calsdk throws, how to check for them, and what it retries for you.
 ---
 
-Every error calsdk throws extends `CalsdkError`. Provider API failures are mapped to the same classes on every provider, so a 404 from Google and a 404 from Outlook are both `NotFoundError`.
+Google and Outlook describe a missing event or a rejected token in different JSON, and your app shouldn't need to know either format. Every error calsdk throws extends `CalsdkError`, and provider API failures are mapped to the same classes on every provider, so a 404 from Google and a 404 from Outlook are both a `NotFoundError`.
 
 ## Check errors with `isInstance`
 
@@ -19,13 +19,13 @@ try {
 }
 ```
 
-Use `isInstance` rather than `instanceof`. It still works when your app ends up with two copies of calsdk installed, which `instanceof` does not.
+Use `isInstance` rather than `instanceof`. It still works when your app ends up with two copies of calsdk installed, where `instanceof` returns `false` for an error thrown by the other copy.
 
 ## What to do with each
 
 | Error                           | Thrown when                                           | Usually                             |
 | ------------------------------- | ----------------------------------------------------- | ----------------------------------- |
-| `InvalidArgumentError`          | Input is wrong, before any request                    | Fix the call. `argument` names the field |
+| `InvalidArgumentError`          | An input value is invalid                             | Fix the call. `argument` names the field |
 | `AuthenticationError`           | The token or password was rejected (401)              | Refresh the token or ask the user to reconnect |
 | `PermissionDeniedError`         | The user may not do this (403)                        | Ask for a wider scope, or skip this calendar |
 | `NotFoundError`                 | The calendar or event does not exist or is hidden (404, 410) | Drop your copy. `resource` is `'calendar'` or `'event'` |
@@ -49,7 +49,7 @@ calsdk retries these for you, twice by default:
 
 It waits 1 second, then 2, doubling each time, or as long as the provider's `Retry-After` header says. A `Retry-After` over a minute is not waited out: the error is thrown, so a request never hangs, and your app can schedule the work for later.
 
-Creates only retry rate limits. A server error might come after the event was saved, and retrying could create it twice. Deletes that find the event already gone on a retry count as done.
+Creates only retry rate limits. A rate limit means the provider did nothing, but a server error might come after the event was saved, and retrying could create it twice. Deletes that find the event already gone on a retry count as done.
 
 ```ts
 await listEvents({ calendar, timeMin, timeMax, maxRetries: 5 });
@@ -66,4 +66,4 @@ await listEvents({ calendar, timeMin, timeMax, abortSignal: AbortSignal.timeout(
 
 ## Private data stays out of messages
 
-Error messages leave out what may be personal. Calendar ids are often email addresses, so `NotFoundError`, `SyncCursorExpiredError` and `FreeBusyUnavailableError` keep them in fields, not in the message. `APICallError` never stores request headers, which carry the access token. Response bodies are kept in `responseBody` for debugging, so be careful where you log them.
+Error messages tend to end up in logs and error trackers, so they leave out what may be personal. Calendar ids are often email addresses, so `NotFoundError`, `SyncCursorExpiredError` and `FreeBusyUnavailableError` keep them in fields, not in the message. `APICallError` never stores request headers, which carry the access token. Response bodies are kept in `responseBody` for debugging, so be careful where you log them.

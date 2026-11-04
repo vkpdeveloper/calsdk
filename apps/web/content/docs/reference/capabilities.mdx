@@ -3,7 +3,7 @@ title: Capabilities
 description: The capability flags every provider declares, and what each one means.
 ---
 
-Every provider has a `capabilities` object. calsdk uses it to pick fallbacks, the conformance suite runs only the tests a provider declares, and these docs build the [provider comparison](/docs/providers) from it.
+Before you offer a feature, such as "edit this and following" or a video link, you'll want to know the user's calendar can do it. Every provider has a `capabilities` object that tells you. calsdk also uses it to pick fallbacks, the conformance suite runs only the tests a provider declares, and these docs build the [provider comparison](/docs/providers) from it.
 
 ```ts
 calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'unknown' or { condition }
@@ -22,19 +22,19 @@ calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'u
 
 <TypeTable
   type={{
-    'events.details': { type: 'Capability', description: 'Events keep the title and description they are written with. Booking tools name events from a template instead.' },
-    'events.allDay': { type: 'Capability', description: 'Create all-day events.' },
-    'events.recurrence': { type: 'Capability', description: 'Create and read recurring series.' },
-    'events.recurrenceScopeThisAndFollowing': { type: 'Capability', description: "scope: 'thisAndFollowing' on update and delete." },
-    'events.serverSideExpansion': { type: 'Capability', description: 'expandRecurring: true returns occurrences, computed by the provider or by calsdk for it.' },
-    'events.attendees': { type: 'Capability', description: 'Invite and read attendees.' },
-    'events.conference': { type: 'Capability', description: 'createConference: true creates a video link.' },
-    'events.reminders': { type: 'Capability', description: 'Set reminders.' },
-    'events.color': { type: 'Capability', description: 'Set event colors.' },
-    'events.etag': { type: 'Capability', description: 'Events carry etag and writes honor ifMatch.' },
-    'events.search': { type: 'Capability', description: 'query on listEvents.' },
-    freeBusy: { type: 'Capability', description: 'A free/busy endpoint. Without one, calsdk computes free/busy from events.' },
-    sync: { type: 'Capability', description: 'syncEvents.' },
-    webhooks: { type: 'Capability', description: 'Push notifications. Part of the contract, not implemented by any provider yet.' },
+    'events.details': { type: 'Capability', description: 'Events keep the title and description they are written with. Booking tools name events from a template instead.', required: true },
+    'events.allDay': { type: 'Capability', description: 'Create all-day events.', required: true },
+    'events.recurrence': { type: 'Capability', description: 'Create and read recurring series.', required: true },
+    'events.recurrenceScopeThisAndFollowing': { type: 'Capability', description: "Change or delete this and later occurrences with `scope: 'thisAndFollowing'`.", required: true },
+    'events.serverSideExpansion': { type: 'Capability', description: '`expandRecurring: true` returns occurrences, computed by the provider or by calsdk for it.', required: true },
+    'events.attendees': { type: 'Capability', description: 'Invite and read attendees.', required: true },
+    'events.conference': { type: 'Capability', description: '`createConference: true` creates a video link.', required: true },
+    'events.reminders': { type: 'Capability', description: 'Set reminders.', required: true },
+    'events.color': { type: 'Capability', description: 'Set event colors.', required: true },
+    'events.etag': { type: 'Capability', description: 'Events carry `etag` and writes honor `ifMatch`.', required: true },
+    'events.search': { type: 'Capability', description: 'Free-text search with `query` on `listEvents`.', required: true },
+    freeBusy: { type: 'Capability', description: 'A free/busy endpoint. Without one, calsdk computes free/busy from events.', required: true },
+    sync: { type: 'Capability', description: 'Fetch changes since a cursor with `syncEvents`.', required: true },
+    webhooks: { type: 'Capability', description: 'Push notifications. Part of the contract, not implemented by any provider yet.', required: true },
   }}
 />

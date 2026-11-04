@@ -3,6 +3,8 @@ title: Microsoft Outlook
 description: Read and write Outlook and Microsoft 365 calendars through Microsoft Graph, with Teams meetings and delta sync.
 ---
 
+Use this provider for Outlook and Microsoft 365 calendars, on work, school and personal Microsoft accounts. It covers most of what Google does, with three differences you'll feel: Outlook stores recurrence as patterns rather than RRULEs, has no "this and following", and syncs a fixed window of time.
+
 ```npm
 npm install calsdk @calsdk/microsoft
 ```
@@ -20,11 +22,9 @@ const { events } = await listEvents({
 });
 ```
 
-Works with work, school and personal Microsoft accounts.
-
 ## Credentials
 
-`accessToken` is a Microsoft Graph token with `Calendars.ReadWrite`, or `Calendars.Read` for reading only. calsdk does not run the OAuth flow: pass a function that returns a fresh token. It is called before every request.
+`accessToken` is a Microsoft Graph token with `Calendars.ReadWrite`, or `Calendars.Read` if you only read. calsdk doesn't run the OAuth flow: get tokens from your auth library and pass a function that returns a fresh one. calsdk calls it before every request.
 
 ## Settings
 
@@ -37,24 +37,37 @@ Works with work, school and personal Microsoft accounts.
   }}
 />
 
-## Supports
+## Not supported
 
-All-day and recurring events (scopes `this` and `all`), attendees, Teams meetings on work and school accounts, one reminder per event, etags and sync. Not supported: `thisAndFollowing`, colors, search and a free/busy endpoint (calsdk computes free/busy from events).
+Outlook has no `thisAndFollowing`, event colors, search or free/busy endpoint. Search throws `UnsupportedFunctionalityError`, so filter the listed events instead, and calsdk computes free/busy from events. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-- **Ids.** calsdk asks Graph for immutable ids, so an event keeps its id when it moves to another calendar.
-- **Time zones.** Events keep the zone they were scheduled in. Outlook's Windows zone names are turned into IANA names.
-- **Recurrence.** Outlook stores patterns, not RRULEs. Rules with an exact Outlook pattern are converted both ways. Others, such as `RDATE`, `FREQ=HOURLY` or `BYMONTHDAY=31` alone, throw `UnsupportedFunctionalityError` instead of saving a different schedule. Outlook moves a day a month lacks, such as the 31st, to the month's last day, which reads back as `BYMONTHDAY=28,29,30,31;BYSETPOS=-1`.
-- **Deleted occurrences** read back as `EXDATE` lines on the series, which costs one extra request per series. Outlook has no list of excluded dates, so to exclude a new date, delete that occurrence instead of adding an `EXDATE`.
-- **`thisAndFollowing`** throws `UnsupportedFunctionalityError`. Moving one occurrence with scope `all` moves the series by the same wall-clock distance; doing that to a monthly or yearly series throws, since its pattern would pick different days.
-- **Conditional deletes.** Outlook ignores `If-Match` on deletes, so `deleteEvent` with `ifMatch` compares the etag first. A change made between that check and the delete is not detected.
-- **Colors.** Outlook events have no color of their own, only categories. `color` is ignored with a warning; use the `categories` option instead.
-- **Reminders.** One popup reminder per event. Outlook has no default reminder to go back to, so `reminders: null` and `useDefault: true` leave it unchanged, with a warning. To turn it off, pass `{ useDefault: false, overrides: [] }`.
-- **Teams meetings.** `createConference: true` asks for a Teams meeting. Personal accounts cannot create one through Graph, so the event is saved without it and the result has a warning.
-- **`sendUpdates`.** Outlook always notifies attendees, so values other than `'all'` return a warning.
-- **Search** throws `UnsupportedFunctionalityError`. Filter the listed events instead.
-- **Sync** uses Graph delta queries over a fixed window, by default one year back and two years ahead of the first sync, kept in the cursor. Changes cover single events, series and changed occurrences. Deleting one occurrence changes its series, so it arrives as an update of the series with a new `EXDATE`.
+### Recurrence patterns
+
+Outlook stores recurrence as patterns, not RRULEs. Rules with an exact Outlook pattern are converted both ways. Others, such as `RDATE`, `FREQ=HOURLY` or `BYMONTHDAY=31` alone, throw `UnsupportedFunctionalityError`, because saving them would quietly schedule a different set of meetings. One difference shows up when reading: Outlook moves a day a month lacks, such as the 31st, to the month's last day, so that rule reads back as `BYMONTHDAY=28,29,30,31;BYSETPOS=-1`.
+
+Outlook also keeps no list of excluded dates, only occurrences deleted one by one. calsdk reads those back as `EXDATE` lines on the series, which costs one extra request per series. To exclude a new date, delete that occurrence instead of adding an `EXDATE`.
+
+### No "this and following"
+
+`thisAndFollowing` throws `UnsupportedFunctionalityError`. You can still move a whole series from one of its occurrences: with scope `all`, the series moves by the same wall-clock distance. On a monthly or yearly series that throws too, since its pattern picks days by date and would land on different ones.
+
+### A fixed sync window
+
+Sync uses Graph delta queries, which work over a date range. So a sync covers a fixed window, by default one year back and two years ahead of the first sync, and the cursor keeps it. Changes cover single events, series and changed occurrences. Deleting one occurrence changes its series, so it arrives as an update of the series with a new `EXDATE`.
+
+### Ids and time zones
+
+calsdk asks Graph for immutable ids, so an event keeps its id when someone moves it to another calendar, and the ids you've stored stay valid. Times keep the zone they were scheduled in; Outlook names zones the Windows way ("Pacific Standard Time"), and calsdk turns those into IANA names.
+
+### Writing events
+
+Outlook ignores `If-Match` on deletes, so `deleteEvent` with `ifMatch` compares the etag first. That leaves a small gap: a change made between the check and the delete isn't detected.
+
+`createConference: true` asks for a Teams meeting. Personal accounts, and some work accounts, can't create one through Graph, so on those the event is saved without it and the result carries a warning. Outlook also always notifies attendees, so `sendUpdates` values other than `'all'` return a warning.
+
+Outlook allows one popup reminder per event, and it has no default reminder to go back to. So `reminders: null` and `useDefault: true` leave the reminder unchanged, with a warning. To turn it off, pass `{ useDefault: false, overrides: [] }`. Events have no color of their own either, only categories, which carry Outlook's colors. `color` is ignored with a warning, so use the `categories` option instead.
 
 ## Provider options
 
@@ -75,19 +88,31 @@ await syncEvents({
 });
 ```
 
-| Function                     | Option          | Type |
-| ---------------------------- | --------------- | ---- |
-| `createEvent`, `updateEvent` | `showAs`        | `'free' \| 'tentative' \| 'busy' \| 'oof' \| 'workingElsewhere'`. Overrides `showAs` on the event |
-| `createEvent`, `updateEvent` | `importance`    | `'low' \| 'normal' \| 'high'` |
-| `createEvent`, `updateEvent` | `categories`    | `string[]`, Outlook category names. Categories carry Outlook's colors |
-| `createEvent`, `updateEvent` | `transactionId` | `string`. Makes a create safe to retry: Outlook will not create it twice |
-| `syncEvents`                 | `timeMin`, `timeMax` | ISO 8601 instants with an offset. The window a first sync covers |
+### createEvent and updateEvent
+
+<TypeTable
+  type={{
+    showAs: { type: "'free' | 'tentative' | 'busy' | 'oof' | 'workingElsewhere'", description: 'Overrides `showAs` on the event.' },
+    importance: { type: "'low' | 'normal' | 'high'" },
+    categories: { type: 'string[]', description: "Outlook category names. Categories carry Outlook's colors." },
+    transactionId: { type: 'string', description: "Makes a create safe to retry: Outlook won't create it twice." },
+  }}
+/>
+
+### syncEvents
+
+<TypeTable
+  type={{
+    timeMin: { type: 'string', description: "ISO 8601 instant with an offset. Where a first sync's window starts." },
+    timeMax: { type: 'string', description: "ISO 8601 instant with an offset. Where a first sync's window ends." },
+  }}
+/>
 
 ## Metadata
 
 Events carry `providerMetadata.microsoft`:
 
-| Field        | Type |
+| Field        | Type and notes |
 | ------------ | ---- |
 | `showAs`     | `string`: Outlook's own `'free'`, `'tentative'`, `'busy'`, `'oof'`, `'workingElsewhere'` or `'unknown'` |
 | `importance` | `string` |

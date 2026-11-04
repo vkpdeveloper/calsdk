@@ -3,9 +3,11 @@ title: Recurring events
 description: Create a series with an RRULE, then change or delete one occurrence, the rest of the series, or all of it.
 ---
 
+Recurring events are where calendar APIs disagree the most, so calsdk describes every series the same way, with RFC 5545 rules, and translates them for each provider.
+
 ## Create a series
 
-A series is an event with `recurrence`: RFC 5545 lines, one per array item. Its `start` and `end` are the first occurrence.
+A series is an event with `recurrence`, one RFC 5545 line per array item, and its `start` and `end` describe the first occurrence:
 
 ```ts
 const { event: standup } = await createEvent({
@@ -21,7 +23,7 @@ const { event: standup } = await createEvent({
 standup.kind; // 'series'
 ```
 
-Some useful rules:
+A few rules you'll reach for often:
 
 | Rule                                         | Repeats                                  |
 | -------------------------------------------- | ---------------------------------------- |
@@ -31,11 +33,11 @@ Some useful rules:
 | `RRULE:FREQ=MONTHLY;BYMONTHDAY=15;COUNT=6`   | The 15th, six times                      |
 | `RRULE:FREQ=DAILY;UNTIL=20261231T235959Z`    | Every day until the end of 2026          |
 
-Add `EXDATE` lines to skip occurrences. The series repeats in its `start.timeZone`, so a 9:30 standup stays at 9:30 local time when daylight saving time starts or ends.
+Add `EXDATE` lines to skip occurrences. The series repeats in its `start.timeZone`, so a 9:30 standup in Berlin stays at 9:30 local time when daylight saving time starts or ends, instead of drifting an hour.
 
 ## Four kinds of event
 
-Every event has a `kind`:
+Every event has a `kind` that says how it relates to a series:
 
 | Kind         | What it is                                         | Has            |
 | ------------ | -------------------------------------------------- | -------------- |
@@ -44,11 +46,11 @@ Every event has a `kind`:
 | `occurrence` | One instance, as the rule placed it                | `seriesId`, `originalStart` |
 | `exception`  | One instance someone changed                       | `seriesId`, `originalStart` |
 
-`listEvents` returns occurrences and exceptions by default, and series with `expandRecurring: false`. `originalStart` is where the rule put an instance, which stays the same when the instance moves.
+`listEvents` returns occurrences and exceptions by default, and series with `expandRecurring: false`. `originalStart` is where the rule put an instance, and it stays put when the instance moves, so it's how you recognize Friday's standup even after someone dragged it to 10:00.
 
 ## Change one occurrence, or more
 
-`updateEvent` and `deleteEvent` take the id of an occurrence or exception, and a `scope`:
+This is the part every calendar UI asks about: "this event, or all events in the series?" `updateEvent` and `deleteEvent` take the id of an occurrence or exception, and a `scope` that answers it:
 
 | `scope`              | Changes                                       |
 | -------------------- | --------------------------------------------- |
@@ -81,11 +83,11 @@ const { events: series } = await listEvents({ calendar, timeMin, timeMax, expand
 // evt_2  Standup v2  ['RRULE:FREQ=DAILY;COUNT=2']
 ```
 
-A `thisAndFollowing` change always works this way, as two series. Ids of later occurrences change, so read them again afterwards.
+A `thisAndFollowing` change always works this way, as two series. Ids of later occurrences change as a result, so read them again afterwards.
 
 ## Moving a series
 
-Patching an occurrence's `start` with scope `'all'` moves the whole series by as much as that occurrence moved. Providers differ in what they keep: Google resets edited occurrences and Zoom schedules every meeting again, both with a warning. The provider pages have the details.
+Patching an occurrence's `start` with scope `'all'` moves the whole series by as much as that occurrence moved. What happens to instances someone already edited is up to the provider: Google resets them and Zoom schedules every meeting again, both with a warning. The provider pages have the details.
 
 ## What each provider supports
 
@@ -99,4 +101,4 @@ Patching an occurrence's `start` with scope `'all'` moves the whole series by as
 | Cal.com, Calendly | No                      | No                 | Bookings do not repeat |
 | ICS       | Any RRULE, read only, with expansion limits | No     | Same limits as CalDAV |
 
-A rule a provider cannot store throws `UnsupportedFunctionalityError` instead of saving a different schedule. Each [provider page](/docs/providers) lists its exact limits.
+When a provider can't store a rule, calsdk throws `UnsupportedFunctionalityError` rather than saving a schedule that's close but wrong. A standup that silently lands on the wrong days is worse than an error. Each [provider page](/docs/providers) lists its exact limits.

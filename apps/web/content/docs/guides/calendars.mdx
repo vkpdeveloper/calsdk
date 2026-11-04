@@ -3,7 +3,7 @@ title: Calendars
 description: List the calendars a user can see and pick the one to read or write.
 ---
 
-An account usually holds several calendars: a default one, shared team calendars, holidays. `listCalendars` returns all of them.
+Most accounts hold more than one calendar: the user's own, a shared team calendar, someone's holidays. When your app needs to put an event somewhere other than the default, or let the user choose where it goes, start with `listCalendars`:
 
 ```ts
 import { listCalendars } from 'calsdk';
@@ -15,11 +15,11 @@ for (const item of calendars) {
 }
 ```
 
-Exactly one calendar has `isPrimary: true`.
+Exactly one calendar in the list has `isPrimary: true`.
 
 ## The `'primary'` id
 
-Every function that takes a `calendarId` defaults to `'primary'`, and every provider resolves it to the user's default calendar. You only pass a `calendarId` to use another one:
+You often don't need the list at all. Every function that takes a `calendarId` defaults to `'primary'`, and every provider resolves it to the user's default calendar, so you only pass a `calendarId` when you want a different one:
 
 ```ts
 const { calendars } = await listCalendars({ calendar });
@@ -28,7 +28,7 @@ const team = calendars.find((item) => item.name === 'Team');
 if (team) await createEvent({ calendar, calendarId: team.id, event });
 ```
 
-What the default calendar is depends on the provider:
+What counts as the default depends on the provider. Booking tools don't have calendars in the usual sense, so calsdk maps what they do have:
 
 | Provider        | `'primary'` is                                                  |
 | --------------- | --------------------------------------------------------------- |
@@ -40,23 +40,19 @@ What the default calendar is depends on the provider:
 
 ## Access roles
 
-`accessRole` says what the user may do with a calendar:
-
-- `owner` and `writer`: read and write events.
-- `reader`: read events.
-- `freeBusyReader`: only busy times. Use [`getFreeBusy`](/docs/guides/free-time) instead of listing events.
+Check `accessRole` before you offer a calendar as somewhere to save events. `owner` and `writer` can read and write events, and `reader` can only read them. A `freeBusyReader` sees nothing but busy times, so ask for those with [`getFreeBusy`](/docs/guides/free-time) instead of listing events.
 
 ## The `Calendar` shape
 
 <TypeTable
   type={{
-    id: { type: 'string', description: 'Pass it as calendarId.', required: true },
+    id: { type: 'string', description: 'Pass it as `calendarId`.', required: true },
     name: { type: 'string', required: true },
     description: { type: 'string' },
     timeZone: { type: 'string', description: "IANA time zone, such as 'Asia/Kolkata'." },
-    color: { type: 'string', description: "Hex color, '#RRGGBB'." },
+    color: { type: 'string', description: "Hex color, `'#RRGGBB'`." },
     isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific fields, keyed by provider id.' },
   }}
 />

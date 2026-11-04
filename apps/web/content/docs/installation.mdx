@@ -3,7 +3,7 @@ title: Install
 description: Add calsdk and a provider package to a TypeScript project.
 ---
 
-calsdk is split into a core package and one package per calendar. Install `calsdk` and the providers your app talks to.
+calsdk is split into a core package and one package per calendar, so your app only installs the providers it talks to. Start with `calsdk` and one provider:
 
 ```npm
 npm install calsdk @calsdk/google
@@ -22,19 +22,19 @@ npm install calsdk @calsdk/google
 | ICS feeds                                | `@calsdk/ics`       | `ics()`                         |
 | In-memory, for tests and examples        | `@calsdk/mock`      | `mockCalendar()`                |
 
-Not sure which one fits? [Choose a provider](/docs/choose-a-provider) compares them.
+Not sure which one fits? [Choose a provider](/docs/choose-a-provider) walks through the credentials each one needs.
 
 ## Requirements
 
-- **ES modules.** Every package is ESM only.
-- **A runtime with `fetch`.** Providers use `fetch` and nothing else, so they run on Node.js 20 or later, Bun, Deno and edge runtimes. CI runs the quickstart in Deno with no file, network or environment access to check this.
-- **TypeScript is optional but worth it.** Provider options and metadata are typed by the provider you pass, so typos are caught before they reach an API.
+Every package is ESM only. Providers talk to their APIs with `fetch` and nothing else, so they run on Node.js 20 or later, Bun, Deno and edge runtimes. CI checks this by running the quickstart in Deno with no file, network or environment access.
+
+TypeScript is optional, but worth it here. Provider options and metadata are typed by the provider you pass, so typos are caught before they reach an API.
 
 ## Keep credentials on the server
 
-Providers take OAuth access tokens, API keys or app passwords. Create them in server code, such as a route handler, a server action or a background job, and never ship them to the browser.
+Providers take OAuth access tokens, API keys or app passwords, which is everything someone needs to read and change a user's calendar. Create providers in server code, such as a route handler, a server action or a background job, and never ship them to the browser.
 
-calsdk does not run OAuth flows or refresh tokens. Pass a token, or a function that returns a fresh one. The function is called before each request, so it can refresh and cache tokens however your app already does:
+calsdk doesn't run OAuth flows or refresh tokens: your app owns the user's account, so it owns the tokens too. Pass a token, or a function that returns a fresh one. calsdk calls the function before each request, so it can refresh and cache tokens however your app already does:
 
 ```ts
 import { google } from '@calsdk/google';
@@ -49,6 +49,6 @@ const calendar = google({
 
 <Cards>
   <Card title="Next: run the quickstart" href="/docs/quickstart">
-    Try every function on an in-memory calendar before adding credentials.
+    Create, list and move events on an in-memory calendar before adding credentials.
   </Card>
 </Cards>

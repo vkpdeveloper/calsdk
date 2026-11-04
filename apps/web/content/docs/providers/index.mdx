@@ -1,38 +1,42 @@
 ---
 title: Compare providers
-description: What each calendar supports, taken from the capabilities every provider declares.
+description: See what each calendar can do before you build on it, straight from the capabilities every provider declares.
 ---
 
-Every provider declares what it supports in `calendar.capabilities`. This table is that data. "Some" means it depends on a condition, given below the table.
+Calendar APIs agree on less than you'd hope. Google can split a recurring series in two, Outlook can't, and Cal.com names every booking after its event type no matter what title you send. Every provider declares what it supports in `calendar.capabilities`, and most of this table comes straight from that data. A dash means no, and "Some" means it depends on a condition, explained below the table.
 
-| Feature                    | Google | Outlook | CalDAV | Cal.com | Calendly | Zoom | ICS  | Mock |
-| -------------------------- | :----: | :-----: | :----: | :-----: | :------: | :--: | :--: | :--: |
-| Write events               | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | No   | Yes  |
-| Keeps title and description | Yes   | Yes     | Yes    | No      | No       | Yes  | No   | Yes  |
-| All-day events             | Yes    | Yes     | Yes    | No      | No       | No   | Some | Yes  |
-| Recurring events           | Yes    | Yes     | Yes    | No      | No       | Some | Some | Yes  |
-| This and following         | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
-| Attendees                  | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Some | Yes  |
-| Creates video links        | Yes    | Some    | No     | No      | No       | Yes  | No   | Yes  |
-| Reminders                  | Yes    | Some    | No     | No      | No       | No   | No   | Yes  |
-| Colors                     | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
-| Etags and `ifMatch`        | Yes    | Yes     | Yes    | No      | No       | No   | No   | Yes  |
-| Search                     | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
-| Free/busy endpoint         | Yes    | No      | No     | No      | No       | No   | No   | No   |
-| Sync                       | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Yes  | Yes  |
+| Feature            | Google | Outlook | CalDAV | Cal.com | Calendly | Zoom | ICS  | Mock |
+| ------------------ | :----: | :-----: | :----: | :-----: | :------: | :--: | :--: | :--: |
+| Write events       | Yes    | Yes     | Yes    | Some    | Some     | Yes  | -    | Yes  |
+| Keeps title        | Yes    | Yes     | Yes    | -       | -        | Yes  | -    | Yes  |
+| All-day            | Yes    | Yes     | Yes    | -       | -        | -    | Some | Yes  |
+| Recurring          | Yes    | Yes     | Yes    | -       | -        | Some | Some | Yes  |
+| This and following | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| Attendees          | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Some | Yes  |
+| Video links        | Yes    | Some    | -      | -       | -        | Yes  | -    | Yes  |
+| Reminders          | Yes    | Some    | -      | -       | -        | -    | -    | Yes  |
+| Colors             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| `ifMatch`          | Yes    | Yes     | Yes    | -       | -        | -    | -    | Yes  |
+| Search             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| Free/busy API      | Yes    | -       | -      | -       | -        | -    | -    | -    |
+| Sync               | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Yes  | Yes  |
 
-**Conditions**
+## Conditions
 
-- **Outlook video links:** Teams meetings need a work or school account.
-- **Outlook reminders:** one popup reminder per event.
-- **Zoom recurring events:** daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
-- **ICS:** feeds are read only. All-day, recurring and attendee data is read but cannot be written.
+Where the table says Some:
 
-"Keeps title and description" is about scheduling tools: Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning.
+- Outlook adds Teams links only on work or school accounts.
+- Outlook keeps one popup reminder per event.
+- Cal.com books, moves (as a new booking with a new id) and cancels.
+- Calendly books and cancels; `updateEvent` throws.
+- Zoom repeats daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
+- ICS feeds are read only: all-day, recurring and attendee data is read but can't be written.
 
-Free/busy works on every provider: where there is no endpoint, calsdk computes it from events and returns a warning. Search does not: providers without it throw `UnsupportedFunctionalityError`.
+"Keeps title" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning rather than saved.
 
-Webhooks are part of the provider contract, but no provider implements them yet. Use [sync](/docs/guides/sync) on a schedule.
+Free/busy works on every provider. Where there's no endpoint, calsdk computes it from events and returns a warning, so `findFreeTime` behaves the same everywhere. Search is different: providers without it throw `UnsupportedFunctionalityError`, and you filter the listed events yourself.
+
+Webhooks are part of the provider contract, but no provider implements them yet. Until they do, run [sync](/docs/guides/sync) on a schedule.
 
 ## Check at runtime
 
@@ -44,17 +48,4 @@ if (events.recurrenceScopeThisAndFollowing === true) {
 }
 ```
 
-Values are `true`, `false`, `'unknown'` or `{ condition: string }`. Treat anything but `true` as "check first". See [Capabilities](/docs/reference/capabilities).
-
-## Providers
-
-<Cards>
-  <Card title="Google Calendar" href="/docs/providers/google" />
-  <Card title="Microsoft Outlook" href="/docs/providers/microsoft" />
-  <Card title="iCloud, Zoho and CalDAV" href="/docs/providers/caldav" />
-  <Card title="Cal.com" href="/docs/providers/calcom" />
-  <Card title="Calendly" href="/docs/providers/calendly" />
-  <Card title="Zoom" href="/docs/providers/zoom" />
-  <Card title="ICS feeds" href="/docs/providers/ics" />
-  <Card title="Mock" href="/docs/providers/mock" />
-</Cards>
+Values are `true`, `false`, `'unknown'` or `{ condition: string }`. Treat anything but `true` as "check first": a condition means it works for some accounts or some inputs, not all of them. See [Capabilities](/docs/reference/capabilities).

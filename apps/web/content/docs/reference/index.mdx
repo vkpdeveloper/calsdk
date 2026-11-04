@@ -3,7 +3,7 @@ title: API overview
 description: Every function calsdk exports, with links to its options and result.
 ---
 
-All functions take one options object and return a promise, except `iterateEvents`, which returns an async iterator. Import them from `calsdk`.
+calsdk is ten functions, and they all work the same way. Each takes one options object, with a provider as `calendar`, and returns a promise, except `iterateEvents`, which returns an async iterator. Import them from `calsdk`.
 
 | Function | What it does |
 | --- | --- |
@@ -24,7 +24,7 @@ Every function except `findFreeTime` takes these. `findFreeTime` takes `maxRetri
 
 <TypeTable
   type={{
-    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as google({ accessToken }).', required: true },
+    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as `google({ accessToken })`.', required: true },
     maxRetries: { type: 'number', description: 'Retries for rate limits, timeouts, server errors and network failures. Creates only retry rate limits.', default: '2' },
     abortSignal: { type: 'AbortSignal', description: 'Cancels the call, including waits between retries.' },
     headers: { type: 'Record<string, string>', description: 'Extra HTTP headers sent with each provider request.' },
@@ -39,7 +39,7 @@ Every result except `findFreeTime`'s has these. `findFreeTime` returns `slots` a
 <TypeTable
   type={{
     warnings: { type: 'Warning[]', description: 'Parts of the request the provider could not honor, or fallbacks used.', required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific output for the call.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific output for the call.' },
     response: { type: '{ headers?: Record<string, string>; body?: unknown }', description: 'The raw response, for debugging only.' },
   }}
 />

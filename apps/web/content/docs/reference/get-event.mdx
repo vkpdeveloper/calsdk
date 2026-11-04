@@ -3,6 +3,8 @@ title: getEvent
 description: Fetches one event by id.
 ---
 
+Use `getEvent` when you have an event's id and want its current details, including attendees that some providers leave out of listings.
+
 ```ts
 import { getEvent } from 'calsdk';
 
@@ -24,7 +26,7 @@ Plus the [common options](/docs/reference#common-options).
 
 <TypeTable
   type={{
-    event: { type: 'CalendarEvent', description: 'The event. providerMetadata is typed by the provider.', required: true },
+    event: { type: 'CalendarEvent', description: 'The event. `providerMetadata` is typed by the provider.', required: true },
     warnings: { type: 'Warning[]', required: true },
   }}
 />

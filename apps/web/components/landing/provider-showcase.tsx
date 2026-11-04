@@ -40,7 +40,8 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
 
   return (
     <div className="grid border-t border-line lg:grid-cols-[1fr_1.1fr]">
-      <div className="relative h-[340px] overflow-hidden border-line sm:h-[460px] lg:h-auto lg:min-h-[520px] lg:border-r">
+      {/* Below lg the picker and code come first, so the API shows before the picture. */}
+      <div className="relative h-[340px] overflow-hidden border-line max-lg:order-last max-lg:border-t sm:h-[460px] lg:h-auto lg:min-h-[520px] lg:border-r">
         <div className="iso-scene" aria-hidden>
           {plates.map((provider, i) => (
             <Plate
@@ -89,10 +90,11 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
             </button>
           ))}
         </div>
-        <div role="tabpanel" className="code flex-1 py-2">
+        {/* Keyed by provider so the changed lines flash once on every switch. */}
+        <div key={current?.id} role="tabpanel" className="code code-flash flex-1 py-2">
           {current?.code}
         </div>
-        <p className="border-t border-line px-5 py-3 text-sm text-neutral-500">
+        <p className="border-t border-line px-5 py-3 text-sm text-neutral-400">
           Switching calendars changes the two blue lines. Nothing else.
         </p>
       </div>

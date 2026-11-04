@@ -3,7 +3,7 @@ title: Errors
 description: Every error class calsdk throws, its fields and when it is thrown.
 ---
 
-All errors extend `CalsdkError`, which extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
+When a call fails, the error's class tells you what went wrong and its fields tell you where. All errors extend `CalsdkError`, which extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
 
 ```ts
 import { NotFoundError } from 'calsdk';
@@ -17,7 +17,7 @@ if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
 
 | Class | Fields | Thrown when |
 | --- | --- | --- |
-| `InvalidArgumentError` | `argument` | An option is invalid, before any request. `argument` is its path, such as `'event.start.timeZone'` |
+| `InvalidArgumentError` | `argument` | An option is invalid. `argument` is its path, such as `'event.start.timeZone'` |
 | `NoSuchProviderVersionError` | `provider`, `version` | The provider implements a contract version this calsdk does not know |
 | `UnsupportedFunctionalityError` | `provider`, `functionality` | The provider cannot do what was asked |
 

@@ -4,15 +4,18 @@ import type {
   CalendarCapabilitiesV1,
   CalendarProviderV1,
   CalendarV1,
+  ConferenceV1,
   EventInputV1,
   EventPatchV1,
   EventTimeV1,
   EventV1,
   JSONObject,
+  PersonV1,
   ProviderMetadataV1,
   ProviderOperationV1,
   ProviderOptionsV1,
   ProviderTypesV1,
+  RemindersV1,
   SendUpdatesV1,
   SyncChangeV1,
   UpdateScopeV1,
@@ -28,7 +31,10 @@ export type CalendarEvent = EventV1;
 export type EventTime = EventTimeV1;
 export type EventInput = EventInputV1;
 export type EventPatch = EventPatchV1;
+export type Person = PersonV1;
 export type Attendee = AttendeeV1;
+export type Conference = ConferenceV1;
+export type Reminders = RemindersV1;
 export type BusyBlock = BusyBlockV1;
 export type SyncChange = SyncChangeV1;
 export type UpdateScope = UpdateScopeV1;

@@ -3,6 +3,8 @@ title: Google Calendar
 description: Read and write Google Calendar events, with Meet links, free/busy and sync tokens.
 ---
 
+Google is the most complete provider: it supports everything calsdk models, including splitting a recurring series with `thisAndFollowing`, Meet links, search and a real free/busy endpoint. If your users are mostly on Google Workspace or Gmail, this is the one you'll spend the least time working around.
+
 ```npm
 npm install calsdk @calsdk/google
 ```
@@ -22,7 +24,7 @@ const { events } = await listEvents({
 
 ## Credentials
 
-`accessToken` is an OAuth access token with a Calendar scope, such as `https://www.googleapis.com/auth/calendar`, or `calendar.readonly` for reading only. calsdk does not run the OAuth flow: get tokens with your auth library and pass a function that returns a fresh one. It is called before every request.
+`accessToken` is an OAuth access token with a Calendar scope, such as `https://www.googleapis.com/auth/calendar`, or `calendar.readonly` if you only read. calsdk doesn't run the OAuth flow, since your app almost certainly has an auth library already. Get tokens there and pass a function that returns a fresh one: calsdk calls it before every request, so a token that expires mid-sync isn't a problem.
 
 ## Settings
 
@@ -35,20 +37,29 @@ const { events } = await listEvents({
   }}
 />
 
-## Supports
-
-Everything calsdk models: all-day and recurring events with all three scopes, attendees, Meet links, reminders, colors, etags, search, a native free/busy endpoint and sync.
-
 ## How it behaves
 
-- **Colors.** Google has 11 event colors. Another hex color is saved as the nearest one, with a `compatibility` warning.
-- **Meet links.** `createConference: true` adds a Google Meet link.
-- **Changed occurrences.** Google's expanded listings do not say which instances were changed, so calsdk makes one extra request per page that has recurring instances, to tell an `exception` from an `occurrence`.
-- **`thisAndFollowing`.** calsdk starts a new series at the chosen instance, copying attendees and the meeting link, and ends the old one just before it. A `COUNT` is split between the two, and `EXDATE` and `RDATE` lines go to the half they fall in. A series with a `COUNT` and `EXDATE` or `RDATE` lines before the split throws `UnsupportedFunctionalityError`, since the occurrences left cannot be counted: give it an `UNTIL` first. If ending the old series fails, calsdk deletes the new one.
-- **Moving a series.** A new `start` with scope `all` or `thisAndFollowing` moves the series on the wall clock of its time zone, so occurrences keep their local time across daylight saving changes. Rules that pick days of the month or year cannot be moved this way and throw `UnsupportedFunctionalityError`. The time zone of a series cannot change through an instance: update the series id instead.
-- **Edited occurrences.** Google resets single-instance changes when a series moves or splits. Deleted occurrences are kept, as `EXDATE`s; edited ones lose their changes, with a `compatibility` warning.
-- **Free/busy** uses Google's endpoint, so events shown as free are ignored and calendars the user can only see as free/busy work.
-- **Sync** uses Google sync tokens. An expired one throws `SyncCursorExpiredError`.
+### Splitting a series
+
+Google's API has no "this and following" operation, so calsdk splits the series itself for `thisAndFollowing`. It starts a new series at the chosen instance, copying attendees and the meeting link, and ends the old one just before it. A `COUNT` is split between the two, and `EXDATE` and `RDATE` lines go to the half they fall in. If ending the old series fails, calsdk deletes the new one so you're not left with both.
+
+One case can't be done safely. A series with a `COUNT` and `EXDATE` or `RDATE` lines before the split throws `UnsupportedFunctionalityError`, because calsdk can't count the occurrences that are left. Give the series an `UNTIL` first.
+
+### Moving a series
+
+A new `start` with scope `all` or `thisAndFollowing` moves the series on the wall clock of its time zone, so a 9:00 standup stays at 9:00 across daylight saving changes. Rules that pick days of the month or year can't be moved this way and throw `UnsupportedFunctionalityError`. You also can't change a series' time zone through one of its instances: update the series id instead.
+
+Google resets single-instance changes when a series moves or splits. calsdk keeps the occurrences you deleted, as `EXDATE`s, but edited ones lose their changes, and you get a `compatibility` warning.
+
+When reading, Google's expanded listings don't say which instances of a series were edited. To tell an `exception` from a plain `occurrence`, calsdk makes one extra request per page that has recurring instances.
+
+### Meet links and colors
+
+`createConference: true` adds a Google Meet link. Colors are less flexible: Google has a fixed palette of 11 event colors, not arbitrary hex values, so if you pass another color, calsdk saves the nearest one and returns a `compatibility` warning.
+
+### Free/busy and sync
+
+Free/busy uses Google's own endpoint, so events marked as free are ignored, and calendars the user can only see as free/busy still work. Sync uses Google sync tokens. An expired one throws `SyncCursorExpiredError`, and you start over with a full sync.
 
 ## Provider options
 
@@ -74,19 +85,30 @@ await listEvents({
 });
 ```
 
-| Function                     | Option                    | Type |
-| ---------------------------- | ------------------------- | ---- |
-| `createEvent`, `updateEvent` | `guestsCanModify`         | `boolean` |
-| `createEvent`, `updateEvent` | `guestsCanInviteOthers`   | `boolean` |
-| `createEvent`, `updateEvent` | `guestsCanSeeOtherGuests` | `boolean` |
-| `createEvent`, `updateEvent` | `extendedProperties`      | `{ private?: Record<string, string>; shared?: Record<string, string> }`. `private` is only visible on this calendar |
-| `listEvents`                 | `eventTypes`              | `('birthday' \| 'default' \| 'focusTime' \| 'fromGmail' \| 'outOfOffice' \| 'workingLocation')[]` |
+### createEvent and updateEvent
+
+<TypeTable
+  type={{
+    guestsCanModify: { type: 'boolean', description: 'Guests can edit the event.' },
+    guestsCanInviteOthers: { type: 'boolean', description: 'Guests can invite other people.' },
+    guestsCanSeeOtherGuests: { type: 'boolean', description: 'Guests can see the guest list.' },
+    extendedProperties: { type: '{ private?: Record<string, string>; shared?: Record<string, string> }', description: '`private` is only visible on this calendar.' },
+  }}
+/>
+
+### listEvents
+
+<TypeTable
+  type={{
+    eventTypes: { type: "('birthday' | 'default' | 'focusTime' | 'fromGmail' | 'outOfOffice' | 'workingLocation')[]", description: 'Only return these types. By default Google returns every type.' },
+  }}
+/>
 
 ## Metadata
 
 Events carry `providerMetadata.google`:
 
-| Field                | Type     |
+| Field                | Type and notes |
 | -------------------- | -------- |
 | `iCalUID`            | `string` |
 | `eventType`          | `string`, such as `'default'`, `'outOfOffice'` or `'focusTime'` |

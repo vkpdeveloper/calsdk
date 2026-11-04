@@ -3,7 +3,7 @@ title: Provider options
 description: Reach provider features calsdk does not model, with options and metadata typed by the provider you pass.
 ---
 
-The shared event shape covers what calendars have in common. For anything else, such as Google's guest permissions or Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
+The shared event shape covers what every calendar has in common, and the order a booking came from isn't one of those things. For anything provider-specific, like tagging a Google event with its order id or setting Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
 
 ```ts
 import { createEvent } from 'calsdk';
@@ -31,7 +31,7 @@ event.providerMetadata?.google?.extendedProperties?.private?.orderId; // '42'
 
 ## Typed by the provider
 
-The types follow the provider in `calendar`. A typo, an option the provider does not take for this function, or another provider's key is a type error:
+The types follow the provider you pass as `calendar`, so your editor knows which options exist. A typo, an option the provider doesn't take for this function, or another provider's key is a type error:
 
 ```ts
 await createEvent({
@@ -44,9 +44,9 @@ await createEvent({
 });
 ```
 
-Providers check options at runtime too. A wrong value, such as a string where Google wants a boolean, throws `InvalidArgumentError` before any request. An unknown key is dropped with an `unsupported` warning.
+Providers check options at runtime too, because options don't always come from code TypeScript has seen. A wrong value, such as a string where Google wants a boolean, throws `InvalidArgumentError` before any request. An unknown key is dropped with an `unsupported` warning rather than failing the call.
 
-When the provider type is a union, for example a function that returns Google or Outlook depending on the user, each provider's key is allowed and each reads only its own:
+Often you don't know the provider at compile time, because a function returns Google or Outlook depending on what the user connected. When the provider type is a union like that, each provider's key is allowed, and at runtime each provider reads only its own:
 
 ```ts
 await createEvent({

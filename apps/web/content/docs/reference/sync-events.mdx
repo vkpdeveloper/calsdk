@@ -1,13 +1,15 @@
 ---
 title: syncEvents
-description: Fetches what changed in a calendar since the last sync.
+description: Returns what changed in a calendar since the last sync.
 ---
+
+Use `syncEvents` to keep a local copy of a calendar, such as a table in Postgres, up to date. The first call returns what the provider syncs, and each later call returns what changed since the cursor you pass. Save the new cursor after applying the changes. [Sync changes](/docs/guides/sync#how-each-provider-syncs) covers how much each provider fetches, and Outlook's fixed window.
 
 ```ts
 import { syncEvents } from 'calsdk';
 
 const { changes, nextCursor } = await syncEvents({ calendar, cursor: stored });
-for (const change of changes) apply(change);
+for (const change of changes) await apply(change);
 await saveCursor(nextCursor);
 ```
 
@@ -15,10 +17,10 @@ await saveCursor(nextCursor);
 
 <TypeTable
   type={{
-    cursor: { type: 'string', description: 'nextCursor from the previous sync. Leave out for a full first sync.' },
+    cursor: { type: 'string', description: '`nextCursor` from the previous sync. Leave out for a full first sync.' },
     calendarId: { type: 'string', default: "'primary'" },
-    paginate: { type: 'boolean', description: 'false returns one page at a time.', default: 'true' },
-    pageToken: { type: 'string', description: 'With paginate: false, nextPageToken from the previous page of this round.' },
+    paginate: { type: 'boolean', description: '`false` returns one page at a time.', default: 'true' },
+    pageToken: { type: 'string', description: 'With `paginate: false`, `nextPageToken` from the previous page of this round.' },
   }}
 />
 
@@ -28,9 +30,9 @@ Plus the [common options](/docs/reference#common-options).
 
 <TypeTable
   type={{
-    changes: { type: "({ type: 'upsert'; event: CalendarEvent } | { type: 'delete'; eventId: string })[]", description: 'Every change since cursor, in the order the provider returns them. Apply them in that order.', required: true },
-    nextCursor: { type: 'string', description: 'Store it and pass it as cursor next time. With paginate: false, only on the last page.', required: true },
-    nextPageToken: { type: 'string', description: 'With paginate: false: more pages are left in this round.' },
+    changes: { type: "({ type: 'upsert'; event: CalendarEvent } | { type: 'delete'; eventId: string })[]", description: 'Every change since `cursor`, in the order the provider returns them. Apply them in that order.', required: true },
+    nextCursor: { type: 'string', description: 'Store it and pass it as `cursor` next time. Always present by default. With `paginate: false`, only on the last page.' },
+    nextPageToken: { type: 'string', description: 'With `paginate: false`: more pages are left in this round.' },
     warnings: { type: 'Warning[]', required: true },
   }}
 />

@@ -12,7 +12,9 @@ const DAYS = ['2027-01-11', '2027-01-12', '2027-01-13', '2027-01-14', '2027-01-1
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const OPEN = 9;
 const CLOSE = 18;
-const HOUR_PX = 44;
+// Hour rows are sized by the --hour CSS variable, taller on wide screens so the grid ends
+// level with the controls beside it.
+const hours = (n: number) => `calc(var(--hour) * ${n})`;
 const HOURS = Array.from({ length: CLOSE - OPEN }, (_, i) => OPEN + i);
 
 type Seed = [day: number, start: string, end: string, title: string];
@@ -154,7 +156,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
       await createEvent({
         calendar,
         event: {
-          title: 'New meeting',
+          title: 'Booked',
           start: { dateTime: slot.start, timeZone: ZONE },
           end: { dateTime: slot.end, timeZone: ZONE },
         },
@@ -187,67 +189,79 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
           <Legend className="bg-accent-blue/40 border border-accent-blue">Free for both</Legend>
           <span className="ml-auto">New York time</span>
         </div>
-        <div className="grid grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 sm:px-4">
-          <div />
-          {DAY_NAMES.map((name) => (
-            <div key={name} className="py-2 text-center text-xs font-medium text-neutral-400">
-              {name}
-            </div>
-          ))}
-          <div className="relative" style={{ height: (CLOSE - OPEN) * HOUR_PX }}>
-            {[...HOURS, CLOSE].map((hour) => (
-              <span
-                key={hour}
-                className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-500"
-                style={{ top: (hour - OPEN) * HOUR_PX }}
-              >
-                {clock(hour * 60)}
-              </span>
+        {/* Phones scroll the week sideways at a width where event names still fit. */}
+        <div className="x-scroll overflow-x-auto">
+          <div className="grid min-w-[640px] grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 [--hour:44px] sm:px-4 lg:[--hour:60px]">
+            <div className="sticky left-0 z-10 bg-panel" />
+            {DAY_NAMES.map((name) => (
+              <div key={name} className="py-2 text-center text-xs font-medium text-neutral-400">
+                {name}
+              </div>
             ))}
-          </div>
-          {DAYS.map((date, day) => (
-            <div
-              key={date}
-              className="relative border-l border-line"
-              style={{ height: (CLOSE - OPEN) * HOUR_PX }}
-            >
-              {HOURS.map((hour) => (
-                <div
+            {/* Sticky, so the hours stay in view while a phone scrolls the week. */}
+            <div className="sticky left-0 z-10 bg-panel" style={{ height: hours(CLOSE - OPEN) }}>
+              {[...HOURS, CLOSE].map((hour) => (
+                <span
                   key={hour}
-                  className="absolute inset-x-0 border-t border-[#1c1c20]"
-                  style={{ top: (hour - OPEN) * HOUR_PX }}
-                />
+                  className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-400"
+                  style={{ top: hours(hour - OPEN) }}
+                >
+                  {clock(hour * 60)}
+                </span>
               ))}
-              {state &&
-                freeRanges(state.slots)
-                  .filter((range) => range.day === day)
-                  .map((range) => (
+            </div>
+            {DAYS.map((date, day) => (
+              <div
+                key={date}
+                className="relative border-l border-line"
+                style={{ height: hours(CLOSE - OPEN) }}
+              >
+                {HOURS.map((hour) => (
+                  <div
+                    key={hour}
+                    className="absolute inset-x-0 border-t border-[#1c1c20]"
+                    style={{ top: hours(hour - OPEN) }}
+                  />
+                ))}
+                {state &&
+                  freeRanges(state.slots)
+                    .filter((range) => range.day === day)
+                    .map((range) => {
+                      const slot = earliest?.find(
+                        (each) =>
+                          place(each.start).day === day && place(each.start).minutes === range.from,
+                      );
+                      return (
+                        <Placed
+                          key={`free-${range.from}`}
+                          block={range}
+                          label={`Book ${DAY_NAMES[day]} ${clock(range.from)}`}
+                          onClick={slot && (() => void book(slot))}
+                          className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15 hover:bg-accent-blue/30"
+                        />
+                      );
+                    })}
+                {state?.you
+                  .filter((block) => block.day === day)
+                  .map((block) => (
                     <Placed
-                      key={`free-${range.from}`}
-                      block={range}
-                      className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15"
+                      key={`you-${block.from}-${block.title}`}
+                      block={block}
+                      className="left-1 right-1/2 mr-0.5 rounded bg-neutral-600 text-neutral-100"
                     />
                   ))}
-              {state?.you
-                .filter((block) => block.day === day)
-                .map((block) => (
-                  <Placed
-                    key={`you-${block.from}-${block.title}`}
-                    block={block}
-                    className="left-1 right-1/2 mr-0.5 rounded bg-neutral-600 text-neutral-100"
-                  />
-                ))}
-              {state?.sam
-                .filter((block) => block.day === day)
-                .map((block) => (
-                  <Placed
-                    key={`sam-${block.from}-${block.title}`}
-                    block={block}
-                    className="left-1/2 right-1 ml-0.5 rounded border border-dashed border-neutral-400 bg-fd-background text-neutral-300"
-                  />
-                ))}
-            </div>
-          ))}
+                {state?.sam
+                  .filter((block) => block.day === day)
+                  .map((block) => (
+                    <Placed
+                      key={`sam-${block.from}-${block.title}`}
+                      block={block}
+                      className="left-1/2 right-1 ml-0.5 rounded border border-dashed border-neutral-400 bg-fd-background text-neutral-300"
+                    />
+                  ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -261,7 +275,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
                 type="button"
                 aria-pressed={value === duration}
                 onClick={() => setDuration(value)}
-                className="h-9 flex-1 rounded-md text-sm text-neutral-400 hover:text-white aria-pressed:bg-neutral-800 aria-pressed:text-white"
+                className="h-11 flex-1 rounded-md text-sm sm:h-9 text-neutral-400 hover:text-white aria-pressed:bg-neutral-800 aria-pressed:text-white"
               >
                 {value} min
               </button>
@@ -270,29 +284,29 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
         </div>
         <div>
           <p className="mb-2 text-sm text-neutral-400">Book a slot on both calendars</p>
-          <div className="flex flex-wrap gap-2">
-            {earliest?.slice(0, 6).map((slot) => {
+          <div className="grid grid-cols-4 gap-1.5">
+            {earliest?.map((slot) => {
               const { day, minutes } = place(slot.start);
               return (
                 <button
                   key={slot.start}
                   type="button"
                   onClick={() => void book(slot)}
-                  className="h-9 rounded-md border border-line px-3 font-mono text-xs text-neutral-200 hover:border-accent-blue hover:text-white"
+                  className="h-11 rounded-md border border-line font-mono text-xs whitespace-nowrap sm:h-9 text-neutral-200 hover:border-accent-blue hover:text-white"
                 >
                   {DAY_NAMES[day]} {clock(minutes)}
                 </button>
               );
             })}
             {state && state.slots.length === 0 && (
-              <p className="text-sm text-neutral-400">No time left this week.</p>
+              <p className="col-span-4 text-sm text-neutral-400">No time left this week.</p>
             )}
           </div>
         </div>
         <div className="code overflow-hidden rounded-xl border border-line bg-panel">
           {lengths.find((length) => length.minutes === duration)?.code}
         </div>
-        <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
+        <div className="flex items-center justify-between gap-3 text-xs text-neutral-400">
           <span aria-live="polite">
             {booked ? `Booked ${booked}. ` : ''}
             {state ? `Ran in your browser in ${state.ms.toFixed(1)} ms.` : ''}
@@ -300,7 +314,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
           <button
             type="button"
             onClick={reset}
-            className="h-8 shrink-0 rounded-md px-2 text-neutral-400 hover:text-white"
+            className="h-11 shrink-0 rounded-md px-3 text-neutral-400 sm:h-8 sm:px-2 hover:text-white"
           >
             Reset
           </button>
@@ -319,15 +333,47 @@ function Legend({ className, children }: { className: string; children: ReactNod
   );
 }
 
-function Placed({ block, className }: { block: Block; className: string }) {
-  const top = ((block.from - OPEN * 60) / 60) * HOUR_PX;
-  const height = ((block.to - block.from) / 60) * HOUR_PX;
+function Placed({
+  block,
+  className,
+  label,
+  onClick,
+}: {
+  block: Block;
+  className: string;
+  label?: string;
+  onClick?: () => void;
+}) {
+  const minutes = block.to - block.from;
+  const style = { top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) };
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        title={label}
+        className={`absolute cursor-pointer ${className}`}
+        style={style}
+      />
+    );
+  }
+  // Text shrinks with the block: a 15-minute standup still gets a one-line name.
+  const size =
+    minutes < 30
+      ? 'py-px text-[9px] leading-none'
+      : minutes < 45
+        ? 'py-0.5 text-[10px] leading-tight sm:text-[11px]'
+        : 'py-1 text-[10px] leading-tight sm:text-[11px]';
   return (
     <div
-      className={`absolute overflow-hidden px-1.5 py-1 text-[10px] leading-tight sm:text-[11px] ${className}`}
-      style={{ top, height }}
+      title={block.title}
+      className={`absolute overflow-hidden px-1.5 ${size} ${className}`}
+      style={style}
     >
-      {height >= 26 && block.title && <span className="hidden sm:block">{block.title}</span>}
+      {block.title && (
+        <span className={minutes < 45 ? 'block truncate' : 'block'}>{block.title}</span>
+      )}
     </div>
   );
 }

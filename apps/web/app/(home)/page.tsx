@@ -481,9 +481,9 @@ export default async function HomePage() {
               <p className="text-neutral-400">
                 color: <span className="text-[#a5d6ff]">'#ec4899'</span>
               </p>
-              <div className="mt-3 flex items-center gap-2 text-neutral-400">
+              <div className="mt-3 flex items-center gap-1.5 text-neutral-400">
                 <Swatch color="#ec4899" label="asked" />
-                <ArrowRight aria-hidden className="size-3.5 text-neutral-600" />
+                <ArrowRight aria-hidden className="size-3.5 shrink-0 text-neutral-600" />
                 <Swatch color="#e67c73" label="saved" />
               </div>
               <p className="mt-3 text-neutral-300">
@@ -622,7 +622,7 @@ function Card({ title, body, children }: { title: string; body: string; children
 
 function Swatch({ color, label }: { color: string; label: string }) {
   return (
-    <span className="flex items-center gap-1.5 whitespace-nowrap">
+    <span className="flex items-center gap-1 whitespace-nowrap">
       <span className="size-4 shrink-0 rounded" style={{ background: color }} />
       {color} {label}
     </span>

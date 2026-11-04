@@ -2,6 +2,7 @@
 
 import { type MockCalendarProvider, mockCalendar } from '@calsdk/mock';
 import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } from 'calsdk';
+import { Plus } from 'lucide-react';
 import { type ReactNode, type Ref, useCallback, useEffect, useRef, useState } from 'react';
 
 // A fixed week, so New York stays on one offset and every visitor sees the same calendar.
@@ -252,14 +253,14 @@ export function CalendarApp() {
     void refresh();
   }, [refresh]);
 
-  // With nothing picked, open the day's standup: an occurrence of a series says the most.
-  // The day only changes on phones (or by booking), so desktop starts on Monday's.
+  // With nothing picked, or the picked event's calendar turned off, open the day's standup:
+  // an occurrence of a series says the most. The day only changes on phones (or by
+  // booking), so desktop starts on Monday's.
   const onDay = run?.events.filter((listed) => listed.at.day === day) ?? [];
   const current =
     run?.events.find((listed) => listed.key === selected) ??
-    (selected === undefined
-      ? (onDay.find((listed) => listed.event.kind === 'occurrence') ?? onDay[0])
-      : undefined);
+    onDay.find((listed) => listed.event.kind === 'occurrence') ??
+    onDay[0];
 
   // A new day on the phone agenda keeps the open event only if it is on that day.
   function showDay(next: number) {
@@ -312,7 +313,9 @@ export function CalendarApp() {
         <span className="hidden sm:inline">
           {searching ? 'listEvents + findFreeTime' : 'listEvents'} ·{' '}
         </span>
-        {sources.length} sample calendars · {run.events.length} events · {run.ms.toFixed(1)} ms
+        <span className="whitespace-nowrap">{sources.length} sample calendars</span> ·{' '}
+        <span className="whitespace-nowrap">{run.events.length} events</span> ·{' '}
+        <span className="whitespace-nowrap">{run.ms.toFixed(1)} ms</span>
       </>
     );
   }
@@ -345,15 +348,15 @@ export function CalendarApp() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-[10.5rem_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[10.5rem_minmax(0,1fr)_21rem]">
-        {/* From lg to xl the calendars sit in a row on top, so the event panel fits beside the week. */}
-        <fieldset className="min-w-0 border-line max-md:border-b md:border-r lg:col-span-2 lg:border-r-0 lg:border-b xl:col-span-1 xl:border-b-0 xl:border-r">
+      <div className="grid lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[10.5rem_minmax(0,1fr)_21rem]">
+        {/* Below xl the calendars sit in a row on top, so the week gets the full width. */}
+        <fieldset className="min-w-0 border-b border-line lg:col-span-2 xl:col-span-1 xl:border-b-0 xl:border-r">
           <legend className="sr-only">Calendars</legend>
-          <p className="hidden px-4 pt-4 pb-2 text-xs font-medium text-neutral-500 md:block lg:hidden xl:block">
+          <p className="hidden px-4 pt-4 pb-2 text-xs font-medium text-neutral-500 xl:block">
             Sample calendars
           </p>
-          {/* Phones get the calendars as a row that scrolls sideways. */}
-          <div className="x-scroll flex gap-1 overflow-x-auto p-2 md:flex-col md:overflow-visible md:pt-0 lg:flex-row lg:pt-2 xl:flex-col xl:pt-0">
+          {/* Phones get two rows of three, so all six are visible. */}
+          <div className="grid grid-cols-3 gap-1 p-2 md:flex xl:flex-col xl:pt-0">
             {SOURCES.map((source) => {
               const on = enabled.includes(source.id);
               return (
@@ -436,7 +439,7 @@ export function CalendarApp() {
         </div>
 
         <div className="x-scroll hidden min-w-0 overflow-x-auto md:block">
-          <div className="grid min-w-[540px] grid-cols-[3rem_repeat(5,minmax(0,1fr))] pr-2 pb-3 [--hour:50px]">
+          <div className="grid min-w-[540px] grid-cols-[3rem_repeat(5,minmax(0,1fr))] pr-2 pb-3 [--hour:56px]">
             <div className="sticky left-0 z-10 bg-[#0c0c0e]" />
             {DAY_NAMES.map((name, i) => (
               <div key={name} className="flex items-baseline justify-center gap-1.5 py-3 text-xs">
@@ -471,7 +474,7 @@ export function CalendarApp() {
                     style={{ top: hours(hour - OPEN) }}
                   />
                 ))}
-                {/* Free time is shading. Its first hour is the button that books it. */}
+                {/* Free time is shading. A pill at its top books its first hour. */}
                 {run?.free
                   ?.filter((range) => range.day === column)
                   .map((range) => (
@@ -485,9 +488,9 @@ export function CalendarApp() {
                         aria-label={bookLabel(range)}
                         title={bookLabel(range)}
                         onClick={() => void book(range.first)}
-                        className="absolute inset-x-0 top-0 flex items-start rounded-md bg-accent-blue/20 px-1.5 pt-1 text-[11px] font-medium text-white hover:bg-accent-blue/35"
-                        style={{ height: hours(1) }}
+                        className="absolute top-1 left-1 flex h-6 max-w-[calc(100%-0.5rem)] items-center gap-0.5 rounded-full border border-accent-blue/70 bg-[#0c0c0e] pr-2 pl-1.5 text-[11px] font-medium whitespace-nowrap text-[#a9bfff] hover:bg-accent-blue/20 hover:text-white"
                       >
+                        <Plus aria-hidden className="size-3 shrink-0" />
                         Book {clock(range.from)}
                       </button>
                     </div>
@@ -557,6 +560,7 @@ function EventBlock({
       className="absolute inset-x-1 overflow-hidden rounded-md border-l-2 px-1.5 text-left text-[11px] leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white"
       style={{
         ...position(block),
+        minHeight: 22,
         borderColor: source.color,
         background: `color-mix(in srgb, ${source.color} 22%, #0c0c0e)`,
       }}
@@ -581,7 +585,7 @@ function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> 
     return (
       <div
         ref={ref}
-        className="flex items-center justify-center border-line p-6 text-sm text-neutral-500 max-lg:border-t md:col-span-2 lg:col-span-1 lg:border-l"
+        className="flex items-center justify-center border-line p-6 text-sm text-neutral-500 max-lg:border-t lg:border-l"
       >
         Pick an event to see what calsdk returns.
       </div>
@@ -589,10 +593,7 @@ function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> 
   }
   const { event, source, at: block } = listed;
   return (
-    <div
-      ref={ref}
-      className="min-w-0 scroll-mt-20 border-line max-lg:border-t md:col-span-2 lg:col-span-1 lg:border-l"
-    >
+    <div ref={ref} className="min-w-0 scroll-mt-20 border-line max-lg:border-t lg:border-l">
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs text-neutral-400">
           <span className="size-2 rounded-full" style={{ background: source.color }} />

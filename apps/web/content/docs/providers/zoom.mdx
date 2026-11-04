@@ -7,7 +7,7 @@ description: Read, schedule, move and delete Zoom meetings, including recurring 
 npm install calsdk @calsdk/zoom
 ```
 
-In Zoom, scheduled meetings are the events. Every one has its Zoom link in `conference`.
+Use this provider when the meeting itself is the thing you're scheduling: a sales call, a client check-in, a weekly office hour. Zoom's scheduled meetings are the events, and every one has its Zoom link in `conference`. Recurring meetings work, within the patterns Zoom supports, but Zoom isn't a calendar, so there are no all-day events and listing is slower than you'd expect.
 
 ```ts
 import { createEvent } from 'calsdk';
@@ -32,7 +32,7 @@ event.conference?.joinUrl; // 'https://zoom.us/j/...'
 
 `accessToken` is a Zoom OAuth access token with the scopes `meeting:read` and `meeting:write`. With granular scopes: `meeting:read:meeting`, `meeting:read:list_meetings`, `meeting:write:meeting`, `meeting:update:meeting`, `meeting:delete:meeting` and `user:read:user`.
 
-For your own account, a Server-to-Server OAuth app mints tokens that last an hour. Pass a function, and calsdk asks it for a token before each request:
+For your own account, a Server-to-Server OAuth app is the simplest route. Its tokens last an hour, so pass a function that mints and caches them. calsdk asks it for a token before each request:
 
 ```ts
 let cached: { token: string; expires: number } | undefined;
@@ -70,17 +70,27 @@ Meetings with titles and agendas, recurring meetings within Zoom's limits, invit
 
 ## How it behaves
 
-- **Calendars.** `'primary'` holds the meetings the user hosts. Its time zone is the user's Zoom time zone.
-- **Ids.** An event id is the meeting id. An occurrence of a series is `<meeting id>_<original start in UTC>`, such as `84512345678_20261103T090000Z`.
-- **Times** are shown in the time zone the meeting was scheduled in. Meetings last whole minutes, up to 24 hours.
-- **Attendees** are Zoom's meeting invitees, by email address only. `getEvent` returns them with the host as `organizer`. Listing and sync leave `attendees` and `organizer` out, as Zoom does not list them.
-- **Recurring meetings.** Zoom repeats meetings daily (every 1 to 99 days), weekly on set weekdays (every 1 to 50 weeks), or monthly on a day of the month or an nth weekday (every 1 to 10 months), for up to 60 meetings or until a date. Other rules throw `UnsupportedFunctionalityError`, as do rules whose days leave out the first meeting. Zoom's weeks start on Monday, so a rule repeating every few weeks on several days with another `WKST` throws too. Zoom keeps no list of excluded dates: delete occurrences one by one instead of passing `EXDATE` lines.
-- **Series far ahead.** Zoom schedules no meetings for a series that starts years ahead. Creating one, or moving a meeting or series that far, throws `UnsupportedFunctionalityError`, and calsdk deletes what Zoom created or undoes the change.
-- **Changing one occurrence** can only move or resize it. Other changes need `scope: 'all'`, which changes the whole series. Moving an occurrence with `scope: 'all'` moves the series by as much.
-- **Moving a series** makes Zoom schedule every meeting of it again: occurrences deleted, moved or resized on their own come back as they were, with ids for their new starts. The update returns a warning when that happens.
-- **`sendUpdates`.** Zoom does not email invitees about changes made through its API, so values other than `'none'` return a warning.
-- **Listing** reads every scheduled meeting and filters them, since Zoom cannot list meetings by time. Zoom cuts agendas in listings to 250 characters and stops listing meetings some time after they end. Each series takes a request of its own, made one at a time to stay under Zoom's rate limits.
-- **Sync.** Zoom cannot list meetings by when they changed, so each sync reads every meeting and compares it with the last sync. All changes come on one page. Meetings Zoom stops listing after they end are not reported as deleted.
+**Calendars.** `'primary'` holds the meetings the user hosts. Its time zone is the user's Zoom time zone.
+
+**Ids.** An event id is the meeting id. An occurrence of a series is `<meeting id>_<original start in UTC>`, such as `84512345678_20261103T090000Z`.
+
+**Times** are shown in the time zone the meeting was scheduled in. Meetings last whole minutes, up to 24 hours.
+
+**Attendees** are Zoom's meeting invitees, by email address only. `getEvent` returns them with the host as `organizer`. Listing and sync leave `attendees` and `organizer` out, as Zoom doesn't list them.
+
+**Recurring meetings.** Zoom repeats meetings daily (every 1 to 99 days), weekly on set weekdays (every 1 to 50 weeks), or monthly on a day of the month or an nth weekday (every 1 to 10 months), for up to 60 meetings or until a date. Other rules throw `UnsupportedFunctionalityError` rather than saving a different schedule, as do rules whose days leave out the first meeting. Zoom's weeks start on Monday, so a rule repeating every few weeks on several days with another `WKST` throws too. Zoom keeps no list of excluded dates: delete occurrences one by one instead of passing `EXDATE` lines.
+
+**Series far ahead.** Zoom schedules no meetings for a series that starts years ahead, so calsdk would have nothing to show. Creating one, or moving a meeting or series that far, throws `UnsupportedFunctionalityError`, and calsdk deletes what Zoom created or undoes the change.
+
+**Changing one occurrence** can only move or resize it. Other changes need `scope: 'all'`, which changes the whole series. Moving an occurrence with `scope: 'all'` moves the series by as much.
+
+**Moving a series** makes Zoom schedule every meeting of it again. Occurrences you deleted, moved or resized on their own come back as they were, with ids for their new starts. The update returns a warning when that happens, so you can tell your user.
+
+**`sendUpdates`.** Zoom doesn't email invitees about changes made through its API, so values other than `'none'` return a warning.
+
+**Listing** reads every scheduled meeting and filters them, since Zoom can't list meetings by time. Each series takes a request of its own, made one at a time to stay under Zoom's rate limits, so an account with many recurring meetings lists slowly. Zoom also cuts agendas in listings to 250 characters and stops listing meetings some time after they end.
+
+**Sync.** Zoom can't list meetings by when they changed either, so each sync reads every meeting and compares it with the last sync. All changes come on one page. Meetings Zoom stops listing after they end aren't reported as deleted.
 
 ## Provider options
 

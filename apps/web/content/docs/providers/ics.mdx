@@ -3,6 +3,8 @@ title: ICS feeds
 description: Read a subscribed iCalendar feed, such as a holiday calendar or a calendar shared by its secret address.
 ---
 
+Sometimes all you have is a link: a public holiday calendar, a team's shared `.ics` address, the feed a booking tool publishes. This provider reads it like any other calendar, recurring series and all, and syncs it. It can't write, because a feed is a file someone else publishes.
+
 ```npm
 npm install calsdk @calsdk/ics
 ```
@@ -40,14 +42,21 @@ Reading all-day and recurring events, attendees, video links and sync. Feeds are
 
 ## How it behaves
 
-- **The feed is `'primary'`.** It is the only calendar.
-- **Every call downloads the feed.** There is no cache between calls.
-- **Ids.** An event id is the feed's `UID`. Instances of a series are `<UID>_<original start>`, the start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date (`20261103`).
-- **Recurring events** are expanded by calsdk, with their `EXDATE`s and their moved and cancelled instances. A series stops after 50,000 instances or a second of work, with a warning. Rules repeating every minute or second, with an `INTERVAL` above 1,000, or that RFC 5545 does not allow, list only their first instance. An instance in the hour skipped when clocks go forward is shown an hour later, as Google, Apple and Outlook show it.
-- **Time zones.** IANA names, Windows names and zones defined only in the feed are all understood. Times in UTC, without a zone, or in a zone defined only in the feed are shown in the calendar's zone. In a zone defined only in the feed, a time within the hour the clocks change may be off by that hour.
-- **Video links.** Google Meet, Teams and Zoom links in the event's URL, location or description become its `conference`.
-- **Sync** compares each single event, series and moved instance with the last sync, so the cursor holds a short fingerprint per event. A cancelled instance is reported once as a delete, in the first sync too. When the server says the feed has not changed (`ETag` or `Last-Modified`), it is not downloaded again.
-- **Secret addresses.** Errors only report the feed's origin, never its path or query, since private feed addresses hold a secret.
+**The feed is `'primary'`.** It's the only calendar.
+
+**Every call downloads the feed.** There's no cache between calls. If you list the same feed often, pass a `fetch` that caches.
+
+**Ids.** An event id is the feed's `UID`. Instances of a series are `<UID>_<original start>`, the start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date (`20261103`).
+
+**Recurring events** are expanded by calsdk, with their `EXDATE`s and their moved and cancelled instances. A series stops after 50,000 instances or a second of work, with a warning, so one runaway rule can't stall your app. Rules repeating every minute or second, with an `INTERVAL` above 1,000, or that RFC 5545 doesn't allow, list only their first instance. An instance in the hour skipped when clocks go forward is shown an hour later, the way Google, Apple and Outlook show it.
+
+**Time zones.** IANA names, Windows names and zones defined only in the feed are all understood. Times in UTC, without a zone, or in a zone defined only in the feed are shown in the calendar's zone. In a zone defined only in the feed, a time within the hour the clocks change may be off by that hour.
+
+**Video links.** Google Meet, Teams and Zoom links in the event's URL, location or description become its `conference`.
+
+**Sync.** A feed has no change log, so calsdk compares each single event, series and moved instance with the last sync, and the cursor holds a short fingerprint per event. A cancelled instance is reported once as a delete, in the first sync too. When the server says the feed hasn't changed (`ETag` or `Last-Modified`), it isn't downloaded again.
+
+**Secret addresses.** Private feed addresses hold a secret in their path or query, so errors only report the feed's origin.
 
 ## Provider options
 

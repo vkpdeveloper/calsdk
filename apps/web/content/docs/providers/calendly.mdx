@@ -7,7 +7,7 @@ description: Read, book and cancel Calendly meetings as calendar events.
 npm install calsdk @calsdk/calendly
 ```
 
-In Calendly, scheduled meetings are the events.
+Calendly is a scheduling tool, so its events are the meetings people have booked with your user. You can list them, sync them, book a new one on an event type and cancel one. Two limits shape everything else: Calendly can't change a scheduled meeting at all, and booking through its API needs a paid plan.
 
 ```ts
 import { createEvent, listEvents } from 'calsdk';
@@ -55,16 +55,25 @@ Booking and cancelling, attendees and sync. Not supported: updating, all-day and
 
 ## How it behaves
 
-- **Calendars.** `'primary'` holds every meeting the user hosts. Calendly cannot list meetings by event type, so there are no other calendars.
-- **Ids.** An event id is the scheduled event's uuid.
-- **Times** are shown in the user's Calendly time zone.
-- **Attendees.** `getEvent` and `createEvent` return the hosts, the invitees and the guests they added. Listing and sync leave `attendees` out, as Calendly needs a request per meeting for its invitees. Hosts are in `organizer`.
-- **Creating** books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type; other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
-- **Updating** throws `UnsupportedFunctionalityError`: Calendly cannot change a scheduled meeting. Delete it and book a new one.
-- **Deleting** cancels the meeting. Cancelled meetings are deleted events.
-- **Listing** finds meetings by their start, looking back a day for meetings that end in the window. Calendly meetings last at most 12 hours.
-- **`sendUpdates`.** Calendly always emails invitees, so values other than `'all'` return a warning.
-- **Sync.** Calendly cannot list meetings by when they changed, so each sync reads every active meeting and compares it with the last sync. All changes come on one page, and the cursor grows with the number of meetings.
+**Calendars.** `'primary'` holds every meeting the user hosts. Calendly can't list meetings by event type, so there are no other calendars.
+
+**Ids.** An event id is the scheduled event's uuid.
+
+**Times** are shown in the user's Calendly time zone.
+
+**Attendees.** `getEvent` and `createEvent` return the hosts, the invitees and the guests they added. Listing and sync leave `attendees` out, because Calendly needs a request per meeting for its invitees, and a month of meetings would mean a request for each. Hosts are in `organizer`.
+
+**Creating** books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type, and other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
+
+**Updating** throws `UnsupportedFunctionalityError`, since Calendly can't change a scheduled meeting. To reschedule, delete it and book a new one.
+
+**Deleting** cancels the meeting. Cancelled meetings read as deleted events.
+
+**Listing** finds meetings by their start. Calendly meetings last at most 12 hours, so calsdk looks back a day to catch meetings that started before `timeMin` and end inside the window.
+
+**`sendUpdates`.** Calendly always emails invitees, so values other than `'all'` return a warning.
+
+**Sync.** Calendly can't list meetings by when they changed, so each sync reads every active meeting and compares it with the last sync. All changes come on one page, and the cursor grows with the number of meetings.
 
 ## Provider options
 

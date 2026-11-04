@@ -1,9 +1,9 @@
 ---
 title: Conformance tests
-description: Check a provider against the calsdk contract with the suite every official provider runs, recorded once and replayed offline.
+description: Check a provider against the calsdk contract with the suite most official providers run, recorded once and replayed offline.
 ---
 
-`@calsdk/provider-tests` registers Vitest tests that check a provider against the contract: calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. Tests run only for the capabilities the provider declares as `true`.
+An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. `@calsdk/provider-tests` registers the Vitest tests most official providers run to catch those: calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. Tests run only for the capabilities your provider declares as `true`, so a provider without recurring events isn't asked to split a series.
 
 ```ts title="test/conformance.test.ts"
 import { describeProviderConformance } from '@calsdk/provider-tests';
@@ -19,7 +19,7 @@ describeProviderConformance({
 });
 ```
 
-Pass the suite's `fetch` through to your provider, so it can record and replay requests and stub error responses.
+Pass the suite's `fetch` through to your provider. That's how the suite records, replays and stubs error responses.
 
 ## Record once, replay everywhere
 
@@ -33,9 +33,9 @@ Pass the suite's `fetch` through to your provider, so it can record and replay r
 CALSDK_RECORD=1 ACME_TOKEN=... bunx vitest run test/conformance.test.ts
 ```
 
-Record against a calendar made for testing: tests delete what they create, but they write to it. Set it with `calendarId`.
+Record against a calendar made for testing, set with `calendarId`. The tests delete what they create, but they do write to it.
 
-Request headers are never saved. Response bodies are saved as the API returned them, so they can hold names and email addresses. Read a recording before you commit it.
+Credentials aren't saved: only the few request headers that change what a request does, and no token query parameters. Response bodies are saved as the API returned them, though, so they can hold names and email addresses. Read a recording before you commit it.
 
 ## Options
 
@@ -52,4 +52,4 @@ Request headers are never saved. Response bodies are saved as the API returned t
 
 ## Your own tests
 
-`createRecordingFetch` is exported for a provider's own tests, with the same record and replay modes. The suite needs Vitest 5 and a runtime with `node:fs`.
+For tests of behavior specific to your API, `createRecordingFetch` is exported with the same record and replay modes. The suite needs Vitest 5 and a runtime with `node:fs`.

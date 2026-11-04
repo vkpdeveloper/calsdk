@@ -85,13 +85,24 @@ await listEvents({
 });
 ```
 
-| Function                     | Option                    | Type and notes |
-| ---------------------------- | ------------------------- | ---- |
-| `createEvent`, `updateEvent` | `guestsCanModify`         | `boolean` |
-| `createEvent`, `updateEvent` | `guestsCanInviteOthers`   | `boolean` |
-| `createEvent`, `updateEvent` | `guestsCanSeeOtherGuests` | `boolean` |
-| `createEvent`, `updateEvent` | `extendedProperties`      | `{ private?: Record<string, string>; shared?: Record<string, string> }`. `private` is only visible on this calendar |
-| `listEvents`                 | `eventTypes`              | `('birthday' \| 'default' \| 'focusTime' \| 'fromGmail' \| 'outOfOffice' \| 'workingLocation')[]` |
+### `createEvent` and `updateEvent`
+
+<TypeTable
+  type={{
+    guestsCanModify: { type: 'boolean' },
+    guestsCanInviteOthers: { type: 'boolean' },
+    guestsCanSeeOtherGuests: { type: 'boolean' },
+    extendedProperties: { type: '{ private?: Record<string, string>; shared?: Record<string, string> }', description: '`private` is only visible on this calendar.' },
+  }}
+/>
+
+### `listEvents`
+
+<TypeTable
+  type={{
+    eventTypes: { type: "('birthday' | 'default' | 'focusTime' | 'fromGmail' | 'outOfOffice' | 'workingLocation')[]" },
+  }}
+/>
 
 ## Metadata
 

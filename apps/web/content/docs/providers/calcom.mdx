@@ -101,14 +101,34 @@ await deleteEvent({
 });
 ```
 
-| Function      | Option                    | Type and notes |
-| ------------- | ------------------------- | ---- |
-| `createEvent` | `eventTypeId`             | `number`. Required on `'primary'` |
-| `createEvent` | `metadata`                | `Record<string, string>`, stored on the booking |
-| `createEvent`, `updateEvent` | `allowConflicts` | `boolean`, default `true`. Book over other bookings and busy time |
-| `createEvent`, `updateEvent` | `allowBookingOutOfBounds` | `boolean`, default `true`. Book outside the event type's availability, notice and booking window |
-| `updateEvent` | `reschedulingReason`      | `string`, shown in the reschedule email |
-| `deleteEvent` | `cancellationReason`      | `string`, shown in the cancellation email. Default `'Cancelled'` |
+### `createEvent`
+
+<TypeTable
+  type={{
+    eventTypeId: { type: 'number', description: "Required on `'primary'`." },
+    metadata: { type: 'Record<string, string>', description: 'Stored on the booking.' },
+    allowConflicts: { type: 'boolean', description: 'Book over other bookings and busy time.', default: 'true' },
+    allowBookingOutOfBounds: { type: 'boolean', description: "Book outside the event type's availability, notice and booking window.", default: 'true' },
+  }}
+/>
+
+### `updateEvent`
+
+<TypeTable
+  type={{
+    reschedulingReason: { type: 'string', description: 'Shown in the reschedule email.' },
+    allowConflicts: { type: 'boolean', description: 'As on `createEvent`.', default: 'true' },
+    allowBookingOutOfBounds: { type: 'boolean', description: 'As on `createEvent`.', default: 'true' },
+  }}
+/>
+
+### `deleteEvent`
+
+<TypeTable
+  type={{
+    cancellationReason: { type: 'string', description: 'Shown in the cancellation email.', default: "'Cancelled'" },
+  }}
+/>
 
 ## Metadata
 

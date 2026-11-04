@@ -93,11 +93,22 @@ await deleteEvent({
 });
 ```
 
-| Function      | Option      | Type and notes |
-| ------------- | ----------- | ---- |
-| `createEvent` | `eventType` | `string`, required. The event type's URI or uuid |
-| `createEvent` | `location`  | `{ kind: string; location?: string }`, passed to Calendly as is, such as `{ kind: 'zoom_conference' }` |
-| `deleteEvent` | `reason`    | `string`, shown in the cancellation email |
+### `createEvent`
+
+<TypeTable
+  type={{
+    eventType: { type: 'string', description: "The event type's URI or uuid.", required: true },
+    location: { type: '{ kind: string; location?: string }', description: "Passed to Calendly as is, such as `{ kind: 'zoom_conference' }`." },
+  }}
+/>
+
+### `deleteEvent`
+
+<TypeTable
+  type={{
+    reason: { type: 'string', description: 'Shown in the cancellation email.' },
+  }}
+/>
 
 ## Metadata
 

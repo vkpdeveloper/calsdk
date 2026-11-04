@@ -88,13 +88,25 @@ await syncEvents({
 });
 ```
 
-| Function                     | Option          | Type and notes |
-| ---------------------------- | --------------- | ---- |
-| `createEvent`, `updateEvent` | `showAs`        | `'free' \| 'tentative' \| 'busy' \| 'oof' \| 'workingElsewhere'`. Overrides `showAs` on the event |
-| `createEvent`, `updateEvent` | `importance`    | `'low' \| 'normal' \| 'high'` |
-| `createEvent`, `updateEvent` | `categories`    | `string[]`, Outlook category names. Categories carry Outlook's colors |
-| `createEvent`, `updateEvent` | `transactionId` | `string`. Makes a create safe to retry: Outlook will not create it twice |
-| `syncEvents`                 | `timeMin`, `timeMax` | ISO 8601 instants with an offset. The window a first sync covers |
+### `createEvent` and `updateEvent`
+
+<TypeTable
+  type={{
+    showAs: { type: "'free' | 'tentative' | 'busy' | 'oof' | 'workingElsewhere'", description: 'Overrides `showAs` on the event.' },
+    importance: { type: "'low' | 'normal' | 'high'" },
+    categories: { type: 'string[]', description: "Outlook category names. Categories carry Outlook's colors." },
+    transactionId: { type: 'string', description: "Makes a create safe to retry: Outlook won't create it twice." },
+  }}
+/>
+
+### `syncEvents`
+
+<TypeTable
+  type={{
+    timeMin: { type: 'string', description: "ISO 8601 instant with an offset. Where a first sync's window starts." },
+    timeMax: { type: 'string', description: "ISO 8601 instant with an offset. Where a first sync's window ends." },
+  }}
+/>
 
 ## Metadata
 

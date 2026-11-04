@@ -5,7 +5,7 @@ description: Keep a local copy of a calendar up to date with the changes since a
 
 To mirror your users' calendars into Postgres, apply the changes `syncEvents` returns and save its cursor for the next run. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window.
 
-The changes you get back are always just the changes, but some providers have to reread the whole calendar to find them. Check [how each provider syncs](#how-each-provider-syncs) before you choose how often to run it.
+After that you get back only what changed, though some providers have to reread the whole calendar to find it. Check [how each provider syncs](#how-each-provider-syncs) before you choose how often to run it.
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
@@ -78,7 +78,8 @@ Pass the same `calendarId` and `cursor` on every page of a round. The last page 
 | Outlook           | Graph delta queries over a fixed window, by default a year back and two years ahead |
 | CalDAV            | The server's sync tokens (RFC 6578)                               |
 | Cal.com           | Bookings by the time they last changed                            |
-| Calendly, Zoom    | Rereads every meeting and compares it with the last sync. The cursor grows with the number of events |
+| Calendly          | Rereads every meeting and compares it with the last sync. The cursor grows with the number of events |
+| Zoom              | Rereads every meeting and compares it with the last sync. The cursor grows with the number of events |
 | ICS               | Downloads the feed unless the server answers `304 Not Modified`, then compares it with the last sync. The cursor grows with the number of events |
 | Mock              | A change log in memory                                            |
 

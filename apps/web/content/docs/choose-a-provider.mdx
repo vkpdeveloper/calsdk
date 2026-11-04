@@ -15,7 +15,9 @@ Use these when your users keep their schedule in the calendar itself. You can re
 | Outlook, Microsoft 365            | [`microsoft()`](/docs/providers/microsoft)              | Microsoft Graph token with `Calendars.ReadWrite`          |
 | iCloud                            | [`icloud()`](/docs/providers/caldav)                    | Apple ID and an app-specific password                     |
 | Zoho Calendar                     | [`zoho()`](/docs/providers/caldav)                      | Email and password, or an app-specific password           |
-| Other CalDAV servers, such as Fastmail or Nextcloud | [`caldav()`](/docs/providers/caldav) | Server address, username and password            |
+| Other CalDAV servers              | [`caldav()`](/docs/providers/caldav)                    | Server address, username and password                     |
+
+Fastmail, Nextcloud and Radicale are CalDAV servers, so they use `caldav()`.
 
 ## Scheduling tools
 
@@ -31,7 +33,7 @@ Use these when your app reads and makes bookings or meetings rather than managin
 
 | Source                                  | Use                                  | Credentials                     |
 | --------------------------------------- | ------------------------------------ | ------------------------------- |
-| A `.ics` or `webcal://` subscription    | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
+| A `.ics` or `webcal://` feed            | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
 | An in-memory calendar                   | [`mockCalendar()`](/docs/providers/mock) | None                        |
 
 ## Check before you rely on a feature

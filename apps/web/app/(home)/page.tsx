@@ -164,43 +164,40 @@ result.warnings;`,
   {
     id: 'recurring',
     label: 'Repeat',
-    title: 'Recurring events are plain RRULEs',
-    body: 'Listing expands a series into occurrences. Move one, or the whole series.',
+    title: 'Move one meeting in a series',
+    body: 'Listing expands a series into occurrences, each with its own id. Move one, or the whole series.',
     code: `
-const standup = await createEvent({
-  calendar,
-  event: {
-    title: 'Standup',
-    start: {
-      dateTime: '2026-11-09T09:30:00',
-      timeZone: 'America/New_York',
-    },
-    end: {
-      dateTime: '2026-11-09T09:45:00',
-      timeZone: 'America/New_York',
-    },
-    recurrence: [
-      'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
-    ],
-  },
-});
+import {
+  listEvents,
+  updateEvent,
+} from 'calsdk';
 
-// Move only Friday's standup.
+// Listing expands the weekday standup.
 const { events } = await listEvents({
   calendar,
   timeMin: '2026-11-13',
   timeMax: '2026-11-14',
 });
 const friday = events.find(
-  (e) => e.seriesId === standup.event.id,
+  (event) => event.title === 'Standup',
 );
 
+// Move only Friday's, to 10:00.
 if (friday) {
   await updateEvent({
     calendar,
     eventId: friday.id,
     scope: 'this',
-    patch: { start, end },
+    patch: {
+      start: {
+        dateTime: '2026-11-13T10:00:00',
+        timeZone: 'America/New_York',
+      },
+      end: {
+        dateTime: '2026-11-13T10:15:00',
+        timeZone: 'America/New_York',
+      },
+    },
   });
 }`,
   },
@@ -384,7 +381,7 @@ export default async function HomePage() {
           One API.
         </h1>
         <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
-          Read, write and sync events on Google, Outlook, iCloud and six more calendars, with one
+          Read, write and sync events on Google, Outlook, iCloud and six other providers, with one
           typed TypeScript API.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -398,7 +395,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-12 sm:mt-16 xl:-mx-10 2xl:-mx-20" aria-label="Live demo">
+      <section className="mt-12 sm:mt-16 xl:-mx-10 2xl:-mx-40" aria-label="Live demo">
         <CalendarApp />
         <p className="mt-4 text-center text-sm text-neutral-500">
           Running in your browser: six sample calendars in memory, with the real listEvents,
@@ -429,8 +426,8 @@ export default async function HomePage() {
             title="Recurrence is always an RRULE"
             body="Outlook stores a pattern object and Zoom numbers its weekdays. You read and write one RRULE."
           >
-            <div className="font-mono text-[11px] leading-relaxed">
-              <pre className="text-neutral-500">{OUTLOOK_PATTERN}</pre>
+            <div className="font-mono text-xs leading-relaxed">
+              <pre className="text-neutral-400">{OUTLOOK_PATTERN}</pre>
               <ArrowRight aria-hidden className="my-2 size-3.5 rotate-90 text-neutral-600" />
               <p className="break-all text-[#a5d6ff]">'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'</p>
             </div>
@@ -440,7 +437,7 @@ export default async function HomePage() {
             body="Google has a fixed palette. Your color is saved as the nearest one, and the result says so."
           >
             <div className="font-mono text-xs leading-relaxed">
-              <p className="text-neutral-500">
+              <p className="text-neutral-400">
                 color: <span className="text-[#a5d6ff]">'#ec4899'</span>
               </p>
               <div className="mt-3 flex items-center gap-2 text-neutral-400">
@@ -449,8 +446,13 @@ export default async function HomePage() {
                 <Swatch color="#e67c73" label="saved" />
               </div>
               <p className="mt-3 text-neutral-300">
-                warnings: [{'{'} type: <span className="text-[#a5d6ff]">'compatibility'</span>,
-                feature: <span className="text-[#a5d6ff]">'color'</span> {'}'}]
+                warnings: [{'{'}{' '}
+                <span className="whitespace-nowrap">
+                  type: <span className="text-[#a5d6ff]">'compatibility'</span>,
+                </span>{' '}
+                <span className="whitespace-nowrap">
+                  feature: <span className="text-[#a5d6ff]">'color'</span> {'}'}]
+                </span>
               </p>
             </div>
           </Card>
@@ -459,7 +461,7 @@ export default async function HomePage() {
             body="The standup stays at 9:30 in New York. Berlin sees it an hour early until Europe changes its clocks too."
           >
             <div className="text-xs">
-              <p className="mb-2 text-neutral-500">9:30 New York standup, in Berlin, March 2027</p>
+              <p className="mb-2 text-neutral-400">9:30 New York standup, in Berlin, March 2027</p>
               {BERLIN.map(([date, time, early]) => (
                 <div
                   key={date}
@@ -512,10 +514,16 @@ export default async function HomePage() {
       <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-6 text-sm text-neutral-500">
         <span>MIT License</span>
         <div className="flex gap-5">
-          <Link href="/docs" className="inline-flex min-h-11 items-center hover:text-white">
+          <Link
+            href="/docs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-white"
+          >
             Docs
           </Link>
-          <a href={githubUrl} className="inline-flex min-h-11 items-center hover:text-white">
+          <a
+            href={githubUrl}
+            className="inline-flex min-h-11 min-w-11 items-center justify-center hover:text-white"
+          >
             GitHub
           </a>
         </div>

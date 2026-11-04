@@ -15,7 +15,6 @@ const CHANGES: Record<number, string> = {
 
 const day = new Intl.DateTimeFormat('en-GB', {
   timeZone: ZONE,
-  weekday: 'short',
   day: 'numeric',
   month: 'short',
 });
@@ -65,7 +64,7 @@ export async function ClockChange() {
     <div className="grid gap-4 lg:grid-cols-2">
       <Card title="Saved as a UTC time" saved={`'${FIRST_UTC}'`} rows={drifted} />
       <Card
-        title="Saved by calsdk"
+        title="Saved as time and zone (calsdk)"
         saved={`{ dateTime: '2027-03-08T09:30:00', timeZone: '${ZONE}' }`}
         rows={kept}
         highlight
@@ -85,7 +84,7 @@ function Card({
   rows: Row[];
   highlight?: boolean;
 }) {
-  const home = rows[0]?.newYork;
+  const first = rows[0];
   return (
     <div
       className={`min-w-0 overflow-hidden rounded-xl border bg-panel ${highlight ? 'border-accent-blue/60' : 'border-line'}`}
@@ -94,34 +93,47 @@ function Card({
         <div className="text-sm font-medium text-white">{title}</div>
         <code className="mt-1 block font-mono text-xs break-words text-neutral-400">{saved}</code>
       </div>
-      <table className="w-full text-sm tabular-nums">
+      {/* Fixed columns, so both cards put each city at the same x and rows compare across. */}
+      <table className="w-full table-fixed text-sm tabular-nums">
+        <colgroup>
+          <col className="w-[24%]" />
+          <col className="w-[38%]" />
+          <col />
+        </colgroup>
         <thead>
           <tr className="text-left text-xs text-neutral-500">
-            <th className="px-4 pt-3 pb-2 font-normal">Standup</th>
-            <th className="px-4 pt-3 pb-2 font-normal">New York</th>
-            <th className="px-4 pt-3 pb-2 font-normal">Berlin</th>
+            <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">Monday</th>
+            <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">New York</th>
+            <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">Berlin</th>
           </tr>
         </thead>
         <tbody>
           {rows.map((row, i) => {
-            const late = row.newYork !== home;
+            const late = row.newYork !== first?.newYork;
+            // On calsdk's side Berlin moves while New York holds; say why where it happens.
+            const shifted = highlight && row.berlin !== first?.berlin;
             const change = CHANGES[i - 1];
             return (
               <Fragment key={row.day}>
                 {change && (
                   <tr className="border-t border-dashed border-neutral-700">
-                    <td colSpan={3} className="px-4 py-1.5 text-xs text-neutral-500">
+                    <td colSpan={3} className="px-3 py-1.5 sm:px-4 text-xs text-neutral-500">
                       {change}
                     </td>
                   </tr>
                 )}
                 <tr className="border-t border-line">
-                  <td className="px-4 py-3 text-neutral-400">{row.day}</td>
-                  <td className={`px-4 py-3 font-mono ${late ? 'text-red-400' : 'text-white'}`}>
+                  <td className="px-3 py-3 sm:px-4 text-neutral-400">{row.day}</td>
+                  <td
+                    className={`px-3 py-3 sm:px-4 font-mono ${late ? 'text-red-400' : 'text-white'}`}
+                  >
                     {row.newYork}
-                    {late && <span className="ml-2 font-sans text-xs">an hour late</span>}
+                    {late && <Note>an hour late</Note>}
                   </td>
-                  <td className="px-4 py-3 font-mono text-neutral-300">{row.berlin}</td>
+                  <td className="px-3 py-3 sm:px-4 font-mono text-neutral-300">
+                    {row.berlin}
+                    {shifted && <Note className="text-neutral-500">US changed first</Note>}
+                  </td>
                 </tr>
               </Fragment>
             );
@@ -129,5 +141,13 @@ function Card({
         </tbody>
       </table>
     </div>
+  );
+}
+
+function Note({ children, className }: { children: string; className?: string }) {
+  return (
+    <span className={`block font-sans text-xs sm:ml-2 sm:inline ${className ?? ''}`}>
+      {children}
+    </span>
   );
 }

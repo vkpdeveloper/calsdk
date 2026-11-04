@@ -88,6 +88,12 @@ const { events } = await listEvents({
 const PAYLOADS = [
   {
     name: 'Google Calendar',
+    notes: {
+      title: 'Called summary, after iCalendar.',
+      start: 'An offset and a zone, both.',
+      repeat: 'Plain RRULE strings. The easy one.',
+      link: 'Three levels deep for one URL.',
+    },
     format: 'JSON',
     lang: 'json',
     conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
@@ -111,6 +117,12 @@ const PAYLOADS = [
   },
   {
     name: 'Outlook',
+    notes: {
+      title: 'Called subject, like an email.',
+      start: 'UTC, with the zone in another field as a Windows name.',
+      repeat: 'A pattern object instead of an RRULE.',
+      link: 'Under onlineMeeting.',
+    },
     format: 'JSON',
     lang: 'json',
     conference: { provider: 'teams', joinUrl: 'https://teams.microsoft.com/l/...' },
@@ -144,6 +156,12 @@ const PAYLOADS = [
   },
   {
     name: 'iCloud',
+    notes: {
+      title: 'Not JSON at all: one text line per field.',
+      start: 'Wall time, with the zone as a parameter.',
+      repeat: 'An RRULE line, straight from the standard.',
+      link: "No video field, so it's just a URL.",
+    },
     format: 'iCalendar',
     lang: 'text',
     conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
@@ -159,6 +177,12 @@ END:VEVENT`,
   },
   {
     name: 'Zoom',
+    notes: {
+      title: 'Called topic.',
+      start: 'No start field: UTC occurrences plus a zone.',
+      repeat: 'Sunday is 1, so weekdays are 2 to 6.',
+      link: 'A Zoom link, always.',
+    },
     format: 'JSON',
     lang: 'json',
     conference: { provider: 'zoom', joinUrl: 'https://zoom.us/j/85512345678' },
@@ -430,9 +454,10 @@ export default async function HomePage() {
         })),
       ),
       Promise.all(
-        PAYLOADS.map(async ({ name, format, lang, code, conference }) => ({
+        PAYLOADS.map(async ({ name, format, lang, code, conference, notes }) => ({
           name,
           format,
+          notes,
           code: await highlightCode(code, { lang }),
           result: await highlightCode(eventCode(conference)),
         })),

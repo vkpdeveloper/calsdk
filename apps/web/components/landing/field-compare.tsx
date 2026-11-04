@@ -9,17 +9,27 @@ const FIELDS = [
   { id: 'start', label: 'Start time' },
   { id: 'repeat', label: 'Repeats' },
   { id: 'link', label: 'Video link' },
-];
+] as const;
 
-export type Payload = { name: string; format: string; code: ReactNode; result: ReactNode };
+type Field = (typeof FIELDS)[number]['id'];
+
+export type Payload = {
+  name: string;
+  format: string;
+  code: ReactNode;
+  result: ReactNode;
+  /** What is odd about this API's version of each field, shown under its payload. */
+  notes: Record<Field, string>;
+};
 
 /**
  * The same meeting as each provider's API returns it, next to the calsdk event made from the
  * picked payload. Picking a field lights up its lines everywhere; the lines carry `field-*`
- * classes. Phones show one payload at a time, so the calsdk event sits right under it.
+ * classes, and each payload's note says what is odd about that field in its API. Phones
+ * show one payload at a time, so the calsdk event sits right under it.
  */
 export function FieldCompare({ payloads }: { payloads: Payload[] }) {
-  const [field, setField] = useState('repeat');
+  const [field, setField] = useState<Field>('repeat');
   const [shown, setShown] = useState(0);
   const picked = payloads[shown];
   return (
@@ -57,10 +67,10 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:col-span-2">
-          {payloads.map(({ name, format, code }, i) => (
+          {payloads.map(({ name, format, code, notes }, i) => (
             <div
               key={name}
-              className={`min-w-0 overflow-hidden rounded-xl border bg-panel transition-colors ${i === shown ? 'border-accent-blue/60' : 'border-line hover:border-neutral-600 max-md:hidden'}`}
+              className={`flex min-w-0 flex-col overflow-hidden rounded-xl border bg-panel transition-colors ${i === shown ? 'border-accent-blue/60' : 'border-line hover:border-neutral-600 max-md:hidden'}`}
             >
               <button
                 type="button"
@@ -73,7 +83,11 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
                 <span className="font-medium text-neutral-200">{name}</span>
                 <span className="ml-auto font-mono text-neutral-500">{format}</span>
               </button>
-              <div className="code code-sm">{code}</div>
+              {/* Grows so the notes line up along the bottom of each row of cards. */}
+              <div className="code code-sm flex-1">{code}</div>
+              <p className="border-t border-line px-4 py-2.5 text-xs text-neutral-400">
+                {notes[field]}
+              </p>
             </div>
           ))}
         </div>

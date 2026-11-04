@@ -12,7 +12,9 @@ const DAYS = ['2027-01-11', '2027-01-12', '2027-01-13', '2027-01-14', '2027-01-1
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 const OPEN = 9;
 const CLOSE = 18;
-const HOUR_PX = 44;
+// Hour rows are sized by the --hour CSS variable, taller on wide screens so the grid ends
+// level with the controls beside it.
+const hours = (n: number) => `calc(var(--hour) * ${n})`;
 const HOURS = Array.from({ length: CLOSE - OPEN }, (_, i) => OPEN + i);
 
 type Seed = [day: number, start: string, end: string, title: string];
@@ -187,19 +189,19 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
           <Legend className="bg-accent-blue/40 border border-accent-blue">Free for both</Legend>
           <span className="ml-auto">New York time</span>
         </div>
-        <div className="grid grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 sm:px-4">
+        <div className="grid grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 [--hour:44px] sm:px-4 lg:[--hour:60px]">
           <div />
           {DAY_NAMES.map((name) => (
             <div key={name} className="py-2 text-center text-xs font-medium text-neutral-400">
               {name}
             </div>
           ))}
-          <div className="relative" style={{ height: (CLOSE - OPEN) * HOUR_PX }}>
+          <div className="relative" style={{ height: hours(CLOSE - OPEN) }}>
             {[...HOURS, CLOSE].map((hour) => (
               <span
                 key={hour}
                 className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-400"
-                style={{ top: (hour - OPEN) * HOUR_PX }}
+                style={{ top: hours(hour - OPEN) }}
               >
                 {clock(hour * 60)}
               </span>
@@ -209,13 +211,13 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
             <div
               key={date}
               className="relative border-l border-line"
-              style={{ height: (CLOSE - OPEN) * HOUR_PX }}
+              style={{ height: hours(CLOSE - OPEN) }}
             >
               {HOURS.map((hour) => (
                 <div
                   key={hour}
                   className="absolute inset-x-0 border-t border-[#1c1c20]"
-                  style={{ top: (hour - OPEN) * HOUR_PX }}
+                  style={{ top: hours(hour - OPEN) }}
                 />
               ))}
               {state &&
@@ -320,14 +322,13 @@ function Legend({ className, children }: { className: string; children: ReactNod
 }
 
 function Placed({ block, className }: { block: Block; className: string }) {
-  const top = ((block.from - OPEN * 60) / 60) * HOUR_PX;
-  const height = ((block.to - block.from) / 60) * HOUR_PX;
+  const minutes = block.to - block.from;
   return (
     <div
       className={`absolute overflow-hidden px-1.5 py-1 text-[10px] leading-tight sm:text-[11px] ${className}`}
-      style={{ top, height }}
+      style={{ top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) }}
     >
-      {height >= 26 && block.title && <span className="hidden sm:block">{block.title}</span>}
+      {minutes >= 36 && block.title && <span className="hidden sm:block">{block.title}</span>}
     </div>
   );
 }

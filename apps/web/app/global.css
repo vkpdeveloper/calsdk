@@ -81,9 +81,9 @@ html > body[data-scroll-locked] {
   padding: 0 0.75rem;
 }
 
-/* The landing page is framed at 1200px, so the nav lines up with it. */
+/* The landing page is framed at 1360px, so the nav lines up with it. */
 #nd-home-layout {
-  --fd-layout-width: 1200px;
+  --fd-layout-width: 1360px;
 }
 
 /* A faint week grid behind the hero and the closing section. */

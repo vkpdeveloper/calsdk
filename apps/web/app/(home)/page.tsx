@@ -443,7 +443,7 @@ export default async function HomePage() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[1200px] border-x border-line">
+    <div className="mx-auto w-full max-w-[1360px] border-x border-line">
       <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
           Calendar SDK for TypeScript

@@ -3,9 +3,11 @@ title: Recurring events
 description: Create a series with an RRULE, then change or delete one occurrence, the rest of the series, or all of it.
 ---
 
+Recurring events are where calendar APIs disagree the most, so calsdk describes every series the same way, with RFC 5545 rules, and translates them for each provider.
+
 ## Create a series
 
-Recurring events are where calendar APIs disagree the most, so calsdk describes every series the same way, with RFC 5545 rules, and translates them for each provider. A series is an event with `recurrence`, one RFC 5545 line per array item, and its `start` and `end` describe the first occurrence:
+A series is an event with `recurrence`, one RFC 5545 line per array item, and its `start` and `end` describe the first occurrence:
 
 ```ts
 const { event: standup } = await createEvent({

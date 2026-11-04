@@ -16,7 +16,7 @@ const { calendars } = await getFreeBusy({
 });
 ```
 
-Google answers from its free/busy endpoint. Other providers need access to the events: calsdk lists them, skips events shown as free and cancelled events, and returns a `compatibility` warning.
+Google answers from its free/busy endpoint. Other providers are read from their events instead, with a `compatibility` warning: [Find free time](/docs/guides/free-time) covers how the busy times are worked out.
 
 ## Options
 

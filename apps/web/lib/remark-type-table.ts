@@ -11,7 +11,8 @@ type Node = {
 
 /**
  * Search indexes a `<TypeTable>` as its raw props, so results showed object literals.
- * This gives remark-structure one readable entry per property instead.
+ * This gives remark-structure one readable entry per property instead. The search dialog
+ * renders inline code, so names, types and the description's code spans stay in backticks.
  */
 export function remarkTypeTableSearch() {
   return (tree: Node) => {
@@ -20,7 +21,7 @@ export function remarkTypeTableSearch() {
         const props = readTypeProp(node);
         const contents = Object.entries(props).map(([name, prop]) => ({
           heading: undefined,
-          content: `${name}: ${prop.type}. ${prop.description?.replaceAll('`', '') ?? ''}`.trim(),
+          content: `\`${name}\`: \`${prop.type}\`. ${prop.description ?? ''}`.trim(),
         }));
         node.data = { ...node.data, structuredData: { contents } };
       }

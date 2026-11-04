@@ -209,8 +209,9 @@ html > body[data-scroll-locked] {
 /* On phones, wide docs tables scroll inside their own box with the header row in view.
    Short tables never reach the height cap. */
 @media (max-width: 767px) {
+  /* Tall enough for the provider comparison to fit on a typical phone. */
   .prose div:has(> table) {
-    max-height: 70dvh;
+    max-height: min(85dvh, 44rem);
   }
   /* `hidden` would stop the cells sticking; `clip` still rounds the corners. */
   .prose table {
@@ -258,12 +259,13 @@ html > body[data-scroll-locked] {
   }
 }
 
-/* Code wider than its box fades at the right edge until it is scrolled to the end, so it
-   reads as scrollable rather than cut off. With nothing to scroll the timeline is inactive
+/* Code and tables wider than their box fade at the right edge until scrolled to the end,
+   so they read as scrollable rather than cut off. With nothing to scroll the timeline is inactive
    and the fade never applies. Browsers without scroll timelines just show no fade. */
 @supports (animation-timeline: scroll()) {
   .code pre,
-  .fd-scroll-container {
+  .fd-scroll-container,
+  .prose div:has(> table) {
     animation: scroll-fade linear both;
     animation-timeline: scroll(self inline);
   }

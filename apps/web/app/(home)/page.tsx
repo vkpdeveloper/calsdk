@@ -210,9 +210,9 @@ if (friday) {
     result: `
 // Friday's standup, listed again
 {
-  id: 'evt_1_20261113T143000Z',
+  id: 'evt_3_20261113T143000Z',
   kind: 'exception',
-  seriesId: 'evt_1',
+  seriesId: 'evt_3',
   start: {
     dateTime:
       '2026-11-13T10:00:00-05:00',

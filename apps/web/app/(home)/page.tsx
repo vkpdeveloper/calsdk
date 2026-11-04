@@ -418,8 +418,8 @@ export default async function HomePage() {
           One API.
         </h1>
         <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
-          Events, free time and sync for Google, Outlook, iCloud and six other providers, with one
-          typed TypeScript API.
+          Events, free time and sync for nine providers, including Google, Outlook and iCloud, in
+          one typed TypeScript API.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link

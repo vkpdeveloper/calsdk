@@ -29,7 +29,7 @@ async function sync(calendarId: string) {
 
 ## Apply changes in order
 
-Apply changes in the order they come. They aren't a history of edits, but the same event can show up more than once in a round (Outlook does this), and a later entry replaces an earlier one. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
+Apply changes in the order they come. The same event can show up more than once in a round (Outlook does this), and the later entry is the newer one, so applying them in order leaves you with the latest version. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
 
 ```ts
 import type { SyncChange } from 'calsdk';

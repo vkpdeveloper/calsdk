@@ -89,9 +89,9 @@ await listEvents({
 
 <TypeTable
   type={{
-    guestsCanModify: { type: 'boolean' },
-    guestsCanInviteOthers: { type: 'boolean' },
-    guestsCanSeeOtherGuests: { type: 'boolean' },
+    guestsCanModify: { type: 'boolean', description: 'Guests can edit the event.' },
+    guestsCanInviteOthers: { type: 'boolean', description: 'Guests can invite other people.' },
+    guestsCanSeeOtherGuests: { type: 'boolean', description: 'Guests can see the guest list.' },
     extendedProperties: { type: '{ private?: Record<string, string>; shared?: Record<string, string> }', description: '`private` is only visible on this calendar.' },
   }}
 />
@@ -100,7 +100,7 @@ await listEvents({
 
 <TypeTable
   type={{
-    eventTypes: { type: "('birthday' | 'default' | 'focusTime' | 'fromGmail' | 'outOfOffice' | 'workingLocation')[]" },
+    eventTypes: { type: "('birthday' | 'default' | 'focusTime' | 'fromGmail' | 'outOfOffice' | 'workingLocation')[]", description: 'Only return these types. By default Google returns every type.' },
   }}
 />
 

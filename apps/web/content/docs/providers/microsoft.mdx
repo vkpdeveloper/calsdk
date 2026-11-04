@@ -65,7 +65,7 @@ calsdk asks Graph for immutable ids, so an event keeps its id when someone moves
 
 Outlook ignores `If-Match` on deletes, so `deleteEvent` with `ifMatch` compares the etag first. That leaves a small gap: a change made between the check and the delete isn't detected.
 
-`createConference: true` asks for a Teams meeting. Personal accounts can't create one through Graph, so on those the event is saved without it and the result carries a warning. Outlook also always notifies attendees, so `sendUpdates` values other than `'all'` return a warning.
+`createConference: true` asks for a Teams meeting. Personal accounts, and some work accounts, can't create one through Graph, so on those the event is saved without it and the result carries a warning. Outlook also always notifies attendees, so `sendUpdates` values other than `'all'` return a warning.
 
 Outlook allows one popup reminder per event, and it has no default reminder to go back to. So `reminders: null` and `useDefault: true` leave the reminder unchanged, with a warning. To turn it off, pass `{ useDefault: false, overrides: [] }`. Events have no color of their own either, only categories, which carry Outlook's colors. `color` is ignored with a warning, so use the `categories` option instead.
 

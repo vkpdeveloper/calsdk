@@ -305,8 +305,9 @@ try {
 // The weekday standup's recurrence, as Outlook stores it.
 const OUTLOOK_PATTERN = `"pattern": {
   "type": "weekly",
-  "daysOfWeek": ["monday", "tuesday",
-    "wednesday", "thursday", "friday"]
+  "daysOfWeek": ["monday",
+    "tuesday", "wednesday",
+    "thursday", "friday"]
 }`;
 
 // A weekly 9:30 New York standup seen from Berlin in March 2027. The US changes its clocks on
@@ -381,7 +382,7 @@ export default async function HomePage() {
           One API.
         </h1>
         <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
-          Read, write and sync events on Google, Outlook, iCloud and six other providers, with one
+          Events, free time and sync for Google, Outlook, iCloud and six other providers, with one
           typed TypeScript API.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -421,7 +422,7 @@ export default async function HomePage() {
         aside="Recurrence, time zones and field names are converted for you. When a provider can't do what you asked, the result says so."
         link={{ href: '/docs/concepts/warnings', label: 'How warnings work' }}
       >
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-4 lg:grid-cols-3">
           <Card
             title="Recurrence is always an RRULE"
             body="Outlook stores a pattern object and Zoom numbers its weekdays. You read and write one RRULE."

@@ -1,0 +1,52 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/black.css";
+@import "fumadocs-ui/css/preset.css";
+
+@theme {
+  --font-sans: var(--font-archivo), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-source-code-pro), ui-monospace, monospace;
+  --color-accent-blue: #4f7cff;
+  --color-line: #222226;
+  --color-panel: #0f0f11;
+}
+
+/* The site is dark only. Shiki and Fumadocs set inline styles, hence the `!important`s below. */
+.dark {
+  --color-fd-background: #09090a;
+  --color-fd-card: #0f0f11;
+  --color-fd-popover: #0f0f11;
+  --color-fd-border: #222226;
+  --color-fd-primary: #4f7cff;
+  --color-fd-primary-foreground: #ffffff;
+}
+
+html {
+  scrollbar-gutter: stable;
+}
+
+html > body[data-scroll-locked] {
+  margin-right: 0px !important;
+  --removed-body-scroll-bar-size: 0px !important;
+}
+
+/* Code highlighted on the server for the landing page. */
+.code pre {
+  margin: 0;
+  padding: 1rem 0;
+  overflow-x: auto;
+  font-size: 0.8125rem;
+  line-height: 1.7;
+  background: transparent !important;
+}
+.code code {
+  display: grid;
+  font-family: var(--font-mono);
+}
+.code .line {
+  padding: 0 1.25rem;
+  border-left: 2px solid transparent;
+}
+.code .line.changed {
+  background: rgb(79 124 255 / 0.1);
+  border-left-color: #4f7cff;
+}

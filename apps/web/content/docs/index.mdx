@@ -1,0 +1,48 @@
+---
+title: Introduction
+description: One TypeScript API for every calendar provider.
+---
+
+calsdk reads and writes events on Google Calendar, Microsoft Outlook, iCloud, Zoho Calendar and other CalDAV servers, Cal.com, Calendly, Zoom meetings and ICS feeds. You pick a provider, then call plain functions. Every provider returns the same event shape.
+
+```ts
+import { listEvents } from 'calsdk';
+import { google } from '@calsdk/google';
+
+const calendar = google({ accessToken: () => getFreshAccessToken() });
+
+const { events } = await listEvents({ calendar, timeMin: '2026-11-01', timeMax: '2026-12-01' });
+```
+
+Swap `google(...)` for `microsoft(...)`, `icloud(...)` or `zoom(...)` and the rest of your code stays the same.
+
+## Functions
+
+| Function                                                | What it does                                                                                        |
+| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `listCalendars`                                         | Calendars the user can see. One is `isPrimary`.                                                     |
+| `getEvent`, `createEvent`, `updateEvent`, `deleteEvent` | Single events. Changes to one instance of a series take `scope: 'this' \| 'thisAndFollowing' \| 'all'`. |
+| `listEvents`, `iterateEvents`                           | Events in a time window. Recurring events are expanded by default. `iterateEvents` walks every page. |
+| `getFreeBusy`                                           | Busy blocks per calendar. Falls back to reading events when the provider has no free/busy endpoint. |
+| `findFreeTime`                                          | Slots when every calendar, across providers, is free.                                               |
+| `syncEvents`                                            | Changes since a stored cursor.                                                                      |
+
+Every function takes `calendar`, plus optional `maxRetries` (default 2), `abortSignal`, `headers` and `providerOptions`. `calendarId` defaults to `'primary'`.
+
+## Providers
+
+| Package            | Provider                                                    |
+| ------------------ | ----------------------------------------------------------- |
+| `@calsdk/google`    | Google Calendar                                             |
+| `@calsdk/microsoft` | Microsoft Outlook, through Microsoft Graph                  |
+| `@calsdk/caldav`    | iCloud, Zoho Calendar, Fastmail, Nextcloud and other CalDAV |
+| `@calsdk/calcom`    | Cal.com bookings                                            |
+| `@calsdk/calendly`  | Calendly meetings                                           |
+| `@calsdk/zoom`      | Zoom meetings                                               |
+| `@calsdk/ics`       | Read-only ICS feeds                                         |
+| `@calsdk/mock`      | An in-memory calendar for tests and examples                |
+
+<Cards>
+  <Card title="Quickstart" href="/docs/quickstart" />
+  <Card title="GitHub" href="https://github.com/vkpdeveloper/calsdk" />
+</Cards>

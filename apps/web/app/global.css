@@ -74,146 +74,59 @@ html > body[data-scroll-locked] {
     animation: none;
   }
 }
+@media (max-width: 639px) {
+  .code pre {
+    font-size: 0.75rem;
+  }
+}
 .code-sm pre {
   font-size: 0.75rem;
 }
 .code-sm .line {
   padding: 0 0.75rem;
 }
-
-/* The landing page is framed at 1360px, so the nav lines up with it. */
-#nd-home-layout {
-  --fd-layout-width: 1360px;
+/* A result sits in a narrow column, so long values wrap (at spaces first) instead of
+   scrolling. Below 1024px it sits under the code and lines up with it; from 1024px it
+   sits under the feature text and lines up with that (sm:p-8). */
+.code-result pre {
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
-/* Same insets as the page sections (px-5, sm:px-10), so the logo and GitHub icon sit on
-   the content edges. */
+.code-result .line {
+  /* Opting out of Fumadocs' code styles also drops the height it gives empty lines. */
+  min-height: 1lh;
+  padding: 0 1rem;
+}
+@media (min-width: 1024px) {
+  .code-result .line {
+    padding: 0 2rem;
+    /* No changed-line marker here, so drop its border to start exactly under the title. */
+    border-left-width: 0;
+  }
+}
+
+/* The landing page is 1200px wide, so the nav lines up with it. */
+#nd-home-layout {
+  --fd-layout-width: 1200px;
+}
+/* Same insets as the page (px-5, sm:px-8), so the logo and GitHub icon sit on the content
+   edges. */
 #nd-home-layout #nd-nav nav > div {
   padding-inline: 1.25rem;
 }
 @media (min-width: 640px) {
   #nd-home-layout #nd-nav nav > div {
-    padding-inline: 2.5rem;
+    padding-inline: 2rem;
   }
 }
 
-/* A faint week grid behind the hero and the closing section. */
-.hero-grid {
-  isolation: isolate;
-}
-.hero-grid::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-  background-size: calc(100% / 7) 56px;
-  mask-image: radial-gradient(ellipse 75% 85% at 75% 20%, black, transparent);
-}
-
-.grid-texture {
-  background-image:
-    linear-gradient(to right, rgb(255 255 255 / 0.04) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(255 255 255 / 0.04) 1px, transparent 1px);
-  background-size: 48px 48px;
-}
-
-/* The stack of calendars under calsdk. Plates fan out once on load, then stay still. */
-.iso-scene {
-  position: absolute;
-  left: 50%;
-  top: 74%;
-  width: 220px;
-  height: 220px;
-  margin: -110px 0 0 -110px;
-  transform: rotateX(58deg) rotateZ(-45deg);
-  transform-style: preserve-3d;
-  scale: 0.78;
-}
-@media (min-width: 640px) {
-  .iso-scene {
-    top: 60%;
-    scale: 1.12;
+/* Phones: the top bar's logo, search and menu are 44px tap targets. */
+@media (max-width: 767px) {
+  #nd-home-layout #nd-nav :is(a, button) {
+    min-width: 44px;
+    min-height: 44px;
   }
-}
-.iso-plate {
-  position: absolute;
-  inset: 0;
-  border: 1px solid #2c2c33;
-  border-radius: 16px;
-  background-color: rgb(14 14 17 / 0.92);
-  background-image: linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px);
-  background-size: calc(100% / 7) 100%;
-  transform: translateZ(var(--z));
-  transition:
-    transform 0.5s cubic-bezier(0.2, 0.7, 0.2, 1),
-    border-color 0.3s,
-    background-color 0.3s;
-  animation: plate-in 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
-  animation-delay: calc(var(--i) * 55ms);
-}
-.iso-plate[data-state="active"] {
-  transform: translate3d(-72px, 0, var(--z));
-  border-color: var(--c);
-  background-color: rgb(24 24 30 / 0.97);
-}
-.iso-block {
-  position: absolute;
-  width: calc(100% / 7 - 6px);
-  margin-left: 3px;
-  border: 1px solid color-mix(in srgb, var(--c) 45%, transparent);
-  border-radius: 4px;
-  background: color-mix(in srgb, var(--c) 18%, transparent);
-  transition: background-color 0.3s;
-}
-.iso-plate[data-state="active"] .iso-block {
-  background: color-mix(in srgb, var(--c) 50%, transparent);
-}
-.iso-label {
-  position: absolute;
-  left: 12px;
-  bottom: 8px;
-  font-family: var(--font-mono);
-  font-size: 11px;
-  color: #8a8a93;
-}
-.iso-plate[data-state="active"] .iso-label {
-  color: var(--c);
-}
-.iso-plate-top {
-  border-color: rgb(79 124 255 / 0.85);
-  background-color: rgb(16 21 38 / 0.94);
-  box-shadow: 0 0 80px rgb(79 124 255 / 0.22);
-}
-@keyframes plate-in {
-  from {
-    transform: translateZ(0);
-    opacity: 0;
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .iso-plate {
-    animation: none;
-    transition: none;
-  }
-}
-
-/* FieldCompare: the picked field stays bright in every payload. */
-.compare .line {
-  opacity: 0.62;
-  transition:
-    opacity 0.2s,
-    background-color 0.2s;
-}
-.compare[data-field="title"] .field-title,
-.compare[data-field="start"] .field-start,
-.compare[data-field="repeat"] .field-repeat,
-.compare[data-field="link"] .field-link {
-  opacity: 1;
-  background: rgb(79 124 255 / 0.12);
-  border-left-color: #4f7cff;
 }
 
 /* Running text keeps a readable line length on wide screens; code, tables and cards still use
@@ -312,21 +225,5 @@ html > body[data-scroll-locked] {
   }
   100% {
     mask-image: none;
-  }
-}
-
-/* The hero's field names arrive one by one, once. */
-.chip-in {
-  animation: chip-in 0.4s ease-out both;
-}
-@keyframes chip-in {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-}
-@media (prefers-reduced-motion: reduce) {
-  .chip-in {
-    animation: none;
   }
 }

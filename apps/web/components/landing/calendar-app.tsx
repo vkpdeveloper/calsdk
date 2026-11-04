@@ -1,0 +1,524 @@
+'use client';
+
+import { type MockCalendarProvider, mockCalendar } from '@calsdk/mock';
+import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } from 'calsdk';
+import { useCallback, useEffect, useState } from 'react';
+
+// A fixed week, so New York stays on one offset and every visitor sees the same calendar.
+const ZONE = 'America/New_York';
+const OFFSET = '-05:00';
+const DAYS = ['2026-11-09', '2026-11-10', '2026-11-11', '2026-11-12', '2026-11-13'];
+const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+const DAY_DATES = [9, 10, 11, 12, 13];
+const OPEN = 9;
+const CLOSE = 18;
+const HOURS = Array.from({ length: CLOSE - OPEN }, (_, i) => OPEN + i);
+// Rows are sized by the --hour CSS variable, shorter on phones.
+const hours = (n: number) => `calc(var(--hour) * ${n})`;
+const RANGE = { timeMin: `${DAYS[0]}T00:00:00${OFFSET}`, timeMax: `2026-11-14T00:00:00${OFFSET}` };
+
+type Seed = [day: number, start: string, end: string, title: string];
+
+// Six sample calendars. `field` is what that provider's own API calls an event's title.
+const SOURCES = [
+  {
+    id: 'google',
+    name: 'Google Calendar',
+    short: 'Google',
+    field: 'summary',
+    color: '#7aa7ff',
+    seeds: [
+      [0, '13:00', '14:00', 'Design review'],
+      [2, '15:00', '17:00', 'Focus time'],
+    ],
+  },
+  {
+    id: 'outlook',
+    name: 'Outlook',
+    short: 'Outlook',
+    field: 'subject',
+    color: '#37c5d9',
+    seeds: [
+      [0, '15:00', '15:30', '1:1'],
+      [1, '14:00', '15:30', 'Sprint planning'],
+      [2, '10:00', '11:30', 'Quarterly review'],
+    ],
+  },
+  {
+    id: 'icloud',
+    name: 'iCloud',
+    short: 'iCloud',
+    field: 'SUMMARY',
+    color: '#ff7a70',
+    seeds: [
+      [1, '12:30', '13:30', 'Lunch with Sam'],
+      [3, '16:00', '17:00', 'Dentist'],
+      [4, '12:00', '13:30', 'Team lunch'],
+    ],
+  },
+  {
+    id: 'zoom',
+    name: 'Zoom',
+    short: 'Zoom',
+    field: 'topic',
+    color: '#b392f0',
+    seeds: [
+      [1, '11:00', '12:00', 'Customer demo'],
+      [3, '10:00', '10:45', 'Investor update'],
+      [4, '15:00', '16:00', 'Retro'],
+    ],
+  },
+  {
+    id: 'calcom',
+    name: 'Cal.com',
+    short: 'Cal.com',
+    field: 'title',
+    color: '#e4e4e7',
+    seeds: [
+      [2, '13:00', '13:30', 'Intro call'],
+      [4, '10:00', '10:30', 'Intro call'],
+    ],
+  },
+  {
+    id: 'calendly',
+    name: 'Calendly',
+    short: 'Calendly',
+    field: 'name',
+    color: '#f5b94a',
+    seeds: [
+      [0, '11:00', '11:30', 'Discovery call'],
+      [3, '14:00', '14:30', 'Discovery call'],
+    ],
+  },
+] satisfies {
+  id: string;
+  name: string;
+  short: string;
+  field: string;
+  color: string;
+  seeds: Seed[];
+}[];
+
+type Source = (typeof SOURCES)[number];
+type SourceId = Source['id'];
+
+const at = (day: number, time: string) => ({
+  dateTime: `${DAYS[day]}T${time}:00${OFFSET}`,
+  timeZone: ZONE,
+});
+
+function createCalendars() {
+  return Object.fromEntries(
+    SOURCES.map((source) => [
+      source.id,
+      mockCalendar({
+        events: [
+          ...source.seeds.map(([day, start, end, title]) => ({
+            title,
+            start: at(day, start),
+            end: at(day, end),
+          })),
+          // Google also holds the weekday standup, so the week shows a recurring series.
+          ...(source.id === 'google'
+            ? [
+                {
+                  title: 'Standup',
+                  start: at(0, '09:30'),
+                  end: at(0, '09:45'),
+                  recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'],
+                },
+              ]
+            : []),
+        ],
+      }),
+    ]),
+  ) as Record<SourceId, MockCalendarProvider>;
+}
+
+const wallClock = new Intl.DateTimeFormat('en-US', {
+  timeZone: ZONE,
+  hourCycle: 'h23',
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+});
+
+/** The day column and minutes after midnight of an instant, in New York. */
+function place(instant: string) {
+  const parts = Object.fromEntries(
+    wallClock.formatToParts(new Date(instant)).map((part) => [part.type, part.value]),
+  );
+  return {
+    day: DAYS.indexOf(`${parts.year}-${parts.month}-${parts.day}`),
+    minutes: Number(parts.hour) * 60 + Number(parts.minute),
+  };
+}
+
+const clock = (minutes: number) =>
+  `${String(Math.floor(minutes / 60)).padStart(2, '0')}:${String(minutes % 60).padStart(2, '0')}`;
+
+type Placed = { day: number; from: number; to: number };
+
+function span(start: string, end: string): Placed {
+  const a = place(start);
+  return { day: a.day, from: a.minutes, to: place(end).minutes };
+}
+
+/** Joins the overlapping slots of a day into ranges, each starting at its first slot. */
+function freeRanges(slots: FreeSlot[]) {
+  const ranges: (Placed & { first: FreeSlot })[] = [];
+  for (const slot of slots) {
+    const block = span(slot.start, slot.end);
+    const last = ranges.at(-1);
+    if (last && last.day === block.day && block.from <= last.to) last.to = block.to;
+    else ranges.push({ ...block, first: slot });
+  }
+  return ranges;
+}
+
+type Listed = { event: EventOf<MockCalendarProvider>; source: Source; key: string };
+type Run = { events: Listed[]; slots?: FreeSlot[]; ms: number };
+
+/** A week of six calendars, read with the real listEvents and findFreeTime in the browser. */
+export function CalendarApp() {
+  const [calendars, setCalendars] = useState(createCalendars);
+  const [enabled, setEnabled] = useState<SourceId[]>(SOURCES.map((source) => source.id));
+  const [finding, setFinding] = useState(false);
+  const [run, setRun] = useState<Run>();
+  const [selected, setSelected] = useState<string>();
+  const [booked, setBooked] = useState<string>();
+
+  const refresh = useCallback(async () => {
+    const sources = SOURCES.filter((source) => enabled.includes(source.id));
+    const started = performance.now();
+    const lists = await Promise.all(
+      sources.map(async (source) => {
+        const { events } = await listEvents({ calendar: calendars[source.id], ...RANGE });
+        return events.map((event) => ({ event, source, key: `${source.id}:${event.id}` }));
+      }),
+    );
+    const slots = finding
+      ? (
+          await findFreeTime({
+            calendars: sources.map((source) => ({ calendar: calendars[source.id] })),
+            ...RANGE,
+            duration: 60,
+            slotInterval: 30,
+            workingHours: { start: '09:00', end: '18:00', timeZone: ZONE },
+          })
+        ).slots
+      : undefined;
+    setRun({ events: lists.flat(), slots, ms: performance.now() - started });
+  }, [calendars, enabled, finding]);
+
+  useEffect(() => {
+    // The mock notes that it computes free/busy from events. That is expected here.
+    globalThis.CALSDK_WARNINGS = 'silent';
+    void refresh();
+  }, [refresh]);
+
+  // Start with Monday's standup open: an occurrence of a series, which says the most.
+  const current =
+    run?.events.find((listed) => listed.key === selected) ??
+    (selected === undefined
+      ? run?.events.find((listed) => listed.event.kind === 'occurrence')
+      : undefined);
+
+  async function book(slot: FreeSlot) {
+    // findFreeTime returns UTC instants. Book in New York time, like the other events.
+    const { day, from, to } = span(slot.start, slot.end);
+    const { event } = await createEvent({
+      calendar: calendars.google,
+      event: { title: 'New meeting', start: at(day, clock(from)), end: at(day, clock(to)) },
+    });
+    setBooked(`Booked ${DAY_NAMES[day]} ${clock(from)} on Google Calendar.`);
+    setSelected(`google:${event.id}`);
+    // A new calendars object reruns the listing with the booking in it.
+    setCalendars({ ...calendars });
+  }
+
+  function toggle(id: SourceId) {
+    setBooked(undefined);
+    setEnabled((ids) => (ids.includes(id) ? ids.filter((each) => each !== id) : [...ids, id]));
+  }
+
+  function reset() {
+    setCalendars(createCalendars());
+    setEnabled(SOURCES.map((source) => source.id));
+    setFinding(false);
+    setSelected(undefined);
+    setBooked(undefined);
+  }
+
+  // Phones drop the function names, so the line fits.
+  const status = run && (
+    <>
+      <span className="hidden sm:inline">
+        {finding ? 'listEvents + findFreeTime' : 'listEvents'} ·{' '}
+      </span>
+      {enabled.length} calendars · {run.events.length} events · {run.ms.toFixed(1)} ms
+    </>
+  );
+
+  return (
+    <div className="overflow-hidden rounded-2xl border border-line bg-[#0c0c0e] text-left shadow-[0_40px_120px_-40px_rgb(0_0_0/0.9)]">
+      <div className="flex h-14 items-center gap-3 border-b border-line px-4">
+        <span aria-hidden className="hidden gap-1.5 sm:flex">
+          <span className="size-3 rounded-full bg-neutral-700" />
+          <span className="size-3 rounded-full bg-neutral-700" />
+          <span className="size-3 rounded-full bg-neutral-700" />
+        </span>
+        <span className="text-sm font-medium text-white sm:ml-4">
+          November 9 – 13<span className="hidden sm:inline">, 2026</span>
+        </span>
+        <span className="hidden text-xs text-neutral-500 md:inline">New York time</span>
+        <button
+          type="button"
+          aria-pressed={finding}
+          onClick={() => {
+            setBooked(undefined);
+            setFinding((on) => !on);
+          }}
+          className="ml-auto flex h-11 items-center rounded-lg border border-line px-3 text-sm text-neutral-200 hover:border-neutral-500 aria-pressed:border-accent-blue aria-pressed:bg-accent-blue/15 aria-pressed:text-white sm:h-9"
+        >
+          Find a free hour
+        </button>
+      </div>
+
+      <div className="grid lg:grid-cols-[12.5rem_minmax(0,1fr)] xl:grid-cols-[12.5rem_minmax(0,1fr)_20rem]">
+        <fieldset className="min-w-0 border-line max-lg:border-b lg:border-r">
+          <legend className="sr-only">Calendars</legend>
+          <p className="hidden px-4 pt-4 pb-2 text-xs font-medium text-neutral-500 lg:block">
+            Calendars
+          </p>
+          {/* Phones get the calendars as a row that scrolls sideways. */}
+          <div className="x-scroll flex gap-1 overflow-x-auto p-2 lg:flex-col lg:overflow-visible lg:pt-0">
+            {SOURCES.map((source) => {
+              const on = enabled.includes(source.id);
+              return (
+                <button
+                  key={source.id}
+                  type="button"
+                  aria-pressed={on}
+                  onClick={() => toggle(source.id)}
+                  className="flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-2.5 text-sm text-neutral-500 hover:bg-white/[0.04] aria-pressed:text-neutral-200 lg:h-9"
+                >
+                  <span
+                    aria-hidden
+                    className="size-3.5 shrink-0 rounded border-2"
+                    style={{ borderColor: source.color, background: on ? source.color : undefined }}
+                  />
+                  {source.name}
+                </button>
+              );
+            })}
+          </div>
+        </fieldset>
+
+        <div className="x-scroll min-w-0 overflow-x-auto">
+          <div className="grid min-w-[600px] grid-cols-[3rem_repeat(5,minmax(0,1fr))] pr-2 pb-3 [--hour:44px] lg:[--hour:50px]">
+            <div className="sticky left-0 z-10 bg-[#0c0c0e]" />
+            {DAY_NAMES.map((name, i) => (
+              <div key={name} className="flex items-baseline justify-center gap-1.5 py-3 text-xs">
+                <span className="text-neutral-500">{name}</span>
+                <span className="font-medium text-neutral-200">{DAY_DATES[i]}</span>
+              </div>
+            ))}
+            {/* Sticky, so the hours stay in view while a phone scrolls the week. */}
+            <div
+              className="sticky left-0 z-10 bg-[#0c0c0e]"
+              style={{ height: hours(CLOSE - OPEN) }}
+            >
+              {[...HOURS, CLOSE].map((hour) => (
+                <span
+                  key={hour}
+                  className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-500"
+                  style={{ top: hours(hour - OPEN) }}
+                >
+                  {clock(hour * 60)}
+                </span>
+              ))}
+            </div>
+            {DAYS.map((date, day) => (
+              <div
+                key={date}
+                className="relative border-l border-line"
+                style={{ height: hours(CLOSE - OPEN) }}
+              >
+                {HOURS.map((hour) => (
+                  <div
+                    key={hour}
+                    className="absolute inset-x-0 border-t border-[#1a1a1e]"
+                    style={{ top: hours(hour - OPEN) }}
+                  />
+                ))}
+                {run?.slots &&
+                  freeRanges(run.slots)
+                    .filter((range) => range.day === day)
+                    .map((range) => {
+                      const label = `Book ${DAY_NAMES[day]} ${clock(range.from)}`;
+                      return (
+                        <button
+                          key={`free-${range.from}`}
+                          type="button"
+                          aria-label={label}
+                          title={label}
+                          onClick={() => void book(range.first)}
+                          className="absolute inset-x-1 rounded-md border border-dashed border-accent-blue/80 bg-accent-blue/10 hover:bg-accent-blue/25"
+                          style={position(range)}
+                        />
+                      );
+                    })}
+                {run?.events
+                  .filter(
+                    ({ event }) => event.start.dateTime && place(event.start.dateTime).day === day,
+                  )
+                  .map((listed) => (
+                    <EventBlock
+                      key={listed.key}
+                      listed={listed}
+                      active={listed.key === current?.key}
+                      onSelect={() => setSelected(listed.key)}
+                    />
+                  ))}
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <Inspector listed={current} />
+      </div>
+
+      <div className="flex min-h-11 flex-wrap items-center justify-between gap-x-4 border-t border-line px-4 py-1.5 font-mono text-[11px] text-neutral-500">
+        <span aria-live="polite">{booked ?? status}</span>
+        <button type="button" onClick={reset} className="h-11 px-1 hover:text-white sm:h-7">
+          Reset
+        </button>
+      </div>
+    </div>
+  );
+}
+
+const position = ({ from, to }: Placed) => ({
+  top: hours((from - OPEN * 60) / 60),
+  height: hours((to - from) / 60),
+});
+
+function EventBlock({
+  listed: { event, source },
+  active,
+  onSelect,
+}: {
+  listed: Listed;
+  active: boolean;
+  onSelect: () => void;
+}) {
+  if (!event.start.dateTime || !event.end.dateTime) return null;
+  const block = span(event.start.dateTime, event.end.dateTime);
+  const minutes = block.to - block.from;
+  return (
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-pressed={active}
+      className="absolute inset-x-1 overflow-hidden rounded-md border-l-2 px-1.5 text-left text-[11px] leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white"
+      style={{
+        ...position(block),
+        borderColor: source.color,
+        background: `color-mix(in srgb, ${source.color} 22%, #0c0c0e)`,
+      }}
+    >
+      <span className={`block truncate font-medium ${minutes < 30 ? 'text-[10px]' : 'pt-1'}`}>
+        {event.title}
+      </span>
+      {minutes >= 45 && (
+        <span className="block truncate text-neutral-300">
+          {clock(block.from)} – {clock(block.to)}
+        </span>
+      )}
+    </button>
+  );
+}
+
+// The fields worth showing, in the order CalendarEvent lists them.
+const FIELDS = ['id', 'kind', 'seriesId', 'title', 'start', 'end', 'status', 'showAs'] as const;
+
+function Inspector({ listed }: { listed?: Listed }) {
+  if (!listed) {
+    return (
+      <div className="flex items-center justify-center border-line p-6 text-sm text-neutral-500 max-xl:border-t lg:col-span-2 xl:col-span-1 xl:border-l">
+        Pick an event to see what calsdk returns.
+      </div>
+    );
+  }
+  const { event, source } = listed;
+  const block =
+    event.start.dateTime && event.end.dateTime
+      ? span(event.start.dateTime, event.end.dateTime)
+      : undefined;
+  return (
+    <div className="min-w-0 border-line max-xl:border-t lg:col-span-2 xl:col-span-1 xl:border-l">
+      <div className="p-4">
+        <div className="flex items-center gap-2 text-xs text-neutral-400">
+          <span className="size-2 rounded-full" style={{ background: source.color }} />
+          {source.name}
+        </div>
+        <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-white">{event.title}</p>
+        {block && (
+          <p className="mt-0.5 text-sm text-neutral-400">
+            {DAY_NAMES[block.day]}, Nov {DAY_DATES[block.day]} · {clock(block.from)} –{' '}
+            {clock(block.to)}
+          </p>
+        )}
+        <p className="mt-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-400">
+          {source.short} calls it
+          <code className="rounded bg-white/[0.06] px-1.5 py-0.5 font-mono text-neutral-200">
+            {source.field}
+          </code>
+          → you get
+          <code className="rounded bg-accent-blue/15 px-1.5 py-0.5 font-mono text-white">
+            title
+          </code>
+        </p>
+      </div>
+      <pre className="overflow-x-auto border-t border-line px-4 py-3 font-mono text-[11.5px] leading-[1.7] text-neutral-300">
+        <span className="text-neutral-500">{'// CalendarEvent'}</span>
+        {'\n{\n'}
+        {FIELDS.map((field) => {
+          const value = event[field];
+          if (value === undefined) return null;
+          return (
+            <span key={field}>
+              {'  '}
+              <span className="text-[#79c0ff]">{field}</span>: <Value value={value} />
+              {',\n'}
+            </span>
+          );
+        })}
+        {'}'}
+      </pre>
+    </div>
+  );
+}
+
+function Value({ value }: { value: unknown }) {
+  if (typeof value === 'string') return <span className="text-[#a5d6ff]">'{value}'</span>;
+  if (value && typeof value === 'object') {
+    return (
+      <>
+        {'{\n'}
+        {Object.entries(value).map(([key, item]) => (
+          <span key={key}>
+            {'    '}
+            <span className="text-[#79c0ff]">{key}</span>: <Value value={item} />
+            {',\n'}
+          </span>
+        ))}
+        {'  }'}
+      </>
+    );
+  }
+  return <span className="text-[#ffa657]">{String(value)}</span>;
+}

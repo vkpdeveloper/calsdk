@@ -1,30 +1,50 @@
-import { ArrowRight } from 'lucide-react';
+import {
+  ArrowRight,
+  CalendarSearch,
+  FlaskConical,
+  Globe,
+  type LucideIcon,
+  Plug,
+  Scale,
+  ShieldCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { ClockChange } from '@/components/landing/clock-change';
+import { CalendarApp } from '@/components/landing/calendar-app';
 import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
-import { FieldCompare } from '@/components/landing/field-compare';
-import { FreeTimeDemo } from '@/components/landing/free-time-demo';
 import { ProviderShowcase } from '@/components/landing/provider-showcase';
 import { Mark } from '@/components/logo';
 import { githubUrl } from '@/lib/shared';
 
-const PROVIDERS = [
+type Support = boolean | string;
+const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Video links', 'Sync'];
+
+// `support` follows CAPABILITIES: true, false, or a note on how far it goes.
+const PROVIDERS: {
+  id: string;
+  label: string;
+  pkg: string;
+  color: string;
+  setup: string;
+  support: Support[];
+}[] = [
   {
     id: 'google',
     label: 'Google',
     pkg: 'google',
-    color: '#8ab4f8',
+    color: '#7aa7ff',
     setup: 'google({ accessToken })',
+    support: [true, true, true, 'Google Meet', true],
   },
   {
     id: 'microsoft',
     label: 'Outlook',
     pkg: 'microsoft',
-    color: '#4cc2ff',
+    color: '#37c5d9',
     setup: 'microsoft({ accessToken })',
+    support: [true, true, true, 'Teams, work accounts', true],
   },
   {
     id: 'icloud',
@@ -32,42 +52,55 @@ const PROVIDERS = [
     pkg: 'caldav',
     color: '#ff7a70',
     setup: 'icloud({ appleId, appPassword })',
+    support: [true, true, true, false, true],
   },
   {
     id: 'zoho',
     label: 'Zoho',
     pkg: 'caldav',
-    color: '#ffc857',
+    color: '#f0883e',
     setup: 'zoho({ email, password })',
+    support: [true, true, true, false, true],
   },
   {
     id: 'caldav',
     label: 'CalDAV',
     pkg: 'caldav',
-    color: '#b8b8c0',
+    color: '#a1a1aa',
     setup: 'caldav({ serverUrl, username, password })',
+    support: [true, true, true, false, true],
   },
-  { id: 'zoom', label: 'Zoom', pkg: 'zoom', color: '#6c8cff', setup: 'zoom({ accessToken })' },
+  {
+    id: 'zoom',
+    label: 'Zoom',
+    pkg: 'zoom',
+    color: '#b392f0',
+    setup: 'zoom({ accessToken })',
+    support: [true, true, "Zoom's patterns", 'Zoom', true],
+  },
   {
     id: 'calcom',
     label: 'Cal.com',
     pkg: 'calcom',
-    color: '#f2f2f2',
+    color: '#e4e4e7',
     setup: 'calcom({ accessToken })',
+    support: [true, 'book, move, cancel', false, false, true],
   },
   {
     id: 'calendly',
     label: 'Calendly',
     pkg: 'calendly',
-    color: '#5aa9ff',
+    color: '#f5b94a',
     setup: 'calendly({ accessToken })',
+    support: [true, 'book, cancel', false, false, true],
   },
   {
     id: 'ics',
     label: 'ICS feed',
     pkg: 'ics',
-    color: '#8fe0b0',
+    color: '#5ee08f',
     setup: "ics({ url: 'webcal://example.com/team.ics' })",
+    support: [true, false, 'read only', false, true],
   },
 ];
 
@@ -81,185 +114,18 @@ const { events } = await listEvents({
   calendar,
   timeMin: '2026-11-01T00:00:00Z',
   timeMax: '2026-12-01T00:00:00Z',
-});`;
+});
 
-// One weekday standup with a video link, as each API returns it. `«field»` marks the lines
-// that FieldCompare lights up together.
-const PAYLOADS = [
-  {
-    name: 'Google Calendar',
-    notes: {
-      title: 'Called summary, after iCalendar.',
-      start: 'An offset and a zone, both.',
-      repeat: 'Plain RRULE strings. The easy one.',
-      link: 'Three levels deep for one URL.',
-    },
-    format: 'JSON',
-    lang: 'json',
-    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
-    code: `
-{
-  "summary": "Standup",«title»
-  "start": {«start»
-    "dateTime": "2026-11-09T09:30:00-05:00",«start»
-    "timeZone": "America/New_York"«start»
-  },«start»
-  "recurrence": [«repeat»
-    "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"«repeat»
-  ],«repeat»
-  "conferenceData": {«link»
-    "entryPoints": [{«link»
-      "entryPointType": "video",«link»
-      "uri": "https://meet.google.com/abc-defg-hij"«link»
-    }]«link»
-  }«link»
-}`,
-  },
-  {
-    name: 'Outlook',
-    notes: {
-      title: 'Called subject, like an email.',
-      start: 'UTC, with the zone in another field as a Windows name.',
-      repeat: 'A pattern object instead of an RRULE.',
-      link: 'Under onlineMeeting.',
-    },
-    format: 'JSON',
-    lang: 'json',
-    conference: { provider: 'teams', joinUrl: 'https://teams.microsoft.com/l/...' },
-    code: `
-{
-  "subject": "Standup",«title»
-  "type": "seriesMaster",«repeat»
-  "start": {«start»
-    "dateTime": "2026-11-09T14:30:00.0000000",«start»
-    "timeZone": "UTC"«start»
-  },«start»
-  "originalStartTimeZone": "Eastern Standard Time",«start»
-  "recurrence": {«repeat»
-    "pattern": {«repeat»
-      "type": "weekly",«repeat»
-      "interval": 1,«repeat»
-      "daysOfWeek": [«repeat»
-        "monday", "tuesday", "wednesday",«repeat»
-        "thursday", "friday"«repeat»
-      ]«repeat»
-    },«repeat»
-    "range": {«repeat»
-      "type": "noEnd",«repeat»
-      "startDate": "2026-11-09"«repeat»
-    }«repeat»
-  },«repeat»
-  "onlineMeeting": {«link»
-    "joinUrl": "https://teams.microsoft.com/l/..."«link»
-  }«link»
-}`,
-  },
-  {
-    name: 'iCloud',
-    notes: {
-      title: 'Not JSON at all: one text line per field.',
-      start: 'Wall time, with the zone as a parameter.',
-      repeat: 'An RRULE line, straight from the standard.',
-      link: "No video field, so it's just a URL.",
-    },
-    format: 'iCalendar',
-    lang: 'text',
-    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
-    code: `
-BEGIN:VEVENT
-UID:8C1F2A70-standup
-SUMMARY:Standup«title»
-DTSTART;TZID=America/New_York:20261109T093000«start»
-DTEND;TZID=America/New_York:20261109T094500
-RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR«repeat»
-URL:https://meet.google.com/abc-defg-hij«link»
-END:VEVENT`,
-  },
-  {
-    name: 'Zoom',
-    notes: {
-      title: 'Called topic.',
-      start: 'No start field: UTC occurrences plus a zone.',
-      repeat: 'Sunday is 1, so weekdays are 2 to 6.',
-      link: 'A Zoom link, always.',
-    },
-    format: 'JSON',
-    lang: 'json',
-    conference: { provider: 'zoom', joinUrl: 'https://zoom.us/j/85512345678' },
-    code: `
-{
-  "topic": "Standup",«title»
-  "type": 8,
-  "timezone": "America/New_York",«start»
-  "recurrence": {«repeat»
-    "type": 2,«repeat»
-    "repeat_interval": 1,«repeat»
-    "weekly_days": "2,3,4,5,6"«repeat»
-  },«repeat»
-  "occurrences": [«start»
-    {«start»
-      "occurrence_id": "1794234600000",«start»
-      "start_time": "2026-11-09T14:30:00Z",«start»
-      "duration": 15«start»
-    },«start»
-    {
-      "occurrence_id": "1794321000000",
-      "start_time": "2026-11-10T14:30:00Z",
-      "duration": 15
-    }
-  ],
-  "join_url": "https://zoom.us/j/85512345678"«link»
-}`,
-  },
-];
-
-// The calsdk event each payload above becomes. Only the conference differs.
-const eventCode = ({ provider, joinUrl }: { provider: string; joinUrl: string }) => `
-{
-  kind: 'series',
-  title: 'Standup',«title»
-  start: {«start»
-    dateTime: '2026-11-09T09:30:00-05:00',«start»
-    timeZone: 'America/New_York',«start»
-  },«start»
-  recurrence: [«repeat»
-    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',«repeat»
-  ],«repeat»
-  // From any Meet, Teams or Zoom link.
-  conference: {«link»
-    provider: '${provider}',«link»
-    joinUrl: '${joinUrl}',«link»
-  },«link»
-  // Plus id, end, status and more.
+for (const event of events) {
+  console.log(event.title, event.start, event.conference?.joinUrl);
 }`;
-
-const demoCode = (duration: number) => `
-const { slots } = await findFreeTime({
-  calendars: [
-    { calendar: you },
-    { calendar: sam },
-  ],
-  timeMin: '2027-01-11T00:00:00-05:00',
-  timeMax: '2027-01-16T00:00:00-05:00',
-  duration: ${duration},
-  slotInterval: 30,
-  workingHours: {
-    start: '09:00',
-    end: '18:00',
-    timeZone: 'America/New_York',
-  },
-});`;
 
 const FEATURES = [
   {
     id: 'book',
     label: 'Book',
     title: 'Book a meeting, with the video link',
-    points: [
-      'createConference adds Google Meet on Google and Teams on Outlook work accounts.',
-      'sendUpdates emails the guests, where the provider can.',
-      'Anything the provider changed or ignored comes back in warnings.',
-    ],
+    body: 'createConference adds Google Meet on Google and Teams on Outlook work accounts. sendUpdates emails the guests, and anything the provider changed or ignored comes back in warnings.',
     code: `
 import { createEvent } from 'calsdk';
 
@@ -281,11 +147,7 @@ event.conference?.joinUrl;`,
     id: 'recurring',
     label: 'Repeat',
     title: 'Recurring events are plain RRULEs',
-    points: [
-      'Listing expands a series, and each occurrence has its own id.',
-      'Move one occurrence or the whole series. On Google, also everything after one.',
-      'Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
-    ],
+    body: 'Listing expands a series, and each occurrence has its own id. Move one occurrence or the whole series. Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
     code: `
 const { event: series } = await createEvent({
   calendar,
@@ -317,11 +179,7 @@ for await (const event of iterateEvents({ calendar, ...friday })) {
     id: 'sync',
     label: 'Sync',
     title: 'Keep a copy in your database',
-    points: [
-      'The first call returns what the provider syncs. Later calls return only changes.',
-      'Changes are upserts and deletes, ready to apply.',
-      'An expired cursor is its own error, so a full resync is one branch.',
-    ],
+    body: 'The first call returns what the provider syncs. Later calls return only changes, as upserts and deletes. An expired cursor is its own error, so a full resync is one branch.',
     code: `
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
 
@@ -342,11 +200,7 @@ try {
     id: 'typed',
     label: 'Types',
     title: 'Typed by the calendar you pass',
-    points: [
-      'Provider options are checked against the provider in calendar.',
-      'Provider metadata comes back typed too.',
-      'A misspelled option is a compile error, not a silent no-op.',
-    ],
+    body: 'Provider options and metadata are checked against the provider in calendar, so a misspelled option is a compile error, not a silent no-op.',
     code: `
 const calendar = google({ accessToken });
 
@@ -368,11 +222,7 @@ created.providerMetadata?.google?.iCalUID; // string | undefined`,
     id: 'errors',
     label: 'Errors',
     title: 'Errors you can branch on',
-    points: [
-      'Conflicts, rate limits, auth and missing events each have a class.',
-      'ifMatch updates only if nobody changed the event since you read it.',
-      "A provider that can't do something warns or throws. It never quietly drops it.",
-    ],
+    body: "Conflicts, rate limits, auth and missing events each have a class. ifMatch updates only if nobody changed the event since you read it. A provider that can't do something warns or throws, and never quietly drops it.",
     code: `
 import { ConflictError, RateLimitError, updateEvent } from 'calsdk';
 
@@ -386,338 +236,219 @@ try {
   },
 ];
 
-type Support = boolean | string;
-const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Adds video links', 'Sync'];
-const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
-  ['Google Calendar', 'google', [true, true, true, 'Google Meet', true]],
-  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams (work)', true]],
-  ['iCloud', 'caldav', [true, true, true, false, true]],
-  ['Zoho Calendar', 'caldav', [true, true, true, false, true]],
-  ['Any CalDAV server', 'caldav', [true, true, true, false, true]],
-  ['Zoom', 'zoom', [true, true, "Zoom's patterns", 'Zoom', true]],
-  ['Cal.com', 'calcom', [true, 'Book, move, cancel', false, false, true]],
-  ['Calendly', 'calendly', [true, 'Book, cancel', false, false, true]],
-  ['ICS feeds', 'ics', [true, false, 'Read only', false, true]],
-];
-
-// Real warnings, word for word from the provider packages, for a call each provider can't
-// honor exactly.
-const WARNINGS = [
-  {
-    provider: 'Google Calendar',
-    asked: "color: '#ec4899'",
-    type: 'compatibility',
-    feature: 'color',
-    details:
-      'Google Calendar has a fixed palette. #ec4899 was saved as the nearest color, #e67c73.',
-    colors: { asked: '#ec4899', saved: '#e67c73' },
-  },
-  {
-    provider: 'Outlook',
-    asked: 'createConference: true',
-    type: 'unsupported',
-    feature: 'createConference',
-    details:
-      'Outlook did not create a Teams meeting. Personal Microsoft accounts and some work accounts cannot create Teams meetings through Graph.',
-  },
-  {
-    provider: 'Cal.com',
-    asked: "title: 'Intro call'",
-    type: 'unsupported',
-    feature: 'title',
-    details: 'Cal.com names bookings after their event type.',
-  },
-];
-
-// What each API calls an event's title, as in the payloads above.
+// What each API calls an event's title.
 const TITLE_NAMES = [
   ['Google', 'summary'],
   ['Outlook', 'subject'],
-  ['iCloud', 'SUMMARY:'],
+  ['iCloud', 'SUMMARY'],
   ['Zoom', 'topic'],
 ];
 
-const STATS = [
-  ['9', 'calendars'],
-  ['1', 'event shape'],
-  ['0', 'vendor SDKs'],
-  ['4', 'runtimes: Node, Bun, Deno, edge'],
+// A weekly 9:30 New York standup seen from Berlin. The US changes its clocks on March 14,
+// Europe on March 28.
+const BERLIN = [
+  ['Mon, Mar 8', '15:30', false],
+  ['Mon, Mar 15', '14:30', true],
+  ['Mon, Mar 22', '14:30', true],
+  ['Mon, Mar 29', '15:30', false],
+] as const;
+
+const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
+  {
+    icon: Globe,
+    title: 'Runs anywhere',
+    body: 'Only fetch, no vendor SDKs. Node, Bun, Deno and edge runtimes.',
+  },
+  {
+    icon: CalendarSearch,
+    title: 'Free time across providers',
+    body: 'findFreeTime merges busy time from any mix of calendars.',
+  },
+  {
+    icon: FlaskConical,
+    title: 'A calendar for tests',
+    body: (
+      <>
+        <code className="font-mono text-[0.9em] text-neutral-300">@calsdk/mock</code> keeps a real
+        calendar in memory. The demo at the top runs on it.
+      </>
+    ),
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Tested on the real APIs',
+    body: 'Google, Outlook, Zoho, Zoom, Cal.com and Calendly are recorded live and replayed in CI.',
+  },
+  {
+    icon: Plug,
+    title: 'Bring your own provider',
+    body: 'A provider is one object with a few functions, checked by the conformance suite.',
+  },
+  {
+    icon: Scale,
+    title: 'MIT licensed',
+    body: 'Open source. Read every line on GitHub.',
+  },
 ];
 
-const PROVIDER_CODE = `
-import type { CalendarProviderV1 } from '@calsdk/provider';
-
-type Fastmail = CalendarProviderV1<'fastmail'>;
-
-export function fastmail(settings: Settings): Fastmail {
-  return {
-    specificationVersion: 'v1',
-    provider: 'fastmail',
-    capabilities: { /* what it supports */ },
-    async doListCalendars(options) { /* ... */ },
-    // doGetEvent, doListEvents, doCreateEvent, ...
-  };
-}`;
-
-const CONFORMANCE_CODE = `
-import {
-  describeProviderConformance,
-} from '@calsdk/provider-tests';
-
-describeProviderConformance({
-  name: 'fastmail',
-  createProvider: ({ fetch }) => fastmail({ token, fetch }),
-  recording: {
-    path: 'test/fixtures/conformance.json',
-    mode: process.env.CALSDK_RECORD ? 'record' : 'replay',
-  },
-});`;
-
 export default async function HomePage() {
-  const [providers, payloads, lengths, features, contractCode, conformanceCode] = await Promise.all(
-    [
-      Promise.all(
-        PROVIDERS.map(async ({ id, label, pkg, color, setup }) => ({
-          id,
-          label,
-          color,
-          code: await highlightCode(providerCode(id, pkg, setup), { changed: [2, 4] }),
-        })),
-      ),
-      Promise.all(
-        PAYLOADS.map(async ({ name, format, lang, code, conference, notes }) => ({
-          name,
-          format,
-          notes,
-          code: await highlightCode(code, { lang }),
-          result: await highlightCode(eventCode(conference)),
-        })),
-      ),
-      Promise.all(
-        [30, 60, 90].map(async (minutes) => ({
-          minutes,
-          code: await highlightCode(demoCode(minutes), { changed: [8] }),
-        })),
-      ),
-      Promise.all(
-        FEATURES.map(async ({ code, ...feature }) => ({
-          ...feature,
-          code: await highlightCode(code),
-        })),
-      ),
-      highlightCode(PROVIDER_CODE),
-      highlightCode(CONFORMANCE_CODE),
-    ],
-  );
+  const [providers, features] = await Promise.all([
+    Promise.all(
+      PROVIDERS.map(async ({ id, label, pkg, color, setup, support }) => ({
+        id,
+        label,
+        pkg: `@calsdk/${pkg}`,
+        color,
+        code: await highlightCode(providerCode(id, pkg, setup), { changed: [2, 4] }),
+        support: CAPABILITIES.map((capability, i): [string, Support] => [
+          capability,
+          support[i] ?? false,
+        ]),
+      })),
+    ),
+    Promise.all(
+      FEATURES.map(async ({ code, ...feature }) => ({
+        ...feature,
+        code: await highlightCode(code),
+      })),
+    ),
+  ]);
 
   return (
-    <div className="mx-auto w-full max-w-[1360px] border-x border-line">
-      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-20 sm:pb-16">
-        {/* The eyebrow travels with the headline, so no gap opens above it when the copy beside
-            it is taller. */}
-        <div className="grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
-          <div>
-            <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
-              Calendar SDK for TypeScript
-            </p>
-            <h1 className="mt-6 text-[clamp(3.25rem,10vw,5.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
-              <span className="whitespace-nowrap">Every calendar.</span>
-              <br />
-              <span className="text-neutral-500">One API.</span>
-            </h1>
-          </div>
-          <div>
-            <p className="text-lg leading-relaxed text-neutral-300">
-              Read, write and sync events on Google, Outlook, iCloud, Zoom, Cal.com, Calendly and
-              any CalDAV server. One set of typed functions, and a clear warning or error wherever a
-              provider falls short.
-            </p>
-            <div className="mt-7 flex flex-wrap items-center gap-3">
-              <Link
-                href="/docs/quickstart"
-                className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
-              >
-                Get started
-              </Link>
-              <a
-                href={githubUrl}
-                className="flex h-11 items-center rounded-full border border-line px-6 text-sm font-medium text-neutral-200 hover:border-neutral-500"
-              >
-                GitHub
-              </a>
-            </div>
-            <div className="mt-4">
-              <CopyCommand command="npm i calsdk @calsdk/google" />
-            </div>
-          </div>
-        </div>
-        <div className="mt-12 flex flex-wrap items-center gap-2 font-mono text-sm sm:mt-16">
-          {TITLE_NAMES.map(([provider, name], i) => (
-            <span
-              key={provider}
-              style={{ animationDelay: `${300 + i * 120}ms` }}
-              className="chip-in rounded-md border border-line bg-panel px-2.5 py-1.5"
-            >
-              <span className="font-sans text-neutral-400">{provider}</span>{' '}
-              <span className="text-neutral-300">{name}</span>
-            </span>
-          ))}
-          <span className="flex items-center gap-2">
-            <ArrowRight aria-hidden className="mx-1 size-4 text-neutral-500" />
-            <span
-              style={{ animationDelay: '840ms' }}
-              className="chip-in rounded-md border border-accent-blue/60 bg-accent-blue/10 px-2.5 py-1.5"
-            >
-              <span className="font-sans text-neutral-400">calsdk</span>{' '}
-              <span className="text-white">title</span>
-            </span>
-          </span>
-        </div>
-      </section>
-
-      <ProviderShowcase providers={providers} />
-
-      <div className="grid grid-cols-2 border-t border-line lg:grid-cols-4">
-        {STATS.map(([value, label]) => (
-          <div
-            key={label}
-            className="border-line px-5 py-8 sm:px-10 odd:border-r lg:border-r lg:last:border-r-0 [&:nth-child(-n+2)]:border-b lg:[&:nth-child(-n+2)]:border-b-0"
-          >
-            <div className="text-5xl font-semibold tracking-[-0.04em] text-white">{value}</div>
-            <div className="mt-2 text-sm text-neutral-400">{label}</div>
-          </div>
-        ))}
-      </div>
-
-      <Section
-        id="why"
-        index="01"
-        eyebrow="The problem"
-        title="Four APIs, four ways to write one standup"
-      >
-        <FieldCompare payloads={payloads} />
-        <p className="mt-12 mb-4 text-neutral-300">
-          And when a provider can't do exactly what you asked, the result tells you in{' '}
-          <code className="font-mono text-sm text-white">warnings</code>:
+    <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
+      <section className="flex flex-col items-center pt-14 text-center sm:pt-20">
+        <h1 className="text-balance text-[clamp(3rem,9vw,5.5rem)] leading-[0.92] font-semibold tracking-[-0.055em] text-white">
+          Every calendar.
+          <br />
+          One API.
+        </h1>
+        <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
+          The TypeScript toolkit for Google, Outlook, iCloud, Zoom, Cal.com, Calendly and any CalDAV
+          server. Read, write and sync events with one set of typed functions.
         </p>
-        <div className="grid gap-4 md:grid-cols-3">
-          {WARNINGS.map(({ provider, asked, type, feature, details, colors }) => (
-            <div key={provider} className="rounded-xl border border-line bg-panel p-4">
-              <div className="flex items-baseline justify-between gap-3 text-xs">
-                <span className="font-medium text-neutral-200">{provider}</span>
-                <code className="font-mono text-neutral-400">{asked}</code>
-              </div>
-              <p className="mt-3 font-mono text-xs text-accent-blue">
-                {type} · {feature}
-              </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{details}</p>
-              {colors && (
-                <div className="mt-3 flex items-center gap-2 font-mono text-xs text-neutral-400">
-                  <Swatch color={colors.asked} label="asked" />
-                  <ArrowRight className="size-3.5" aria-hidden />
-                  <Swatch color={colors.saved} label="saved" />
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </Section>
-
-      <Section
-        id="demo"
-        index="02"
-        eyebrow="Live"
-        title="Find a time that works for both"
-        intro="This is the real findFreeTime, running in your browser on two in-memory calendars. Book a slot and both calendars update."
-      >
-        <FreeTimeDemo lengths={lengths} />
-      </Section>
-
-      <Section
-        id="time-zones"
-        index="03"
-        eyebrow="Time zones"
-        title="Clocks change. Your standup shouldn't."
-        intro="A weekly 9:30 standup in New York, through March 2027. The US moves its clocks on the 14th, Europe on the 28th."
-      >
-        <ClockChange />
-        <p className="mt-5 max-w-3xl text-sm text-neutral-400">
-          calsdk keeps the time and the zone, so the series is expanded in New York time. Berlin
-          sees it an hour early for the two weeks Europe hasn't changed yet, which is right: the
-          meeting belongs to New York.
-        </p>
-      </Section>
-
-      <section id="features" className="scroll-mt-20 border-t border-line">
-        <SectionHeading
-          index="04"
-          eyebrow="Features"
-          title="The calendar code you'd rather not write"
-        />
-        <FeatureTabs features={features} />
-      </section>
-
-      <Section id="providers" index="05" eyebrow="Providers" title="Nine calendars today">
-        <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
-          {SUPPORT.map(([name, pkg, support]) => (
-            <div key={name} className="bg-fd-background p-6">
-              <div className="flex items-baseline justify-between gap-3">
-                <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{name}</h3>
-                <span className="font-mono text-xs text-neutral-400">@calsdk/{pkg}</span>
-              </div>
-              <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm sm:mt-5 sm:block sm:space-y-2">
-                {CAPABILITIES.map((capability, i) => (
-                  <Capability key={capability} label={capability} value={support[i] ?? false} />
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-        <p className="mt-5 text-sm text-neutral-400">
-          Free/busy and findFreeTime work on every provider, and across providers. Google, Outlook,
-          Zoho, Zoom, Cal.com and Calendly are tested against their real APIs, and the recordings
-          replay in CI.
-        </p>
-      </Section>
-
-      <Section
-        id="your-provider"
-        index="06"
-        eyebrow="Extend"
-        title="Bring your own calendar"
-        intro="A provider is one object with a few functions. Test it with the conformance suite most official providers run."
-      >
-        <div className="grid gap-4 lg:grid-cols-2">
-          <div className="code overflow-hidden rounded-xl border border-line bg-panel">
-            {contractCode}
-          </div>
-          <div className="code overflow-hidden rounded-xl border border-line bg-panel">
-            {conformanceCode}
-          </div>
-        </div>
-      </Section>
-
-      <section className="hero-grid relative flex flex-col items-center overflow-hidden border-t border-line px-5 py-24 text-center sm:py-32">
-        <Mark className="size-14 text-white" />
-        <h2 className="mt-8 max-w-3xl text-balance text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
-          Try it without an account
-        </h2>
-        <p className="mt-5 max-w-md text-neutral-400">
-          The mock provider is a real calendar in memory. Swap in Google or Outlook when you're
-          ready.
-        </p>
-        <div className="mt-8 flex flex-col items-center gap-4">
-          <CopyCommand command="npm i calsdk @calsdk/mock" />
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
             href="/docs/quickstart"
-            className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
+            className="flex h-11 items-center rounded-lg bg-white px-5 text-sm font-medium text-black hover:bg-neutral-200"
+          >
+            Get started
+          </Link>
+          <CopyCommand command="npm i calsdk @calsdk/google" />
+        </div>
+      </section>
+
+      <section className="mt-12 sm:mt-16" aria-label="Live demo">
+        <CalendarApp />
+        <p className="mt-4 text-center text-sm text-neutral-500">
+          Running in your browser: six in-memory calendars, the real listEvents and findFreeTime.
+        </p>
+      </section>
+
+      <Section
+        title="Switch calendars, not code"
+        aside="Pick a provider. Two lines change, and the events come back in the same shape."
+        link={{ href: '/docs/choose-a-provider', label: 'Choose a provider' }}
+      >
+        <ProviderShowcase providers={providers} />
+      </Section>
+
+      <Section
+        title="The quirks are handled. The rest is reported."
+        aside="Field names, time zones and recurrence are converted for you. When a provider can't do what you asked, the result says so."
+        link={{ href: '/docs/concepts/warnings', label: 'How warnings work' }}
+      >
+        <div className="grid gap-4 md:grid-cols-3">
+          <Card
+            title="One name for every field"
+            body="Google says summary, Outlook subject, Zoom topic. You always get title."
+          >
+            <div className="flex flex-col gap-1.5 font-mono text-xs">
+              {TITLE_NAMES.map(([provider, name]) => (
+                <div key={provider} className="flex items-center gap-2">
+                  <span className="w-16 font-sans text-neutral-500">{provider}</span>
+                  <span className="w-[4.75rem] rounded bg-white/[0.06] px-1.5 py-0.5 text-neutral-300">
+                    {name}
+                  </span>
+                  <ArrowRight aria-hidden className="size-3 text-neutral-600" />
+                  <span className="rounded bg-accent-blue/15 px-1.5 py-0.5 text-white">title</span>
+                </div>
+              ))}
+            </div>
+          </Card>
+          <Card
+            title="Warnings, not silent changes"
+            body="Google has a fixed palette. Your color is saved as the nearest one, and the result says so."
+          >
+            <div className="font-mono text-xs leading-relaxed">
+              <p className="text-neutral-500">
+                color: <span className="text-[#a5d6ff]">'#ec4899'</span>
+              </p>
+              <div className="mt-3 flex items-center gap-2 text-neutral-400">
+                <Swatch color="#ec4899" label="asked" />
+                <ArrowRight aria-hidden className="size-3.5 text-neutral-600" />
+                <Swatch color="#e67c73" label="saved" />
+              </div>
+              <p className="mt-3 text-neutral-300">
+                <span className="text-accent-blue">compatibility</span> · color
+              </p>
+            </div>
+          </Card>
+          <Card
+            title="Time zones that survive clock changes"
+            body="The standup stays at 9:30 in New York. Berlin sees it an hour early until Europe changes its clocks too."
+          >
+            <div className="text-xs">
+              <p className="mb-2 text-neutral-500">9:30 New York standup, in Berlin</p>
+              {BERLIN.map(([date, time, early]) => (
+                <div
+                  key={date}
+                  className="flex items-center justify-between border-t border-line py-1.5"
+                >
+                  <span className="text-neutral-400">{date}</span>
+                  <span className={`font-mono ${early ? 'text-accent-blue' : 'text-neutral-200'}`}>
+                    {time}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </div>
+      </Section>
+
+      <Section
+        title="The calendar code you'd rather not write"
+        link={{ href: '/docs/guides/write-events', label: 'Read the guides' }}
+      >
+        <FeatureTabs features={features} />
+      </Section>
+
+      <section className="mt-24 grid gap-x-10 gap-y-10 border-t border-line pt-16 sm:mt-32 sm:grid-cols-2 lg:grid-cols-3">
+        {EXTRAS.map(({ icon: Icon, title, body }) => (
+          <div key={title}>
+            <Icon aria-hidden className="size-5 text-neutral-300" strokeWidth={1.75} />
+            <h3 className="mt-4 font-medium text-white">{title}</h3>
+            <p className="mt-1.5 text-sm leading-relaxed text-neutral-400">{body}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="mt-24 flex flex-col items-center border-t border-line py-24 text-center sm:mt-32 sm:py-32">
+        <Mark className="size-12 text-white" />
+        <h2 className="mt-8 max-w-2xl text-balance text-[clamp(2.25rem,6vw,4rem)] leading-[0.98] font-semibold tracking-[-0.05em] text-white">
+          Start with a calendar in memory
+        </h2>
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Link
+            href="/docs/quickstart"
+            className="flex h-11 items-center rounded-lg bg-white px-5 text-sm font-medium text-black hover:bg-neutral-200"
           >
             Read the quickstart
           </Link>
+          <CopyCommand command="npm i calsdk @calsdk/mock" />
         </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-400 sm:px-10">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-8 text-sm text-neutral-500">
         <span>MIT License</span>
         <div className="flex gap-5">
           <Link href="/docs" className="hover:text-white">
@@ -732,67 +463,50 @@ export default async function HomePage() {
   );
 }
 
-function SectionHeading({
-  index,
-  eyebrow,
-  title,
-  intro,
-}: {
-  index: string;
-  eyebrow: string;
-  title: string;
-  intro?: string;
-}) {
-  return (
-    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-20 sm:pb-10">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
-        <span className="text-accent-blue">{index}</span> / {eyebrow}
-      </p>
-      <h2 className="mt-4 max-w-4xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
-        {title}
-      </h2>
-      {intro && <p className="mt-5 max-w-2xl text-lg text-neutral-400">{intro}</p>}
-    </div>
-  );
-}
-
 function Section({
-  id,
+  title,
+  aside,
+  link,
   children,
-  ...heading
 }: {
-  id: string;
-  index: string;
-  eyebrow: string;
   title: string;
-  intro?: string;
+  aside?: string;
+  link: { href: string; label: string };
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-20 border-t border-line">
-      <SectionHeading {...heading} />
-      <div className="px-5 pb-16 sm:px-10 sm:pb-20">{children}</div>
+    <section className="mt-24 sm:mt-36">
+      <div className="mb-10 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
+        <h2 className="max-w-2xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-5xl">
+          {title}
+        </h2>
+        <div className="lg:max-w-sm">
+          {aside && <p className="leading-relaxed text-neutral-400">{aside}</p>}
+          <Link
+            href={link.href}
+            className={`inline-flex items-center gap-1.5 text-sm font-medium text-white hover:text-neutral-300 ${aside ? 'mt-3' : ''}`}
+          >
+            {link.label}
+            <ArrowRight aria-hidden className="size-3.5" />
+          </Link>
+        </div>
+      </div>
+      {children}
     </section>
   );
 }
 
-function Capability({ label, value }: { label: string; value: Support }) {
+function Card({ title, body, children }: { title: string; body: string; children: ReactNode }) {
   return (
-    <li className="flex items-center gap-2 sm:gap-3">
-      <span
-        aria-hidden
-        className={`size-2 shrink-0 rounded-full ${
-          value === false ? 'border border-neutral-500' : 'bg-accent-blue'
-        }`}
-      />
-      <span className={value === false ? 'text-neutral-400' : 'text-neutral-200'}>
-        {label}
-        <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
-      </span>
-      {typeof value === 'string' && (
-        <span className="text-xs text-neutral-400 sm:ml-auto sm:text-right">{value}</span>
-      )}
-    </li>
+    <div className="flex flex-col overflow-hidden rounded-2xl border border-line bg-panel">
+      <div className="flex min-h-44 flex-1 items-center border-b border-line px-6 py-6">
+        <div className="w-full">{children}</div>
+      </div>
+      <div className="p-6">
+        <h3 className="font-medium text-white">{title}</h3>
+        <p className="mt-1.5 text-sm leading-relaxed text-neutral-400">{body}</p>
+      </div>
+    </div>
   );
 }
 

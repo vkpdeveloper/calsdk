@@ -226,13 +226,21 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
                 {state &&
                   freeRanges(state.slots)
                     .filter((range) => range.day === day)
-                    .map((range) => (
-                      <Placed
-                        key={`free-${range.from}`}
-                        block={range}
-                        className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15"
-                      />
-                    ))}
+                    .map((range) => {
+                      const slot = earliest?.find(
+                        (each) =>
+                          place(each.start).day === day && place(each.start).minutes === range.from,
+                      );
+                      return (
+                        <Placed
+                          key={`free-${range.from}`}
+                          block={range}
+                          label={`Book ${DAY_NAMES[day]} ${clock(range.from)}`}
+                          onClick={slot && (() => void book(slot))}
+                          className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15 hover:bg-accent-blue/30"
+                        />
+                      );
+                    })}
                 {state?.you
                   .filter((block) => block.day === day)
                   .map((block) => (
@@ -276,22 +284,22 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
         </div>
         <div>
           <p className="mb-2 text-sm text-neutral-400">Book a slot on both calendars</p>
-          <div className="flex flex-wrap gap-2">
-            {earliest?.slice(0, 6).map((slot) => {
+          <div className="grid grid-cols-4 gap-1.5">
+            {earliest?.map((slot) => {
               const { day, minutes } = place(slot.start);
               return (
                 <button
                   key={slot.start}
                   type="button"
                   onClick={() => void book(slot)}
-                  className="h-11 rounded-md border border-line px-3 font-mono text-xs sm:h-9 text-neutral-200 hover:border-accent-blue hover:text-white"
+                  className="h-11 rounded-md border border-line font-mono text-xs whitespace-nowrap sm:h-9 text-neutral-200 hover:border-accent-blue hover:text-white"
                 >
                   {DAY_NAMES[day]} {clock(minutes)}
                 </button>
               );
             })}
             {state && state.slots.length === 0 && (
-              <p className="text-sm text-neutral-400">No time left this week.</p>
+              <p className="col-span-4 text-sm text-neutral-400">No time left this week.</p>
             )}
           </div>
         </div>
@@ -325,17 +333,46 @@ function Legend({ className, children }: { className: string; children: ReactNod
   );
 }
 
-function Placed({ block, className }: { block: Block; className: string }) {
+function Placed({
+  block,
+  className,
+  label,
+  onClick,
+}: {
+  block: Block;
+  className: string;
+  label?: string;
+  onClick?: () => void;
+}) {
   const minutes = block.to - block.from;
-  // Half-hour blocks fit one tight line; shorter ones (the 15-minute standups) stay bare.
-  const short = minutes < 45;
+  const style = { top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) };
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={label}
+        title={label}
+        className={`absolute cursor-pointer ${className}`}
+        style={style}
+      />
+    );
+  }
+  // Text shrinks with the block: a 15-minute standup still gets a one-line name.
+  const size =
+    minutes < 30
+      ? 'py-px text-[9px] leading-none'
+      : minutes < 45
+        ? 'py-0.5 text-[10px] leading-tight sm:text-[11px]'
+        : 'py-1 text-[10px] leading-tight sm:text-[11px]';
   return (
     <div
-      className={`absolute overflow-hidden px-1.5 text-[10px] leading-tight sm:text-[11px] ${short ? 'py-0.5' : 'py-1'} ${className}`}
-      style={{ top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) }}
+      title={block.title}
+      className={`absolute overflow-hidden px-1.5 ${size} ${className}`}
+      style={style}
     >
-      {minutes >= 30 && block.title && (
-        <span className={short ? 'block truncate' : 'block'}>{block.title}</span>
+      {block.title && (
+        <span className={minutes < 45 ? 'block truncate' : 'block'}>{block.title}</span>
       )}
     </div>
   );

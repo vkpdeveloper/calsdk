@@ -34,14 +34,17 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
   const picked = payloads[shown];
   return (
     <div className="compare" data-field={field}>
-      <fieldset aria-label="Field" className="mb-6 flex flex-wrap gap-2">
+      <fieldset
+        aria-label="Field"
+        className="mb-6 grid grid-cols-4 gap-1.5 sm:flex sm:flex-wrap sm:gap-2"
+      >
         {FIELDS.map(({ id, label }) => (
           <button
             key={id}
             type="button"
             aria-pressed={id === field}
             onClick={() => setField(id)}
-            className="h-11 rounded-full border border-line px-4 text-sm sm:h-10 text-neutral-400 transition-colors hover:border-neutral-600 hover:text-white aria-pressed:border-accent-blue aria-pressed:bg-accent-blue/10 aria-pressed:text-white"
+            className="h-11 rounded-full border border-line px-1 text-[13px] whitespace-nowrap sm:h-10 sm:px-4 sm:text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:text-white aria-pressed:border-accent-blue aria-pressed:bg-accent-blue/10 aria-pressed:text-white"
           >
             {label}
           </button>

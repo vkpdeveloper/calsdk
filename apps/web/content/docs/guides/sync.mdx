@@ -5,7 +5,7 @@ description: Keep a local copy of a calendar up to date with the changes since a
 
 To mirror your users' calendars into Postgres, apply the changes `syncEvents` returns and save its cursor for the next run. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window.
 
-You get only the changes back from every provider, but how much is fetched differs. Google, Outlook, CalDAV and Cal.com fetch just the changes since the cursor. Calendly and Zoom have no change feed, so calsdk rereads their meetings and compares them with the last sync. ICS compares the downloaded feed the same way, but skips the download when the server answers `304 Not Modified`. See [how each provider syncs](#how-each-provider-syncs).
+The changes you get back are always just the changes, but some providers have to reread the whole calendar to find them. Check [how each provider syncs](#how-each-provider-syncs) before you choose how often to run it.
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';

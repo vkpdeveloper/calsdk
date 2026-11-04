@@ -100,7 +100,7 @@ A missing event throws `NotFoundError`. The exception is a retry: if an earlier 
 
 ## Don't overwrite someone else's change
 
-You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update or delete then only goes through if nobody changed the event since you read it:
+You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update then only goes through if nobody changed the event since you read it:
 
 ```ts
 import { ConflictError, getEvent, updateEvent } from 'calsdk';
@@ -114,6 +114,8 @@ try {
   // Someone else changed it. Read it again and decide what to do.
 }
 ```
+
+`deleteEvent` takes `ifMatch` too. Outlook can't make a delete conditional, so it compares the etag first and then deletes, and a change made between the two isn't caught.
 
 Google, Outlook, CalDAV and the mock support `ifMatch`. Cal.com, Calendly and Zoom throw `UnsupportedFunctionalityError` when you pass it.
 

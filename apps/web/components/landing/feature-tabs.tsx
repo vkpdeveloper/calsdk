@@ -41,7 +41,7 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
             tabIndex={f.id === feature?.id ? 0 : -1}
             aria-selected={f.id === feature?.id}
             onClick={() => setActive(f.id)}
-            className="h-11 shrink-0 rounded-full border border-transparent px-4 text-sm text-neutral-400 transition-colors hover:text-white aria-selected:border-line aria-selected:bg-white/[0.06] aria-selected:text-white sm:h-10"
+            className="h-11 shrink-0 rounded-full border border-transparent px-3 text-sm sm:px-4 text-neutral-400 transition-colors hover:text-white aria-selected:border-line aria-selected:bg-white/[0.06] aria-selected:text-white sm:h-10"
           >
             {f.label}
           </button>
@@ -52,7 +52,7 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
           id={`${prefix}-panel`}
           role="tabpanel"
           aria-labelledby={`${prefix}-tab-${feature.id}`}
-          className="mt-6 grid overflow-hidden rounded-2xl border border-line bg-panel lg:min-h-[38rem] lg:grid-cols-[20rem_minmax(0,1fr)]"
+          className="mt-6 grid overflow-hidden rounded-2xl border border-line bg-panel lg:min-h-[38rem] lg:grid-cols-[24rem_minmax(0,1fr)]"
         >
           <div className="border-line p-6 max-lg:border-b sm:p-8 lg:border-r">
             <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{feature.title}</h3>

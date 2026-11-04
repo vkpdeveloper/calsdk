@@ -406,7 +406,7 @@ export default async function HomePage() {
 
       <Section
         title="Switch calendars, not code"
-        aside="Pick a provider. Two lines change, and the events come back in the same shape."
+        aside="Pick a provider. Only the import and the setup change, and the events come back in the same shape."
         link={{ href: '/docs/choose-a-provider', label: 'Choose a provider' }}
       >
         <ProviderShowcase providers={providers} />
@@ -430,7 +430,11 @@ export default async function HomePage() {
             <div className="font-mono text-xs leading-relaxed">
               <pre className="text-neutral-400">{OUTLOOK_PATTERN}</pre>
               <ArrowRight aria-hidden className="my-2 size-3.5 rotate-90 text-neutral-600" />
-              <p className="break-all text-[#a5d6ff]">'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'</p>
+              <p className="break-words text-[#a5d6ff]">
+                'RRULE:FREQ=WEEKLY;
+                <wbr />
+                BYDAY=MO,TU,WE,TH,FR'
+              </p>
             </div>
           </Card>
           <Card

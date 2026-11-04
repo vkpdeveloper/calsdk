@@ -237,6 +237,11 @@ html > body[data-scroll-locked] {
       inset -1px 0 0 var(--color-fd-border),
       inset 0 -1px 0 var(--color-fd-border);
   }
+  /* A code block without a title floats its copy button over the first line, and phone
+     lines run to the edge. Start the code below the button instead. */
+  figure.shiki > div.absolute + .fd-scroll-container pre {
+    padding-top: 1.75rem;
+  }
 }
 
 /* Code wider than its box fades at the right edge until it is scrolled to the end, so it

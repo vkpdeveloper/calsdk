@@ -60,7 +60,7 @@ let pageToken: string | undefined;
 let cursor: string | undefined;
 
 do {
-  const page = await syncEvents({ calendar, cursor: stored, paginate: false, pageToken });
+  const page = await syncEvents({ calendar, calendarId, cursor: stored, paginate: false, pageToken });
   await applyChanges(page.changes);
   pageToken = page.nextPageToken;
   cursor = page.nextCursor;
@@ -69,7 +69,7 @@ do {
 await db.syncCursors.set(calendarId, cursor);
 ```
 
-Pass the same `cursor` on every page of a round. The last page has no `nextPageToken` and carries `nextCursor`.
+Pass the same `calendarId` and `cursor` on every page of a round. The last page has no `nextPageToken` and carries `nextCursor`.
 
 ## How each provider syncs
 

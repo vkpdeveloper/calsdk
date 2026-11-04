@@ -4,10 +4,10 @@ export const appName = 'calsdk';
 export const appDescription =
   'Events, free time and sync for nine providers, including Google Calendar, Outlook and iCloud, in one typed TypeScript API. Open source, MIT licensed.';
 
-// Absolute URLs (canonical links, Open Graph images, the sitemap) need the public origin.
-// Vercel sets this to the production domain, a custom one once it's added, for every build.
-const productionHost = process.env.VERCEL_PROJECT_PRODUCTION_URL;
-export const siteUrl = productionHost ? `https://${productionHost}` : 'http://localhost:3000';
+// Absolute URLs (canonical links, Open Graph images, the sitemap) use the public origin in every
+// build, so previews and local builds never present themselves as the real site. It's www because
+// the bare domain redirects here.
+export const siteUrl = 'https://www.cal-sdk.com';
 
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';

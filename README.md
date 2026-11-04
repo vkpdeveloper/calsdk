@@ -9,7 +9,7 @@
 
 Events, free time and sync for nine providers, including Google Calendar, Outlook and iCloud, in one typed TypeScript API.
 
-[Website](https://calsdk.vercel.app) · [Docs](https://calsdk.vercel.app/docs) · [Quickstart](https://calsdk.vercel.app/docs/quickstart) · [FAQ](https://calsdk.vercel.app/docs/faq)
+[Website](https://www.cal-sdk.com) · [Docs](https://www.cal-sdk.com/docs) · [Quickstart](https://www.cal-sdk.com/docs/quickstart) · [FAQ](https://www.cal-sdk.com/docs/faq)
 
 The website opens with a live demo. It runs in your browser on six sample calendars, using the real `listEvents`, `findFreeTime` and `createEvent`.
 
@@ -74,7 +74,7 @@ const calendar = google({ accessToken: () => getFreshAccessToken() });
 | Calendly | `@calsdk/calendly` | ✓ | Book an event type, cancel | | | ✓ |
 | ICS feed | `@calsdk/ics` | ✓ | | | | ✓ |
 
-[Compare providers](https://calsdk.vercel.app/docs/providers) has the full list of what each one can do.
+[Compare providers](https://www.cal-sdk.com/docs/providers) has the full list of what each one can do.
 
 ## What it handles for you
 
@@ -92,7 +92,7 @@ const calendar = google({ accessToken: () => getFreshAccessToken() });
 - **It doesn't run OAuth.** Pass a token, or a function that returns a fresh one.
 - **It runs anywhere with `fetch`.** Node.js 20 or later, Bun, Deno and edge runtimes, with no vendor SDKs.
 - **It's tested on the real APIs.** Google, Outlook, Zoho, Zoom, Cal.com and Calendly are recorded live and replayed in CI.
-- **You can add your own provider.** A provider is one object with a few functions, checked by a shared conformance suite. See [Build a provider](https://calsdk.vercel.app/docs/build-a-provider).
+- **You can add your own provider.** A provider is one object with a few functions, checked by a shared conformance suite. See [Build a provider](https://www.cal-sdk.com/docs/build-a-provider).
 
 ## Working on calsdk
 

@@ -298,7 +298,13 @@ const { event: created } = await createEvent({
 // string | undefined
 created.providerMetadata?.google?.iCalUID;`,
     result: `
-error TS2561: Object literal may only specify known properties, but 'guestsCanModfy' does not exist in type '{ guestsCanModify?: boolean | undefined; … }'. Did you mean to write 'guestsCanModify'?`,
+error TS2561: Object literal may only
+specify known properties, but
+'guestsCanModfy' does not exist in
+type '{ guestsCanModify?: boolean |
+undefined; … }'.
+Did you mean to write
+'guestsCanModify'?`,
     resultLang: 'text',
   },
   {

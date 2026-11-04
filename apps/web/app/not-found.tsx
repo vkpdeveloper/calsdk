@@ -22,11 +22,11 @@ export default function NotFound() {
               <span className="font-medium text-neutral-200 line-through decoration-neutral-500">
                 This page
               </span>
-              <code className="font-mono text-neutral-400">status: 'cancelled'</code>
+              <code className="font-mono text-accent-blue">NotFoundError</code>
             </div>
-            <p className="mt-3 font-mono text-xs text-accent-blue">NotFoundError</p>
-            <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">
-              It moved or never existed. Search from the top bar, or start from the docs.
+            <p className="mt-3 text-sm leading-relaxed text-neutral-300">
+              The page was not found. It may have moved or been deleted. Search from the top bar,
+              or start from the docs.
             </p>
           </div>
 

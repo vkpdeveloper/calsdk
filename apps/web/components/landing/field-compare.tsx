@@ -15,10 +15,12 @@ export type Payload = { name: string; format: string; code: ReactNode };
 
 /**
  * The same meeting as each provider's API returns it, next to the calsdk event. Picking a
- * field lights up its lines in every payload; the lines carry `field-*` classes.
+ * field lights up its lines in every payload; the lines carry `field-*` classes. Phones show
+ * one payload at a time, so the calsdk event sits right under it.
  */
 export function FieldCompare({ payloads, result }: { payloads: Payload[]; result: ReactNode }) {
   const [field, setField] = useState('repeat');
+  const [shown, setShown] = useState(payloads[0]?.name);
   return (
     <div className="compare" data-field={field}>
       <fieldset aria-label="Field" className="mb-6 flex flex-wrap gap-2">
@@ -34,12 +36,30 @@ export function FieldCompare({ payloads, result }: { payloads: Payload[]; result
           </button>
         ))}
       </fieldset>
+      <div
+        role="tablist"
+        aria-label="Provider"
+        className="mb-3 flex border-b border-line md:hidden"
+      >
+        {payloads.map(({ name }) => (
+          <button
+            key={name}
+            type="button"
+            role="tab"
+            aria-selected={name === shown}
+            onClick={() => setShown(name)}
+            className="-mb-px h-10 flex-1 border-b-2 border-transparent px-1 text-[13px] text-neutral-400 aria-selected:border-accent-blue aria-selected:text-white"
+          >
+            {name.replace(' Calendar', '')}
+          </button>
+        ))}
+      </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:col-span-2">
           {payloads.map(({ name, format, code }) => (
             <div
               key={name}
-              className="min-w-0 overflow-hidden rounded-xl border border-line bg-panel"
+              className={`min-w-0 overflow-hidden rounded-xl border border-line bg-panel ${name === shown ? '' : 'max-md:hidden'}`}
             >
               <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-xs">
                 <span className="font-medium text-neutral-200">{name}</span>

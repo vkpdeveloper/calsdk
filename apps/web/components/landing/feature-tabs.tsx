@@ -17,11 +17,7 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
   const feature = features.find((f) => f.id === active) ?? features[0];
   return (
     <div>
-      <div
-        role="tablist"
-        aria-label="Feature"
-        className="flex overflow-x-auto border-y border-line [scrollbar-width:none]"
-      >
+      <div role="tablist" aria-label="Feature" className="flex border-y border-line">
         {features.map((f) => (
           <button
             key={f.id}
@@ -29,7 +25,7 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
             role="tab"
             aria-selected={f.id === feature?.id}
             onClick={() => setActive(f.id)}
-            className="relative h-14 min-w-32 flex-1 shrink-0 border-r border-line px-4 text-sm text-neutral-400 transition-colors last:border-r-0 hover:text-white aria-selected:bg-white/[0.04] aria-selected:text-white aria-selected:before:absolute aria-selected:before:inset-x-0 aria-selected:before:top-0 aria-selected:before:h-0.5 aria-selected:before:bg-accent-blue"
+            className="relative h-14 min-w-0 flex-1 border-r border-line px-2 text-[13px] sm:px-4 sm:text-sm text-neutral-400 transition-colors last:border-r-0 hover:text-white aria-selected:bg-white/[0.04] aria-selected:text-white aria-selected:before:absolute aria-selected:before:inset-x-0 aria-selected:before:top-0 aria-selected:before:h-0.5 aria-selected:before:bg-accent-blue"
           >
             {f.label}
           </button>

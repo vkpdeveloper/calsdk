@@ -279,7 +279,7 @@ for await (const event of iterateEvents({ calendar, ...friday })) {
     label: 'Sync',
     title: 'Keep a copy in your database',
     points: [
-      'The first call returns every event. Later calls return only changes.',
+      'The first call returns what the provider syncs. Later calls return only changes.',
       'Changes are upserts and deletes, ready to apply.',
       'An expired cursor is its own error, so a full resync is one branch.',
     ],
@@ -437,8 +437,8 @@ export default async function HomePage() {
           Calendar SDK for TypeScript
         </p>
         <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
-          <h1 className="text-[clamp(3.25rem,10vw,7.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
-            Every calendar.
+          <h1 className="text-[clamp(3.25rem,10vw,5.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
+            <span className="whitespace-nowrap">Every calendar.</span>
             <br />
             <span className="text-neutral-500">One API.</span>
           </h1>

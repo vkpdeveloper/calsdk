@@ -61,7 +61,7 @@ html > body[data-scroll-locked] {
   border-left-color: #4f7cff;
 }
 .code-sm pre {
-  font-size: 0.6875rem;
+  font-size: 0.75rem;
 }
 .code-sm .line {
   padding: 0 0.75rem;
@@ -178,7 +178,7 @@ html > body[data-scroll-locked] {
 
 /* FieldCompare: the picked field stays bright in every payload. */
 .compare .line {
-  opacity: 0.42;
+  opacity: 0.62;
   transition:
     opacity 0.2s,
     background-color 0.2s;

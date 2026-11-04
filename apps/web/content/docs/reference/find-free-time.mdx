@@ -1,0 +1,56 @@
+---
+title: findFreeTime
+description: Finds slots when every listed calendar is free, across providers.
+---
+
+```ts
+import { findFreeTime } from 'calsdk';
+
+const { slots } = await findFreeTime({
+  calendars: [{ calendar: google({ accessToken }) }, { calendar: microsoft({ accessToken }) }],
+  timeMin: new Date(),
+  timeMax: new Date(Date.now() + 7 * 86_400_000),
+  duration: 30,
+  workingHours: { start: '09:00', end: '18:00', timeZone: 'Asia/Kolkata' },
+});
+```
+
+## Options
+
+<TypeTable
+  type={{
+    calendars: { type: '{ calendar; calendarIds?; headers?; providerOptions? }[]', description: "Every calendar that must be free, grouped by provider. calendarIds defaults to ['primary']. headers and providerOptions apply to that provider's requests.", required: true },
+    timeMin: { type: 'Date | string', required: true },
+    timeMax: { type: 'Date | string', required: true },
+    duration: { type: 'number', description: 'Meeting length in minutes. A positive whole number.', required: true },
+    workingHours: { type: 'WorkingHours', description: 'Only return slots inside these hours. Leave out to search the whole window.' },
+    slotInterval: { type: 'number', description: 'Minutes between slot starts, lined up with the hour in workingHours.timeZone, or UTC.', default: '15' },
+    maxRetries: { type: 'number', default: '2' },
+    abortSignal: { type: 'AbortSignal' },
+  }}
+/>
+
+### WorkingHours
+
+<TypeTable
+  type={{
+    start: { type: 'string', description: "'HH:mm', such as '09:00'.", required: true },
+    end: { type: 'string', description: "'HH:mm', after start. Slots end by this time.", required: true },
+    timeZone: { type: 'string', description: 'IANA time zone the hours are in.', required: true },
+    days: { type: 'number[]', description: '0 (Sunday) to 6 (Saturday).', default: '[1, 2, 3, 4, 5]' },
+  }}
+/>
+
+## Result
+
+<TypeTable
+  type={{
+    slots: { type: '{ start: string; end: string }[]', description: 'Free slots in order, as UTC ISO 8601 instants. Neighbouring slots overlap when slotInterval is less than duration.', required: true },
+    warnings: { type: 'Warning[]', description: 'Warnings from every provider, such as the free/busy fallback.', required: true },
+  }}
+/>
+
+## Throws
+
+- `FreeBusyUnavailableError` when any calendar cannot be read, rather than return slots that might clash. It has `provider` and `calendarId`.
+- `InvalidArgumentError` when `duration` or `slotInterval` is not a positive whole number, or `workingHours` is invalid.

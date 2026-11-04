@@ -1,0 +1,40 @@
+---
+title: getFreeBusy
+description: Returns busy blocks for one or more calendars of one provider.
+---
+
+```ts
+import { getFreeBusy } from 'calsdk';
+
+const { calendars } = await getFreeBusy({
+  calendar,
+  calendarIds: ['primary', 'team@example.com'],
+  timeMin: new Date(),
+  timeMax: new Date(Date.now() + 7 * 86_400_000),
+});
+```
+
+Providers with a free/busy endpoint (Google) use it. Others list events instead, skipping events shown as free and cancelled events, and return a `compatibility` warning.
+
+## Options
+
+<TypeTable
+  type={{
+    timeMin: { type: 'Date | string', required: true },
+    timeMax: { type: 'Date | string', required: true },
+    calendarIds: { type: 'string[]', default: "['primary']" },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options).
+
+## Result
+
+<TypeTable
+  type={{
+    calendars: { type: 'Record<string, { busy: BusyBlock[]; error?: string }>', description: 'Keyed by requested calendar id. busy is merged, sorted and clipped to the window. error is set when that calendar could not be read.', required: true },
+    warnings: { type: 'Warning[]', required: true },
+  }}
+/>
+
+A `BusyBlock` is `{ start: string; end: string }`, ISO 8601 instants with `end` exclusive.

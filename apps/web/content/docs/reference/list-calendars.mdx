@@ -1,0 +1,29 @@
+---
+title: listCalendars
+description: Lists the calendars the user can see.
+---
+
+```ts
+import { listCalendars } from 'calsdk';
+
+const { calendars } = await listCalendars({ calendar });
+```
+
+## Options
+
+Only the [common options](/docs/reference#common-options).
+
+## Result
+
+<TypeTable
+  type={{
+    calendars: { type: 'Calendar[]', description: 'Every calendar the user can see. Exactly one has isPrimary: true.', required: true },
+    warnings: { type: 'Warning[]', required: true },
+  }}
+/>
+
+See [`Calendar`](/docs/reference/types#calendar) for the fields of each calendar, and [Calendars](/docs/guides/calendars) for what `'primary'` means on each provider.
+
+## Throws
+
+- `AuthenticationError` when the credentials are rejected.

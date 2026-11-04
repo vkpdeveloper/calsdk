@@ -1,0 +1,43 @@
+---
+title: syncEvents
+description: Fetches what changed in a calendar since the last sync.
+---
+
+```ts
+import { syncEvents } from 'calsdk';
+
+const { changes, nextCursor } = await syncEvents({ calendar, cursor: stored });
+for (const change of changes) apply(change);
+await saveCursor(nextCursor);
+```
+
+## Options
+
+<TypeTable
+  type={{
+    cursor: { type: 'string', description: 'nextCursor from the previous sync. Leave out for a full first sync.' },
+    calendarId: { type: 'string', default: "'primary'" },
+    paginate: { type: 'boolean', description: 'false returns one page at a time.', default: 'true' },
+    pageToken: { type: 'string', description: 'With paginate: false, nextPageToken from the previous page of this round.' },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options).
+
+## Result
+
+<TypeTable
+  type={{
+    changes: { type: "({ type: 'upsert'; event: CalendarEvent } | { type: 'delete'; eventId: string })[]", description: 'Every change since cursor, in the order the provider returns them. Apply them in that order.', required: true },
+    nextCursor: { type: 'string', description: 'Store it and pass it as cursor next time. With paginate: false, only on the last page.', required: true },
+    nextPageToken: { type: 'string', description: 'With paginate: false: more pages are left in this round.' },
+    warnings: { type: 'Warning[]', required: true },
+  }}
+/>
+
+Changes cover single events, series and exceptions, never computed occurrences.
+
+## Throws
+
+- `SyncCursorExpiredError` when the provider no longer accepts the cursor. Drop it, and your copy, and sync without one.
+- `UnsupportedFunctionalityError` when the provider has no sync. Every built-in provider has it.

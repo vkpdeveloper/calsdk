@@ -1,0 +1,100 @@
+---
+title: Calendly
+description: Read, book and cancel Calendly meetings as calendar events.
+---
+
+```npm
+npm install calsdk @calsdk/calendly
+```
+
+In Calendly, scheduled meetings are the events.
+
+```ts
+import { createEvent, listEvents } from 'calsdk';
+import { calendly } from '@calsdk/calendly';
+
+const calendar = calendly({ accessToken: process.env.CALENDLY_TOKEN! });
+
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-01T00:00:00Z',
+  timeMax: '2026-12-01T00:00:00Z',
+});
+
+// Book a 30 minute event type for a guest.
+await createEvent({
+  calendar,
+  event: {
+    start: { dateTime: '2026-11-03T10:00:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-03T10:30:00', timeZone: 'Europe/Berlin' },
+    attendees: [{ email: 'guest@example.com', name: 'Guest' }],
+  },
+  providerOptions: {
+    calendly: { eventType: 'https://api.calendly.com/event_types/<uuid>' },
+  },
+});
+```
+
+## Credentials
+
+`accessToken` is a personal access token or OAuth access token with the scopes `users:read` and `scheduled_events:read`, plus `event_types:read` and `scheduled_events:write` to book.
+
+## Settings
+
+<TypeTable
+  type={{
+    accessToken: { type: 'string | (() => string | PromiseLike<string>)', description: 'Personal access token or OAuth access token, or a function that returns one.', required: true },
+    headers: { type: 'Record<string, string | undefined>', description: 'Headers sent with every request.' },
+    fetch: { type: 'typeof fetch', description: 'A custom fetch, for example to log or record requests.' },
+  }}
+/>
+
+## Supports
+
+Booking and cancelling, attendees and sync. Not supported: updating, all-day and recurring events, `ifMatch` and search. Free/busy is computed from meetings.
+
+## How it behaves
+
+- **Calendars.** `'primary'` holds every meeting the user hosts. Calendly cannot list meetings by event type, so there are no other calendars.
+- **Ids.** An event id is the scheduled event's uuid.
+- **Times** are shown in the user's Calendly time zone.
+- **Attendees.** `getEvent` and `createEvent` return the hosts, the invitees and the guests they added. Listing and sync leave `attendees` out, as Calendly needs a request per meeting for its invitees. Hosts are in `organizer`.
+- **Creating** books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type; other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
+- **Updating** throws `UnsupportedFunctionalityError`: Calendly cannot change a scheduled meeting. Delete it and book a new one.
+- **Deleting** cancels the meeting. Cancelled meetings are deleted events.
+- **Listing** finds meetings by their start, looking back a day for meetings that end in the window. Calendly meetings last at most 12 hours.
+- **`sendUpdates`.** Calendly always emails invitees, so values other than `'all'` return a warning.
+- **Sync.** Calendly cannot list meetings by when they changed, so each sync reads every active meeting and compares it with the last sync. All changes come on one page, and the cursor grows with the number of meetings.
+
+## Provider options
+
+```ts
+await createEvent({
+  calendar,
+  event,
+  providerOptions: {
+    calendly: { eventType: '<uuid>', location: { kind: 'physical', location: 'Office' } },
+  },
+});
+
+await deleteEvent({
+  calendar,
+  eventId,
+  providerOptions: { calendly: { reason: 'No longer needed' } },
+});
+```
+
+| Function      | Option      | Type |
+| ------------- | ----------- | ---- |
+| `createEvent` | `eventType` | `string`, required. The event type's URI or uuid |
+| `createEvent` | `location`  | `{ kind: string; location?: string }`, passed to Calendly as is, such as `{ kind: 'zoom_conference' }` |
+| `deleteEvent` | `reason`    | `string`, shown in the cancellation email |
+
+## Metadata
+
+Events carry `providerMetadata.calendly`:
+
+| Field       | Type |
+| ----------- | ---- |
+| `uri`       | `string`, the scheduled event's URI |
+| `eventType` | `string`, the URI of the event type it was booked on |

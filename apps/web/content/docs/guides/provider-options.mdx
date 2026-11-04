@@ -1,0 +1,88 @@
+---
+title: Provider options
+description: Reach provider features calsdk does not model, with options and metadata typed by the provider you pass.
+---
+
+The shared event shape covers what calendars have in common. For anything else, such as Google's guest permissions or Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
+
+```ts
+import { createEvent } from 'calsdk';
+import { google } from '@calsdk/google';
+
+const calendar = google({ accessToken });
+
+const { event } = await createEvent({
+  calendar,
+  event: {
+    title: 'Order 42 handover',
+    start: { dateTime: '2026-11-09T15:00:00Z', timeZone: 'UTC' },
+    end: { dateTime: '2026-11-09T15:30:00Z', timeZone: 'UTC' },
+  },
+  providerOptions: {
+    google: {
+      guestsCanModify: true,
+      extendedProperties: { private: { orderId: '42' } },
+    },
+  },
+});
+
+event.providerMetadata?.google?.extendedProperties?.private?.orderId; // '42'
+```
+
+## Typed by the provider
+
+The types follow the provider in `calendar`. A typo, an option the provider does not take for this function, or another provider's key is a type error:
+
+```ts
+await createEvent({
+  calendar, // google(...)
+  event: input,
+  providerOptions: {
+    // Type error: Google has no `guestsCanModfy` option.
+    google: { guestsCanModfy: true },
+  },
+});
+```
+
+Providers check options at runtime too. A wrong value, such as a string where Google wants a boolean, throws `InvalidArgumentError` before any request. An unknown key is dropped with an `unsupported` warning.
+
+When the provider type is a union, for example a function that returns Google or Outlook depending on the user, each provider's key is allowed and each reads only its own:
+
+```ts
+await createEvent({
+  calendar, // GoogleCalendarProvider | MicrosoftCalendarProvider
+  event,
+  providerOptions: {
+    google: { guestsCanModify: true },
+    microsoft: { importance: 'high' },
+  },
+});
+```
+
+## Options by provider
+
+| Provider    | Functions                                   | Options |
+| ----------- | ------------------------------------------- | ------- |
+| `google`    | `createEvent`, `updateEvent`                | `guestsCanModify`, `guestsCanInviteOthers`, `guestsCanSeeOtherGuests`, `extendedProperties` |
+| `google`    | `listEvents`                                | `eventTypes` |
+| `microsoft` | `createEvent`, `updateEvent`                | `showAs`, `importance`, `categories`, `transactionId` |
+| `microsoft` | `syncEvents`                                | `timeMin`, `timeMax` |
+| `calcom`    | `createEvent`                               | `eventTypeId`, `metadata`, `allowConflicts`, `allowBookingOutOfBounds` |
+| `calcom`    | `updateEvent`                               | `reschedulingReason`, `allowConflicts`, `allowBookingOutOfBounds` |
+| `calcom`    | `deleteEvent`                               | `cancellationReason` |
+| `calendly`  | `createEvent`                               | `eventType` (required), `location` |
+| `calendly`  | `deleteEvent`                               | `reason` |
+
+CalDAV, Zoom, ICS and the mock take no options.
+
+## Metadata by provider
+
+| Provider    | `providerMetadata` on events |
+| ----------- | ---------------------------- |
+| `google`    | `iCalUID`, `eventType`, `extendedProperties` |
+| `microsoft` | `showAs` (Outlook's own, such as `'oof'`), `importance`, `categories`, `iCalUId` |
+| `calcom`    | `bookingId`, `eventTypeId`, `status`, `rescheduledFromUid`, `metadata` |
+| `calendly`  | `uri`, `eventType` |
+| `zoom`      | `uuid`, `occurrenceId` |
+
+Each [provider page](/docs/providers) explains its options.

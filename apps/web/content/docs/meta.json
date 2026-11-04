@@ -1,3 +1,19 @@
 {
-  "pages": ["index", "quickstart"]
+  "pages": [
+    "---Get started---",
+    "index",
+    "installation",
+    "quickstart",
+    "choose-a-provider",
+    "---Guides---",
+    "...guides",
+    "---Providers---",
+    "...providers",
+    "---Concepts---",
+    "...concepts",
+    "---Reference---",
+    "...reference",
+    "---Build a provider---",
+    "...build-a-provider"
+  ]
 }

@@ -1,0 +1,49 @@
+---
+title: Choose a provider
+description: Which package to install, and what credentials it needs, for each calendar your users have.
+---
+
+Most apps need one provider per calendar their users connect. Providers are plain objects, so one app can hold a Google provider for one user and an Outlook provider for another, and pass whichever applies to the same functions.
+
+## Full calendars
+
+Use these when users keep their schedule in the calendar itself. They read and write any event, invite attendees and repeat events.
+
+| Calendar                          | Use                                                     | Credentials                                               |
+| --------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
+| Google Calendar                   | [`google()`](/docs/providers/google)                    | OAuth access token with a Calendar scope                  |
+| Outlook, Microsoft 365            | [`microsoft()`](/docs/providers/microsoft)              | Microsoft Graph token with `Calendars.ReadWrite`          |
+| iCloud                            | [`icloud()`](/docs/providers/caldav)                    | Apple ID and an app-specific password                     |
+| Zoho Calendar                     | [`zoho()`](/docs/providers/caldav)                      | Email and password, or an app-specific password           |
+| Fastmail, Nextcloud, Radicale and other CalDAV servers | [`caldav()`](/docs/providers/caldav) | Server address, username and password            |
+
+## Scheduling tools
+
+Use these to read and make bookings. Events are bookings or meetings, created on an event type, and the tool decides their title and length.
+
+| Tool     | Use                                      | Credentials                                       |
+| -------- | ---------------------------------------- | ------------------------------------------------- |
+| Cal.com  | [`calcom()`](/docs/providers/calcom)     | API key or OAuth access token                     |
+| Calendly | [`calendly()`](/docs/providers/calendly) | Personal access token or OAuth access token       |
+| Zoom     | [`zoom()`](/docs/providers/zoom)         | OAuth access token with meeting scopes            |
+
+## Feeds and tests
+
+| Source                                  | Use                                  | Credentials                     |
+| --------------------------------------- | ------------------------------------ | ------------------------------- |
+| A `.ics` or `webcal://` subscription    | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
+| An in-memory calendar                   | [`mockCalendar()`](/docs/providers/mock) | None                        |
+
+## Check before you rely on a feature
+
+Providers differ. Outlook cannot change "this and following" occurrences, Zoom has no all-day meetings, and an ICS feed is read only. Each provider lists what it supports in `capabilities`:
+
+```ts
+if (calendar.capabilities.events.search === true) {
+  await listEvents({ calendar, timeMin, timeMax, query: 'standup' });
+}
+```
+
+A capability is `true`, `false`, `'unknown'` or `{ condition }` when it depends on something, such as Teams meetings needing a work account. The [comparison table](/docs/providers) shows them all side by side.
+
+When you ask for something a provider cannot do, the call either succeeds with a [warning](/docs/concepts/warnings), when the rest of the event is still right (an Outlook event cannot have a color), or throws `UnsupportedFunctionalityError`, when going ahead would save something you did not ask for (a rule Outlook cannot repeat). Each provider page lists which is which.

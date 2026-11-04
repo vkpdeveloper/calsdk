@@ -1,0 +1,58 @@
+---
+title: listEvents
+description: Lists one page of events in a time window. iterateEvents walks every page.
+---
+
+```ts
+import { listEvents } from 'calsdk';
+
+const { events, nextPageToken } = await listEvents({
+  calendar,
+  timeMin: new Date(),
+  timeMax: '2026-12-31T00:00:00Z',
+});
+```
+
+## Options
+
+<TypeTable
+  type={{
+    timeMin: { type: 'Date | string', description: 'Start of the window, inclusive. Events that end after it are returned.', required: true },
+    timeMax: { type: 'Date | string', description: 'End of the window, exclusive. Events that start before it are returned.', required: true },
+    calendarId: { type: 'string', default: "'primary'" },
+    expandRecurring: { type: 'boolean', description: 'true returns occurrences and exceptions, sorted by start. false returns series instead.', default: 'true' },
+    query: { type: 'string', description: 'Free-text search. Throws UnsupportedFunctionalityError unless capabilities.events.search is supported.' },
+    pageSize: { type: 'number', description: 'Upper bound on events per page. Providers may return fewer.' },
+    pageToken: { type: 'string', description: 'nextPageToken from the previous page.' },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options). Strings in `timeMin` and `timeMax` are parsed as ISO 8601; one without a time is midnight UTC.
+
+## Result
+
+<TypeTable
+  type={{
+    events: { type: 'CalendarEvent[]', required: true },
+    nextPageToken: { type: 'string', description: 'Pass as pageToken for the next page. Missing on the last page.' },
+    warnings: { type: 'Warning[]', required: true },
+  }}
+/>
+
+## Throws
+
+- `InvalidArgumentError` when `timeMax` is not after `timeMin`, or `pageSize` is not a positive whole number.
+- `UnsupportedFunctionalityError` for `query` on a provider without search.
+- `NotFoundError` when the calendar does not exist.
+
+## iterateEvents
+
+```ts
+import { iterateEvents } from 'calsdk';
+
+for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
+  console.log(event.title);
+}
+```
+
+Takes the same options as `listEvents` except `pageToken`, and yields every event, fetching the next page only when the loop needs it. Warnings go to the [warnings setting](/docs/concepts/warnings), since there is no result to return them on.

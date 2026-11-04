@@ -1,0 +1,102 @@
+---
+title: Recurring events
+description: Create a series with an RRULE, then change or delete one occurrence, the rest of the series, or all of it.
+---
+
+## Create a series
+
+A series is an event with `recurrence`: RFC 5545 lines, one per array item. Its `start` and `end` are the first occurrence.
+
+```ts
+const { event: standup } = await createEvent({
+  calendar,
+  event: {
+    title: 'Standup',
+    start: { dateTime: '2026-11-09T09:30:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-09T09:45:00', timeZone: 'Europe/Berlin' },
+    recurrence: ['RRULE:FREQ=DAILY;COUNT=5'],
+  },
+});
+
+standup.kind; // 'series'
+```
+
+Some useful rules:
+
+| Rule                                         | Repeats                                  |
+| -------------------------------------------- | ---------------------------------------- |
+| `RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR`           | Every Monday, Wednesday and Friday       |
+| `RRULE:FREQ=WEEKLY;INTERVAL=2;BYDAY=TU`      | Every other Tuesday                      |
+| `RRULE:FREQ=MONTHLY;BYDAY=1MO`               | The first Monday of each month           |
+| `RRULE:FREQ=MONTHLY;BYMONTHDAY=15;COUNT=6`   | The 15th, six times                      |
+| `RRULE:FREQ=DAILY;UNTIL=20261231T235959Z`    | Every day until the end of 2026          |
+
+Add `EXDATE` lines to skip occurrences. The series repeats in its `start.timeZone`, so a 9:30 standup stays at 9:30 local time when daylight saving time starts or ends.
+
+## Four kinds of event
+
+Every event has a `kind`:
+
+| Kind         | What it is                                         | Has            |
+| ------------ | -------------------------------------------------- | -------------- |
+| `single`     | An event that does not repeat                      |                |
+| `series`     | The recurring event itself                         | `recurrence`   |
+| `occurrence` | One instance, as the rule placed it                | `seriesId`, `originalStart` |
+| `exception`  | One instance someone changed                       | `seriesId`, `originalStart` |
+
+`listEvents` returns occurrences and exceptions by default, and series with `expandRecurring: false`. `originalStart` is where the rule put an instance, which stays the same when the instance moves.
+
+## Change one occurrence, or more
+
+`updateEvent` and `deleteEvent` take the id of an occurrence or exception, and a `scope`:
+
+| `scope`              | Changes                                       |
+| -------------------- | --------------------------------------------- |
+| `'this'` (default)   | Only that instance. It becomes an `exception`. |
+| `'all'`              | The whole series.                             |
+| `'thisAndFollowing'` | That instance and every later one.            |
+
+Pass the series id itself to change the whole series; `scope` only applies to instance ids.
+
+This deletes the second standup and renames the fourth onward:
+
+```ts
+const { events } = await listEvents({ calendar, timeMin, timeMax });
+
+await deleteEvent({ calendar, eventId: events[1].id });
+
+await updateEvent({
+  calendar,
+  eventId: events[3].id,
+  scope: 'thisAndFollowing',
+  patch: { title: 'Standup v2' },
+});
+```
+
+Reading the series back shows what happened. The deleted day became an `EXDATE`, and `thisAndFollowing` ended the first series and started a second one:
+
+```ts
+const { events: series } = await listEvents({ calendar, timeMin, timeMax, expandRecurring: false });
+// evt_1  Standup     ['RRULE:FREQ=DAILY;UNTIL=20261111T083000Z', 'EXDATE:20261110T083000Z']
+// evt_2  Standup v2  ['RRULE:FREQ=DAILY;COUNT=2']
+```
+
+A `thisAndFollowing` change always works this way, as two series. Ids of later occurrences change, so read them again afterwards.
+
+## Moving a series
+
+Patching an occurrence's `start` with scope `'all'` moves the whole series by as much as that occurrence moved. Providers differ in what they keep: Google resets edited occurrences and Zoom schedules every meeting again, both with a warning. The provider pages have the details.
+
+## What each provider supports
+
+| Provider  | Repeats                         | `thisAndFollowing` | Notes |
+| --------- | ------------------------------- | ------------------ | ----- |
+| Google    | Any RRULE                       | Yes                | Single-instance changes are reset when a series moves or splits, with a warning |
+| Outlook   | Rules Outlook has a pattern for | No                 | `RDATE`, hourly rules and some others throw |
+| CalDAV    | Any RRULE, with expansion limits | No                | Expanded by calsdk: rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance |
+| Zoom      | Daily, weekly or monthly, up to 60 meetings | No     | One meeting can only be moved, resized or deleted |
+| Mock      | One `RRULE` plus `EXDATE` lines | Yes                | `RDATE` and `EXRULE` throw |
+| Cal.com, Calendly | No                      | No                 | Bookings do not repeat |
+| ICS       | Any RRULE, read only, with expansion limits | No     | Same limits as CalDAV |
+
+A rule a provider cannot store throws `UnsupportedFunctionalityError` instead of saving a different schedule. Each [provider page](/docs/providers) lists its exact limits.

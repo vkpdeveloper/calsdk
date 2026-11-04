@@ -1,0 +1,53 @@
+---
+title: Helpers
+description: The fetch client, error mapping, options parsing, time zone and recurrence helpers in @calsdk/provider-utils.
+---
+
+`@calsdk/provider-utils` holds the helpers the official providers are built on.
+
+```npm
+npm install @calsdk/provider-utils
+```
+
+## Requests
+
+| Export | What it does |
+| --- | --- |
+| `createJsonFetcher({ baseURL, accessToken, headers?, fetch? })` | A JSON client. Sends `Authorization: Bearer`, resolving the token per request; validates responses with a schema; throws `APICallError` for non-2xx responses and network failures; never follows redirects |
+| `urlPath` | A template tag that percent-encodes every value: ``urlPath`/calendars/${id}/events` `` |
+| `mapAPICallError(error, { provider, resource?, eventId? })` | Turns 401, 403, 404, 410, 412 and 429 into `AuthenticationError`, `PermissionDeniedError`, `NotFoundError`, `ConflictError` and `RateLimitError` |
+| `parseRetryAfterMs(headers)` | Reads `Retry-After` as milliseconds |
+| `combineHeaders`, `withUserAgentSuffix` | Merge header objects, and add your provider to the user agent |
+
+## Options and schemas
+
+| Export | What it does |
+| --- | --- |
+| `parseProviderOptions({ provider, providerOptions, schema })` | Reads your key from `providerOptions`. Throws `InvalidArgumentError` for wrong values, warns about unknown keys |
+| `validateSchema(schema, value)` | Validates with any Standard Schema library, such as zod |
+| `formatSchemaIssues(issues)` | A readable message from schema issues |
+
+## Time
+
+| Export | What it does |
+| --- | --- |
+| `isAllDay(time)` | Whether an `EventTime` is all-day |
+| `eventTimeToInstant(time, allDayTimeZone?)` | Epoch milliseconds for an `EventTime`. All-day dates are read in `allDayTimeZone`, UTC by default |
+| `addDaysToDate(date, days)` | Adds days to a `'YYYY-MM-DD'` date |
+| `formatZonedDateTime(instant, zone)` | An ISO 8601 date-time with the zone's offset, such as `'2026-11-09T09:30:00-05:00'` |
+| `localToInstant`, `instantToLocal`, `parseLocalDateTime`, `formatLocalDateTime`, `formatLocalDate` | Convert between wall-clock times in a zone and instants |
+| `getTimeZoneOffset(instant, zone)` | A zone's offset at an instant |
+| `isValidTimeZone(zone)` | Whether a string is an IANA zone |
+| `windowsToIana`, `ianaToWindows` | Convert Windows zone names, as Outlook uses them |
+
+## Recurrence
+
+| Export | What it does |
+| --- | --- |
+| `parseRecurrence(lines)` | Splits RFC 5545 lines into the rule, `EXDATE`s and `RDATE`s. Throws `InvalidArgumentError` for malformed lines |
+| `parseRRule`, `formatRRule` | Read and write one `RRULE` as an object |
+| `parseICalDate`, `formatICalDate`, `instantToICalDate`, `instantToICalDateOnly` | iCalendar date and date-time values |
+| `formatExdates`, `formatRdates` | Build `EXDATE` and `RDATE` lines |
+| `WEEKDAYS` | `['SU', 'MO', 'TU', 'WE', 'TH', 'FR', 'SA']` |
+
+Read each function's doc comment in the package for exact signatures.

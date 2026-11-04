@@ -1,0 +1,18 @@
+{
+  "title": "Reference",
+  "pages": [
+    "index",
+    "list-calendars",
+    "get-event",
+    "list-events",
+    "create-event",
+    "update-event",
+    "delete-event",
+    "get-free-busy",
+    "find-free-time",
+    "sync-events",
+    "types",
+    "errors",
+    "capabilities"
+  ]
+}

@@ -1,0 +1,69 @@
+---
+title: Errors and retries
+description: Which errors calsdk throws, how to check for them, and what it retries for you.
+---
+
+Every error calsdk throws extends `CalsdkError`. Provider API failures are mapped to the same classes on every provider, so a 404 from Google and a 404 from Outlook are both `NotFoundError`.
+
+## Check errors with `isInstance`
+
+```ts
+import { AuthenticationError, NotFoundError, getEvent } from 'calsdk';
+
+try {
+  await getEvent({ calendar, eventId });
+} catch (error) {
+  if (NotFoundError.isInstance(error)) return null;
+  if (AuthenticationError.isInstance(error)) return reconnect(user);
+  throw error;
+}
+```
+
+Use `isInstance` rather than `instanceof`. It still works when your app ends up with two copies of calsdk installed, which `instanceof` does not.
+
+## What to do with each
+
+| Error                           | Thrown when                                           | Usually                             |
+| ------------------------------- | ----------------------------------------------------- | ----------------------------------- |
+| `InvalidArgumentError`          | Input is wrong, before any request                    | Fix the call. `argument` names the field |
+| `AuthenticationError`           | The token or password was rejected (401)              | Refresh the token or ask the user to reconnect |
+| `PermissionDeniedError`         | The user may not do this (403)                        | Ask for a wider scope, or skip this calendar |
+| `NotFoundError`                 | The calendar or event does not exist or is hidden (404, 410) | Drop your copy. `resource` is `'calendar'` or `'event'` |
+| `ConflictError`                 | `ifMatch` no longer matches (412)                     | Read the event again and retry |
+| `RateLimitError`                | The provider is throttling (429)                      | Retried for you. If it still fails, try later; `retryAfterMs` says when |
+| `UnsupportedFunctionalityError` | The provider cannot do this                           | Check `capabilities`, or offer something else |
+| `SyncCursorExpiredError`        | The sync cursor is no longer accepted                 | Drop the cursor and sync from scratch |
+| `FreeBusyUnavailableError`      | `findFreeTime` could not read a calendar              | Leave that calendar out, or ask for access |
+| `APICallError`                  | Any other failed request                              | `statusCode` and `isRetryable` say more |
+| `InvalidResponseDataError`      | The provider sent data calsdk did not expect          | Report it: it is a provider bug |
+| `NoSuchProviderVersionError`    | A provider built for another calsdk version           | Update calsdk and the provider together |
+
+The [errors reference](/docs/reference/errors) lists every field.
+
+## Retries
+
+calsdk retries these for you, twice by default:
+
+- Rate limits (`RateLimitError`, or a 429).
+- Timeouts (408), server errors (5xx) and network failures, marked `isRetryable` on `APICallError`.
+
+It waits 1 second, then 2, doubling each time, or as long as the provider's `Retry-After` header says. A `Retry-After` over a minute is not waited out: the error is thrown, so a request never hangs, and your app can schedule the work for later.
+
+Creates only retry rate limits. A server error might come after the event was saved, and retrying could create it twice. Deletes that find the event already gone on a retry count as done.
+
+```ts
+await listEvents({ calendar, timeMin, timeMax, maxRetries: 5 });
+await createEvent({ calendar, event, maxRetries: 0 }); // no retries
+```
+
+## Cancel a call
+
+Pass an `AbortSignal` to stop a call, including any wait between retries:
+
+```ts
+await listEvents({ calendar, timeMin, timeMax, abortSignal: AbortSignal.timeout(10_000) });
+```
+
+## Private data stays out of messages
+
+Error messages leave out what may be personal. Calendar ids are often email addresses, so `NotFoundError`, `SyncCursorExpiredError` and `FreeBusyUnavailableError` keep them in fields, not in the message. `APICallError` never stores request headers, which carry the access token. Response bodies are kept in `responseBody` for debugging, so be careful where you log them.

@@ -1,0 +1,62 @@
+---
+title: Calendars
+description: List the calendars a user can see and pick the one to read or write.
+---
+
+An account usually holds several calendars: a default one, shared team calendars, holidays. `listCalendars` returns all of them.
+
+```ts
+import { listCalendars } from 'calsdk';
+
+const { calendars } = await listCalendars({ calendar });
+
+for (const item of calendars) {
+  console.log(item.id, item.name, item.isPrimary, item.accessRole, item.timeZone);
+}
+```
+
+Exactly one calendar has `isPrimary: true`.
+
+## The `'primary'` id
+
+Every function that takes a `calendarId` defaults to `'primary'`, and every provider resolves it to the user's default calendar. You only pass a `calendarId` to use another one:
+
+```ts
+const { calendars } = await listCalendars({ calendar });
+const team = calendars.find((item) => item.name === 'Team');
+
+if (team) await createEvent({ calendar, calendarId: team.id, event });
+```
+
+What the default calendar is depends on the provider:
+
+| Provider        | `'primary'` is                                                  |
+| --------------- | --------------------------------------------------------------- |
+| Google, Outlook | The account's default calendar                                  |
+| CalDAV          | The server's default calendar for invitations, or else the first calendar that holds events |
+| Cal.com         | Every booking of the user. Each event type is another calendar, with the event type id as its id |
+| Calendly, Zoom  | Every meeting the user hosts. There are no other calendars      |
+| ICS             | The feed                                                        |
+
+## Access roles
+
+`accessRole` says what the user may do with a calendar:
+
+- `owner` and `writer`: read and write events.
+- `reader`: read events.
+- `freeBusyReader`: only busy times. Use [`getFreeBusy`](/docs/guides/free-time) instead of listing events.
+
+## The `Calendar` shape
+
+<TypeTable
+  type={{
+    id: { type: 'string', description: 'Pass it as calendarId.', required: true },
+    name: { type: 'string', required: true },
+    description: { type: 'string' },
+    timeZone: { type: 'string', description: "IANA time zone, such as 'Asia/Kolkata'." },
+    color: { type: 'string', description: "Hex color, '#RRGGBB'." },
+    isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
+    accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
+    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id.' },
+  }}
+/>

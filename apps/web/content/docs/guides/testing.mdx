@@ -1,0 +1,118 @@
+---
+title: Test your code
+description: Run your app's calendar logic against an in-memory calendar, with no account and no network.
+---
+
+`@calsdk/mock` is a full calendar in memory. Your code calls the same functions it calls in production, and you check the result on the mock.
+
+```npm
+npm install -D @calsdk/mock
+```
+
+## Pass the calendar in
+
+Write your code to take the provider as an argument, and pass the mock in tests:
+
+```ts title="book-intro-call.ts"
+import { type CalendarProvider, createEvent, findFreeTime } from 'calsdk';
+
+export async function bookIntroCall(calendar: CalendarProvider, guest: string) {
+  const { slots } = await findFreeTime({
+    calendars: [{ calendar }],
+    timeMin: '2026-11-09T00:00:00Z',
+    timeMax: '2026-11-14T00:00:00Z',
+    duration: 30,
+    workingHours: { start: '09:00', end: '17:00', timeZone: 'Europe/Berlin' },
+  });
+  const [slot] = slots;
+  if (!slot) return undefined;
+
+  const { event } = await createEvent({
+    calendar,
+    event: {
+      title: 'Intro call',
+      start: { dateTime: slot.start, timeZone: 'Europe/Berlin' },
+      end: { dateTime: slot.end, timeZone: 'Europe/Berlin' },
+      attendees: [{ email: guest }],
+    },
+  });
+  return event;
+}
+```
+
+```ts title="book-intro-call.test.ts"
+import { mockCalendar } from '@calsdk/mock';
+import { expect, test } from 'vitest';
+import { bookIntroCall } from './book-intro-call';
+
+test('books the first free half hour', async () => {
+  const calendar = mockCalendar({
+    events: [
+      {
+        title: 'Busy morning',
+        start: { dateTime: '2026-11-09T09:00:00+01:00', timeZone: 'Europe/Berlin' },
+        end: { dateTime: '2026-11-09T11:00:00+01:00', timeZone: 'Europe/Berlin' },
+      },
+    ],
+  });
+
+  const event = await bookIntroCall(calendar, 'guest@example.com');
+
+  expect(event?.start.dateTime).toBe('2026-11-09T10:00:00.000Z'); // 11:00 in Berlin
+  expect(calendar.events).toHaveLength(2);
+});
+```
+
+## Settings
+
+<TypeTable
+  type={{
+    calendars: {
+      type: '(Partial<Calendar> & { id: string })[]',
+      description: "Calendars to start with. The first is primary unless another sets isPrimary. Defaults to one calendar, 'cal_1'.",
+    },
+    events: {
+      type: '(EventInput & { id?: string; calendarId?: string })[]',
+      description: 'Events to start with, created in order. They skip the checks createEvent runs, so give every dateTime an offset.',
+    },
+    now: {
+      type: '() => Date',
+      description: 'Clock for createdAt and updatedAt. Defaults to the real time.',
+    },
+    user: {
+      type: 'Person',
+      description: 'The signed-in user. Becomes the organizer of created events.',
+    },
+    defaultPageSize: {
+      type: 'number',
+      description: 'Page size for listings without pageSize, and for sync rounds.',
+      default: '250',
+    },
+  }}
+/>
+
+## Inspect the state
+
+`calendar.events` holds the stored events: single events, series and changed occurrences. `calendar.calendars` holds the calendars. Both are copies, so changing them does not change the mock.
+
+Ids are predictable: events are `evt_1`, `evt_2` and so on, and an occurrence is `<series id>_<UTC start>`, such as `evt_1_20261109T083000Z`. Pass `now` to make `createdAt` and `updatedAt` predictable too.
+
+## What the mock does
+
+It behaves like a full-featured provider, so tests cover the paths real calendars take:
+
+- **Recurring events** follow RFC 5545: one `RRULE` line plus `EXDATE` lines. All three scopes work. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`.
+- **Etags** change on every write, and a stale `ifMatch` throws `ConflictError`.
+- **Sync** keeps a change log, with cursors and pages like a real provider.
+- **Search, attendees, video links, reminders and colors** are stored as given.
+- **Free/busy** has no endpoint of its own, so `getFreeBusy` and `findFreeTime` compute it from events and return a `compatibility` warning, as they do for most providers.
+
+The mock does not simulate a provider's quirks, such as Outlook's limits on recurrence. Test those paths against a recording of the real API.
+
+## Silence warnings in tests
+
+Warnings go to `console.warn` by default. Turn them off in a test setup file, and assert on the `warnings` a call returns instead:
+
+```ts title="vitest.setup.ts"
+globalThis.CALSDK_WARNINGS = 'silent';
+```

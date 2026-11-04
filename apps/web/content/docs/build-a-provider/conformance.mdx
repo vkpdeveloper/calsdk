@@ -1,0 +1,55 @@
+---
+title: Conformance tests
+description: Check a provider against the calsdk contract with the suite every official provider runs, recorded once and replayed offline.
+---
+
+`@calsdk/provider-tests` registers Vitest tests that check a provider against the contract: calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. Tests run only for the capabilities the provider declares as `true`.
+
+```ts title="test/conformance.test.ts"
+import { describeProviderConformance } from '@calsdk/provider-tests';
+import { acme } from '../src/acme';
+
+describeProviderConformance({
+  name: 'acme',
+  createProvider: ({ fetch }) => acme({ accessToken: process.env.ACME_TOKEN ?? 'replay', fetch }),
+  recording: {
+    path: 'test/fixtures/conformance.json',
+    mode: process.env.CALSDK_RECORD ? 'record' : 'replay',
+  },
+});
+```
+
+Pass the suite's `fetch` through to your provider, so it can record and replay requests and stub error responses.
+
+## Record once, replay everywhere
+
+| Mode | What happens |
+| --- | --- |
+| `'replay'` (default) | No network and no credentials. Fails when a request has no recorded response |
+| `'record'` | Calls the real API and saves the responses per test |
+| No `recording` | Calls the real API live and saves nothing |
+
+```bash
+CALSDK_RECORD=1 ACME_TOKEN=... bunx vitest run test/conformance.test.ts
+```
+
+Record against a calendar made for testing: tests delete what they create, but they write to it. Set it with `calendarId`.
+
+Request headers are never saved. Response bodies are saved as the API returned them, so they can hold names and email addresses. Read a recording before you commit it.
+
+## Options
+
+<TypeTable
+  type={{
+    name: { type: 'string', description: "Suite name, such as 'acme'.", required: true },
+    createProvider: { type: '(settings: { fetch }) => CalendarProviderV1', description: "Creates the provider under test. Pass fetch through.", required: true },
+    calendarId: { type: 'string', description: 'Calendar the tests write to.', default: "'primary'" },
+    recording: { type: "{ path: string; mode?: 'record' | 'replay' }", description: 'Record and replay HTTP traffic. Leave out to call the API live.' },
+    http: { type: 'boolean', description: 'Run the tests that stub HTTP responses. Set false for providers that do not call fetch.', default: 'true' },
+    firstDay: { type: 'string', description: "First day test events are placed on, 'YYYY-MM-DD'. Fixed rather than relative to today, so recordings replay.", default: "'2030-01-07'" },
+  }}
+/>
+
+## Your own tests
+
+`createRecordingFetch` is exported for a provider's own tests, with the same record and replay modes. The suite needs Vitest 5 and a runtime with `node:fs`.

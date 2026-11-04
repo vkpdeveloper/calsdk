@@ -1,0 +1,34 @@
+---
+title: deleteEvent
+description: Deletes an event, one occurrence, or a series.
+---
+
+```ts
+import { deleteEvent } from 'calsdk';
+
+await deleteEvent({ calendar, eventId });
+```
+
+## Options
+
+<TypeTable
+  type={{
+    eventId: { type: 'string', required: true },
+    calendarId: { type: 'string', default: "'primary'" },
+    scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: delete only this instance, the whole series, or this and later instances.', default: "'this'" },
+    ifMatch: { type: 'string', description: "Only delete if the event's etag still matches. Otherwise throws ConflictError." },
+    sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options).
+
+## Result
+
+`{ warnings }`, plus `providerMetadata` and `response` when the provider sets them.
+
+## Throws
+
+- `NotFoundError` when the event does not exist. If a retry finds the event gone because an earlier attempt deleted it, the call succeeds instead.
+- `ConflictError` when `ifMatch` no longer matches.
+- `UnsupportedFunctionalityError` for a scope the provider cannot use, or on a read-only ICS feed.

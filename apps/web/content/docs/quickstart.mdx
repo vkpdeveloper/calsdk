@@ -1,77 +1,168 @@
 ---
 title: Quickstart
-description: Create, list and find free time in a few lines.
+description: Create a recurring event, move one occurrence and find free time, with no account and no network.
 ---
 
-## Install
+This page runs every step against `@calsdk/mock`, an in-memory calendar. It needs no credentials and makes no requests, and the code is the same code you will run against Google or Outlook.
 
-Install `calsdk` and a provider. The in-memory `@calsdk/mock` provider needs no credentials, so it is a good place to start.
+<Steps>
+<Step>
 
-```bash
-bun add calsdk @calsdk/mock
+### Install
+
+```npm
+npm install calsdk @calsdk/mock
 ```
 
-## Create and list events
+</Step>
+<Step>
 
-```ts
-import { createEvent, listEvents } from 'calsdk';
+### Create a recurring event
+
+Save this as `quickstart.ts`:
+
+```ts title="quickstart.ts"
+import { createEvent, findFreeTime, listEvents, updateEvent } from 'calsdk';
 import { mockCalendar } from '@calsdk/mock';
 
 const calendar = mockCalendar();
 
-await createEvent({
+const { event: standup } = await createEvent({
   calendar,
   event: {
-    title: 'Design review',
-    start: { dateTime: '2026-11-03T10:00:00', timeZone: 'Asia/Kolkata' },
-    end: { dateTime: '2026-11-03T11:00:00', timeZone: 'Asia/Kolkata' },
+    title: 'Standup',
+    start: { dateTime: '2026-11-09T09:30:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-09T09:45:00', timeZone: 'Europe/Berlin' },
+    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'],
   },
 });
 
-const { events } = await listEvents({ calendar, timeMin: '2026-11-01', timeMax: '2026-12-01' });
+console.log(standup.kind, standup.start.dateTime);
+// series 2026-11-09T09:30:00+01:00
 ```
 
-Timed values are `{ dateTime, timeZone }` with an IANA zone. A `dateTime` without an offset is read as wall-clock time in `timeZone`. All-day values are `{ date: 'YYYY-MM-DD' }`, and all-day end dates are exclusive.
+`calendarId` was left out, so the event went to `'primary'`, the user's default calendar. The `dateTime` had no offset, so calsdk read it as 9:30 on the Berlin wall clock and returned it with the offset filled in.
 
-## Find free time
+</Step>
+<Step>
 
-`findFreeTime` takes calendars from any mix of providers and returns the slots when all of them are free.
+### List a week
 
-```ts
-import { findFreeTime } from 'calsdk';
+```ts title="quickstart.ts"
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-09T00:00:00+01:00',
+  timeMax: '2026-11-14T00:00:00+01:00',
+});
 
+for (const event of events) console.log(event.id, event.kind, event.start.dateTime);
+// evt_1_20261109T083000Z occurrence 2026-11-09T09:30:00+01:00
+// evt_1_20261110T083000Z occurrence 2026-11-10T09:30:00+01:00
+// evt_1_20261111T083000Z occurrence 2026-11-11T09:30:00+01:00
+// evt_1_20261112T083000Z occurrence 2026-11-12T09:30:00+01:00
+// evt_1_20261113T083000Z occurrence 2026-11-13T09:30:00+01:00
+```
+
+Recurring events are expanded by default, so the series comes back as one `occurrence` per weekday. Each has its own id, and `seriesId` points back at the series.
+
+</Step>
+<Step>
+
+### Move one occurrence
+
+```ts title="quickstart.ts"
+const wednesday = events[2];
+
+const { event: moved } = await updateEvent({
+  calendar,
+  eventId: wednesday.id,
+  patch: {
+    start: { dateTime: '2026-11-11T11:00:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-11T11:15:00', timeZone: 'Europe/Berlin' },
+  },
+});
+
+console.log(moved.kind, moved.start.dateTime);
+// exception 2026-11-11T11:00:00+01:00
+```
+
+Updating an occurrence changes only that one by default, and it becomes an `exception`. Pass `scope: 'all'` to change the whole series instead. [Recurring events](/docs/guides/recurring-events) covers the other scopes.
+
+</Step>
+<Step>
+
+### Find free time
+
+```ts title="quickstart.ts"
 const { slots } = await findFreeTime({
   calendars: [{ calendar }],
-  timeMin: new Date(),
-  timeMax: new Date(Date.now() + 7 * 86_400_000),
+  timeMin: '2026-11-09T00:00:00+01:00',
+  timeMax: '2026-11-10T00:00:00+01:00',
   duration: 30,
-  workingHours: { start: '09:00', end: '18:00', timeZone: 'Asia/Kolkata' },
+  slotInterval: 30,
+  workingHours: { start: '09:00', end: '11:00', timeZone: 'Europe/Berlin' },
 });
+
+console.log(slots.map((slot) => slot.start));
+// [ '2026-11-09T08:00:00.000Z', '2026-11-09T09:00:00.000Z', '2026-11-09T09:30:00.000Z' ]
 ```
+
+Monday's standup blocks the 9:30 slot, so the free half hours are 9:00, 10:00 and 10:30 in Berlin. Slots are UTC instants.
+
+</Step>
+<Step>
+
+### Run it
+
+```bash
+bun quickstart.ts
+# or: npx tsx quickstart.ts
+```
+
+You will also see this line:
+
+```txt
+calsdk warning (mock, getFreeBusy): freeBusy uses a fallback: Provider "mock" has no free/busy endpoint, so busy times were computed from events.
+```
+
+That is a [warning](/docs/concepts/warnings), not an error. The mock has no free/busy endpoint, so calsdk read the events instead and says so.
+
+</Step>
+</Steps>
 
 ## Use a real calendar
 
-Replace the mock with a provider. calsdk does not run OAuth flows: pass a token, or a function that returns a fresh one.
+Replace the mock with a provider. Nothing else changes.
 
-```ts
+```ts tab="Google"
 import { google } from '@calsdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 ```
 
-## Warnings and errors
+```ts tab="Outlook"
+import { microsoft } from '@calsdk/microsoft';
 
-When a provider cannot honor part of a request, the call still succeeds and returns `warnings`. Set `globalThis.CALSDK_WARNINGS` to `'console'` (default), `'silent'` or a function.
-
-Errors extend `CalsdkError`. Check them with `isInstance`, which works across duplicated package copies:
-
-```ts
-import { SyncCursorExpiredError, syncEvents } from 'calsdk';
-
-try {
-  await syncEvents({ calendar, cursor });
-} catch (error) {
-  if (SyncCursorExpiredError.isInstance(error)) await fullResync();
-  else throw error;
-}
+const calendar = microsoft({ accessToken: () => getFreshAccessToken() });
 ```
+
+```ts tab="iCloud"
+import { icloud } from '@calsdk/caldav';
+
+const calendar = icloud({
+  appleId: 'me@icloud.com',
+  appPassword: process.env.ICLOUD_APP_PASSWORD!,
+});
+```
+
+```ts tab="Zoom"
+import { zoom } from '@calsdk/zoom';
+
+const calendar = zoom({ accessToken: () => getFreshAccessToken() });
+```
+
+Each [provider page](/docs/providers) lists the token or password it needs and how it differs from the others.
+
+<Callout type="warn" title="Use a test calendar">
+  Writes go to the real account. Point `calendarId` at a calendar made for testing until your code does what you expect.
+</Callout>

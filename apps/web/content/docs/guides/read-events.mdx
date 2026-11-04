@@ -5,7 +5,7 @@ description: List events in a time window, walk every page, fetch one event and 
 
 ## List a time window
 
-`listEvents` returns the events that overlap `[timeMin, timeMax)`: events that end after `timeMin` and start before `timeMax`.
+Say you're rendering a user's week. `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
 
 ```ts
 import { listEvents } from 'calsdk';
@@ -17,11 +17,11 @@ const { events, nextPageToken } = await listEvents({
 });
 ```
 
-`timeMin` and `timeMax` take a `Date` or an ISO 8601 string. A string without a time, such as `'2026-11-01'`, is midnight UTC, so pass an offset when you mean midnight somewhere else.
+Because the end is exclusive, an event ending exactly on a boundary never shows up in two back-to-back windows. `timeMin` and `timeMax` take a `Date` or an ISO 8601 string. Watch out for strings without a time: `'2026-11-01'` means midnight UTC, so pass an offset when you mean midnight in Berlin or Kolkata.
 
 ## Walk every page
 
-`listEvents` returns one page. Pass `nextPageToken` back as `pageToken` for the next one, or let `iterateEvents` do it:
+`listEvents` returns one page. You can pass `nextPageToken` back as `pageToken` to get the next one, but it's usually easier to let `iterateEvents` do it:
 
 ```ts
 import { iterateEvents } from 'calsdk';
@@ -31,16 +31,13 @@ for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
 }
 ```
 
-`iterateEvents` fetches pages as you loop, so you can `break` early without reading the rest. It yields events, not results, so warnings go to the [warnings setting](/docs/concepts/warnings) instead of being returned. Set `pageSize` to change how many events each request asks for; providers may return fewer.
+It fetches pages as you loop, so you can `break` early without reading the rest. Since it yields events rather than results, there's nowhere to return warnings, and they go to the [warnings setting](/docs/concepts/warnings) instead. Set `pageSize` to change how many events each request asks for; providers may return fewer.
 
 ## Recurring events
 
-By default each series is expanded into its instances, sorted by start:
+By default each series is expanded into its instances, sorted by start. An instance that follows the series rule is an `occurrence`, and one that someone changed, like the Monday standup moved to 10:00, is an `exception`.
 
-- `occurrence`: an instance that follows the series rule.
-- `exception`: an instance someone changed, such as a moved standup.
-
-Pass `expandRecurring: false` to get one `series` event per recurring event instead, with its rule in `recurrence`:
+To show the rules themselves, such as "every Monday, Wednesday and Friday", pass `expandRecurring: false` to get one `series` event per recurring event, with its rule in `recurrence`:
 
 ```ts
 const { events } = await listEvents({ calendar, timeMin, timeMax, expandRecurring: false });
@@ -49,7 +46,7 @@ const series = events.filter((event) => event.kind === 'series');
 console.log(series[0]?.recurrence); // ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR']
 ```
 
-Deleted instances are not events, so listings leave them out. See [Recurring events](/docs/guides/recurring-events).
+Deleted instances are not events, so listings leave them out. [Recurring events](/docs/guides/recurring-events) covers the rest.
 
 ## Fetch one event
 
@@ -67,11 +64,11 @@ const { event } = await getEvent({ calendar, eventId });
 const { events } = await listEvents({ calendar, timeMin, timeMax, query: 'design review' });
 ```
 
-Only Google and the mock support `query`. Other providers throw `UnsupportedFunctionalityError`, so check `calendar.capabilities.events.search` first if your app takes any provider.
+Search is the read most providers can't do. Only Google and the mock support `query`, and the others throw `UnsupportedFunctionalityError` rather than quietly ignoring it. If your app accepts any provider, check `calendar.capabilities.events.search` first.
 
 ## Another calendar
 
-Every read defaults to `'primary'`. Pass the `id` from [`listCalendars`](/docs/guides/calendars) to read another calendar:
+Every read defaults to `'primary'`. To read another calendar, pass the `id` you got from [`listCalendars`](/docs/guides/calendars):
 
 ```ts
 const { events } = await listEvents({ calendar, calendarId: 'team@example.com', timeMin, timeMax });

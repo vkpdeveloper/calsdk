@@ -3,6 +3,8 @@ title: Find free time
 description: Read busy blocks from one calendar, or find meeting slots that work across several providers.
 ---
 
+You're building a booking page and need the times when both people are free, one on Google and the other on Outlook. That takes two steps: read when each calendar is busy, then find the gaps.
+
 ## Busy blocks
 
 `getFreeBusy` returns when each calendar is busy, without event details:
@@ -20,13 +22,13 @@ const { calendars } = await getFreeBusy({
 calendars.primary?.busy; // [{ start: '2026-11-09T08:30:00.000Z', end: '2026-11-09T08:45:00.000Z' }, ...]
 ```
 
-Blocks are merged, sorted and clipped to the window. `calendarIds` defaults to `['primary']`. A calendar that could not be read, for example one that is not shared with the user, gets an `error` string instead of failing the whole call.
+Blocks come back merged, sorted and clipped to the window, so two overlapping meetings show up as one busy stretch. `calendarIds` defaults to `['primary']`. A calendar that can't be read, for example one that isn't shared with the user, gets an `error` string instead of failing the whole call.
 
-Google has a free/busy endpoint, which also works for calendars the user can only see as free or busy. Every other provider has none, so calsdk lists the events instead and returns a `compatibility` [warning](/docs/concepts/warnings). Either way, events shown as free and cancelled events do not count as busy.
+Only Google has a free/busy endpoint, which also works for calendars the user can only see as free or busy. For every other provider, calsdk lists the events and works out the busy times itself, with a `compatibility` [warning](/docs/concepts/warnings). Either way, events shown as free and cancelled events don't count as busy.
 
 ## Slots that work for everyone
 
-`findFreeTime` takes calendars from any mix of providers and returns the times when all of them are free:
+`findFreeTime` does both steps for you. It takes calendars from any mix of providers and returns the times when all of them are free:
 
 ```ts
 import { findFreeTime } from 'calsdk';
@@ -47,17 +49,15 @@ const { slots } = await findFreeTime({
 // [{ start: '2026-11-09T08:00:00.000Z', end: '2026-11-09T08:30:00.000Z' }, ...]
 ```
 
-- **`duration`** is the meeting length in minutes.
-- **`slotInterval`** is the minutes between slot starts, 15 by default. Slots line up with the hour in the working hours' time zone, so 15 gives :00, :15, :30 and :45.
-- **`workingHours`** limits slots to these hours, Monday to Friday unless you pass `days` (`0` is Sunday). Leave it out to search the whole window.
+`duration` is the meeting length in minutes. `workingHours` keeps slots inside those hours, Monday to Friday unless you pass `days` (`0` is Sunday); leave it out to search the whole window. `slotInterval` is the minutes between slot starts, 15 by default, and slots line up with the hour in the working hours' time zone, so 15 gives :00, :15, :30 and :45.
 
-Slots overlap when `slotInterval` is shorter than `duration`: a 60 minute meeting every 15 minutes gives 9:00 to 10:00, 9:15 to 10:15 and so on. Show them as start times.
+Slots overlap when `slotInterval` is shorter than `duration`: a 60 minute meeting every 15 minutes gives 9:00 to 10:00, 9:15 to 10:15 and so on. On a booking page, show them as start times.
 
-If any calendar cannot be read, `findFreeTime` throws `FreeBusyUnavailableError` instead of offering times that might clash. The error has the `provider` and `calendarId`; its message leaves out the id, which is often an email address.
+If any calendar can't be read, `findFreeTime` throws `FreeBusyUnavailableError` rather than offering times that might clash. A slot that ignores Raj's calendar is a double booking waiting to happen. The error has the `provider` and `calendarId`, but its message leaves out the id, which is often an email address.
 
 ## Book the slot
 
-A slot is plain start and end instants. Create the event in the zone you want it shown in:
+A slot is a pair of UTC instants, so create the event in the zone you want it shown in:
 
 ```ts
 const [slot] = slots;

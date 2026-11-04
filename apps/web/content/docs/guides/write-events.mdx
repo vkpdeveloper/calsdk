@@ -5,6 +5,8 @@ description: Create, update and delete events, invite attendees, add video links
 
 ## Create an event
 
+You want every booking in your app to land in your users' real calendars, whichever one they use. That's one `createEvent` call:
+
 ```ts
 import { createEvent } from 'calsdk';
 
@@ -20,9 +22,9 @@ const { event, warnings } = await createEvent({
 });
 ```
 
-The result is the event as the provider stored it, with its `id` and `etag`. Check `warnings` for anything the provider changed or could not save, such as a color Google does not have.
+You get back the event as the provider stored it, with its `id` and `etag`. Check `warnings` for anything the provider changed or couldn't save, such as a color Google doesn't have.
 
-An all-day event uses dates, and the end date is exclusive:
+All-day events use dates instead, and the end date is exclusive:
 
 ```ts
 await createEvent({
@@ -32,7 +34,7 @@ await createEvent({
 // Covers the 12th and the 13th.
 ```
 
-calsdk checks every event before it calls the provider. A start after its end, an unknown time zone or a malformed RRULE throws `InvalidArgumentError` without a request.
+calsdk checks every event before it calls the provider, so a start after its end, an unknown time zone or a malformed RRULE throws `InvalidArgumentError` straight away, before any request.
 
 ## Invite people
 
@@ -52,9 +54,9 @@ await createEvent({
 });
 ```
 
-`sendUpdates` decides who gets an email: `'all'`, `'externalOnly'` (people outside the organization) or `'none'`. Leave it out for the provider's default. Some providers always email attendees, or never do, and return a warning when you ask for something else. Each [provider page](/docs/providers) says which.
+`sendUpdates` decides who gets an email: `'all'`, `'externalOnly'` (people outside the organization) or `'none'`. Leave it out to get the provider's default. Not every provider lets you choose: some always email attendees, and some never do. Cal.com, for example, always emails attendees about their bookings, so asking for `'none'` there still sends the email and returns a warning that says so. Each [provider page](/docs/providers) says what it does.
 
-Events you read back list `attendees` with their `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`) and the `organizer`.
+When you read events back, `attendees` carry their `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`), and `organizer` says who organized it.
 
 ## Add a video link
 
@@ -68,7 +70,7 @@ console.log(event.conference);
 // { provider: 'google-meet', joinUrl: 'https://meet.google.com/...', id: '...' }
 ```
 
-Google adds a Meet link and Outlook a Teams meeting (work and school accounts only). Every Zoom meeting has its link already. Other providers cannot create links, but on CalDAV and ICS events calsdk finds a Meet, Teams or Zoom link in the event's URL, location or description and returns it as `conference`.
+Google adds a Meet link and Outlook a Teams meeting (work and school accounts only). Every Zoom meeting has its link already. Other providers can't create links, but CalDAV and ICS events often have one pasted in, so calsdk looks for a Meet, Teams or Zoom link in the event's URL, location or description and returns it as `conference`.
 
 ## Update an event
 
@@ -84,7 +86,7 @@ const { event } = await updateEvent({
 });
 ```
 
-`start` and `end` can be replaced but not cleared. Always use the `id` of the returned event afterwards: a few providers, such as Cal.com, replace an event when it moves and give it a new id.
+`start` and `end` can be replaced but not cleared. Always use the `id` of the returned event afterwards, because a few providers replace an event when it moves. Cal.com, for one, cancels the old booking and gives you a new one with a new id.
 
 ## Delete an event
 
@@ -94,11 +96,11 @@ import { deleteEvent } from 'calsdk';
 await deleteEvent({ calendar, eventId });
 ```
 
-A missing event throws `NotFoundError`. If a retry finds that an earlier attempt already deleted the event, calsdk treats the delete as done.
+A missing event throws `NotFoundError`. The exception is a retry: if an earlier attempt deleted the event but its response got lost, calsdk treats the delete as done instead of failing.
 
 ## Do not overwrite someone else's change
 
-Events carry an `etag`, a version tag, on providers that support it. Pass it as `ifMatch` to update or delete only if nobody changed the event since you read it:
+You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update or delete then only goes through if nobody changed the event since you read it:
 
 ```ts
 import { ConflictError, getEvent, updateEvent } from 'calsdk';
@@ -117,9 +119,9 @@ Google, Outlook, CalDAV and the mock support `ifMatch`. Cal.com, Calendly and Zo
 
 ## Retries
 
-calsdk retries rate limits, timeouts, server errors and network failures twice by default, with exponential backoff that honors `Retry-After`. Creates are the exception: they only retry rate limits, because retrying after a server error could create the event twice. Set `maxRetries` to change the count, or `0` to turn retries off.
+calsdk retries rate limits, timeouts, server errors and network failures twice by default, with exponential backoff that honors `Retry-After`. A `Retry-After` over a minute isn't waited out: calsdk throws so the call doesn't hang. Set `maxRetries` to change the count, or `0` to turn retries off.
 
-To make an Outlook create safe to retry yourself, pass a `transactionId`:
+Creates are the exception. They only retry rate limits, which the provider rejects before doing any work, because retrying after a server error could create the event twice. To make an Outlook create safe to retry yourself, pass a `transactionId`, and Outlook won't create the event again on a repeat:
 
 ```ts
 await createEvent({

@@ -3,7 +3,7 @@ title: Sync changes
 description: Keep a copy of a calendar up to date by fetching only what changed since the last sync.
 ---
 
-`syncEvents` returns every change since a cursor you stored. The first sync, without a cursor, returns everything the provider syncs: for most providers that is the whole calendar, while Outlook covers a window. See [how each provider syncs](#how-each-provider-syncs).
+Say you're mirroring your users' calendars into Postgres. Reading every event on each run gets slower as calendars grow, so `syncEvents` returns only what changed since a cursor you stored. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window. See [how each provider syncs](#how-each-provider-syncs).
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
@@ -27,10 +27,7 @@ async function sync(calendarId: string) {
 
 ## Apply changes in order
 
-Changes come in the order the provider returns them, which is not always by time. Apply them in that order. Each is one of:
-
-- `{ type: 'upsert', event }`: insert the event, or replace the one with the same `id`.
-- `{ type: 'delete', eventId }`: remove that event.
+Changes come oldest first, in the order the provider reports them, and the same event can show up more than once in a round (Outlook does this). Apply them in order so the last version wins. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
 
 ```ts
 import type { SyncChange } from 'calsdk';
@@ -43,17 +40,17 @@ async function applyChanges(changes: SyncChange[]) {
 }
 ```
 
-Sync returns stored events, not computed occurrences: single events, series and exceptions. To show a week, expand series yourself, or call `listEvents` for the window when you need it.
+Sync returns what the provider stores, not computed occurrences: single events, series and exceptions. A daily standup with no end has infinitely many occurrences, so there's no sensible way to sync them all. To show a week, expand series yourself, or call `listEvents` for that window.
 
 ## Cursors
 
-The cursor is opaque. Store it as a string and never parse it: it can be a provider token or a list of fingerprints, depending on the provider. Save it only after the changes are applied, so a crash in between replays them instead of losing them.
+Store the cursor as a string and never parse it: depending on the provider, it's a provider token or a list of fingerprints. Save it only after the changes are applied, so a crash in between replays them instead of losing them.
 
-A provider can expire a cursor, for example after a long time unused. Then `syncEvents` throws `SyncCursorExpiredError`. Throw away the cursor and your copy, and sync again without one.
+Providers can expire a cursor, for example after a long time unused, and then `syncEvents` throws `SyncCursorExpiredError`. Throw away the cursor and your copy, and sync again without one, as the example at the top does.
 
 ## Large syncs
 
-`syncEvents` follows every page and returns all changes at once. For a big first sync, take one page at a time with `paginate: false`:
+`syncEvents` follows every page and returns all changes at once. A first sync of years of history can be large, so take it one page at a time with `paginate: false`:
 
 ```ts
 let pageToken: string | undefined;
@@ -82,4 +79,6 @@ Pass the same `calendarId` and `cursor` on every page of a round. The last page 
 | Calendly, Zoom, ICS | Reads everything and compares it with the last sync. The cursor grows with the number of events |
 | Mock              | A change log in memory                                            |
 
-No provider pushes changes yet. Run sync on a schedule, or when the user opens your app.
+Outlook syncs a window because Graph's delta query needs a date range. Pass `providerOptions.microsoft.timeMin` and `timeMax` on the first sync to choose a different one; the window is kept in the cursor after that.
+
+No provider pushes changes yet, so run sync on a schedule, or when the user opens your app.

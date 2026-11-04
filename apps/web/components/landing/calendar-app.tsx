@@ -281,7 +281,7 @@ export function CalendarApp() {
       },
     });
     setBooked(`Booked ${DAY_NAMES[slotDay]} ${clock(from)} on ${target.name}.`);
-    setSelected(`${target.id}:${event.id}`);
+    pick(`${target.id}:${event.id}`);
     setDay(slotDay);
     // A new calendars object reruns the listing with the booking in it.
     setCalendars({ ...calendars });
@@ -313,8 +313,10 @@ export function CalendarApp() {
         <span className="hidden sm:inline">
           {searching ? 'listEvents + findFreeTime' : 'listEvents'} ·{' '}
         </span>
-        <span className="whitespace-nowrap">{sources.length} sample calendars</span> ·{' '}
-        <span className="whitespace-nowrap">{run.events.length} events</span> ·{' '}
+        <span className="whitespace-nowrap">
+          {sources.length} <span className="max-sm:hidden">sample </span>calendars
+        </span>{' '}
+        · <span className="whitespace-nowrap">{run.events.length} events</span> ·{' '}
         <span className="whitespace-nowrap">{run.ms.toFixed(1)} ms</span>
       </>
     );

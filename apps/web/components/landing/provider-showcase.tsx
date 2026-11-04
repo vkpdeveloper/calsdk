@@ -89,7 +89,8 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
             </button>
           ))}
         </div>
-        <div role="tabpanel" className="code flex-1 py-2">
+        {/* Keyed by provider so the changed lines flash once on every switch. */}
+        <div key={current?.id} role="tabpanel" className="code code-flash flex-1 py-2">
           {current?.code}
         </div>
         <p className="border-t border-line px-5 py-3 text-sm text-neutral-500">

@@ -60,6 +60,20 @@ html > body[data-scroll-locked] {
   background: rgb(79 124 255 / 0.1);
   border-left-color: #4f7cff;
 }
+/* The provider showcase: the lines a switch changed light up once, then settle. */
+.code-flash .line.changed {
+  animation: line-flash 0.9s ease-out;
+}
+@keyframes line-flash {
+  from {
+    background-color: rgb(79 124 255 / 0.38);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .code-flash .line.changed {
+    animation: none;
+  }
+}
 .code-sm pre {
   font-size: 0.75rem;
 }

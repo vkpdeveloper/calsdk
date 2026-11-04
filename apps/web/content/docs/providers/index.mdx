@@ -23,12 +23,14 @@ Calendar APIs agree on less than you'd hope. Google can split a recurring series
 
 ## Conditions
 
-- **Outlook video links:** Teams meetings need a work or school account.
-- **Outlook reminders:** one popup reminder per event.
-- **Cal.com writes:** book, move (as a new booking with a new id) and cancel.
-- **Calendly writes:** book and cancel. `updateEvent` throws.
-- **Zoom recurring events:** daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
-- **ICS:** feeds are read only. All-day, recurring and attendee data is read but can't be written.
+Where the table says Some:
+
+- Outlook adds Teams links only on work or school accounts.
+- Outlook keeps one popup reminder per event.
+- Cal.com books, moves (as a new booking with a new id) and cancels.
+- Calendly books and cancels; `updateEvent` throws.
+- Zoom repeats daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
+- ICS feeds are read only: all-day, recurring and attendee data is read but can't be written.
 
 "Keeps title" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning rather than saved.
 

@@ -36,8 +36,8 @@ const { slots } = await findFreeTime({
 
 <TypeTable
   type={{
-    start: { type: 'string', description: "'HH:mm', such as '09:00'.", required: true },
-    end: { type: 'string', description: "'HH:mm', after start. Slots end by this time.", required: true },
+    start: { type: 'string', description: "`'HH:mm'`, such as `'09:00'`.", required: true },
+    end: { type: 'string', description: "`'HH:mm'`, after start. Slots end by this time.", required: true },
     timeZone: { type: 'string', description: 'IANA time zone the hours are in.', required: true },
     days: { type: 'number[]', description: '0 (Sunday) to 6 (Saturday).', default: '[1, 2, 3, 4, 5]' },
   }}

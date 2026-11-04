@@ -48,9 +48,9 @@ Either timed or all-day, never both. `start` and `end` of one event use the same
 
 <TypeTable
   type={{
-    dateTime: { type: 'string', description: "Timed. ISO 8601 with an offset, such as '2026-11-03T10:00:00+05:30'. On input, the offset may be left out." },
-    timeZone: { type: 'string', description: "Timed. The IANA zone the event was scheduled in, such as 'Asia/Kolkata'." },
-    date: { type: 'string', description: "All-day. 'YYYY-MM-DD'. Exclusive on end." },
+    dateTime: { type: 'string', description: "Timed. ISO 8601 with an offset, such as `'2026-11-03T10:00:00+05:30'`. On input, the offset may be left out." },
+    timeZone: { type: 'string', description: "Timed. The IANA zone the event was scheduled in, such as `'Asia/Kolkata'`." },
+    date: { type: 'string', description: "All-day. `'YYYY-MM-DD'`. Exclusive on end." },
   }}
 />
 
@@ -84,7 +84,7 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
     description: { type: 'string' },
     timeZone: { type: 'string', description: 'IANA time zone.' },
     color: { type: 'string', description: "`'#RRGGBB'`." },
-    isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
+    isPrimary: { type: 'boolean', description: "The user's default calendar. `'primary'` resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
     providerMetadata: { type: 'Record<string, JSONObject>' },
   }}

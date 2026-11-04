@@ -4,7 +4,7 @@ import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
 import { defineDocs } from 'fumadocs-mdx/macro';
 import { remarkTypeTableSearch } from './remark-type-table';
-import { docsRoute } from './shared';
+import { docsRoute, siteUrl } from './shared';
 
 const docs = defineDocs({
   dir: 'content/docs',
@@ -28,7 +28,7 @@ export const source = loader({
 });
 
 export const docsLlms = llms(source, {
-  renderPage: async (page) => `# ${page.data.title} (${page.url})
+  renderPage: async (page) => `# ${page.data.title} (${siteUrl}${page.url})
 
 ${await page.data.getText('processed')}`,
 });

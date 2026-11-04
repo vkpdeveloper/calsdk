@@ -206,8 +206,8 @@ html > body[data-scroll-locked] {
   border-left-color: #4f7cff;
 }
 
-/* On phones, wide docs tables scroll inside their own box, with the header row and each
-   row's label kept in view. Short tables never reach the height cap. */
+/* On phones, wide docs tables scroll inside their own box with the header row in view.
+   Short tables never reach the height cap. */
 @media (max-width: 767px) {
   .prose div:has(> table) {
     max-height: 70dvh;
@@ -223,19 +223,33 @@ html > body[data-scroll-locked] {
     background-color: rgb(20 20 20);
     box-shadow: inset 0 -1px 0 var(--color-fd-border);
   }
-  .prose table :is(th, td):first-child {
+  /* Only wide matrices (five or more columns) pin their row labels. On narrower tables a
+     pinned first column, such as a long RRULE, can cover the column next to it. */
+  .prose table:has(th:nth-child(5)) :is(th, td):first-child {
     position: sticky;
     left: 0;
     z-index: 1;
     background-color: var(--color-fd-card);
     box-shadow: inset -1px 0 0 var(--color-fd-border);
   }
-  .prose table th:first-child {
+  .prose table:has(th:nth-child(5)) th:first-child {
     z-index: 3;
     background-color: rgb(20 20 20);
     box-shadow:
       inset -1px 0 0 var(--color-fd-border),
       inset 0 -1px 0 var(--color-fd-border);
+  }
+  /* Narrower tables hold prose after the first column; keep those columns wide enough to
+     read, and let the table scroll instead of squeezing them into strips. Four-column
+     tables end in longer notes. */
+  .prose table:not(:has(th:nth-child(5))) td:not(:first-child) {
+    min-width: 9rem;
+  }
+  .prose table:not(:has(th:nth-child(5))) td:last-child {
+    min-width: 11rem;
+  }
+  .prose table:has(th:nth-child(4)):not(:has(th:nth-child(5))) td:last-child {
+    min-width: 18rem;
   }
   /* A code block without a title floats its copy button over the first line, and phone
      lines run to the edge. Start the code below the button instead. */

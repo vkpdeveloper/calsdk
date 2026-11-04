@@ -20,11 +20,17 @@ export type GetEventOptionsV1 = CallOptionsV1 & {
   calendarId: string;
   eventId: string;
 };
-export type EventResultV1 = ResultBaseV1 & { event: EventV1 };
+export type EventResultV1 = ResultBaseV1 & {
+  /**
+   * After an update, `event.id` can differ from the id passed in: some providers, such as
+   * Cal.com, replace an event when it moves. Use the returned id from then on.
+   */
+  event: EventV1;
+};
 
 export type ListEventsOptionsV1 = CallOptionsV1 & {
   calendarId: string;
-  /** ISO 8601 lower bound (inclusive) on event end. */
+  /** ISO 8601 lower bound on event end: events ending after it are returned. */
   timeMin: string;
   /** ISO 8601 upper bound (exclusive) on event start. */
   timeMax: string;

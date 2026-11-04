@@ -1,12 +1,12 @@
 # calsdk
 
-One TypeScript API for Google Calendar, Microsoft Outlook and any other calendar provider. Pick a provider, then call plain functions.
+One TypeScript API for Google Calendar, Microsoft Outlook, Cal.com and any other calendar provider. Pick a provider, then call plain functions.
 
 ```ts
 import { createEvent, findFreeTime, listEvents } from 'calsdk';
 import { mockCalendar } from '@calsdk/mock';
 
-const calendar = mockCalendar(); // or google({ accessToken }), microsoft({ accessToken })
+const calendar = mockCalendar(); // or google({ accessToken }), microsoft({ accessToken }), calcom({ accessToken })
 
 await createEvent({
   calendar,

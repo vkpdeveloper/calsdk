@@ -206,6 +206,12 @@ html > body[data-scroll-locked] {
   border-left-color: #4f7cff;
 }
 
+/* Running text keeps a readable line length on wide screens; code, tables and cards still use
+   the full column. */
+.prose > :is(p, ul, ol, blockquote) {
+  max-width: 75ch;
+}
+
 /* On phones, wide docs tables scroll inside their own box with the header row in view.
    Short tables never reach the height cap. */
 @media (max-width: 767px) {

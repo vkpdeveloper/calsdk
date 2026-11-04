@@ -156,7 +156,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
       await createEvent({
         calendar,
         event: {
-          title: 'New meeting',
+          title: 'Booked',
           start: { dateTime: slot.start, timeZone: ZONE },
           end: { dateTime: slot.end, timeZone: ZONE },
         },
@@ -327,12 +327,16 @@ function Legend({ className, children }: { className: string; children: ReactNod
 
 function Placed({ block, className }: { block: Block; className: string }) {
   const minutes = block.to - block.from;
+  // Half-hour blocks fit one tight line; shorter ones (the 15-minute standups) stay bare.
+  const short = minutes < 45;
   return (
     <div
-      className={`absolute overflow-hidden px-1.5 py-1 text-[10px] leading-tight sm:text-[11px] ${className}`}
+      className={`absolute overflow-hidden px-1.5 text-[10px] leading-tight sm:text-[11px] ${short ? 'py-0.5' : 'py-1'} ${className}`}
       style={{ top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) }}
     >
-      {minutes >= 36 && block.title && <span className="block">{block.title}</span>}
+      {minutes >= 30 && block.title && (
+        <span className={short ? 'block truncate' : 'block'}>{block.title}</span>
+      )}
     </div>
   );
 }

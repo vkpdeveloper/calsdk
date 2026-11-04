@@ -198,10 +198,12 @@ END:VEVENT`,
   },«repeat»
   "occurrences": [«start»
     {«start»
+      "occurrence_id": "1794234600000",«start»
       "start_time": "2026-11-09T14:30:00Z",«start»
       "duration": 15«start»
     },«start»
     {
+      "occurrence_id": "1794321000000",
       "start_time": "2026-11-10T14:30:00Z",
       "duration": 15
     }

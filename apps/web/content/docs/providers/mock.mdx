@@ -3,6 +3,8 @@ title: Mock
 description: An in-memory calendar for trying calsdk, testing your app offline and checking a provider against a reference.
 ---
 
+The mock needs no credentials and makes no requests, so it's the quickest way to try calsdk and the right thing to put in your tests. It supports everything calsdk models except a free/busy endpoint, which also makes it the reference implementation for [provider authors](/docs/build-a-provider).
+
 ```npm
 npm install calsdk @calsdk/mock
 ```
@@ -30,8 +32,6 @@ const { events } = await listEvents({
 
 console.log(calendar.events); // the stored state
 ```
-
-The mock needs no credentials and makes no requests, so it's the quickest way to try calsdk and the right thing to put in your tests. It supports everything calsdk models except a free/busy endpoint, which also makes it the reference implementation for [provider authors](/docs/build-a-provider).
 
 ## How it behaves
 

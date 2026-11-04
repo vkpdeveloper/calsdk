@@ -34,28 +34,25 @@ The same meeting read from Google would have a different id, a Meet link and Goo
 
 ## Identity
 
-- **`id`** is the provider's id for the event. Pass it to `getEvent`, `updateEvent` and `deleteEvent`, with the same `calendarId`.
-- **`calendarId`** is the calendar the event was read from.
-- **`kind`** is `single`, `series`, `occurrence` or `exception`. See [Recurring events](/docs/guides/recurring-events).
-- **`seriesId`** and **`originalStart`** are set on occurrences and exceptions: the series they belong to, and where its rule placed them.
+Every event carries the provider's own `id` and the `calendarId` it was read from. Pass both back to `getEvent`, `updateEvent` and `deleteEvent`. Ids are strings with no fixed format, and each provider shapes them its own way, so store them as they are rather than parsing them.
 
-Ids are strings with no fixed format, and each provider shapes them its own way, so store them as they are rather than parsing them.
+`kind` tells you what you're looking at: a `single` event, a recurring `series`, one `occurrence` of a series, or an `exception`, an occurrence someone moved or edited. Occurrences and exceptions also carry `seriesId`, the series they belong to, and `originalStart`, where the series' rule placed them. [Recurring events](/docs/guides/recurring-events) covers how to work with them.
 
 ## When
 
-- **`start`** and **`end`** are either both timed, `{ dateTime, timeZone }`, or both all-day, `{ date }`. All-day end dates are exclusive. See [Time zones](/docs/concepts/time-zones).
-- **`recurrence`** holds the RFC 5545 lines of a series, such as `['RRULE:FREQ=WEEKLY;BYDAY=MO', 'EXDATE:20261110T100000Z']`.
+`start` and `end` are either both timed, `{ dateTime, timeZone }`, or both all-day, `{ date }`. An all-day event's end date is exclusive, so a one-day event on 3 November ends on the 4th. [Time zones](/docs/concepts/time-zones) explains why timed events keep their zone.
+
+A series keeps its rule in `recurrence`, as RFC 5545 lines such as `['RRULE:FREQ=WEEKLY;BYDAY=MO', 'EXDATE:20261110T100000Z']`.
 
 ## Status and availability
 
-- **`status`** is `confirmed`, `tentative` or `cancelled`. `cancelled` is rare: it is for events that still have their details, such as an Outlook meeting the organizer cancelled. Deleted events are not returned at all, and sync reports them as `delete` changes.
-- **`showAs`** is `busy` or `free`, which decides whether the event blocks time in free/busy. Providers with more states, such as Outlook's out of office, put the original in `providerMetadata`.
-- **`visibility`** is `default`, `public` or `private`.
+`status` is `confirmed`, `tentative` or `cancelled`. You'll rarely see `cancelled`: it's for events that still have their details, such as an Outlook meeting the organizer cancelled. Deleted events aren't returned at all, and sync reports them as `delete` changes.
+
+`showAs` is `busy` or `free`, and decides whether the event blocks time in free/busy. Providers with more states, such as Outlook's out of office, keep the original in `providerMetadata`. `visibility` is `default`, `public` or `private`.
 
 ## People
 
-- **`organizer`** is a `{ email, name?, self? }`. `self` is `true` when it is the signed-in user.
-- **`attendees`** add `responseStatus` (`needsAction`, `accepted`, `declined`, `tentative`), `optional` and `organizer`.
+The `organizer` is a `{ email, name?, self? }`, where `self` is `true` when it's the signed-in user. `attendees` have the same fields plus `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`), `optional` and `organizer`.
 
 Some providers leave attendees out of listings because reading them costs a request per event. Fetch the event with `getEvent` when you need them. The provider pages say which.
 

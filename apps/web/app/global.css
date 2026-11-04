@@ -86,7 +86,8 @@ html > body[data-scroll-locked] {
   padding: 0 0.75rem;
 }
 /* A result sits in a narrow column, so long values wrap (at spaces first) instead of
-   scrolling. From 640px the inset matches the feature text above it (sm:p-8). */
+   scrolling. Below 1024px it sits under the code and lines up with it; from 1024px it
+   sits under the feature text and lines up with that (sm:p-8). */
 .code-result pre {
   font-size: 0.75rem;
   white-space: pre-wrap;
@@ -95,9 +96,9 @@ html > body[data-scroll-locked] {
 .code-result .line {
   /* Opting out of Fumadocs' code styles also drops the height it gives empty lines. */
   min-height: 1lh;
-  padding: 0 1.25rem;
+  padding: 0 1rem;
 }
-@media (min-width: 640px) {
+@media (min-width: 1024px) {
   .code-result .line {
     padding: 0 2rem;
   }

@@ -1,1 +1,1 @@
-export { type CaldavProvider, type CaldavSettings, caldav, icloud } from './caldav-provider';
+export { type CaldavProvider, type CaldavSettings, caldav, icloud, zoho } from './caldav-provider';

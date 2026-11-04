@@ -1,0 +1,254 @@
+{
+  "creates, lists, updates and deletes an event in a Zoho calendar": [
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "https://calendar.zoho.com/.well-known/caldav",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:current-user-principal/><C:calendar-home-set/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/.well-known/caldav</D:href><D:propstat><D:prop><D:current-user-principal><D:href>/caldav/0123456789abcdef0123456789abcdef/user/</D:href></D:current-user-principal></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/user/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><C:calendar-home-set/><C:calendar-user-address-set/><C:schedule-inbox-URL/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/user/</D:href><D:propstat><D:prop><A0:calendar-home-set xmlns:A0=\"urn:ietf:params:xml:ns:caldav\"><D:href>/caldav/0123456789abcdef0123456789abcdef/</D:href></A0:calendar-home-set><B:calendar-user-address-set xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><D:href>mailto:me@example.com</D:href><D:href>/caldav/0123456789abcdef0123456789abcdef/user</D:href></B:calendar-user-address-set><B:schedule-inbox-URL xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><D:href>/caldav/0123456789abcdef0123456789abcdef/inbox/</D:href></B:schedule-inbox-URL></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:resourcetype/><D:displayname/><D:current-user-privilege-set/><C:calendar-description/><C:supported-calendar-component-set/><A:calendar-color/><CS:shared-url/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><D:principal/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/events/</D:href><D:propstat><D:prop><D:current-user-privilege-set><D:privilege><D:write/></D:privilege><D:privilege><D:write-properties/></D:privilege><D:privilege><D:bind/></D:privilege><D:privilege><B:read-free-busy xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:privilege><D:privilege><D:unbind/></D:privilege><D:privilege><D:read-current-user-privilege-set/></D:privilege><D:privilege><D:read/></D:privilege><D:privilege><D:write-content/></D:privilege></D:current-user-privilege-set><D:displayname>Me</D:displayname><D:calendar-color xmlns:D=\"http://apple.com/ns/ical/\">#8cbf40</D:calendar-color><D:resourcetype><B:calendar xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype><B:supported-calendar-component-set xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><B:comp name=\"VEVENT\"/></B:supported-calendar-component-set><B:calendar-description xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/inbox/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><B:schedule-inbox xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/outbox/</D:href><D:propstat><D:prop><D:resourcetype><B:schedule-outbox xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/</D:href><D:propstat><D:prop><D:current-user-privilege-set><D:privilege><D:write/></D:privilege><D:privilege><D:write-properties/></D:privilege><D:privilege><D:bind/></D:privilege><D:privilege><B:read-free-busy xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:privilege><D:privilege><D:unbind/></D:privilege><D:privilege><D:read-current-user-privilege-set/></D:privilege><D:privilege><D:read/></D:privilege><D:privilege><D:write-content/></D:privilege></D:current-user-privilege-set><D:displayname>calsdk test</D:displayname><D:calendar-color xmlns:D=\"http://apple.com/ns/ical/\">#867FDD</D:calendar-color><D:resourcetype><B:calendar xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype><B:supported-calendar-component-set xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><B:comp name=\"VEVENT\"/></B:supported-calendar-component-set><B:calendar-description xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/inbox/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><C:schedule-default-calendar-URL/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/inbox/</D:href><D:propstat><D:prop/><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PROPFIND",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><D:propfind xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\" xmlns:A=\"http://apple.com/ns/ical/\" xmlns:CS=\"http://calendarserver.org/ns/\"><D:prop><D:resourcetype/><D:displayname/><D:current-user-privilege-set/><C:calendar-description/><C:supported-calendar-component-set/><A:calendar-color/><CS:shared-url/></D:prop></D:propfind>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><D:principal/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/events/</D:href><D:propstat><D:prop><D:current-user-privilege-set><D:privilege><B:read-free-busy xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:privilege><D:privilege><D:read-current-user-privilege-set/></D:privilege><D:privilege><D:write-content/></D:privilege><D:privilege><D:write/></D:privilege><D:privilege><D:unbind/></D:privilege><D:privilege><D:read/></D:privilege><D:privilege><D:bind/></D:privilege><D:privilege><D:write-properties/></D:privilege></D:current-user-privilege-set><D:displayname>Me</D:displayname><G:calendar-color xmlns:G=\"http://apple.com/ns/ical/\">#8cbf40</G:calendar-color><D:resourcetype><B:calendar xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype><B:supported-calendar-component-set xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><B:comp name=\"VEVENT\"/></B:supported-calendar-component-set><B:calendar-description xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/inbox/</D:href><D:propstat><D:prop><D:resourcetype><D:collection/><B:schedule-inbox xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/outbox/</D:href><D:propstat><D:prop><D:resourcetype><B:schedule-outbox xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/</D:href><D:propstat><D:prop><D:current-user-privilege-set><D:privilege><B:read-free-busy xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:privilege><D:privilege><D:read-current-user-privilege-set/></D:privilege><D:privilege><D:write-content/></D:privilege><D:privilege><D:write/></D:privilege><D:privilege><D:unbind/></D:privilege><D:privilege><D:read/></D:privilege><D:privilege><D:bind/></D:privilege><D:privilege><D:write-properties/></D:privilege></D:current-user-privilege-set><D:displayname>calsdk test</D:displayname><G:calendar-color xmlns:G=\"http://apple.com/ns/ical/\">#867FDD</G:calendar-color><D:resourcetype><B:calendar xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/><D:collection/></D:resourcetype><B:supported-calendar-component-set xmlns:B=\"urn:ietf:params:xml:ns:caldav\"><B:comp name=\"VEVENT\"/></B:supported-calendar-component-set><B:calendar-description xmlns:B=\"urn:ietf:params:xml:ns:caldav\"/></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-none-match": "*"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//calsdk//CalDAV//EN\r\nBEGIN:VEVENT\r\nUID:a207db8c-0000-4000-8000-000000000001\r\nCREATED:20261030T000000Z\r\nSEQUENCE:0\r\nSUMMARY:calsdk zoho\r\nDTSTART;TZID=UTC:20300304T100000\r\nDTEND;TZID=UTC:20300304T110000\r\nDTSTAMP:20261030T000000Z\r\nLAST-MODIFIED:20261030T000000Z\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "text/calendar;component=vevent;charset=UTF-8"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar;charset=UTF-8",
+          "etag": "1793739003676"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\nVERSION:2.0\nX-WR-CALNAME:calsdk test\nX-WR-TIMEZONE:UTC\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:calsdk zoho\nDESCRIPTION:\nDTSTART:20300304T100000Z\nDTEND:20300304T110000Z\nLOCATION:\nCLASS:PUBLIC\nIMPORTANT:0\nSTATUS:CONFIRMED\nUID:a207db8c-0000-4000-8000-000000000001\nTRANSP:OPAQUE\nCREATED:20261103T205003Z\nLAST-MODIFIED:20261103T205003Z\nDTSTAMP:20261103T205003Z\nORGANIZER;CN=Me:MAILTO:me@example.com\nEND:VEVENT\nEND:VCALENDAR"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar;charset=UTF-8",
+          "etag": "1793739003676"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\nVERSION:2.0\nX-WR-CALNAME:calsdk test\nX-WR-TIMEZONE:UTC\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:calsdk zoho\nDESCRIPTION:\nDTSTART:20300304T100000Z\nDTEND:20300304T110000Z\nLOCATION:\nCLASS:PUBLIC\nIMPORTANT:0\nSTATUS:CONFIRMED\nUID:a207db8c-0000-4000-8000-000000000001\nTRANSP:OPAQUE\nCREATED:20261103T205003Z\nLAST-MODIFIED:20261103T205003Z\nDTSTAMP:20261103T205004Z\nORGANIZER;CN=Me:MAILTO:me@example.com\nEND:VEVENT\nEND:VCALENDAR"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-query xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><C:filter><C:comp-filter name=\"VCALENDAR\"><C:comp-filter name=\"VEVENT\"><C:time-range start=\"20300303T000000Z\" end=\"20300306T000000Z\"/></C:comp-filter></C:comp-filter></C:filter></C:calendar-query>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/</D:href><D:propstat><D:prop/><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics</D:href><D:propstat><D:prop><D:getetag>1793739003676</D:getetag></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "REPORT",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/",
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"utf-8\"?><C:calendar-multiget xmlns:D=\"DAV:\" xmlns:C=\"urn:ietf:params:xml:ns:caldav\"><D:prop><D:getetag/><C:calendar-data/></D:prop><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics</D:href></C:calendar-multiget>"
+        }
+      },
+      "response": {
+        "status": 207,
+        "headers": {
+          "content-type": "text/xml;charset=UTF-8"
+        },
+        "body": {
+          "text": "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?><D:multistatus xmlns:D=\"DAV:\"><D:response><D:href>/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics</D:href><D:propstat><D:prop><D:getetag>1793739003676</D:getetag><A0:calendar-data xmlns:A0=\"urn:ietf:params:xml:ns:caldav\">BEGIN:VCALENDAR\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\nVERSION:2.0\nX-WR-CALNAME:calsdk test\nX-WR-TIMEZONE:UTC\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:calsdk zoho\nDESCRIPTION:\nDTSTART:20300304T100000Z\nDTEND:20300304T110000Z\nLOCATION:\nCLASS:PUBLIC\nIMPORTANT:0\nSTATUS:CONFIRMED\nUID:a207db8c-0000-4000-8000-000000000001\nTRANSP:OPAQUE\nCREATED:20261103T205003Z\nLAST-MODIFIED:20261103T205003Z\nDTSTAMP:20261103T205004Z\nORGANIZER;CN=Me:MAILTO:me@example.com\nEND:VEVENT\nEND:VCALENDAR</A0:calendar-data></D:prop><D:status>HTTP/1.1 200 OK</D:status></D:propstat></D:response></D:multistatus>"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar;charset=UTF-8",
+          "etag": "1793739003676"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\nVERSION:2.0\nX-WR-CALNAME:calsdk test\nX-WR-TIMEZONE:UTC\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:calsdk zoho\nDESCRIPTION:\nDTSTART:20300304T100000Z\nDTEND:20300304T110000Z\nLOCATION:\nCLASS:PUBLIC\nIMPORTANT:0\nSTATUS:CONFIRMED\nUID:a207db8c-0000-4000-8000-000000000001\nTRANSP:OPAQUE\nCREATED:20261103T205003Z\nLAST-MODIFIED:20261103T205003Z\nDTSTAMP:20261103T205005Z\nORGANIZER;CN=Me:MAILTO:me@example.com\nEND:VEVENT\nEND:VCALENDAR"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "PUT",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics",
+        "headers": {
+          "if-match": "1793739003676"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\r\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\r\nVERSION:2.0\r\nX-WR-CALNAME:calsdk test\r\nX-WR-TIMEZONE:UTC\r\nCALSCALE:GREGORIAN\r\nBEGIN:VEVENT\r\nSUMMARY:calsdk zoho (renamed)\r\nDESCRIPTION:\r\nDTSTART:20300304T100000Z\r\nDTEND:20300304T110000Z\r\nLOCATION:\r\nCLASS:PUBLIC\r\nIMPORTANT:0\r\nSTATUS:CONFIRMED\r\nUID:a207db8c-0000-4000-8000-000000000001\r\nTRANSP:OPAQUE\r\nCREATED:20261103T205003Z\r\nLAST-MODIFIED:20261030T000000Z\r\nDTSTAMP:20261030T000000Z\r\nORGANIZER;CN=Me:MAILTO:me@example.com\r\nSEQUENCE:1\r\nEND:VEVENT\r\nEND:VCALENDAR"
+        }
+      },
+      "response": {
+        "status": 201,
+        "headers": {
+          "content-type": "text/calendar;component=vevent;charset=UTF-8"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar;charset=UTF-8",
+          "etag": "1793739006443"
+        },
+        "body": {
+          "text": "BEGIN:VCALENDAR\nPRODID:-//Zoho Corporation//Zoho Calendar-US//EN\nVERSION:2.0\nX-WR-CALNAME:calsdk test\nX-WR-TIMEZONE:UTC\nCALSCALE:GREGORIAN\nBEGIN:VEVENT\nSUMMARY:calsdk zoho (renamed)\nDESCRIPTION:\nDTSTART:20300304T100000Z\nDTEND:20300304T110000Z\nLOCATION:\nCLASS:PUBLIC\nIMPORTANT:0\nSTATUS:CONFIRMED\nUID:a207db8c-0000-4000-8000-000000000001\nTRANSP:OPAQUE\nCREATED:20261103T205003Z\nLAST-MODIFIED:20261103T205006Z\nDTSTAMP:20261103T205006Z\nORGANIZER;CN=Me:MAILTO:me@example.com\nEND:VEVENT\nEND:VCALENDAR"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "DELETE",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 204,
+        "headers": {
+          "content-type": "text/html;charset=UTF-8"
+        }
+      }
+    },
+    {
+      "request": {
+        "method": "GET",
+        "url": "https://calendar.zoho.com/caldav/0123456789abcdef0123456789abcdef/fedcba9876543210fedcba9876543210/a207db8c-0000-4000-8000-000000000001.ics"
+      },
+      "response": {
+        "status": 200,
+        "headers": {
+          "content-type": "text/calendar;charset=UTF-8"
+        }
+      }
+    }
+  ]
+}

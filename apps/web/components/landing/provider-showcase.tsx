@@ -20,7 +20,7 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
   const prefix = useId();
 
   return (
-    <div className="grid overflow-hidden rounded-2xl border border-line bg-panel lg:grid-cols-[15rem_minmax(0,1fr)]">
+    <div className="grid overflow-hidden rounded-2xl border border-line bg-panel lg:grid-cols-[17rem_minmax(0,1fr)]">
       <div
         role="tablist"
         aria-label="Calendar provider"
@@ -48,7 +48,7 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
           >
             <span className="size-2 shrink-0 rounded-full" style={{ background: provider.color }} />
             <span className="truncate">{provider.label}</span>
-            <span className="ml-auto hidden font-mono text-[11px] text-neutral-500 lg:inline">
+            <span className="ml-auto hidden whitespace-nowrap font-mono text-[11px] text-neutral-500 lg:inline">
               {provider.pkg}
             </span>
           </button>

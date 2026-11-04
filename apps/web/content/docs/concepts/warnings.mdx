@@ -1,0 +1,54 @@
+---
+title: Warnings
+description: How calsdk reports parts of a request a provider could not honor, without failing the call.
+---
+
+A warning means the call succeeded, but not exactly as asked. Every result has a `warnings` array:
+
+```ts
+const { event, warnings } = await createEvent({
+  calendar, // microsoft(...)
+  event: { title: 'Launch', start, end, color: '#d50000' },
+});
+
+console.log(warnings);
+// [{ type: 'unsupported', feature: 'color', details: 'Outlook events have no color of their own. Use providerOptions.microsoft.categories instead.' }]
+```
+
+## Three types
+
+| `type`          | Meaning                                                           | Fields                 |
+| --------------- | ----------------------------------------------------------------- | ---------------------- |
+| `unsupported`   | The provider ignored part of the request it cannot honor          | `feature`, `details?`  |
+| `compatibility` | calsdk or the provider used a fallback that may behave a little differently | `feature`, `details?` |
+| `other`         | Anything else worth knowing                                       | `message`              |
+
+Some warnings you will see:
+
+- `compatibility` on `getFreeBusy` and `findFreeTime` for providers without a free/busy endpoint. Busy times were computed from events.
+- `compatibility` on Google when a color is not one of its 11 event colors. The nearest one was saved.
+- `unsupported` when `sendUpdates` asks for something a provider cannot do, such as Cal.com, which always emails attendees.
+- `unsupported` for a `providerOptions` key the provider does not know.
+
+## Where warnings go
+
+Besides being returned, warnings are logged. Set `globalThis.CALSDK_WARNINGS` once, at startup:
+
+```ts
+// Default: console.warn each distinct warning once per process.
+globalThis.CALSDK_WARNINGS = 'console';
+
+// Only return them on results.
+globalThis.CALSDK_WARNINGS = 'silent';
+
+// Send them somewhere else.
+globalThis.CALSDK_WARNINGS = (warnings, { provider, operation }) => {
+  logger.warn({ provider, operation, warnings }, 'calsdk warnings');
+};
+```
+
+The function is called for every call that has warnings. `iterateEvents` returns events, not results, so its warnings only reach this setting.
+
+## Warning or error?
+
+calsdk warns when the rest of the request still did what you asked. It throws `UnsupportedFunctionalityError` instead when going ahead would save a different schedule or lose data, such as a recurrence rule the provider cannot repeat. See [Errors](/docs/concepts/errors).

@@ -1,0 +1,57 @@
+---
+title: How it works
+description: Functions, providers, results, warnings and errors, and how a call moves between them.
+---
+
+calsdk has two layers, the same way the Vercel AI SDK splits `generateText` from model providers:
+
+- **Functions** in `calsdk`, such as `listEvents` and `createEvent`. They validate input, retry, page through results and fill in features a provider lacks.
+- **Providers**, such as `google()` and `microsoft()`. Each is a plain object that turns calsdk requests into one API's requests and turns the responses back into calsdk's shapes. Providers hold no state between calls.
+
+Your app only calls functions. It passes a provider as `calendar`.
+
+```ts
+const { events } = await listEvents({ calendar: google({ accessToken }), timeMin, timeMax });
+```
+
+## A call, step by step
+
+1. **Check.** The function checks ids, time windows, event times, time zones, RRULEs, colors and emails, and throws `InvalidArgumentError` before any request.
+2. **Normalize.** A `dateTime` without an offset is turned into one with the offset for its `timeZone`. Providers always get exact times.
+3. **Call.** The provider makes its requests with your `abortSignal` and `headers`.
+4. **Retry.** Rate limits, timeouts, server errors and network failures are retried with backoff, twice by default. Creates only retry rate limits.
+5. **Return.** You get the result with `warnings`, which are also logged once to the console by default.
+
+## Options every function takes
+
+<TypeTable
+  type={{
+    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as google({ accessToken }).', required: true },
+    maxRetries: { type: 'number', description: 'Retries for retryable failures. 0 turns retries off.', default: '2' },
+    abortSignal: { type: 'AbortSignal', description: 'Cancels the call, including requests in flight and waits between retries.' },
+    headers: { type: 'Record<string, string>', description: 'Extra HTTP headers sent with each provider request.' },
+    providerOptions: { type: 'ProviderOptionsFor<C, Operation>', description: 'Provider-specific input, keyed by provider id and typed by the provider.' },
+  }}
+/>
+
+Functions that work on events also take `calendarId`, which defaults to `'primary'`.
+
+## What every result carries
+
+<TypeTable
+  type={{
+    warnings: { type: 'Warning[]', description: 'Parts of the request the provider could not honor, or fallbacks calsdk used.', required: true },
+    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific output for the call, keyed by provider id.' },
+    response: { type: '{ headers?: Record<string, string>; body?: unknown }', description: 'The raw response, for debugging only. Do not build logic on it.' },
+  }}
+/>
+
+## When providers differ
+
+Calendars do not all support the same things. calsdk handles a gap in one of three ways:
+
+- **Fill it in.** A provider without a free/busy endpoint gets free/busy computed from its events. The result carries a `compatibility` warning.
+- **Ignore it, and say so.** An Outlook event cannot have a color, so `color` is dropped with an `unsupported` warning. Everything else is saved.
+- **Refuse.** When going ahead would save something different from what you asked for, such as a recurrence rule Outlook cannot express, the call throws `UnsupportedFunctionalityError`.
+
+Each provider declares what it supports in `calendar.capabilities`. See [Capabilities](/docs/reference/capabilities).

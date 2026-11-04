@@ -1,0 +1,51 @@
+---
+title: API overview
+description: Every function calsdk exports, with links to its options and result.
+---
+
+All functions take one options object and return a promise, except `iterateEvents`, which returns an async iterator. Import them from `calsdk`.
+
+| Function | What it does |
+| --- | --- |
+| [`listCalendars`](/docs/reference/list-calendars) | Calendars the user can see |
+| [`getEvent`](/docs/reference/get-event) | One event by id |
+| [`listEvents`](/docs/reference/list-events) | One page of events in a time window |
+| [`iterateEvents`](/docs/reference/list-events#iterateevents) | Every event in a time window, page by page |
+| [`createEvent`](/docs/reference/create-event) | Create an event or series |
+| [`updateEvent`](/docs/reference/update-event) | Change an event, an occurrence or a series |
+| [`deleteEvent`](/docs/reference/delete-event) | Delete an event, an occurrence or a series |
+| [`getFreeBusy`](/docs/reference/get-free-busy) | Busy blocks for one or more calendars |
+| [`findFreeTime`](/docs/reference/find-free-time) | Slots when every calendar, across providers, is free |
+| [`syncEvents`](/docs/reference/sync-events) | Changes since a stored cursor |
+
+## Common options
+
+Every function except `findFreeTime` takes these. `findFreeTime` takes `maxRetries` and `abortSignal`, and `headers` and `providerOptions` per provider.
+
+<TypeTable
+  type={{
+    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as google({ accessToken }).', required: true },
+    maxRetries: { type: 'number', description: 'Retries for rate limits, timeouts, server errors and network failures. Creates only retry rate limits.', default: '2' },
+    abortSignal: { type: 'AbortSignal', description: 'Cancels the call, including waits between retries.' },
+    headers: { type: 'Record<string, string>', description: 'Extra HTTP headers sent with each provider request.' },
+    providerOptions: { type: 'ProviderOptionsFor<C, Operation>', description: "Provider-specific input, keyed by provider id. Typed by the provider in calendar." },
+  }}
+/>
+
+## Common result fields
+
+Every result except `findFreeTime`'s has these. `findFreeTime` returns `slots` and `warnings`.
+
+<TypeTable
+  type={{
+    warnings: { type: 'Warning[]', description: 'Parts of the request the provider could not honor, or fallbacks used.', required: true },
+    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific output for the call.' },
+    response: { type: '{ headers?: Record<string, string>; body?: unknown }', description: 'The raw response, for debugging only.' },
+  }}
+/>
+
+## Other exports
+
+- **Types:** `CalendarEvent`, `Calendar`, `EventTime`, `EventInput`, `EventPatch`, `Attendee`, `BusyBlock`, `SyncChange`, `UpdateScope`, `SendUpdates`, `Warning`, `CalendarProvider`, `CalendarCapabilities` and the options and result type of each function. See [Types](/docs/reference/types).
+- **Errors:** `CalsdkError` and every subclass. See [Errors](/docs/reference/errors).
+- **`WarningsSetting`**, the type of `globalThis.CALSDK_WARNINGS`. See [Warnings](/docs/concepts/warnings).

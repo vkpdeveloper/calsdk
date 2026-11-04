@@ -1,0 +1,40 @@
+---
+title: Capabilities
+description: The capability flags every provider declares, and what each one means.
+---
+
+Every provider has a `capabilities` object. calsdk uses it to pick fallbacks, the conformance suite runs only the tests a provider declares, and these docs build the [provider comparison](/docs/providers) from it.
+
+```ts
+calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'unknown' or { condition }
+```
+
+## Values
+
+| Value | Meaning |
+| --- | --- |
+| `true` | Always supported |
+| `false` | Never supported |
+| `'unknown'` | The provider cannot tell ahead of time. Not the same as unsupported |
+| `{ condition: string }` | Supported only under the condition, such as `'Teams meetings need a work or school account.'` |
+
+## Flags
+
+<TypeTable
+  type={{
+    'events.details': { type: 'Capability', description: 'Events keep the title and description they are written with. Booking tools name events from a template instead.' },
+    'events.allDay': { type: 'Capability', description: 'Create all-day events.' },
+    'events.recurrence': { type: 'Capability', description: 'Create and read recurring series.' },
+    'events.recurrenceScopeThisAndFollowing': { type: 'Capability', description: "scope: 'thisAndFollowing' on update and delete." },
+    'events.serverSideExpansion': { type: 'Capability', description: 'expandRecurring: true returns occurrences, computed by the provider or by calsdk for it.' },
+    'events.attendees': { type: 'Capability', description: 'Invite and read attendees.' },
+    'events.conference': { type: 'Capability', description: 'createConference: true creates a video link.' },
+    'events.reminders': { type: 'Capability', description: 'Set reminders.' },
+    'events.color': { type: 'Capability', description: 'Set event colors.' },
+    'events.etag': { type: 'Capability', description: 'Events carry etag and writes honor ifMatch.' },
+    'events.search': { type: 'Capability', description: 'query on listEvents.' },
+    freeBusy: { type: 'Capability', description: 'A free/busy endpoint. Without one, calsdk computes free/busy from events.' },
+    sync: { type: 'Capability', description: 'syncEvents.' },
+    webhooks: { type: 'Capability', description: 'Push notifications. Part of the contract, not implemented by any provider yet.' },
+  }}
+/>

@@ -1,0 +1,46 @@
+---
+title: updateEvent
+description: Applies a partial update to an event, one occurrence, or a series.
+---
+
+```ts
+import { updateEvent } from 'calsdk';
+
+const { event } = await updateEvent({
+  calendar,
+  eventId,
+  patch: { title: 'Moved to Friday', location: null },
+  ifMatch: previous.etag,
+});
+```
+
+## Options
+
+<TypeTable
+  type={{
+    eventId: { type: 'string', required: true },
+    patch: { type: 'EventPatch', description: 'Fields to change. Left out fields stay as they are; null clears a field. start and end can be replaced, not cleared.', required: true },
+    calendarId: { type: 'string', default: "'primary'" },
+    scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: change only this instance, the whole series, or this and later instances.', default: "'this'" },
+    ifMatch: { type: 'string', description: "Only update if the event's etag still matches. Otherwise throws ConflictError." },
+    sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options). `EventPatch` has the fields of [`EventInput`](/docs/reference/create-event#eventinput), all optional.
+
+## Result
+
+<TypeTable
+  type={{
+    event: { type: 'CalendarEvent', description: 'The updated event. Its id can differ from eventId: Cal.com replaces a booking when it moves. Use the returned id from then on.', required: true },
+    warnings: { type: 'Warning[]', required: true },
+  }}
+/>
+
+## Throws
+
+- `NotFoundError` when the event does not exist.
+- `ConflictError` when `ifMatch` no longer matches.
+- `InvalidArgumentError` for the same input problems as [`createEvent`](/docs/reference/create-event#throws), or a `null` `start` or `end`.
+- `UnsupportedFunctionalityError` for a scope, rule or change the provider cannot make.

@@ -1,0 +1,45 @@
+---
+title: Errors
+description: Every error class calsdk throws, its fields and when it is thrown.
+---
+
+All errors extend `CalsdkError`, which extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
+
+```ts
+import { NotFoundError } from 'calsdk';
+
+if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
+```
+
+[Errors and retries](/docs/concepts/errors) covers how to handle them.
+
+## Input and setup
+
+| Class | Fields | Thrown when |
+| --- | --- | --- |
+| `InvalidArgumentError` | `argument` | An option is invalid, before any request. `argument` is its path, such as `'event.start.timeZone'` |
+| `NoSuchProviderVersionError` | `provider`, `version` | The provider implements a contract version this calsdk does not know |
+| `UnsupportedFunctionalityError` | `provider`, `functionality` | The provider cannot do what was asked |
+
+## Provider responses
+
+| Class | Fields | Thrown when |
+| --- | --- | --- |
+| `AuthenticationError` | `provider` | Credentials were rejected (401) |
+| `PermissionDeniedError` | `provider` | The user may not do this (403) |
+| `NotFoundError` | `provider`, `resource` (`'calendar'` or `'event'`), `id` | The calendar or event does not exist, was deleted or is hidden (404, 410) |
+| `ConflictError` | `provider`, `eventId` | `ifMatch` no longer matches (412) |
+| `RateLimitError` | `provider`, `retryAfterMs?`, `isRetryable` (always `true`) | The provider is throttling (429) |
+| `SyncCursorExpiredError` | `provider`, `calendarId` | The provider no longer accepts the sync cursor |
+| `InvalidResponseDataError` | `data` | The provider returned data in a shape calsdk does not expect. The message leaves the data out |
+| `APICallError` | `url`, `statusCode?`, `responseHeaders?`, `responseBody?`, `isRetryable` | Any other failed request, including network errors |
+
+`APICallError.isRetryable` is `true` for 408, 429, 5xx and network failures. Request headers are never stored on it, since they carry the token.
+
+## Free time
+
+| Class | Fields | Thrown when |
+| --- | --- | --- |
+| `FreeBusyUnavailableError` | `provider`, `calendarId` | `findFreeTime` could not read one of the calendars |
+
+`NotFoundError`, `SyncCursorExpiredError` and `FreeBusyUnavailableError` leave calendar ids out of their messages, since they are often email addresses. Read them from the fields.

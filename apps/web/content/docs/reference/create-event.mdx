@@ -1,0 +1,62 @@
+---
+title: createEvent
+description: Creates an event or a recurring series and returns it as the provider stored it.
+---
+
+```ts
+import { createEvent } from 'calsdk';
+
+const { event } = await createEvent({
+  calendar,
+  event: {
+    title: 'Design review',
+    start: { dateTime: '2026-11-03T10:00:00', timeZone: 'Asia/Kolkata' },
+    end: { dateTime: '2026-11-03T10:30:00', timeZone: 'Asia/Kolkata' },
+  },
+});
+```
+
+## Options
+
+<TypeTable
+  type={{
+    event: { type: 'EventInput', description: 'The event to create. See below.', required: true },
+    calendarId: { type: 'string', default: "'primary'" },
+    sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees get an invitation. The provider default when left out.' },
+  }}
+/>
+
+Plus the [common options](/docs/reference#common-options). Only rate limits are retried: retrying after a server error could create the event twice.
+
+### EventInput
+
+<TypeTable
+  type={{
+    start: { type: 'EventTime', description: "{ dateTime, timeZone } or { date }. A dateTime without an offset is wall-clock time in timeZone.", required: true },
+    end: { type: 'EventTime', description: 'The same form as start. All-day end dates are exclusive.', required: true },
+    title: { type: 'string' },
+    description: { type: 'string' },
+    location: { type: 'string' },
+    recurrence: { type: 'string[]', description: "RFC 5545 lines, such as ['RRULE:FREQ=WEEKLY;BYDAY=MO;COUNT=10']." },
+    showAs: { type: "'busy' | 'free'", default: "'busy'" },
+    visibility: { type: "'default' | 'public' | 'private'" },
+    attendees: { type: '{ email: string; name?: string; optional?: boolean }[]' },
+    createConference: { type: 'boolean', description: 'Ask the provider for a video link: Meet on Google, Teams on Outlook.' },
+    reminders: { type: "{ useDefault: boolean; overrides?: { method: 'popup' | 'email'; minutesBefore: number }[] }" },
+    color: { type: 'string', description: "Hex color, '#RRGGBB'. Providers with a fixed palette pick the nearest and warn." },
+  }}
+/>
+
+## Result
+
+<TypeTable
+  type={{
+    event: { type: 'CalendarEvent', description: 'The stored event, with its id and etag.', required: true },
+    warnings: { type: 'Warning[]', description: 'Fields the provider ignored or changed.', required: true },
+  }}
+/>
+
+## Throws
+
+- `InvalidArgumentError` when `end` is not after `start`, `start` and `end` mix timed and all-day, the time zone is unknown or a Windows name, a recurrence line is malformed, or a color or email is invalid.
+- `UnsupportedFunctionalityError` when the provider cannot store the event as given, such as a rule Outlook cannot repeat or an all-day Zoom meeting.

@@ -1,0 +1,54 @@
+---
+title: Time and time zones
+description: How calsdk represents timed and all-day events, and how it reads times you pass in.
+---
+
+## Timed events
+
+A timed `start` or `end` is a date-time plus the IANA time zone the event was scheduled in:
+
+```ts
+{ dateTime: '2026-11-03T10:00:00+05:30', timeZone: 'Asia/Kolkata' }
+```
+
+Events you read always have an offset in `dateTime`, so `new Date(event.start.dateTime)` is the exact instant. `timeZone` says how to show it and how a series repeats: a weekly 10:00 meeting in `Europe/Berlin` stays at 10:00 Berlin time when the clocks change.
+
+When you write an event, you can leave the offset out. calsdk then reads the `dateTime` as the wall clock in `timeZone` and adds the right offset, daylight saving time included:
+
+```ts
+await createEvent({
+  calendar,
+  event: {
+    title: 'Planning',
+    start: { dateTime: '2026-03-30T09:00:00', timeZone: 'Europe/Berlin' }, // stored as +02:00
+    end: { dateTime: '2026-03-30T10:00:00', timeZone: 'Europe/Berlin' },
+  },
+});
+```
+
+`timeZone` must be an IANA name, such as `America/New_York`. A Windows name, such as `Pacific Standard Time`, throws `InvalidArgumentError` with the IANA name to use instead. Outlook reports Windows names; calsdk turns them into IANA names when reading.
+
+## All-day events
+
+An all-day `start` or `end` is a date, with no time and no zone:
+
+```ts
+{ start: { date: '2026-11-12' }, end: { date: '2026-11-14' } }
+```
+
+The end date is exclusive, as in iCalendar and the Google and Outlook APIs: this event covers the 12th and the 13th. A one-day event on the 12th ends on the 13th. An event cannot mix the two forms: `start` and `end` are both timed or both all-day.
+
+## Time windows
+
+`timeMin` and `timeMax`, on `listEvents`, `getFreeBusy` and `findFreeTime`, take a `Date` or an ISO 8601 string. They are instants, so give strings an offset:
+
+```ts
+// Midnight to midnight in Berlin.
+await listEvents({ calendar, timeMin: '2026-11-09T00:00:00+01:00', timeMax: '2026-11-10T00:00:00+01:00' });
+```
+
+A string without a time, such as `'2026-11-09'`, is midnight UTC.
+
+## Free time
+
+Busy blocks and free slots are plain instants, `{ start, end }` in UTC. `findFreeTime` reads `workingHours` in the zone you give them, so "9 to 5 in Berlin" stays 9 to 5 across daylight saving changes.

@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/core",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "One typed API for Google Calendar, Microsoft Outlook and other calendar providers.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

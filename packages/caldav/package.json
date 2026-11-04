@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/caldav",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "CalDAV provider for calsdk: iCloud, Fastmail, Nextcloud and other CalDAV servers.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

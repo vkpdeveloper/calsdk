@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/mock",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "In-memory calsdk calendar provider for tests, examples and offline development.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

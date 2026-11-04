@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/ics",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "ICS feed provider for calsdk: read subscribed iCalendar feeds.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/provider",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "The calsdk provider contract: types and error classes for calendar providers.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

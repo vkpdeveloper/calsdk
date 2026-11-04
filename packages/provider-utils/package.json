@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/provider-utils",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Helpers for writing calsdk calendar providers.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

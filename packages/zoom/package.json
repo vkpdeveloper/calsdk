@@ -1,6 +1,6 @@
 {
   "name": "@cal-sdk/zoom",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Zoom provider for calsdk: scheduled Zoom meetings as calendar events.",
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",

@@ -9,7 +9,7 @@ import type { JSONObject } from '../../json-value';
  * @example
  * { google: { conferenceDataVersion: 1 }, microsoft: { transactionId: 'abc' } }
  */
-export type ProviderOptionsV1 = Record<string, JSONObject>;
+export type ProviderOptionsV1 = Record<string, JSONObject | undefined>;
 
 /**
  * Provider-specific output, keyed by provider id.

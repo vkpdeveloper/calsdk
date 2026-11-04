@@ -3,11 +3,21 @@ import {
   type SyncEventsResultV1,
   UnsupportedFunctionalityError,
 } from '@calsdk/provider';
-import type { CallSettings, ResultMetadata, SyncChange, Warning } from './types';
+import type {
+  CalendarProvider,
+  CallSettings,
+  ResultMetadata,
+  SyncChange,
+  SyncChangeOf,
+  Warning,
+} from './types';
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId } from './util/validate';
 
-export type SyncEventsOptions = CallSettings & {
+export type SyncEventsOptions<C extends CalendarProvider = CalendarProvider> = CallSettings<
+  C,
+  'syncEvents'
+> & {
   /** Defaults to `'primary'`. */
   calendarId?: string;
   /**
@@ -17,15 +27,15 @@ export type SyncEventsOptions = CallSettings & {
   cursor?: string;
 };
 
-export type SyncEventsResult = ResultMetadata & {
+export type SyncEventsResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
   /** Every change since `cursor`, oldest first. Apply them in order. */
-  changes: SyncChange[];
+  changes: SyncChangeOf<C>[];
   /** Store it and pass it as `cursor` next time. */
   nextCursor: string;
 };
 
-export type SyncEventsPageResult = ResultMetadata & {
-  changes: SyncChange[];
+export type SyncEventsPageResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
+  changes: SyncChangeOf<C>[];
   /** Pass as `pageToken` (with the same `cursor`) to get the next page of this round. */
   nextPageToken?: string;
   /** Present on the last page. Store it and pass it as `cursor` next time. */
@@ -44,15 +54,15 @@ export type SyncEventsPageResult = ResultMetadata & {
  * for (const change of changes) apply(change);
  * await saveCursor(nextCursor);
  */
-export async function syncEvents(
-  options: SyncEventsOptions & { paginate?: true },
-): Promise<SyncEventsResult>;
-export async function syncEvents(
-  options: SyncEventsOptions & { paginate: false; pageToken?: string },
-): Promise<SyncEventsPageResult>;
-export async function syncEvents(
-  options: SyncEventsOptions & { paginate?: boolean; pageToken?: string },
-): Promise<SyncEventsResult | SyncEventsPageResult>;
+export async function syncEvents<C extends CalendarProvider>(
+  options: SyncEventsOptions<C> & { paginate?: true },
+): Promise<SyncEventsResult<C>>;
+export async function syncEvents<C extends CalendarProvider>(
+  options: SyncEventsOptions<C> & { paginate: false; pageToken?: string },
+): Promise<SyncEventsPageResult<C>>;
+export async function syncEvents<C extends CalendarProvider>(
+  options: SyncEventsOptions<C> & { paginate?: boolean; pageToken?: string },
+): Promise<SyncEventsResult<C> | SyncEventsPageResult<C>>;
 export async function syncEvents(
   options: SyncEventsOptions & { paginate?: boolean; pageToken?: string },
 ): Promise<SyncEventsResult | SyncEventsPageResult> {

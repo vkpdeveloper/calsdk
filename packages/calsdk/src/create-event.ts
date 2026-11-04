@@ -1,15 +1,27 @@
-import type { CalendarEvent, CallSettings, EventInput, ResultMetadata, SendUpdates } from './types';
+import type {
+  CalendarProvider,
+  CallSettings,
+  EventInput,
+  EventOf,
+  ResultMetadata,
+  SendUpdates,
+} from './types';
 import { resultMetadata, runCall } from './util/prepare-call';
 import { requireId, validateEventInput } from './util/validate';
 
-export type CreateEventOptions = CallSettings & {
+export type CreateEventOptions<C extends CalendarProvider = CalendarProvider> = CallSettings<
+  C,
+  'createEvent'
+> & {
   /** Defaults to `'primary'`, the user's default calendar. */
   calendarId?: string;
   event: EventInput;
   /** Whether attendees get an invitation. Provider default when omitted. */
   sendUpdates?: SendUpdates;
 };
-export type CreateEventResult = ResultMetadata & { event: CalendarEvent };
+export type CreateEventResult<C extends CalendarProvider = CalendarProvider> = ResultMetadata & {
+  event: EventOf<C>;
+};
 
 /**
  * Creates an event and returns it as stored by the provider.
@@ -27,6 +39,9 @@ export type CreateEventResult = ResultMetadata & { event: CalendarEvent };
  *   },
  * });
  */
+export async function createEvent<C extends CalendarProvider>(
+  options: CreateEventOptions<C>,
+): Promise<CreateEventResult<C>>;
 export async function createEvent(options: CreateEventOptions): Promise<CreateEventResult> {
   const calendarId = requireId(options.calendarId ?? 'primary', 'calendarId');
   const event = validateEventInput(options.event);

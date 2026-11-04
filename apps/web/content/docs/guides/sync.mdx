@@ -3,7 +3,7 @@ title: Sync changes
 description: Keep a copy of a calendar up to date by fetching only what changed since the last sync.
 ---
 
-`syncEvents` returns every change since a cursor you stored. The first sync, without a cursor, returns everything.
+`syncEvents` returns every change since a cursor you stored. The first sync, without a cursor, returns everything the provider syncs: for most providers that is the whole calendar, while Outlook covers a window. See [how each provider syncs](#how-each-provider-syncs).
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';

@@ -29,7 +29,7 @@ Plus the [common options](/docs/reference#common-options).
 <TypeTable
   type={{
     changes: { type: "({ type: 'upsert'; event: CalendarEvent } | { type: 'delete'; eventId: string })[]", description: 'Every change since cursor, in the order the provider returns them. Apply them in that order.', required: true },
-    nextCursor: { type: 'string', description: 'Store it and pass it as cursor next time. With paginate: false, only on the last page.', required: true },
+    nextCursor: { type: 'string', description: 'Store it and pass it as cursor next time. Always present by default. With paginate: false, only on the last page.' },
     nextPageToken: { type: 'string', description: 'With paginate: false: more pages are left in this round.' },
     warnings: { type: 'Warning[]', required: true },
   }}

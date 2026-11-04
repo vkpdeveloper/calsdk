@@ -37,7 +37,7 @@ type CalendarProviderV1<Provider extends string, Types extends ProviderTypesV1> 
 Rules every provider follows:
 
 - **Resolve `'primary'`** to the user's default calendar.
-- **Stay stateless.** Do not cache between calls; calsdk and your users may call from many places at once.
+- **Keep progress in cursors.** Calls may run at once from many places, so never keep sync position or other per-call state in the provider. Caching setup that does not change, such as CalDAV's server discovery, is fine.
 - **Return exact times.** Timed `dateTime`s carry an offset, and `timeZone` is an IANA name.
 - **Map errors** to calsdk's classes: `mapAPICallError` does this for HTTP status codes.
 - **Never save something else.** If the API cannot store what was asked, throw `UnsupportedFunctionalityError`. If you drop a harmless part, such as a color, return an `unsupported` warning.

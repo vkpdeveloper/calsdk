@@ -1,5 +1,7 @@
+import { ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { ClockChange } from '@/components/landing/clock-change';
 import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
@@ -370,6 +372,14 @@ const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['ICS feeds', 'ics', [true, false, 'Read only', false, true]],
 ];
 
+// What each API calls an event's title, as in the payloads above.
+const TITLE_NAMES = [
+  ['Google', 'summary'],
+  ['Outlook', 'subject'],
+  ['iCloud', 'SUMMARY:'],
+  ['Zoom', 'topic'],
+];
+
 const STATS = [
   ['9', 'calendars'],
   ['1', 'event shape'],
@@ -478,6 +488,28 @@ export default async function HomePage() {
             </div>
           </div>
         </div>
+        <div className="mt-12 flex flex-wrap items-center gap-2 font-mono text-sm sm:mt-16">
+          {TITLE_NAMES.map(([provider, name], i) => (
+            <span
+              key={provider}
+              style={{ animationDelay: `${300 + i * 120}ms` }}
+              className="chip-in rounded-md border border-line bg-panel px-2.5 py-1.5"
+            >
+              <span className="font-sans text-neutral-500">{provider}</span>{' '}
+              <span className="text-neutral-300">{name}</span>
+            </span>
+          ))}
+          <span className="flex items-center gap-2">
+            <ArrowRight aria-hidden className="mx-1 size-4 text-neutral-500" />
+            <span
+              style={{ animationDelay: '840ms' }}
+              className="chip-in rounded-md border border-accent-blue/60 bg-accent-blue/10 px-2.5 py-1.5"
+            >
+              <span className="font-sans text-neutral-400">calsdk</span>{' '}
+              <span className="text-white">title</span>
+            </span>
+          </span>
+        </div>
       </section>
 
       <ProviderShowcase providers={providers} />
@@ -513,16 +545,31 @@ export default async function HomePage() {
         <FreeTimeDemo lengths={lengths} />
       </Section>
 
+      <Section
+        id="time-zones"
+        index="03"
+        eyebrow="Time zones"
+        title="Clocks change. Your standup shouldn't."
+        intro="A weekly 9:30 standup in New York, through March 2027. The US moves its clocks on the 14th, Europe on the 28th."
+      >
+        <ClockChange />
+        <p className="mt-5 max-w-3xl text-sm text-neutral-400">
+          calsdk keeps the time and the zone, so the series is expanded in New York time. Berlin
+          sees it an hour early for the two weeks Europe hasn't changed yet, which is right: the
+          meeting belongs to New York.
+        </p>
+      </Section>
+
       <section id="features" className="scroll-mt-20 border-t border-line">
         <SectionHeading
-          index="03"
+          index="04"
           eyebrow="Features"
           title="The calendar code you'd rather not write"
         />
         <FeatureTabs features={features} />
       </section>
 
-      <Section id="providers" index="04" eyebrow="Providers" title="Nine calendars today">
+      <Section id="providers" index="05" eyebrow="Providers" title="Nine calendars today">
         <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
           {SUPPORT.map(([name, pkg, support]) => (
             <div key={name} className="bg-fd-background p-6">
@@ -547,7 +594,7 @@ export default async function HomePage() {
 
       <Section
         id="your-provider"
-        index="05"
+        index="06"
         eyebrow="Extend"
         title="Bring your own calendar"
         intro="A provider is one object with a few functions. Test it with the conformance suite most official providers run."

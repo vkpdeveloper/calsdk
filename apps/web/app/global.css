@@ -263,3 +263,19 @@ html > body[data-scroll-locked] {
     mask-image: none;
   }
 }
+
+/* The hero's field names arrive one by one, once. */
+.chip-in {
+  animation: chip-in 0.4s ease-out both;
+}
+@keyframes chip-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chip-in {
+    animation: none;
+  }
+}

@@ -1,0 +1,76 @@
+---
+title: Find free time
+description: Read busy blocks from one calendar, or find meeting slots that work across several providers.
+---
+
+## Busy blocks
+
+`getFreeBusy` returns when each calendar is busy, without event details:
+
+```ts
+import { getFreeBusy } from 'calsdk';
+
+const { calendars } = await getFreeBusy({
+  calendar,
+  calendarIds: ['primary', 'team@example.com'],
+  timeMin: new Date(),
+  timeMax: new Date(Date.now() + 7 * 86_400_000),
+});
+
+calendars.primary?.busy; // [{ start: '2026-11-09T08:30:00.000Z', end: '2026-11-09T08:45:00.000Z' }, ...]
+```
+
+Blocks are merged, sorted and clipped to the window. `calendarIds` defaults to `['primary']`. A calendar that could not be read, for example one that is not shared with the user, gets an `error` string instead of failing the whole call.
+
+Google has a free/busy endpoint, which also works for calendars the user can only see as free or busy. Every other provider has none, so calsdk lists the events instead and returns a `compatibility` [warning](/docs/concepts/warnings). Either way, events shown as free and cancelled events do not count as busy.
+
+## Slots that work for everyone
+
+`findFreeTime` takes calendars from any mix of providers and returns the times when all of them are free:
+
+```ts
+import { findFreeTime } from 'calsdk';
+import { google } from '@calsdk/google';
+import { microsoft } from '@calsdk/microsoft';
+
+const { slots } = await findFreeTime({
+  calendars: [
+    { calendar: google({ accessToken: anaToken }) },
+    { calendar: microsoft({ accessToken: rajToken }), calendarIds: ['primary', roomCalendarId] },
+  ],
+  timeMin: '2026-11-09T00:00:00Z',
+  timeMax: '2026-11-14T00:00:00Z',
+  duration: 30,
+  workingHours: { start: '09:00', end: '17:00', timeZone: 'Europe/Berlin' },
+});
+
+// [{ start: '2026-11-09T08:00:00.000Z', end: '2026-11-09T08:30:00.000Z' }, ...]
+```
+
+- **`duration`** is the meeting length in minutes.
+- **`slotInterval`** is the minutes between slot starts, 15 by default. Slots line up with the hour in the working hours' time zone, so 15 gives :00, :15, :30 and :45.
+- **`workingHours`** limits slots to these hours, Monday to Friday unless you pass `days` (`0` is Sunday). Leave it out to search the whole window.
+
+Slots overlap when `slotInterval` is shorter than `duration`: a 60 minute meeting every 15 minutes gives 9:00 to 10:00, 9:15 to 10:15 and so on. Show them as start times.
+
+If any calendar cannot be read, `findFreeTime` throws `FreeBusyUnavailableError` instead of offering times that might clash. The error has the `provider` and `calendarId`; its message leaves out the id, which is often an email address.
+
+## Book the slot
+
+A slot is plain start and end instants. Create the event in the zone you want it shown in:
+
+```ts
+const [slot] = slots;
+
+if (slot) {
+  await createEvent({
+    calendar,
+    event: {
+      title: 'Intro call',
+      start: { dateTime: slot.start, timeZone: 'Europe/Berlin' },
+      end: { dateTime: slot.end, timeZone: 'Europe/Berlin' },
+      attendees: [{ email: 'raj@example.com' }],
+    },
+  });
+}
+```

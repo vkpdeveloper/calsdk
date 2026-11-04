@@ -1,0 +1,13 @@
+{
+  "title": "Guides",
+  "pages": [
+    "calendars",
+    "read-events",
+    "write-events",
+    "recurring-events",
+    "free-time",
+    "sync",
+    "provider-options",
+    "testing"
+  ]
+}

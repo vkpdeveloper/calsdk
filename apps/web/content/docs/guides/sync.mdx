@@ -1,0 +1,85 @@
+---
+title: Sync changes
+description: Keep a copy of a calendar up to date by fetching only what changed since the last sync.
+---
+
+`syncEvents` returns every change since a cursor you stored. The first sync, without a cursor, returns everything.
+
+```ts
+import { SyncCursorExpiredError, syncEvents } from 'calsdk';
+
+async function sync(calendarId: string) {
+  const stored = await db.syncCursors.get(calendarId);
+
+  try {
+    const { changes, nextCursor } = await syncEvents({ calendar, calendarId, cursor: stored });
+    await applyChanges(changes);
+    await db.syncCursors.set(calendarId, nextCursor);
+  } catch (error) {
+    if (!SyncCursorExpiredError.isInstance(error)) throw error;
+    // The provider no longer accepts the cursor. Start over.
+    await db.events.clear(calendarId);
+    await db.syncCursors.delete(calendarId);
+    await sync(calendarId);
+  }
+}
+```
+
+## Apply changes in order
+
+Changes come oldest first. Each is one of:
+
+- `{ type: 'upsert', event }`: insert the event, or replace the one with the same `id`.
+- `{ type: 'delete', eventId }`: remove that event.
+
+```ts
+import type { SyncChange } from 'calsdk';
+
+async function applyChanges(changes: SyncChange[]) {
+  for (const change of changes) {
+    if (change.type === 'upsert') await db.events.put(change.event);
+    else await db.events.delete(change.eventId);
+  }
+}
+```
+
+Sync returns stored events, not computed occurrences: single events, series and exceptions. To show a week, expand series yourself, or call `listEvents` for the window when you need it.
+
+## Cursors
+
+The cursor is opaque. Store it as a string and never parse it: it can be a provider token or a list of fingerprints, depending on the provider. Save it only after the changes are applied, so a crash in between replays them instead of losing them.
+
+A provider can expire a cursor, for example after a long time unused. Then `syncEvents` throws `SyncCursorExpiredError`. Throw away the cursor and your copy, and sync again without one.
+
+## Large syncs
+
+`syncEvents` follows every page and returns all changes at once. For a big first sync, take one page at a time with `paginate: false`:
+
+```ts
+let pageToken: string | undefined;
+let cursor: string | undefined;
+
+do {
+  const page = await syncEvents({ calendar, cursor: stored, paginate: false, pageToken });
+  await applyChanges(page.changes);
+  pageToken = page.nextPageToken;
+  cursor = page.nextCursor;
+} while (pageToken);
+
+await db.syncCursors.set(calendarId, cursor);
+```
+
+Pass the same `cursor` on every page of a round. The last page has no `nextPageToken` and carries `nextCursor`.
+
+## How each provider syncs
+
+| Provider          | How                                                               |
+| ----------------- | ----------------------------------------------------------------- |
+| Google            | Google sync tokens                                                |
+| Outlook           | Graph delta queries over a fixed window, by default a year back and two years ahead |
+| CalDAV            | The server's sync tokens (RFC 6578)                               |
+| Cal.com           | Bookings by the time they last changed                            |
+| Calendly, Zoom, ICS | Reads everything and compares it with the last sync. The cursor grows with the number of events |
+| Mock              | A change log in memory                                            |
+
+No provider pushes changes yet. Run sync on a schedule, or when the user opens your app.

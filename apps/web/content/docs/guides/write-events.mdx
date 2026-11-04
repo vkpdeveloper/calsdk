@@ -1,0 +1,130 @@
+---
+title: Write events
+description: Create, update and delete events, invite attendees, add video links and avoid overwriting changes.
+---
+
+## Create an event
+
+```ts
+import { createEvent } from 'calsdk';
+
+const { event, warnings } = await createEvent({
+  calendar,
+  event: {
+    title: 'Design review',
+    description: 'Walk through the new onboarding flow.',
+    location: 'Room 4',
+    start: { dateTime: '2026-11-03T10:00:00', timeZone: 'Asia/Kolkata' },
+    end: { dateTime: '2026-11-03T11:00:00', timeZone: 'Asia/Kolkata' },
+  },
+});
+```
+
+The result is the event as the provider stored it, with its `id` and `etag`. Check `warnings` for anything the provider changed or could not save, such as a color Google does not have.
+
+An all-day event uses dates, and the end date is exclusive:
+
+```ts
+await createEvent({
+  calendar,
+  event: { title: 'Offsite', start: { date: '2026-11-12' }, end: { date: '2026-11-14' } },
+});
+// Covers the 12th and the 13th.
+```
+
+calsdk checks every event before it calls the provider. A start after its end, an unknown time zone or a malformed RRULE throws `InvalidArgumentError` without a request.
+
+## Invite people
+
+```ts
+await createEvent({
+  calendar,
+  event: {
+    title: 'Kickoff',
+    start,
+    end,
+    attendees: [
+      { email: 'ana@example.com', name: 'Ana' },
+      { email: 'raj@example.com', optional: true },
+    ],
+  },
+  sendUpdates: 'all',
+});
+```
+
+`sendUpdates` decides who gets an email: `'all'`, `'externalOnly'` (people outside the organization) or `'none'`. Leave it out for the provider's default. Some providers always email attendees, or never do, and return a warning when you ask for something else. Each [provider page](/docs/providers) says which.
+
+Events you read back list `attendees` with their `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`) and the `organizer`.
+
+## Add a video link
+
+```ts
+const { event } = await createEvent({
+  calendar,
+  event: { title: 'Sync', start, end, createConference: true },
+});
+
+console.log(event.conference);
+// { provider: 'google-meet', joinUrl: 'https://meet.google.com/...', id: '...' }
+```
+
+Google adds a Meet link and Outlook a Teams meeting (work and school accounts only). Every Zoom meeting has its link already. Other providers cannot create links, but on CalDAV and ICS events calsdk finds a Meet, Teams or Zoom link in the event's URL, location or description and returns it as `conference`.
+
+## Update an event
+
+`updateEvent` takes a patch. Fields you leave out stay as they are, and `null` clears a field:
+
+```ts
+import { updateEvent } from 'calsdk';
+
+const { event } = await updateEvent({
+  calendar,
+  eventId,
+  patch: { title: 'Design review (moved)', location: null },
+});
+```
+
+`start` and `end` can be replaced but not cleared. Always use the `id` of the returned event afterwards: a few providers, such as Cal.com, replace an event when it moves and give it a new id.
+
+## Delete an event
+
+```ts
+import { deleteEvent } from 'calsdk';
+
+await deleteEvent({ calendar, eventId });
+```
+
+A missing event throws `NotFoundError`. If a retry finds that an earlier attempt already deleted the event, calsdk treats the delete as done.
+
+## Do not overwrite someone else's change
+
+Events carry an `etag`, a version tag, on providers that support it. Pass it as `ifMatch` to update or delete only if nobody changed the event since you read it:
+
+```ts
+import { ConflictError, getEvent, updateEvent } from 'calsdk';
+
+const { event } = await getEvent({ calendar, eventId });
+
+try {
+  await updateEvent({ calendar, eventId, patch: { title: 'Renamed' }, ifMatch: event.etag });
+} catch (error) {
+  if (!ConflictError.isInstance(error)) throw error;
+  // Someone else changed it. Read it again and decide what to do.
+}
+```
+
+Google, Outlook, CalDAV and the mock support `ifMatch`. Cal.com, Calendly and Zoom throw `UnsupportedFunctionalityError` when you pass it.
+
+## Retries
+
+calsdk retries rate limits, timeouts, server errors and network failures twice by default, with exponential backoff that honors `Retry-After`. Creates are the exception: they only retry rate limits, because retrying after a server error could create the event twice. Set `maxRetries` to change the count, or `0` to turn retries off.
+
+To make an Outlook create safe to retry yourself, pass a `transactionId`:
+
+```ts
+await createEvent({
+  calendar,
+  event,
+  providerOptions: { microsoft: { transactionId: order.id } },
+});
+```

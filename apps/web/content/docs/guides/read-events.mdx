@@ -1,0 +1,78 @@
+---
+title: Read events
+description: List events in a time window, walk every page, fetch one event and search.
+---
+
+## List a time window
+
+`listEvents` returns the events that overlap `[timeMin, timeMax)`: events that end after `timeMin` and start before `timeMax`.
+
+```ts
+import { listEvents } from 'calsdk';
+
+const { events, nextPageToken } = await listEvents({
+  calendar,
+  timeMin: new Date(),
+  timeMax: '2026-12-31T00:00:00Z',
+});
+```
+
+`timeMin` and `timeMax` take a `Date` or an ISO 8601 string. A string without a time, such as `'2026-11-01'`, is midnight UTC, so pass an offset when you mean midnight somewhere else.
+
+## Walk every page
+
+`listEvents` returns one page. Pass `nextPageToken` back as `pageToken` for the next one, or let `iterateEvents` do it:
+
+```ts
+import { iterateEvents } from 'calsdk';
+
+for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
+  console.log(event.title);
+}
+```
+
+`iterateEvents` fetches pages as you loop, so you can `break` early without reading the rest. It yields events, not results, so warnings go to the [warnings setting](/docs/concepts/warnings) instead of being returned. Set `pageSize` to change how many events each request asks for; providers may return fewer.
+
+## Recurring events
+
+By default each series is expanded into its instances, sorted by start:
+
+- `occurrence`: an instance that follows the series rule.
+- `exception`: an instance someone changed, such as a moved standup.
+
+Pass `expandRecurring: false` to get one `series` event per recurring event instead, with its rule in `recurrence`:
+
+```ts
+const { events } = await listEvents({ calendar, timeMin, timeMax, expandRecurring: false });
+
+const series = events.filter((event) => event.kind === 'series');
+console.log(series[0]?.recurrence); // ['RRULE:FREQ=WEEKLY;BYDAY=MO,WE,FR']
+```
+
+Deleted instances are not events, so listings leave them out. See [Recurring events](/docs/guides/recurring-events).
+
+## Fetch one event
+
+```ts
+import { getEvent } from 'calsdk';
+
+const { event } = await getEvent({ calendar, eventId });
+```
+
+`eventId` can be a single event, a series, an occurrence or an exception. A missing event throws `NotFoundError`.
+
+## Search
+
+```ts
+const { events } = await listEvents({ calendar, timeMin, timeMax, query: 'design review' });
+```
+
+Only Google and the mock support `query`. Other providers throw `UnsupportedFunctionalityError`, so check `calendar.capabilities.events.search` first if your app takes any provider.
+
+## Another calendar
+
+Every read defaults to `'primary'`. Pass the `id` from [`listCalendars`](/docs/guides/calendars) to read another calendar:
+
+```ts
+const { events } = await listEvents({ calendar, calendarId: 'team@example.com', timeMin, timeMax });
+```

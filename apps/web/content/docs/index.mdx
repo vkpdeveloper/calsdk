@@ -1,9 +1,9 @@
 ---
-title: Introduction
-description: One TypeScript API for every calendar provider.
+title: Overview
+description: One TypeScript API for Google Calendar, Outlook, iCloud, Zoom, Cal.com, Calendly, CalDAV and ICS feeds.
 ---
 
-calsdk reads and writes events on Google Calendar, Microsoft Outlook, iCloud, Zoho Calendar and other CalDAV servers, Cal.com, Calendly, Zoom meetings and ICS feeds. You pick a provider, then call plain functions. Every provider returns the same event shape.
+calsdk gives your app one set of functions and one event shape for every calendar. You create a provider, such as `google({ accessToken })`, and pass it to plain functions like `listEvents` and `createEvent`. Switching calendars changes the provider line and nothing else.
 
 ```ts
 import { listEvents } from 'calsdk';
@@ -11,38 +11,87 @@ import { google } from '@calsdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 
-const { events } = await listEvents({ calendar, timeMin: '2026-11-01', timeMax: '2026-12-01' });
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-01T00:00:00Z',
+  timeMax: '2026-12-01T00:00:00Z',
+});
 ```
 
-Swap `google(...)` for `microsoft(...)`, `icloud(...)` or `zoom(...)` and the rest of your code stays the same.
+When a provider cannot do part of a request, calsdk tells you: the call returns `warnings`, or throws `UnsupportedFunctionalityError` when going ahead would save something other than what you asked for. It never quietly changes your data.
 
-## Functions
+## Start here
 
-| Function                                                | What it does                                                                                        |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `listCalendars`                                         | Calendars the user can see. One is `isPrimary`.                                                     |
-| `getEvent`, `createEvent`, `updateEvent`, `deleteEvent` | Single events. Changes to one instance of a series take `scope: 'this' \| 'thisAndFollowing' \| 'all'`. |
-| `listEvents`, `iterateEvents`                           | Events in a time window. Recurring events are expanded by default. `iterateEvents` walks every page. |
-| `getFreeBusy`                                           | Busy blocks per calendar. Falls back to reading events when the provider has no free/busy endpoint. |
-| `findFreeTime`                                          | Slots when every calendar, across providers, is free.                                               |
-| `syncEvents`                                            | Changes since a stored cursor.                                                                      |
+<Cards>
+  <Card title="Install calsdk" href="/docs/installation">
+    Add the core package and the providers you need.
+  </Card>
+  <Card title="Run the quickstart" href="/docs/quickstart">
+    Create, list and move events on an in-memory calendar, with no account.
+  </Card>
+  <Card title="Choose a provider" href="/docs/choose-a-provider">
+    See which package and credentials each calendar needs.
+  </Card>
+  <Card title="Understand the model" href="/docs/concepts/how-it-works">
+    How functions, providers, warnings and errors fit together.
+  </Card>
+</Cards>
 
-Every function takes `calendar`, plus optional `maxRetries` (default 2), `abortSignal`, `headers` and `providerOptions`. `calendarId` defaults to `'primary'`.
+## Build features
+
+<Cards>
+  <Card title="Read events" href="/docs/guides/read-events">
+    List a time window, page through results and search.
+  </Card>
+  <Card title="Write events" href="/docs/guides/write-events">
+    Create, update and delete events, invite people and add video links.
+  </Card>
+  <Card title="Recurring events" href="/docs/guides/recurring-events">
+    Create series with RRULEs and change one occurrence or the whole series.
+  </Card>
+  <Card title="Find free time" href="/docs/guides/free-time">
+    Get busy blocks and find slots that work across providers.
+  </Card>
+  <Card title="Sync changes" href="/docs/guides/sync">
+    Keep a local copy up to date with a stored cursor.
+  </Card>
+  <Card title="Test your code" href="/docs/guides/testing">
+    Run your calendar logic offline against the mock provider.
+  </Card>
+</Cards>
 
 ## Providers
 
-| Package            | Provider                                                    |
-| ------------------ | ----------------------------------------------------------- |
-| `@calsdk/google`    | Google Calendar                                             |
-| `@calsdk/microsoft` | Microsoft Outlook, through Microsoft Graph                  |
-| `@calsdk/caldav`    | iCloud, Zoho Calendar, Fastmail, Nextcloud and other CalDAV |
-| `@calsdk/calcom`    | Cal.com bookings                                            |
-| `@calsdk/calendly`  | Calendly meetings                                           |
-| `@calsdk/zoom`      | Zoom meetings                                               |
-| `@calsdk/ics`       | Read-only ICS feeds                                         |
-| `@calsdk/mock`      | An in-memory calendar for tests and examples                |
+| Package             | Calendar                                                 |
+| ------------------- | -------------------------------------------------------- |
+| `@calsdk/google`    | [Google Calendar](/docs/providers/google)                |
+| `@calsdk/microsoft` | [Microsoft Outlook](/docs/providers/microsoft), through Microsoft Graph |
+| `@calsdk/caldav`    | [iCloud, Zoho Calendar and any CalDAV server](/docs/providers/caldav) |
+| `@calsdk/calcom`    | [Cal.com](/docs/providers/calcom) bookings               |
+| `@calsdk/calendly`  | [Calendly](/docs/providers/calendly) meetings            |
+| `@calsdk/zoom`      | [Zoom](/docs/providers/zoom) meetings                    |
+| `@calsdk/ics`       | [ICS feeds](/docs/providers/ics), read only              |
+| `@calsdk/mock`      | [An in-memory calendar](/docs/providers/mock) for tests  |
+
+The [provider comparison](/docs/providers) shows what each one supports.
+
+## Reference
 
 <Cards>
-  <Card title="Quickstart" href="/docs/quickstart" />
-  <Card title="GitHub" href="https://github.com/vkpdeveloper/calsdk" />
+  <Card title="API overview" href="/docs/reference">
+    Every function, its options and its result.
+  </Card>
+  <Card title="Types" href="/docs/reference/types">
+    The event, calendar and time shapes every provider returns.
+  </Card>
+  <Card title="Errors" href="/docs/reference/errors">
+    Every error class and when it is thrown.
+  </Card>
+  <Card title="Build a provider" href="/docs/build-a-provider">
+    Add a calendar calsdk does not support yet.
+  </Card>
 </Cards>
+
+<Callout title="No hosted service">
+  calsdk is a library. It has no server, database or queue, and it does not run OAuth flows. Your app keeps the tokens and passes them in.
+</Callout>

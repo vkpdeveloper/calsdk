@@ -1,0 +1,54 @@
+---
+title: Install
+description: Add calsdk and a provider package to a TypeScript project.
+---
+
+calsdk is split into a core package and one package per calendar. Install `calsdk` and the providers your app talks to.
+
+```npm
+npm install calsdk @calsdk/google
+```
+
+## Pick your providers
+
+| Calendar                                 | Package             | Function                        |
+| ---------------------------------------- | ------------------- | ------------------------------- |
+| Google Calendar                          | `@calsdk/google`    | `google()`                      |
+| Microsoft Outlook                        | `@calsdk/microsoft` | `microsoft()`                   |
+| iCloud, Zoho Calendar, any CalDAV server | `@calsdk/caldav`    | `icloud()`, `zoho()`, `caldav()` |
+| Cal.com                                  | `@calsdk/calcom`    | `calcom()`                      |
+| Calendly                                 | `@calsdk/calendly`  | `calendly()`                    |
+| Zoom                                     | `@calsdk/zoom`      | `zoom()`                        |
+| ICS feeds                                | `@calsdk/ics`       | `ics()`                         |
+| In-memory, for tests and examples        | `@calsdk/mock`      | `mockCalendar()`                |
+
+Not sure which one fits? [Choose a provider](/docs/choose-a-provider) compares them.
+
+## Requirements
+
+- **ES modules.** Every package is ESM only.
+- **A runtime with `fetch`.** Providers use `fetch` and nothing else, so they run on Node.js 20 or later, Bun, Deno and edge runtimes. CI runs the quickstart in Deno with no file, network or environment access to check this.
+- **TypeScript is optional but worth it.** Provider options and metadata are typed by the provider you pass, so typos are caught before they reach an API.
+
+## Keep credentials on the server
+
+Providers take OAuth access tokens, API keys or app passwords. Create them in server code, such as a route handler, a server action or a background job, and never ship them to the browser.
+
+calsdk does not run OAuth flows or refresh tokens. Pass a token, or a function that returns a fresh one. The function is called before each request, so it can refresh and cache tokens however your app already does:
+
+```ts
+import { google } from '@calsdk/google';
+
+const calendar = google({
+  accessToken: async () => {
+    const account = await db.calendarAccounts.find(userId);
+    return account.expiresAt > Date.now() ? account.accessToken : refresh(account);
+  },
+});
+```
+
+<Cards>
+  <Card title="Next: run the quickstart" href="/docs/quickstart">
+    Try every function on an in-memory calendar before adding credentials.
+  </Card>
+</Cards>

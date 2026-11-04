@@ -4,6 +4,7 @@ import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } fr
 import { type MockCalendarProvider, mockCalendar } from '@cal-sdk/mock';
 import { Plus } from 'lucide-react';
 import { type ReactNode, type Ref, useCallback, useEffect, useRef, useState } from 'react';
+import { ProviderLogo, type ProviderLogoId } from '@/components/provider-logo';
 
 // A fixed week, so New York stays on one offset and every visitor sees the same calendar.
 const ZONE = 'America/New_York';
@@ -34,7 +35,7 @@ const SOURCES = [
     ],
   },
   {
-    id: 'outlook',
+    id: 'microsoft',
     name: 'Outlook',
     short: 'Outlook',
     field: 'subject',
@@ -92,7 +93,7 @@ const SOURCES = [
     ],
   },
 ] satisfies {
-  id: string;
+  id: ProviderLogoId;
   name: string;
   short: string;
   field: string;
@@ -368,14 +369,19 @@ export function CalendarApp() {
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggle(source.id)}
-                  className="flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-2.5 text-[13px] text-neutral-500 hover:bg-white/[0.04] aria-pressed:text-neutral-200 md:h-9"
+                  className="group flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-2.5 text-[13px] text-neutral-500 hover:bg-white/[0.04] aria-pressed:text-neutral-200 md:h-9"
                 >
-                  <span
-                    aria-hidden
-                    className="size-3.5 shrink-0 rounded border-2"
-                    style={{ borderColor: source.color, background: on ? source.color : undefined }}
+                  <ProviderLogo
+                    id={source.id}
+                    className="opacity-35 transition-opacity group-aria-pressed:opacity-100"
                   />
                   {source.short}
+                  {/* The color key for this calendar's events in the week view. */}
+                  <span
+                    aria-hidden
+                    className="ml-auto size-2 shrink-0 rounded-full opacity-35 group-aria-pressed:opacity-100"
+                    style={{ background: source.color }}
+                  />
                 </button>
               );
             })}
@@ -601,7 +607,7 @@ function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> 
     <div ref={ref} className="min-w-0 scroll-mt-20 border-line max-lg:border-t lg:border-l">
       <div className="px-3 py-4 sm:px-4">
         <div className="flex items-center gap-2 text-xs text-neutral-400">
-          <span className="size-2 rounded-full" style={{ background: source.color }} />
+          <ProviderLogo id={source.id} />
           {source.name}
         </div>
         <p className="mt-2 text-lg font-semibold tracking-[-0.02em] text-white">{event.title}</p>

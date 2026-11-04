@@ -9,13 +9,13 @@ You rarely get to choose your users' calendar. One team lives in Google Workspac
 
 Use these when your users keep their schedule in the calendar itself. You can read and write any event, invite attendees and create repeating series.
 
-| Calendar                          | Use                                                     | Credentials                                               |
-| --------------------------------- | ------------------------------------------------------- | --------------------------------------------------------- |
-| Google Calendar                   | [`google()`](/docs/providers/google)                    | OAuth access token with a Calendar scope                  |
-| Outlook, Microsoft 365            | [`microsoft()`](/docs/providers/microsoft)              | Microsoft Graph token with `Calendars.ReadWrite`          |
-| iCloud                            | [`icloud()`](/docs/providers/caldav)                    | Apple ID and an app-specific password                     |
-| Zoho Calendar                     | [`zoho()`](/docs/providers/caldav)                      | Email and password, or an app-specific password           |
-| Other CalDAV servers              | [`caldav()`](/docs/providers/caldav)                    | Server address, username and password                     |
+| Calendar                                               | Use                                        | Credentials                                      |
+| ------------------------------------------------------ | ------------------------------------------ | ------------------------------------------------ |
+| <ProviderLogo id="google" /> Google Calendar           | [`google()`](/docs/providers/google)       | OAuth access token with a Calendar scope         |
+| <ProviderLogo id="microsoft" /> Outlook, Microsoft 365 | [`microsoft()`](/docs/providers/microsoft) | Microsoft Graph token with `Calendars.ReadWrite` |
+| <ProviderLogo id="icloud" /> iCloud                    | [`icloud()`](/docs/providers/caldav)       | Apple ID and an app-specific password            |
+| <ProviderLogo id="zoho" /> Zoho Calendar               | [`zoho()`](/docs/providers/caldav)         | Email and password, or an app-specific password  |
+| <ProviderLogo id="caldav" /> Other CalDAV servers      | [`caldav()`](/docs/providers/caldav)       | Server address, username and password            |
 
 Fastmail, Nextcloud and Radicale are CalDAV servers, so they use `caldav()`.
 
@@ -23,18 +23,18 @@ Fastmail, Nextcloud and Radicale are CalDAV servers, so they use `caldav()`.
 
 Use these when your app reads and makes bookings or meetings rather than managing someone's whole calendar. Cal.com and Calendly book an event type, and the event type sets the booking's name and length, not you. Zoom meetings keep the title and length you give them.
 
-| Tool     | Use                                      | Credentials                                       |
-| -------- | ---------------------------------------- | ------------------------------------------------- |
-| Cal.com  | [`calcom()`](/docs/providers/calcom)     | API key or OAuth access token                     |
-| Calendly | [`calendly()`](/docs/providers/calendly) | Personal access token or OAuth access token       |
-| Zoom     | [`zoom()`](/docs/providers/zoom)         | OAuth access token with meeting scopes            |
+| Tool                                    | Use                                      | Credentials                                 |
+| --------------------------------------- | ---------------------------------------- | ------------------------------------------- |
+| <ProviderLogo id="calcom" /> Cal.com    | [`calcom()`](/docs/providers/calcom)     | API key or OAuth access token               |
+| <ProviderLogo id="calendly" /> Calendly | [`calendly()`](/docs/providers/calendly) | Personal access token or OAuth access token |
+| <ProviderLogo id="zoom" /> Zoom         | [`zoom()`](/docs/providers/zoom)         | OAuth access token with meeting scopes      |
 
 ## Feeds and tests
 
-| Source                                  | Use                                  | Credentials                     |
-| --------------------------------------- | ------------------------------------ | ------------------------------- |
-| A `.ics` or `webcal://` feed            | [`ics()`](/docs/providers/ics)       | None, or headers for a private feed |
-| An in-memory calendar                   | [`mockCalendar()`](/docs/providers/mock) | None                        |
+| Source                                                 | Use                                      | Credentials                         |
+| ------------------------------------------------------ | ---------------------------------------- | ----------------------------------- |
+| <ProviderLogo id="ics" /> A `.ics` or `webcal://` feed | [`ics()`](/docs/providers/ics)           | None, or headers for a private feed |
+| <ProviderLogo id="mock" /> An in-memory calendar       | [`mockCalendar()`](/docs/providers/mock) | None                                |
 
 ## Check before you rely on a feature
 

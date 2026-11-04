@@ -1,13 +1,13 @@
 'use client';
 
 import { type ReactNode, useId, useState } from 'react';
+import { ProviderLogo, type ProviderLogoId } from '@/components/provider-logo';
 import { onTabKeyDown } from './tabs';
 
 export type ShowcaseProvider = {
-  id: string;
+  id: ProviderLogoId;
   label: string;
   pkg: string;
-  color: string;
   code: ReactNode;
   /** What the provider supports, as [capability, note or true/false]. */
   support: [string, boolean | string][];
@@ -44,9 +44,9 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
             tabIndex={provider.id === current?.id ? 0 : -1}
             aria-selected={provider.id === current?.id}
             onClick={() => setActive(provider.id)}
-            className="flex h-11 min-w-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm text-neutral-400 transition-colors hover:bg-white/[0.04] hover:text-white aria-selected:bg-white/[0.07] aria-selected:text-white lg:h-10"
+            className="flex h-11 min-w-0 items-center gap-2 rounded-lg px-2.5 text-left text-sm text-neutral-400 transition-colors hover:bg-white/[0.04] hover:text-white aria-selected:bg-white/[0.07] aria-selected:text-white lg:h-10 lg:gap-2.5 lg:px-3"
           >
-            <span className="size-2 shrink-0 rounded-full" style={{ background: provider.color }} />
+            <ProviderLogo id={provider.id} />
             <span className="truncate">{provider.label}</span>
             <span className="ml-auto hidden whitespace-nowrap font-mono text-[11px] text-neutral-500 lg:inline">
               {provider.pkg}

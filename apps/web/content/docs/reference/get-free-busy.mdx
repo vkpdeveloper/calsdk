@@ -3,7 +3,7 @@ title: getFreeBusy
 description: Returns busy blocks for one or more calendars of one provider.
 ---
 
-Use `getFreeBusy` to see when someone is busy without reading what their events are. Only Google has a free/busy endpoint; for other providers calsdk reads the events and works out the busy times, with a warning.
+Use `getFreeBusy` when you need to know when someone is busy, not what their events are.
 
 ```ts
 import { getFreeBusy } from 'calsdk';
@@ -16,7 +16,7 @@ const { calendars } = await getFreeBusy({
 });
 ```
 
-Providers with a free/busy endpoint (Google) use it. Others list events instead, skipping events shown as free and cancelled events, and return a `compatibility` warning.
+Google answers from its free/busy endpoint. Other providers need access to the events: calsdk lists them, skips events shown as free and cancelled events, and returns a `compatibility` warning.
 
 ## Options
 

@@ -53,7 +53,7 @@ Plus the [common options](/docs/reference#common-options). Only rate limits are 
 
 <TypeTable
   type={{
-    event: { type: 'CalendarEvent', description: 'The stored event, with its id and `etag`.', required: true },
+    event: { type: 'CalendarEvent', description: 'The stored event, with its id, and an `etag` where the provider has one.', required: true },
     warnings: { type: 'Warning[]', description: 'Fields the provider ignored or changed.', required: true },
   }}
 />

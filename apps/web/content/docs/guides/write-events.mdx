@@ -22,7 +22,7 @@ const { event, warnings } = await createEvent({
 });
 ```
 
-You get back the event as the provider stored it, with its `id` and `etag`. Check `warnings` for anything the provider changed or couldn't save, such as a color Google doesn't have.
+You get back the event as the provider stored it, with its `id`, and an `etag` where the provider supports version checks. Check `warnings` for anything the provider changed or couldn't save, such as a color Google doesn't have.
 
 All-day events use dates instead, and the end date is exclusive:
 

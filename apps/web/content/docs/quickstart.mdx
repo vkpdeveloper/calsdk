@@ -3,7 +3,7 @@ title: Quickstart
 description: Create a recurring event, move one occurrence and find free time, with no account and no network.
 ---
 
-This page runs every step against `@calsdk/mock`, an in-memory calendar. It needs no credentials and makes no requests, and the code is the same code you will run against Google or Outlook.
+The quickest way to see how calsdk behaves is against a calendar you can't break. This page uses `@calsdk/mock`, an in-memory calendar with no credentials and no network, and the code is the same code you'll later run against Google or Outlook. You'll set up a weekday standup, move Wednesday's to later in the morning, and find free time around it.
 
 <Steps>
 <Step>
@@ -41,7 +41,7 @@ console.log(standup.kind, standup.start.dateTime);
 // series 2026-11-09T09:30:00+01:00
 ```
 
-`calendarId` was left out, so the event went to `'primary'`, the user's default calendar. The `dateTime` had no offset, so calsdk read it as 9:30 on the Berlin wall clock and returned it with the offset filled in.
+You didn't pass `calendarId`, so the event went to `'primary'`, the user's default calendar. And because the `dateTime` had no offset, calsdk read it as 9:30 on the Berlin wall clock and returned it with the offset filled in.
 
 </Step>
 <Step>
@@ -63,7 +63,7 @@ for (const event of events) console.log(event.id, event.kind, event.start.dateTi
 // evt_1_20261113T083000Z occurrence 2026-11-13T09:30:00+01:00
 ```
 
-Recurring events are expanded by default, so the series comes back as one `occurrence` per weekday. Each has its own id, and `seriesId` points back at the series.
+`listEvents` expands recurring events by default, so the series comes back as one `occurrence` per weekday. Each has its own id, which is what you pass to change a single day, and `seriesId` points back at the series.
 
 </Step>
 <Step>
@@ -86,7 +86,7 @@ console.log(moved.kind, moved.start.dateTime);
 // exception 2026-11-11T11:00:00+01:00
 ```
 
-Updating an occurrence changes only that one by default, and it becomes an `exception`. Pass `scope: 'all'` to change the whole series instead. [Recurring events](/docs/guides/recurring-events) covers the other scopes.
+Updating an occurrence changes only that one by default, and it becomes an `exception`: an occurrence that no longer follows the series rule. Pass `scope: 'all'` to change the whole series instead. [Recurring events](/docs/guides/recurring-events) covers the other scopes.
 
 </Step>
 <Step>
@@ -107,7 +107,7 @@ console.log(slots.map((slot) => slot.start));
 // [ '2026-11-09T08:00:00.000Z', '2026-11-09T09:00:00.000Z', '2026-11-09T09:30:00.000Z' ]
 ```
 
-Monday's standup blocks the 9:30 slot, so the free half hours are 9:00, 10:00 and 10:30 in Berlin. Slots are UTC instants.
+Monday's standup blocks the 9:30 slot, so the free half hours are 9:00, 10:00 and 10:30 in Berlin. Slots come back as UTC instants, which is why 9:00 in Berlin prints as `08:00:00.000Z`.
 
 </Step>
 <Step>
@@ -119,20 +119,20 @@ bun quickstart.ts
 # or: npx tsx quickstart.ts
 ```
 
-You will also see this line:
+Along with your own output, you'll see this line:
 
 ```txt
 calsdk warning (mock, getFreeBusy): freeBusy uses a fallback: Provider "mock" has no free/busy endpoint, so busy times were computed from events.
 ```
 
-That is a [warning](/docs/concepts/warnings), not an error. The mock has no free/busy endpoint, so calsdk read the events instead and says so.
+That's a [warning](/docs/concepts/warnings), not an error. The mock has no free/busy endpoint, so calsdk worked out busy times from its events and tells you it did. calsdk does the same for Outlook, so expect a similar line there.
 
 </Step>
 </Steps>
 
 ## Use a real calendar
 
-Install a provider and replace the mock with it. The calendar calls stay the same.
+When the logic does what you want, install a provider and swap it in for the mock. Only the line that creates `calendar` changes; every call after it stays the same.
 
 ```ts tab="Google"
 // npm install @calsdk/google
@@ -165,7 +165,7 @@ import { zoom } from '@calsdk/zoom';
 const calendar = zoom({ accessToken: () => getFreshAccessToken() });
 ```
 
-Each [provider page](/docs/providers) lists the token or password it needs and how it differs from the others.
+Each [provider page](/docs/providers) lists the token or password it needs and where it behaves differently from the others.
 
 <Callout type="warn" title="Use a test calendar">
   Writes go to the real account. Point `calendarId` at a calendar made for testing until your code does what you expect.

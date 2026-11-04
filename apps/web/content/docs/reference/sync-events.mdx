@@ -3,6 +3,8 @@ title: syncEvents
 description: Fetches what changed in a calendar since the last sync.
 ---
 
+Use `syncEvents` to keep a local copy of a calendar, such as a table in Postgres, up to date without reading everything again. The first call returns every event, and each later call returns only what changed since the cursor you stored.
+
 ```ts
 import { syncEvents } from 'calsdk';
 

@@ -3,6 +3,8 @@ title: Time and time zones
 description: How calsdk represents timed and all-day events, and how it reads times you pass in.
 ---
 
+Time zones are where calendar code goes wrong quietly: a weekly meeting stored as 08:00 UTC moves an hour when the clocks change. So calsdk keeps two things on every timed event, the exact instant and the zone it was scheduled in.
+
 ## Timed events
 
 A timed `start` or `end` is a date-time plus the IANA time zone the event was scheduled in:
@@ -26,11 +28,11 @@ await createEvent({
 });
 ```
 
-`timeZone` must be an IANA name, such as `America/New_York`. A Windows name, such as `Pacific Standard Time`, throws `InvalidArgumentError` with the IANA name to use instead. Outlook reports Windows names; calsdk turns them into IANA names when reading.
+`timeZone` must be an IANA name, such as `America/New_York`. A Windows name, such as `Pacific Standard Time`, throws `InvalidArgumentError` with the IANA name to use instead. Outlook reports Windows names, and calsdk turns them into IANA names when reading.
 
 ## All-day events
 
-An all-day `start` or `end` is a date, with no time and no zone:
+An all-day `start` or `end` is a date, with no time and no zone, because a holiday on the 12th is on the 12th wherever you are:
 
 ```ts
 { start: { date: '2026-11-12' }, end: { date: '2026-11-14' } }
@@ -40,14 +42,14 @@ The end date is exclusive, as in iCalendar and the Google and Outlook APIs: this
 
 ## Time windows
 
-`timeMin` and `timeMax`, on `listEvents`, `getFreeBusy` and `findFreeTime`, take a `Date` or an ISO 8601 string. They are instants, so give strings an offset:
+`timeMin` and `timeMax`, on `listEvents`, `getFreeBusy` and `findFreeTime`, take a `Date` or an ISO 8601 string. They're exact instants, not wall-clock times, so give strings an offset:
 
 ```ts
 // Midnight to midnight in Berlin.
 await listEvents({ calendar, timeMin: '2026-11-09T00:00:00+01:00', timeMax: '2026-11-10T00:00:00+01:00' });
 ```
 
-A string without a time, such as `'2026-11-09'`, is midnight UTC.
+A string without a time, such as `'2026-11-09'`, is midnight UTC. A date-time without an offset is read in the server's local zone, as JavaScript's `Date` does, which is rarely what you meant.
 
 ## Free time
 

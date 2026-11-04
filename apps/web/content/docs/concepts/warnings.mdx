@@ -3,7 +3,7 @@ title: Warnings
 description: How calsdk reports parts of a request a provider could not honor, without failing the call.
 ---
 
-A warning means the call succeeded, but not exactly as asked. Every result has a `warnings` array:
+Sometimes a provider can do most of what you asked but not all of it. Failing the whole call over an event color would be unhelpful, and dropping the color silently would be worse, so calsdk saves what it can and tells you what it couldn't. A warning means the call succeeded, but not exactly as asked. Every result has a `warnings` array:
 
 ```ts
 const { event, warnings } = await createEvent({
@@ -23,7 +23,7 @@ console.log(warnings);
 | `compatibility` | calsdk or the provider used a fallback that may behave a little differently | `feature`, `details?` |
 | `other`         | Anything else worth knowing                                       | `message`              |
 
-Some warnings you will see:
+Some warnings you'll see:
 
 - `compatibility` on `getFreeBusy` and `findFreeTime` for providers without a free/busy endpoint. Busy times were computed from events.
 - `compatibility` on Google when a color is not one of its 11 event colors. The nearest one was saved.
@@ -32,7 +32,7 @@ Some warnings you will see:
 
 ## Where warnings go
 
-Besides being returned, warnings are logged. Set `globalThis.CALSDK_WARNINGS` once, at startup:
+Warnings are also logged, since it's easy to never look at a result's `warnings` array. Set `globalThis.CALSDK_WARNINGS` once, at startup, to choose where they go:
 
 ```ts
 // Default: console.warn each distinct warning once per process.
@@ -47,7 +47,7 @@ globalThis.CALSDK_WARNINGS = (warnings, { provider, operation }) => {
 };
 ```
 
-The function is called for every call that has warnings. `iterateEvents` returns events, not results, so its warnings only reach this setting.
+A function you set here runs for every call that has warnings. `iterateEvents` yields events, not results, so this setting is the only place its warnings reach.
 
 ## Warning or error?
 

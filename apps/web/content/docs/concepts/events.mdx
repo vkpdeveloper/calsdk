@@ -3,7 +3,7 @@ title: The event model
 description: The one event shape every provider returns, and what each field means.
 ---
 
-Every provider returns the same `CalendarEvent`. Here is one read from Outlook:
+On the wire, a Google event and an Outlook event have little in common: different ids, different time formats, different names for the same status. calsdk turns both into one `CalendarEvent`, so the rest of your code only learns one shape. Here is one read from Outlook:
 
 ```ts
 {
@@ -30,7 +30,7 @@ Every provider returns the same `CalendarEvent`. Here is one read from Outlook:
 }
 ```
 
-The same meeting from Google has a different id, a Meet link and Google's metadata, and every other field the same.
+The same meeting read from Google would have a different id, a Meet link and Google's metadata, and every other field the same.
 
 ## Identity
 
@@ -39,7 +39,7 @@ The same meeting from Google has a different id, a Meet link and Google's metada
 - **`kind`** is `single`, `series`, `occurrence` or `exception`. See [Recurring events](/docs/guides/recurring-events).
 - **`seriesId`** and **`originalStart`** are set on occurrences and exceptions: the series they belong to, and where its rule placed them.
 
-Ids are strings with no fixed format. Store them as they are.
+Ids are strings with no fixed format, and each provider shapes them its own way, so store them as they are rather than parsing them.
 
 ## When
 
@@ -69,8 +69,8 @@ Some providers leave attendees out of listings because reading them costs a requ
 - **`createdAt`** and **`updatedAt`** are ISO 8601 timestamps.
 - **`providerMetadata`** holds fields only one provider has, keyed by provider id. See [Provider options](/docs/guides/provider-options).
 
-Every field except `id`, `calendarId`, `kind`, `start`, `end`, `status` and `showAs` is optional. A provider leaves out what it does not have.
+Every field except `id`, `calendarId`, `kind`, `start`, `end`, `status` and `showAs` is optional, because a provider leaves out what it doesn't have. A Cal.com booking has no color, and an ICS feed has no etag.
 
 ## Writing events
 
-`createEvent` takes an `EventInput`, a smaller shape with only the fields you can set: `title`, `description`, `location`, `start`, `end`, `recurrence`, `showAs`, `visibility`, `attendees`, `createConference`, `reminders` and `color`. `updateEvent` takes the same fields as a partial `EventPatch`, where `null` clears a field. See [Types](/docs/reference/types) for both.
+You don't write a `CalendarEvent` back. `createEvent` takes an `EventInput`, a smaller shape with only the fields you can set: `title`, `description`, `location`, `start`, `end`, `recurrence`, `showAs`, `visibility`, `attendees`, `createConference`, `reminders` and `color`. `updateEvent` takes the same fields as a partial `EventPatch`, where `null` clears a field. See [Types](/docs/reference/types) for both.

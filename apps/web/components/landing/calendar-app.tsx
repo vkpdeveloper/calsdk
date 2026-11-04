@@ -316,8 +316,9 @@ export function CalendarApp() {
         <span className="whitespace-nowrap">
           {sources.length} <span className="max-sm:hidden">sample </span>calendars
         </span>{' '}
-        · <span className="whitespace-nowrap">{run.events.length} events</span> ·{' '}
-        <span className="whitespace-nowrap">{run.ms.toFixed(1)} ms</span>
+        · <span className="whitespace-nowrap">{run.events.length} events</span>
+        {/* The timing drops below 375px, so the line stays on one row. */}
+        <span className="whitespace-nowrap max-[374px]:hidden"> · {run.ms.toFixed(1)} ms</span>
       </>
     );
   }

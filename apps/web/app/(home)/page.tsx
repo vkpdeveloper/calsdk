@@ -160,19 +160,11 @@ const { event: series } = await createEvent({
 });
 
 // Move only Friday's standup.
-const friday = { timeMin: '2026-11-13', timeMax: '2026-11-14' };
-for await (const event of iterateEvents({ calendar, ...friday })) {
-  if (event.seriesId !== series.id) continue;
-  await updateEvent({
-    calendar,
-    eventId: event.id,
-    scope: 'this',
-    patch: {
-      start: { dateTime: '2026-11-13T10:00:00', timeZone: 'America/New_York' },
-      end: { dateTime: '2026-11-13T10:15:00', timeZone: 'America/New_York' },
-    },
-  });
-  break;
+const { events } = await listEvents({ calendar, timeMin: '2026-11-13', timeMax: '2026-11-14' });
+const friday = events.find((event) => event.seriesId === series.id);
+
+if (friday) {
+  await updateEvent({ calendar, eventId: friday.id, scope: 'this', patch: { start, end } });
 }`,
   },
   {
@@ -183,17 +175,22 @@ for await (const event of iterateEvents({ calendar, ...friday })) {
     code: `
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
 
-try {
-  const { changes, nextCursor } = await syncEvents({ calendar, cursor: await db.cursor() });
-
+async function sync(cursor?: string) {
+  const { changes, nextCursor } = await syncEvents({ calendar, cursor });
   for (const change of changes) {
     if (change.type === 'delete') await db.remove(change.eventId);
     else await db.save(change.event);
   }
   await db.saveCursor(nextCursor);
+}
+
+try {
+  await sync(await db.cursor());
 } catch (error) {
-  if (SyncCursorExpiredError.isInstance(error)) await db.clear();
-  else throw error;
+  if (!SyncCursorExpiredError.isInstance(error)) throw error;
+  // The cursor expired: drop this calendar's copy and cursor, then start over.
+  await db.clear();
+  await sync();
 }`,
   },
   {
@@ -323,8 +320,8 @@ export default async function HomePage() {
           One API.
         </h1>
         <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
-          The TypeScript toolkit for Google, Outlook, iCloud, Zoom, Cal.com, Calendly and any CalDAV
-          server. Read, write and sync events with one set of typed functions.
+          Read, write and sync events on Google, Outlook, iCloud and six more calendars, with one
+          typed TypeScript API.
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
@@ -337,7 +334,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="mt-12 sm:mt-16" aria-label="Live demo">
+      <section className="mt-12 sm:mt-16 xl:-mx-10 2xl:-mx-20" aria-label="Live demo">
         <CalendarApp />
         <p className="mt-4 text-center text-sm text-neutral-500">
           Running in your browser: six in-memory calendars, the real listEvents and findFreeTime.
@@ -448,13 +445,13 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-8 text-sm text-neutral-500">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-6 text-sm text-neutral-500">
         <span>MIT License</span>
         <div className="flex gap-5">
-          <Link href="/docs" className="hover:text-white">
+          <Link href="/docs" className="inline-flex min-h-11 items-center hover:text-white">
             Docs
           </Link>
-          <a href={githubUrl} className="hover:text-white">
+          <a href={githubUrl} className="inline-flex min-h-11 items-center hover:text-white">
             GitHub
           </a>
         </div>
@@ -484,7 +481,7 @@ function Section({
           {aside && <p className="leading-relaxed text-neutral-400">{aside}</p>}
           <Link
             href={link.href}
-            className={`inline-flex items-center gap-1.5 text-sm font-medium text-white hover:text-neutral-300 ${aside ? 'mt-3' : ''}`}
+            className={`inline-flex min-h-11 items-center gap-1.5 text-sm font-medium text-white hover:text-neutral-300 ${aside ? 'mt-1' : ''}`}
           >
             {link.label}
             <ArrowRight aria-hidden className="size-3.5" />

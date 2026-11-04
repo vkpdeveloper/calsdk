@@ -96,6 +96,14 @@ html > body[data-scroll-locked] {
   }
 }
 
+/* Phones: the top bar's logo, search and menu are 44px tap targets. */
+@media (max-width: 767px) {
+  #nd-home-layout #nd-nav :is(a, button) {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
 /* Running text keeps a readable line length on wide screens; code, tables and cards still use
    the full column. */
 .prose > :is(p, ul, ol, blockquote) {

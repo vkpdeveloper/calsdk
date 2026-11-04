@@ -1,6 +1,7 @@
 'use client';
 
-import { type ReactNode, useState } from 'react';
+import { type ReactNode, useId, useState } from 'react';
+import { onTabKeyDown } from './tabs';
 
 export type ShowcaseProvider = {
   id: string;
@@ -16,12 +17,21 @@ export type ShowcaseProvider = {
 export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] }) {
   const [active, setActive] = useState(providers[0]?.id);
   const current = providers.find((provider) => provider.id === active) ?? providers[0];
+  const prefix = useId();
 
   return (
     <div className="grid overflow-hidden rounded-2xl border border-line bg-panel lg:grid-cols-[15rem_minmax(0,1fr)]">
       <div
         role="tablist"
         aria-label="Calendar provider"
+        onKeyDown={(event) =>
+          onTabKeyDown(event, {
+            ids: providers.map((provider) => provider.id),
+            active: current?.id,
+            prefix,
+            select: setActive,
+          })
+        }
         className="grid grid-cols-3 gap-1 border-line p-2 max-lg:border-b lg:grid-cols-1 lg:content-start lg:border-r"
       >
         {providers.map((provider) => (
@@ -29,6 +39,9 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
             key={provider.id}
             type="button"
             role="tab"
+            id={`${prefix}-tab-${provider.id}`}
+            aria-controls={`${prefix}-panel`}
+            tabIndex={provider.id === current?.id ? 0 : -1}
             aria-selected={provider.id === current?.id}
             onClick={() => setActive(provider.id)}
             className="flex h-11 min-w-0 items-center gap-2.5 rounded-lg px-3 text-left text-sm text-neutral-400 transition-colors hover:bg-white/[0.04] hover:text-white aria-selected:bg-white/[0.07] aria-selected:text-white lg:h-10"
@@ -44,7 +57,13 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
 
       <div className="flex min-w-0 flex-col">
         {/* Keyed by provider so the changed lines flash once on every switch. */}
-        <div key={current?.id} role="tabpanel" className="code code-flash flex-1 py-2">
+        <div
+          key={current?.id}
+          id={`${prefix}-panel`}
+          role="tabpanel"
+          aria-labelledby={`${prefix}-tab-${current?.id}`}
+          className="code code-flash flex-1 py-2"
+        >
           {current?.code}
         </div>
         {current && (

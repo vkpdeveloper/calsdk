@@ -11,16 +11,17 @@ const FIELDS = [
   { id: 'link', label: 'Video link' },
 ];
 
-export type Payload = { name: string; format: string; code: ReactNode };
+export type Payload = { name: string; format: string; code: ReactNode; result: ReactNode };
 
 /**
- * The same meeting as each provider's API returns it, next to the calsdk event. Picking a
- * field lights up its lines in every payload; the lines carry `field-*` classes. Phones show
- * one payload at a time, so the calsdk event sits right under it.
+ * The same meeting as each provider's API returns it, next to the calsdk event made from the
+ * picked payload. Picking a field lights up its lines everywhere; the lines carry `field-*`
+ * classes. Phones show one payload at a time, so the calsdk event sits right under it.
  */
-export function FieldCompare({ payloads, result }: { payloads: Payload[]; result: ReactNode }) {
+export function FieldCompare({ payloads }: { payloads: Payload[] }) {
   const [field, setField] = useState('repeat');
-  const [shown, setShown] = useState(payloads[0]?.name);
+  const [shown, setShown] = useState(0);
+  const picked = payloads[shown];
   return (
     <div className="compare" data-field={field}>
       <fieldset aria-label="Field" className="mb-6 flex flex-wrap gap-2">
@@ -41,13 +42,13 @@ export function FieldCompare({ payloads, result }: { payloads: Payload[]; result
         aria-label="Provider"
         className="mb-3 flex border-b border-line md:hidden"
       >
-        {payloads.map(({ name }) => (
+        {payloads.map(({ name }, i) => (
           <button
             key={name}
             type="button"
             role="tab"
-            aria-selected={name === shown}
-            onClick={() => setShown(name)}
+            aria-selected={i === shown}
+            onClick={() => setShown(i)}
             className="-mb-px h-10 flex-1 border-b-2 border-transparent px-1 text-[13px] text-neutral-400 aria-selected:border-accent-blue aria-selected:text-white"
           >
             {name.replace(' Calendar', '')}
@@ -56,15 +57,20 @@ export function FieldCompare({ payloads, result }: { payloads: Payload[]; result
       </div>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="grid min-w-0 gap-4 md:grid-cols-2 lg:col-span-2">
-          {payloads.map(({ name, format, code }) => (
+          {payloads.map(({ name, format, code }, i) => (
             <div
               key={name}
-              className={`min-w-0 overflow-hidden rounded-xl border border-line bg-panel ${name === shown ? '' : 'max-md:hidden'}`}
+              className={`min-w-0 overflow-hidden rounded-xl border bg-panel transition-colors ${i === shown ? 'border-accent-blue/60' : 'border-line max-md:hidden'}`}
             >
-              <div className="flex items-center justify-between border-b border-line px-4 py-2.5 text-xs">
+              <button
+                type="button"
+                aria-pressed={i === shown}
+                onClick={() => setShown(i)}
+                className="flex w-full items-center justify-between border-b border-line px-4 py-2.5 text-left text-xs hover:bg-white/[0.03]"
+              >
                 <span className="font-medium text-neutral-200">{name}</span>
                 <span className="font-mono text-neutral-500">{format}</span>
-              </div>
+              </button>
               <div className="code code-sm">{code}</div>
             </div>
           ))}
@@ -76,9 +82,11 @@ export function FieldCompare({ payloads, result }: { payloads: Payload[]; result
           <div className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-xs">
             <Mark className="size-4 text-white" />
             <span className="font-medium text-white">calsdk</span>
-            <span className="ml-auto font-mono text-neutral-500">Event</span>
+            <span className="ml-auto font-mono text-neutral-500">
+              Event from {picked?.name.replace(' Calendar', '')}
+            </span>
           </div>
-          <div className="code code-sm">{result}</div>
+          <div className="code code-sm">{picked?.result}</div>
         </div>
       </div>
     </div>

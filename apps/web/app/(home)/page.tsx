@@ -88,6 +88,7 @@ const PAYLOADS = [
     name: 'Google Calendar',
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
     code: `
 {
   "summary": "Standup",«title»
@@ -110,6 +111,7 @@ const PAYLOADS = [
     name: 'Outlook',
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'teams', joinUrl: 'https://teams.microsoft.com/l/...' },
     code: `
 {
   "subject": "Standup",«title»
@@ -140,6 +142,7 @@ const PAYLOADS = [
     name: 'iCloud',
     format: 'iCalendar',
     lang: 'text',
+    conference: { provider: 'google-meet', joinUrl: 'https://meet.google.com/abc-defg-hij' },
     code: `
 BEGIN:VEVENT
 UID:8C1F2A70-standup
@@ -154,6 +157,7 @@ END:VEVENT`,
     name: 'Zoom',
     format: 'JSON',
     lang: 'json',
+    conference: { provider: 'zoom', joinUrl: 'https://zoom.us/j/85512345678' },
     code: `
 {
   "topic": "Standup",«title»
@@ -179,7 +183,8 @@ END:VEVENT`,
   },
 ];
 
-const EVENT_CODE = `
+// The calsdk event each payload above becomes. Only the conference differs.
+const eventCode = ({ provider, joinUrl }: { provider: string; joinUrl: string }) => `
 {
   kind: 'series',
   title: 'Standup',«title»
@@ -192,8 +197,8 @@ const EVENT_CODE = `
   ],«repeat»
   // From any Meet, Teams or Zoom link.
   conference: {«link»
-    provider: 'teams',«link»
-    joinUrl: 'https://teams.microsoft.com/l/...',«link»
+    provider: '${provider}',«link»
+    joinUrl: '${joinUrl}',«link»
   },«link»
 }`;
 
@@ -396,8 +401,8 @@ describeProviderConformance({
 });`;
 
 export default async function HomePage() {
-  const [providers, payloads, eventCode, lengths, features, contractCode, conformanceCode] =
-    await Promise.all([
+  const [providers, payloads, lengths, features, contractCode, conformanceCode] = await Promise.all(
+    [
       Promise.all(
         PROVIDERS.map(async ({ id, label, pkg, color, setup }) => ({
           id,
@@ -407,13 +412,13 @@ export default async function HomePage() {
         })),
       ),
       Promise.all(
-        PAYLOADS.map(async ({ name, format, lang, code }) => ({
+        PAYLOADS.map(async ({ name, format, lang, code, conference }) => ({
           name,
           format,
           code: await highlightCode(code, { lang }),
+          result: await highlightCode(eventCode(conference)),
         })),
       ),
-      highlightCode(EVENT_CODE),
       Promise.all(
         [30, 60, 90].map(async (minutes) => ({
           minutes,
@@ -428,7 +433,8 @@ export default async function HomePage() {
       ),
       highlightCode(PROVIDER_CODE),
       highlightCode(CONFORMANCE_CODE),
-    ]);
+    ],
+  );
 
   return (
     <div className="mx-auto w-full max-w-[1200px] border-x border-line">
@@ -488,7 +494,7 @@ export default async function HomePage() {
         eyebrow="The problem"
         title="Four APIs. Four ways to write one standup."
       >
-        <FieldCompare payloads={payloads} result={eventCode} />
+        <FieldCompare payloads={payloads} />
       </Section>
 
       <Section

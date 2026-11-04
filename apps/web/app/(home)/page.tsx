@@ -260,7 +260,10 @@ try {
 // result.changes, from a later sync
 [
   { type: 'upsert', event: {…} },
-  { type: 'delete', eventId: 'evt_1' },
+  {
+    type: 'delete',
+    eventId: 'evt_1',
+  },
 ]`,
   },
   {

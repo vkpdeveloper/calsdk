@@ -20,7 +20,7 @@ export function CopyCommand({ command }: { command: string }) {
         clearTimeout(timer.current);
         timer.current = setTimeout(() => setState('idle'), 1500);
       }}
-      className="group flex h-11 items-center gap-3 rounded-lg border border-line bg-panel px-4 font-mono text-sm text-neutral-300 transition-colors hover:border-neutral-600"
+      className="group flex h-11 items-center gap-2 rounded-lg border border-line bg-panel px-3 font-mono text-xs whitespace-nowrap text-neutral-300 sm:gap-3 sm:px-4 sm:text-sm transition-colors hover:border-neutral-600"
       aria-label={`Copy ${command}`}
     >
       <span className="text-neutral-500">$</span>

@@ -17,6 +17,7 @@
       "name": "calsdk-quickstart",
       "dependencies": {
         "@calsdk/calcom": "workspace:*",
+        "@calsdk/caldav": "workspace:*",
         "@calsdk/google": "workspace:*",
         "@calsdk/ics": "workspace:*",
         "@calsdk/microsoft": "workspace:*",
@@ -30,6 +31,21 @@
       "dependencies": {
         "@calsdk/provider": "workspace:*",
         "@calsdk/provider-utils": "workspace:*",
+        "zod": "^4.6.7",
+      },
+      "devDependencies": {
+        "@calsdk/provider-tests": "workspace:*",
+      },
+    },
+    "packages/caldav": {
+      "name": "@calsdk/caldav",
+      "version": "0.0.0",
+      "dependencies": {
+        "@calsdk/ics": "workspace:*",
+        "@calsdk/provider": "workspace:*",
+        "@calsdk/provider-utils": "workspace:*",
+        "@xmldom/xmldom": "^0.9.12",
+        "ical.js": "^2.2.1",
         "zod": "^4.6.7",
       },
       "devDependencies": {
@@ -147,6 +163,8 @@
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.6.4", "", { "os": "win32", "cpu": "x64" }, "sha512-pYsMy5AThiHFOZAsngg8qN4PurM6nInKBhVX7sbj3eNpRQqo1Hb0MgCwPL7VqVMrmcEEMj9Ks3qbkallR65e8g=="],
 
     "@calsdk/calcom": ["@calsdk/calcom@workspace:packages/calcom"],
+
+    "@calsdk/caldav": ["@calsdk/caldav@workspace:packages/caldav"],
 
     "@calsdk/google": ["@calsdk/google@workspace:packages/google"],
 
@@ -299,6 +317,8 @@
     "@vitest/mocker": ["@vitest/mocker@5.0.5", "", { "dependencies": { "@jridgewell/trace-mapping": "0.3.31", "@vitest/spy": "5.0.5", "estree-walker": "^3.0.3", "magic-string": "^1.4.3" }, "peerDependencies": { "msw": "^2.4.9 || ^3.0.0", "vite": "^6.0.0 || ^7.0.0 || ^8.0.0" }, "optionalPeers": ["msw", "vite"] }, "sha512-xLL3lkDegJZw+MGoGaCCsFayDZthGgpAtr3Vziyfc4p7xH89K7KRPcRBBh/kEYm0Aqkt5DtTmkYpBtRV/FrHZg=="],
 
     "@vitest/spy": ["@vitest/spy@5.0.5", "", {}, "sha512-lwJRExuH417257Q5wv9QYugN9IMJkoxcrKrYxGPQkBzl7wlNpTUxD/5yNX4ESKVUIShKPgkGchYPFMWOOk0wzw=="],
+
+    "@xmldom/xmldom": ["@xmldom/xmldom@0.9.12", "", {}, "sha512-5AXjrcMClTryPe9LgZrygpB1lj7s0S9E0+W+AHaVKAVyHanafK86iPSvG5xHVSp/jC+VH1UXu0TAEmY279xH7A=="],
 
     "@yuku-core/binding-android-arm64": ["@yuku-core/binding-android-arm64@0.19.0", "", { "os": "android", "cpu": "arm64" }, "sha512-wdL2XmTiZixAOaHk9Z0JJZ8u9Qm8d333Zjpc6gaxXFX+UR5BlsfxZ7a2+2Rm71pamppsPYGUGFq2oVLbh6DISw=="],
 

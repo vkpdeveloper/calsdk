@@ -200,11 +200,15 @@ const eventCode = ({ provider, joinUrl }: { provider: string; joinUrl: string })
     provider: '${provider}',«link»
     joinUrl: '${joinUrl}',«link»
   },«link»
+  // Plus id, calendarId, end, status and the rest.
 }`;
 
 const demoCode = (duration: number) => `
 const { slots } = await findFreeTime({
-  calendars: [{ calendar: you }, { calendar: sam }],
+  calendars: [
+    { calendar: you },
+    { calendar: sam },
+  ],
   timeMin: '2027-01-11T00:00:00-05:00',
   timeMax: '2027-01-16T00:00:00-05:00',
   duration: ${duration},
@@ -249,7 +253,7 @@ event.conference?.joinUrl;`,
     title: 'Recurring events are plain RRULEs',
     points: [
       'Listing expands a series, and each occurrence has its own id.',
-      "Move one occurrence, or 'thisAndFollowing', or the whole series.",
+      'Move one occurrence or the whole series. On Google, also everything after one.',
       'Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
     ],
     code: `
@@ -363,12 +367,12 @@ const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['Zoom', 'zoom', [true, true, "Zoom's patterns", 'Zoom', true]],
   ['Cal.com', 'calcom', [true, 'Book, move, cancel', false, false, true]],
   ['Calendly', 'calendly', [true, 'Book, cancel', false, false, true]],
-  ['ICS feeds', 'ics', [true, false, true, false, true]],
+  ['ICS feeds', 'ics', [true, false, 'Read only', false, true]],
 ];
 
 const STATS = [
   ['9', 'calendars'],
-  ['1', 'Event type'],
+  ['1', 'event shape'],
   ['0', 'vendor SDKs'],
   ['4', 'runtimes: Node, Bun, Deno, edge'],
 ];
@@ -389,7 +393,9 @@ export function fastmail(settings: Settings): Fastmail {
 }`;
 
 const CONFORMANCE_CODE = `
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import {
+  describeProviderConformance,
+} from '@calsdk/provider-tests';
 
 describeProviderConformance({
   name: 'fastmail',
@@ -422,7 +428,7 @@ export default async function HomePage() {
       Promise.all(
         [30, 60, 90].map(async (minutes) => ({
           minutes,
-          code: await highlightCode(demoCode(minutes), { changed: [5] }),
+          code: await highlightCode(demoCode(minutes), { changed: [8] }),
         })),
       ),
       Promise.all(
@@ -468,7 +474,7 @@ export default async function HomePage() {
               </a>
             </div>
             <div className="mt-4">
-              <CopyCommand command="bun add calsdk @calsdk/google" />
+              <CopyCommand command="npm i calsdk @calsdk/google" />
             </div>
           </div>
         </div>
@@ -492,7 +498,7 @@ export default async function HomePage() {
         id="why"
         index="01"
         eyebrow="The problem"
-        title="Four APIs. Four ways to write one standup."
+        title="Four APIs, four ways to write one standup"
       >
         <FieldCompare payloads={payloads} />
       </Section>
@@ -522,7 +528,7 @@ export default async function HomePage() {
             <div key={name} className="bg-fd-background p-6">
               <div className="flex items-baseline justify-between gap-3">
                 <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{name}</h3>
-                <span className="font-mono text-xs text-neutral-500">@calsdk/{pkg}</span>
+                <span className="font-mono text-xs text-neutral-400">@calsdk/{pkg}</span>
               </div>
               <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm sm:mt-5 sm:block sm:space-y-2">
                 {CAPABILITIES.map((capability, i) => (
@@ -566,7 +572,7 @@ export default async function HomePage() {
           ready.
         </p>
         <div className="mt-8 flex flex-col items-center gap-4">
-          <CopyCommand command="bun add calsdk @calsdk/mock" />
+          <CopyCommand command="npm i calsdk @calsdk/mock" />
           <Link
             href="/docs/quickstart"
             className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
@@ -649,7 +655,7 @@ function Capability({ label, value }: { label: string; value: Support }) {
         <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
       </span>
       {typeof value === 'string' && (
-        <span className="text-xs text-neutral-500 sm:ml-auto sm:text-right">{value}</span>
+        <span className="text-xs text-neutral-400 sm:ml-auto sm:text-right">{value}</span>
       )}
     </li>
   );

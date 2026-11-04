@@ -78,7 +78,7 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
         <div className="flex justify-center text-neutral-500 lg:hidden">
           <ArrowDown className="size-5" />
         </div>
-        <div className="min-w-0 self-center overflow-hidden rounded-xl border border-accent-blue/60 bg-panel shadow-[0_0_0_4px_rgb(79_124_255/0.08)]">
+        <div className="min-w-0 self-start overflow-hidden rounded-xl border border-accent-blue/60 lg:sticky lg:top-24 bg-panel shadow-[0_0_0_4px_rgb(79_124_255/0.08)]">
           <div className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-xs">
             <Mark className="size-4 text-white" />
             <span className="font-medium text-white">calsdk</span>

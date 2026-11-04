@@ -198,7 +198,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
             {[...HOURS, CLOSE].map((hour) => (
               <span
                 key={hour}
-                className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-500"
+                className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-400"
                 style={{ top: (hour - OPEN) * HOUR_PX }}
               >
                 {clock(hour * 60)}

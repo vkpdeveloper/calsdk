@@ -1,12 +1,12 @@
 # calsdk
 
-One TypeScript API for Google Calendar, Microsoft Outlook, iCloud and other CalDAV servers, Cal.com, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
+One TypeScript API for Google Calendar, Microsoft Outlook, iCloud and other CalDAV servers, Cal.com, Calendly, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
 
 ```ts
 import { createEvent, findFreeTime, listEvents } from 'calsdk';
 import { mockCalendar } from '@calsdk/mock';
 
-const calendar = mockCalendar(); // or google({ accessToken }), microsoft({ accessToken }), calcom({ accessToken })
+const calendar = mockCalendar(); // or google({ accessToken }), microsoft({ accessToken }), calcom({ accessToken }), calendly({ accessToken })
 
 await createEvent({
   calendar,

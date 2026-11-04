@@ -197,6 +197,7 @@ export function CalendarApp() {
   // Below 1024px the event panel sits under the calendar, so bring it into view.
   function pick(key: string) {
     setSelected(key);
+    if (!matchMedia('(max-width: 1023px)').matches) return;
     requestAnimationFrame(() =>
       inspector.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }),
     );
@@ -251,12 +252,20 @@ export function CalendarApp() {
     void refresh();
   }, [refresh]);
 
-  // Start with Monday's standup open: an occurrence of a series, which says the most.
+  // With nothing picked, open the day's standup: an occurrence of a series says the most.
+  // The day only changes on phones (or by booking), so desktop starts on Monday's.
+  const onDay = run?.events.filter((listed) => listed.at.day === day) ?? [];
   const current =
     run?.events.find((listed) => listed.key === selected) ??
     (selected === undefined
-      ? run?.events.find((listed) => listed.event.kind === 'occurrence')
+      ? (onDay.find((listed) => listed.event.kind === 'occurrence') ?? onDay[0])
       : undefined);
+
+  // A new day on the phone agenda keeps the open event only if it is on that day.
+  function showDay(next: number) {
+    setDay(next);
+    if (current?.at.day !== next) setSelected(undefined);
+  }
 
   async function book(slot: FreeSlot) {
     if (!target) return;
@@ -376,7 +385,7 @@ export function CalendarApp() {
                 key={name}
                 type="button"
                 aria-pressed={i === day}
-                onClick={() => setDay(i)}
+                onClick={() => showDay(i)}
                 className="flex h-12 items-center justify-center gap-1 text-xs text-neutral-500 aria-pressed:bg-white/[0.06] aria-pressed:text-white"
               >
                 {name}
@@ -503,7 +512,11 @@ export function CalendarApp() {
 
       <div className="flex min-h-11 items-center justify-between gap-x-4 border-t border-line px-4 py-1.5 font-mono text-[11px] text-neutral-500">
         <span aria-live="polite">{message}</span>
-        <button type="button" onClick={reset} className="h-11 shrink-0 px-1 hover:text-white">
+        <button
+          type="button"
+          onClick={reset}
+          className="h-11 min-w-11 shrink-0 px-1 hover:text-white"
+        >
           Reset
         </button>
       </div>

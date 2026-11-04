@@ -560,7 +560,9 @@ function EventBlock({
       type="button"
       onClick={onSelect}
       aria-pressed={active}
-      className="absolute inset-x-1 overflow-hidden rounded-md border-l-2 px-1.5 text-left leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white"
+      // Short events get an invisible hit area 5px above and below, so a finger on a tablet
+      // can land on them. The 15 minute gaps around them are 14px, so nothing overlaps.
+      className={`absolute inset-x-1 rounded-md border-l-2 px-1.5 text-left leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white ${minutes < 30 ? "before:absolute before:inset-x-0 before:-inset-y-[5px] before:content-['']" : 'overflow-hidden'}`}
       style={{
         ...position(block),
         minHeight: 22,

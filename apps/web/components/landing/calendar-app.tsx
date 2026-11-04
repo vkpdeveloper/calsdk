@@ -369,17 +369,17 @@ export function CalendarApp() {
                   type="button"
                   aria-pressed={on}
                   onClick={() => toggle(source.id)}
-                  className="group flex h-11 shrink-0 items-center gap-2.5 rounded-lg px-2.5 text-[13px] text-neutral-500 hover:bg-white/[0.04] aria-pressed:text-neutral-200 md:h-9"
+                  className="group flex h-11 shrink-0 items-center gap-2 rounded-lg px-2 text-[13px] whitespace-nowrap lg:gap-2.5 lg:px-2.5 text-neutral-500 hover:bg-white/[0.04] aria-pressed:text-neutral-200 md:h-9"
                 >
                   <ProviderLogo
                     id={source.id}
                     className="opacity-35 transition-opacity group-aria-pressed:opacity-100"
                   />
                   {source.short}
-                  {/* The color key for this calendar's events in the week view. */}
+                  {/* The color key for the week view. Phones list events with the calendar's name instead. */}
                   <span
                     aria-hidden
-                    className="ml-auto size-2 shrink-0 rounded-full opacity-35 group-aria-pressed:opacity-100"
+                    className="ml-auto size-2 shrink-0 rounded-full opacity-35 group-aria-pressed:opacity-100 max-md:hidden"
                     style={{ background: source.color }}
                   />
                 </button>

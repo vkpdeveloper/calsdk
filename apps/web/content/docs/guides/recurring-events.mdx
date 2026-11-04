@@ -93,10 +93,10 @@ Patching an occurrence's `start` with scope `'all'` moves the whole series by as
 | --------- | ------------------------------- | ------------------ | ----- |
 | Google    | Any RRULE                       | Yes                | Single-instance changes are reset when a series moves or splits, with a warning |
 | Outlook   | Rules Outlook has a pattern for | No                 | `RDATE`, hourly rules and some others throw |
-| CalDAV    | Any RRULE                       | No                 | Expanded by calsdk |
+| CalDAV    | Any RRULE, with expansion limits | No                | Expanded by calsdk: rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance |
 | Zoom      | Daily, weekly or monthly, up to 60 meetings | No     | One meeting can only be moved, resized or deleted |
 | Mock      | One `RRULE` plus `EXDATE` lines | Yes                | `RDATE` and `EXRULE` throw |
 | Cal.com, Calendly | No                      | No                 | Bookings do not repeat |
-| ICS       | Any RRULE, read only            | No                 | Expanded by calsdk |
+| ICS       | Any RRULE, read only, with expansion limits | No     | Same limits as CalDAV |
 
 A rule a provider cannot store throws `UnsupportedFunctionalityError` instead of saving a different schedule. Each [provider page](/docs/providers) lists its exact limits.

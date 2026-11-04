@@ -27,7 +27,7 @@ async function sync(calendarId: string) {
 
 ## Apply changes in order
 
-Changes come oldest first. Each is one of:
+Changes come in the order the provider returns them, which is not always by time. Apply them in that order. Each is one of:
 
 - `{ type: 'upsert', event }`: insert the event, or replace the one with the same `id`.
 - `{ type: 'delete', eventId }`: remove that event.

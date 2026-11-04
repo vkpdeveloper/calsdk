@@ -13,7 +13,11 @@ const calendar = google({ accessToken });
 
 const { event } = await createEvent({
   calendar,
-  event,
+  event: {
+    title: 'Order 42 handover',
+    start: { dateTime: '2026-11-09T15:00:00Z', timeZone: 'UTC' },
+    end: { dateTime: '2026-11-09T15:30:00Z', timeZone: 'UTC' },
+  },
   providerOptions: {
     google: {
       guestsCanModify: true,
@@ -32,7 +36,7 @@ The types follow the provider in `calendar`. A typo, an option the provider does
 ```ts
 await createEvent({
   calendar, // google(...)
-  event,
+  event: input,
   providerOptions: {
     // Type error: Google has no `guestsCanModfy` option.
     google: { guestsCanModfy: true },

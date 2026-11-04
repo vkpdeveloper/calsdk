@@ -3,6 +3,7 @@
 // env or network. Biome rules keep Node APIs out of package code; this proves it runs.
 import { calcom } from '@calsdk/calcom';
 import { google } from '@calsdk/google';
+import { ics } from '@calsdk/ics';
 import { microsoft } from '@calsdk/microsoft';
 import { listCalendars } from 'calsdk';
 import './index';
@@ -16,10 +17,13 @@ const fetch = async (input: RequestInfo | URL) =>
     data: String(input).endsWith('/me') ? { email: 'me@example.com' } : [],
   });
 
+const FEED = 'BEGIN:VCALENDAR\r\nVERSION:2.0\r\nEND:VCALENDAR';
+
 for (const calendar of [
   google({ accessToken: 't', fetch }),
   microsoft({ accessToken: 't', fetch }),
   calcom({ accessToken: 't', fetch }),
+  ics({ url: 'https://example.com/feed.ics', fetch: async () => new Response(FEED) }),
 ]) {
   const { calendars } = await listCalendars({ calendar });
   if (calendars[0]?.isPrimary !== true)

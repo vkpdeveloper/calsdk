@@ -6,15 +6,17 @@ import type { MDXComponents } from 'mdx/types';
 import { ProviderLogo, type ProviderLogoId } from './provider-logo';
 import { TypeTable } from './type-table';
 
+// Docs tables are tight on phones, where the logo would push the name onto its own line.
+function DocsProviderLogo({ id }: { id: ProviderLogoId }) {
+  return <ProviderLogo id={id} className="me-1 max-sm:hidden" />;
+}
+
 export function getMDXComponents(components?: MDXComponents) {
   return {
     ...defaultMdxComponents,
     Accordion,
     Accordions,
-    // Docs tables are tight on phones, where the logo would push the name onto its own line.
-    ProviderLogo: ({ id }: { id: ProviderLogoId }) => (
-      <ProviderLogo id={id} className="me-1 max-sm:hidden" />
-    ),
+    ProviderLogo: DocsProviderLogo,
     Step,
     Steps,
     Tab,

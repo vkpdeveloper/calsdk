@@ -512,16 +512,20 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto w-full max-w-[1360px] border-x border-line">
-      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
-          Calendar SDK for TypeScript
-        </p>
-        <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
-          <h1 className="text-[clamp(3.25rem,10vw,5.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
-            <span className="whitespace-nowrap">Every calendar.</span>
-            <br />
-            <span className="text-neutral-500">One API.</span>
-          </h1>
+      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-20 sm:pb-16">
+        {/* The eyebrow travels with the headline, so no gap opens above it when the copy beside
+            it is taller. */}
+        <div className="grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
+          <div>
+            <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
+              Calendar SDK for TypeScript
+            </p>
+            <h1 className="mt-6 text-[clamp(3.25rem,10vw,5.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
+              <span className="whitespace-nowrap">Every calendar.</span>
+              <br />
+              <span className="text-neutral-500">One API.</span>
+            </h1>
+          </div>
           <div>
             <p className="text-lg leading-relaxed text-neutral-300">
               Read, write and sync events on Google, Outlook, iCloud, Zoom, Cal.com, Calendly and

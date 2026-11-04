@@ -9,6 +9,7 @@ import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { ProviderShowcase } from '@/components/landing/provider-showcase';
 import { Mark } from '@/components/logo';
+import type { ProviderLogoId } from '@/components/provider-logo';
 import { pageMetadata, softwareJsonLd } from '@/lib/seo';
 import { appDescription, githubUrl } from '@/lib/shared';
 
@@ -23,10 +24,9 @@ const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Video links', 'Sync'];
 
 // `support` follows CAPABILITIES: true, false, or a note on how far it goes.
 const PROVIDERS: {
-  id: string;
+  id: ProviderLogoId;
   label: string;
   pkg: string;
-  color: string;
   setup: string;
   support: Support[];
 }[] = [
@@ -34,7 +34,6 @@ const PROVIDERS: {
     id: 'google',
     label: 'Google',
     pkg: 'google',
-    color: '#7aa7ff',
     setup: 'google({ accessToken })',
     support: [true, true, true, 'Google Meet', true],
   },
@@ -42,7 +41,6 @@ const PROVIDERS: {
     id: 'microsoft',
     label: 'Outlook',
     pkg: 'microsoft',
-    color: '#37c5d9',
     setup: 'microsoft({\n  accessToken,\n})',
     support: [true, true, true, 'Teams, work accounts', true],
   },
@@ -50,7 +48,6 @@ const PROVIDERS: {
     id: 'icloud',
     label: 'iCloud',
     pkg: 'caldav',
-    color: '#ff7a70',
     setup: 'icloud({\n  appleId,\n  appPassword,\n})',
     support: [true, true, true, false, true],
   },
@@ -58,7 +55,6 @@ const PROVIDERS: {
     id: 'zoho',
     label: 'Zoho',
     pkg: 'caldav',
-    color: '#f0883e',
     setup: 'zoho({\n  email,\n  password,\n})',
     support: [true, true, true, false, true],
   },
@@ -66,7 +62,6 @@ const PROVIDERS: {
     id: 'caldav',
     label: 'CalDAV',
     pkg: 'caldav',
-    color: '#a1a1aa',
     setup: 'caldav({\n  serverUrl,\n  username,\n  password,\n})',
     support: [true, true, true, false, true],
   },
@@ -74,7 +69,6 @@ const PROVIDERS: {
     id: 'zoom',
     label: 'Zoom',
     pkg: 'zoom',
-    color: '#b392f0',
     setup: 'zoom({ accessToken })',
     support: [true, true, "Zoom's patterns", 'Zoom', true],
   },
@@ -82,7 +76,6 @@ const PROVIDERS: {
     id: 'calcom',
     label: 'Cal.com',
     pkg: 'calcom',
-    color: '#e4e4e7',
     setup: 'calcom({ accessToken })',
     support: [true, 'book an event type, move, cancel', false, false, true],
   },
@@ -90,7 +83,6 @@ const PROVIDERS: {
     id: 'calendly',
     label: 'Calendly',
     pkg: 'calendly',
-    color: '#f5b94a',
     setup: 'calendly({\n  accessToken,\n})',
     support: [true, 'book an event type, cancel', false, false, true],
   },
@@ -98,7 +90,6 @@ const PROVIDERS: {
     id: 'ics',
     label: 'ICS feed',
     pkg: 'ics',
-    color: '#5ee08f',
     setup: 'ics({ url: feedUrl })',
     support: [true, false, 'read only', false, true],
   },
@@ -410,13 +401,12 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
 export default async function HomePage() {
   const [providers, features] = await Promise.all([
     Promise.all(
-      PROVIDERS.map(async ({ id, label, pkg, color, setup, support }) => {
+      PROVIDERS.map(async ({ id, label, pkg, setup, support }) => {
         const { code, changed } = providerCode(id, pkg, setup);
         return {
           id,
           label,
           pkg: `@cal-sdk/${pkg}`,
-          color,
           code: await highlightCode(code, { changed }),
           support: CAPABILITIES.map((capability, i): [string, Support] => [
             capability,

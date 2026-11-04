@@ -15,5 +15,5 @@
     "noFallthroughCasesInSwitch": true,
     "skipLibCheck": true
   },
-  "include": ["*.ts", "packages/*/src", "packages/*/test", "examples/*/src"]
+  "include": ["*.ts", "packages/*/src", "packages/*/test", "packages/*/scripts", "examples/*/src"]
 }

@@ -405,12 +405,12 @@ const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
 const WARNINGS = [
   {
     provider: 'Google Calendar',
-    asked: "color: '#d00000'",
+    asked: "color: '#ec4899'",
     type: 'compatibility',
     feature: 'color',
     details:
-      'Google Calendar has a fixed palette. #d00000 was saved as the nearest color, #d50000.',
-    colors: { asked: '#d00000', saved: '#d50000' },
+      'Google Calendar has a fixed palette. #ec4899 was saved as the nearest color, #e67c73.',
+    colors: { asked: '#ec4899', saved: '#e67c73' },
   },
   {
     provider: 'Outlook',

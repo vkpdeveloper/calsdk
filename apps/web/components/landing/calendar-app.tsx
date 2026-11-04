@@ -559,7 +559,7 @@ function EventBlock({
       type="button"
       onClick={onSelect}
       aria-pressed={active}
-      className="absolute inset-x-1 overflow-hidden rounded-md border-l-2 px-1.5 text-left text-[11px] leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white"
+      className="absolute inset-x-1 overflow-hidden rounded-md border-l-2 px-1.5 text-left leading-tight text-white outline-offset-1 aria-pressed:outline aria-pressed:outline-1 aria-pressed:outline-white"
       style={{
         ...position(block),
         minHeight: 22,
@@ -567,11 +567,11 @@ function EventBlock({
         background: `color-mix(in srgb, ${source.color} 22%, #0c0c0e)`,
       }}
     >
-      <span className={`block truncate font-medium ${minutes < 30 ? 'text-[10px]' : 'pt-1'}`}>
+      <span className={`block truncate text-xs font-medium ${minutes < 30 ? 'leading-5' : 'pt-1'}`}>
         {event.title}
       </span>
       {minutes >= 45 && (
-        <span className="block truncate text-neutral-300">
+        <span className="block truncate text-[11px] text-neutral-300">
           {clock(block.from)} – {clock(block.to)}
         </span>
       )}

@@ -191,3 +191,21 @@ html > body[data-scroll-locked] {
   background: rgb(79 124 255 / 0.12);
   border-left-color: #4f7cff;
 }
+
+/* On phones, wide docs tables scroll sideways. Keep each row's label in view. */
+@media (max-width: 767px) {
+  /* `hidden` would stop the cells sticking; `clip` still rounds the corners. */
+  .prose table {
+    overflow: clip;
+  }
+  .prose table :is(th, td):first-child {
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    background-color: var(--color-fd-card);
+    box-shadow: inset -1px 0 0 var(--color-fd-border);
+  }
+  .prose table th:first-child {
+    background-color: rgb(20 20 20);
+  }
+}

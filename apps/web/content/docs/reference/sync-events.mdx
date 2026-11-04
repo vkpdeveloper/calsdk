@@ -1,15 +1,15 @@
 ---
 title: syncEvents
-description: Fetches what changed in a calendar since the last sync.
+description: Returns what changed in a calendar since the last sync.
 ---
 
-Use `syncEvents` to keep a local copy of a calendar, such as a table in Postgres, up to date without reading everything again. The first call returns what the provider syncs, and each later call returns only what changed since the cursor you stored. Outlook covers a fixed window of time, explained in [Sync changes](/docs/guides/sync#how-each-provider-syncs).
+Use `syncEvents` to keep a local copy of a calendar, such as a table in Postgres, up to date. The first call returns what the provider syncs, and each later call returns what changed since the cursor you pass. Save the new cursor after applying the changes. [Sync changes](/docs/guides/sync#how-each-provider-syncs) covers how much each provider fetches, and Outlook's fixed window.
 
 ```ts
 import { syncEvents } from 'calsdk';
 
 const { changes, nextCursor } = await syncEvents({ calendar, cursor: stored });
-for (const change of changes) apply(change);
+for (const change of changes) await apply(change);
 await saveCursor(nextCursor);
 ```
 

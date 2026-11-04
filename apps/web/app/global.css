@@ -24,6 +24,16 @@ html {
   scrollbar-gutter: stable;
 }
 
+/* Fumadocs keeps the docs top bar inside the centred layout, so on wide screens its
+   bottom border stops short of the window edges. Extend the line, not the bar. */
+#nd-subnav::before {
+  content: "";
+  position: absolute;
+  inset: auto -100vmax 0;
+  border-bottom: 1px solid var(--color-fd-border);
+  pointer-events: none;
+}
+
 html > body[data-scroll-locked] {
   margin-right: 0px !important;
   --removed-body-scroll-bar-size: 0px !important;

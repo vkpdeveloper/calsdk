@@ -6,7 +6,7 @@ description: Fetches one event by id.
 Use `getEvent` when you have an event's id and want its current details, including attendees that some providers leave out of listings.
 
 ```ts
-import { getEvent } from 'calsdk';
+import { getEvent } from '@cal-sdk/core';
 
 const { event } = await getEvent({ calendar, eventId });
 ```

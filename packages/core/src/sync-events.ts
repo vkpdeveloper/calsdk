@@ -2,7 +2,7 @@ import {
   InvalidResponseDataError,
   type SyncEventsResultV1,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import type {
   CalendarProvider,
   CallSettings,

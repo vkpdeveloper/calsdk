@@ -2,14 +2,14 @@
 // root) bundles this file for browsers and runs it in Deno with no permissions: no files,
 // env or network. Biome rules keep Node APIs out of package code; this proves it runs.
 
-import { calcom } from '@calsdk/calcom';
-import { caldav } from '@calsdk/caldav';
-import { calendly } from '@calsdk/calendly';
-import { google } from '@calsdk/google';
-import { ics } from '@calsdk/ics';
-import { microsoft } from '@calsdk/microsoft';
-import { zoom } from '@calsdk/zoom';
-import { listCalendars } from 'calsdk';
+import { calcom } from '@cal-sdk/calcom';
+import { caldav } from '@cal-sdk/caldav';
+import { calendly } from '@cal-sdk/calendly';
+import { listCalendars } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
+import { ics } from '@cal-sdk/ics';
+import { microsoft } from '@cal-sdk/microsoft';
+import { zoom } from '@cal-sdk/zoom';
 import './index';
 
 // One body that every API's calendar list schemas accept. Cal.com reads a profile and a

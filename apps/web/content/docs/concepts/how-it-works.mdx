@@ -5,7 +5,7 @@ description: Functions, providers, results, warnings and errors, and how a call 
 
 Calendar APIs disagree about nearly everything, so calsdk keeps the disagreement in one place. It has two layers, the same way the Vercel AI SDK splits `generateText` from model providers.
 
-The functions in `calsdk`, such as `listEvents` and `createEvent`, are what your app calls. They validate input, retry, page through results and fill in features a provider lacks, so that work is written once instead of once per API. Providers, such as `google()` and `microsoft()`, are plain objects that translate: each turns calsdk requests into one API's requests and turns the responses back into calsdk's shapes. Sync progress lives in cursors you store, not in the provider.
+The functions in `@cal-sdk/core`, such as `listEvents` and `createEvent`, are what your app calls. They validate input, retry, page through results and fill in features a provider lacks, so that work is written once instead of once per API. Providers, such as `google()` and `microsoft()`, are plain objects that translate: each turns calsdk requests into one API's requests and turns the responses back into calsdk's shapes. Sync progress lives in cursors you store, not in the provider.
 
 Your app only calls functions, and passes a provider as `calendar`:
 

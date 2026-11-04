@@ -6,8 +6,8 @@ description: Reach provider features calsdk does not model, with options and met
 The shared event shape covers what every calendar has in common, and the order a booking came from isn't one of those things. For anything provider-specific, like tagging a Google event with its order id or setting Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
 
 ```ts
-import { createEvent } from 'calsdk';
-import { google } from '@calsdk/google';
+import { createEvent } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
 
 const calendar = google({ accessToken });
 

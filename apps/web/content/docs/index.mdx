@@ -8,8 +8,8 @@ Every calendar API has its own idea of what an event is. Google describes a repe
 calsdk gives your app one set of functions and one event shape for all of them. You create a provider, such as `google({ accessToken })`, and pass it to plain functions like `listEvents` and `createEvent`. Switching calendars changes the provider line and nothing else.
 
 ```ts
-import { listEvents } from 'calsdk';
-import { google } from '@calsdk/google';
+import { listEvents } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 

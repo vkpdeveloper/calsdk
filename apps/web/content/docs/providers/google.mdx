@@ -6,12 +6,12 @@ description: Read and write Google Calendar events, with Meet links, free/busy a
 Google is the most complete provider: it supports everything calsdk models, including splitting a recurring series with `thisAndFollowing`, Meet links, search and a real free/busy endpoint. If your users are mostly on Google Workspace or Gmail, this is the one you'll spend the least time working around.
 
 ```npm
-npm install calsdk @calsdk/google
+npm install @cal-sdk/core @cal-sdk/google
 ```
 
 ```ts
-import { listEvents } from 'calsdk';
-import { google } from '@calsdk/google';
+import { listEvents } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 

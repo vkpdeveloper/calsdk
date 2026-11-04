@@ -1,4 +1,3 @@
-import { mockCalendar } from '@calsdk/mock';
 import {
   createEvent,
   deleteEvent,
@@ -9,12 +8,13 @@ import {
   NotFoundError,
   syncEvents,
   updateEvent,
-} from 'calsdk';
+} from '@cal-sdk/core';
+import { mockCalendar } from '@cal-sdk/mock';
 
 // An in-memory calendar, so this runs offline. Swap in a real provider with one line:
-//   import { google } from '@calsdk/google';
+//   import { google } from '@cal-sdk/google';
 //   const calendar = google({ accessToken: process.env.GOOGLE_ACCESS_TOKEN ?? '' });
-// or `microsoft({ accessToken })` from '@calsdk/microsoft'. Everything below stays the same.
+// or `microsoft({ accessToken })` from '@cal-sdk/microsoft'. Everything below stays the same.
 const calendar = mockCalendar({
   calendars: [{ id: 'work', name: 'Work', timeZone: 'Europe/Berlin' }],
   events: [

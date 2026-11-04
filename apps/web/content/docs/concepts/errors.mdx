@@ -8,7 +8,7 @@ Google and Outlook describe a missing event or a rejected token in different JSO
 ## Check errors with `isInstance`
 
 ```ts
-import { AuthenticationError, NotFoundError, getEvent } from 'calsdk';
+import { AuthenticationError, NotFoundError, getEvent } from '@cal-sdk/core';
 
 try {
   await getEvent({ calendar, eventId });

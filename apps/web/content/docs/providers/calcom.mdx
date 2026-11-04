@@ -6,12 +6,12 @@ description: Read, book, move and cancel Cal.com bookings as calendar events.
 Cal.com is a scheduling tool, not a calendar, so here the events are bookings. Use this provider to read a user's bookings, book a slot on one of their event types, reschedule it or cancel it, with the same functions you'd use for Google. Expect the booking rules to win: the event type decides the title, the length and most other fields.
 
 ```npm
-npm install calsdk @calsdk/calcom
+npm install @cal-sdk/core @cal-sdk/calcom
 ```
 
 ```ts
-import { createEvent, listEvents } from 'calsdk';
-import { calcom } from '@calsdk/calcom';
+import { createEvent, listEvents } from '@cal-sdk/core';
+import { calcom } from '@cal-sdk/calcom';
 
 const calendar = calcom({ accessToken: process.env.CALCOM_API_KEY! });
 

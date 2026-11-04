@@ -1,4 +1,4 @@
-import { APICallError, NotFoundError, RateLimitError } from '@calsdk/provider';
+import { APICallError, NotFoundError, RateLimitError } from '@cal-sdk/provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { withRetries } from './retry';
 

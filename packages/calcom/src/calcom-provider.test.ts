@@ -3,7 +3,7 @@ import {
   NotFoundError,
   type SyncChangeV1,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { calcom } from './calcom-provider';
 

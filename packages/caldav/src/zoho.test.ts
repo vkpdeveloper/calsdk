@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
-import { NotFoundError } from '@calsdk/provider';
-import { createRecordingFetch } from '@calsdk/provider-tests';
+import { NotFoundError } from '@cal-sdk/provider';
+import { createRecordingFetch } from '@cal-sdk/provider-tests';
 import { afterAll, expect, it } from 'vitest';
 import { pinWrites } from '../test/pin-writes';
 import { zoho } from './caldav-provider';

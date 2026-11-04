@@ -5,13 +5,13 @@ import type {
   EventV1,
   PersonV1,
   WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
   formatZonedDateTime,
   isAllDay,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import ICAL from 'ical.js';
 import {
   eventTimeOf,

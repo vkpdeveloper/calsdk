@@ -1,5 +1,5 @@
-import type { EventTimeV1, EventV1 } from '@calsdk/provider';
-import { formatZonedDateTime, isValidTimeZone } from '@calsdk/provider-utils';
+import type { EventTimeV1, EventV1 } from '@cal-sdk/provider';
+import { formatZonedDateTime, isValidTimeZone } from '@cal-sdk/provider-utils';
 import type { Booking } from './calcom-api';
 import type { CalcomEventMetadata } from './calcom-options';
 

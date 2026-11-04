@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from '@calsdk/provider';
+import { InvalidArgumentError } from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import {
   normalizeEventTime,

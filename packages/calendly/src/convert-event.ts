@@ -1,5 +1,5 @@
-import type { AttendeeV1, ConferenceV1, EventTimeV1, EventV1 } from '@calsdk/provider';
-import { formatZonedDateTime } from '@calsdk/provider-utils';
+import type { AttendeeV1, ConferenceV1, EventTimeV1, EventV1 } from '@cal-sdk/provider';
+import { formatZonedDateTime } from '@cal-sdk/provider-utils';
 import type { Invitee, ScheduledEvent } from './calendly-api';
 import type { CalendlyEventMetadata } from './calendly-options';
 

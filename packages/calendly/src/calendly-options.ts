@@ -22,7 +22,7 @@ export const calendlyDeleteOptionsSchema = z.object({
 });
 export type CalendlyDeleteOptions = z.infer<typeof calendlyDeleteOptionsSchema>;
 
-/** The option and metadata types of the Calendly provider, for type checking in `calsdk`. */
+/** The option and metadata types of the Calendly provider, for type checking in `@cal-sdk/core`. */
 export type CalendlyProviderTypes = {
   options: {
     createEvent: CalendlyCreateOptions;

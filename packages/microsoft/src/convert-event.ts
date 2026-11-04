@@ -6,7 +6,7 @@ import type {
   EventTimeV1,
   EventV1,
   WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { fromGraphRecurrence, toGraphRecurrence } from './convert-recurrence';
 import { fromGraphZone, graphTimeToInstant, instantToEventTime, toGraphTime } from './graph-time';
 import type { GraphEvent, GraphRecurrence, GraphTime } from './microsoft-api';

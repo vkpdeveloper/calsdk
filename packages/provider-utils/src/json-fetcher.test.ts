@@ -1,4 +1,4 @@
-import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@calsdk/provider';
+import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@cal-sdk/provider';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 import { createJsonFetcher, urlPath } from './json-fetcher';

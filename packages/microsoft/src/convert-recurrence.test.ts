@@ -1,4 +1,4 @@
-import { UnsupportedFunctionalityError, type WarningV1 } from '@calsdk/provider';
+import { UnsupportedFunctionalityError, type WarningV1 } from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { fromGraphRecurrence, shiftRecurrence, toGraphRecurrence } from './convert-recurrence';
 import type { GraphRecurrence, GraphWeekday } from './microsoft-api';

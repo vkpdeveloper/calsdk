@@ -2,7 +2,7 @@ import {
   type EventTimeV1,
   InvalidArgumentError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -20,7 +20,7 @@ import {
   parseRecurrence,
   type RRule,
   WEEKDAYS,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 
 const DAY_MS = 86_400_000;
 

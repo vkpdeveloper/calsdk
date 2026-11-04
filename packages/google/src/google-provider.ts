@@ -14,7 +14,7 @@ import {
   SyncCursorExpiredError,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   addDaysToDate,
@@ -36,7 +36,7 @@ import {
   parseRetryAfterMs,
   type QueryValue,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { z } from 'zod';
 import {
   fromGoogleEvent,
@@ -89,7 +89,7 @@ const ACCESS_ROLES = new Set<string>(['owner', 'writer', 'reader', 'freeBusyRead
  * Creates a Google Calendar provider.
  *
  * @example
- * import { google } from '@calsdk/google';
+ * import { google } from '@cal-sdk/google';
  * const calendar = google({ accessToken: () => getFreshToken() });
  */
 export function google(settings: GoogleCalendarSettings): GoogleCalendarProvider {

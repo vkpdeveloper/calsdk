@@ -9,7 +9,7 @@ import {
   type ReadContext,
   recurrenceKey,
   storedEvents,
-} from '@calsdk/ics/icalendar';
+} from '@cal-sdk/ics/icalendar';
 import {
   APICallError,
   type CalendarProviderV1,
@@ -22,7 +22,7 @@ import {
   SyncCursorExpiredError,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -33,7 +33,7 @@ import {
   isAllDay,
   isValidTimeZone,
   mapAPICallError,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { type Call, createDavClient } from './dav-client';
 import { type Discovery, discover, listDavCalendars, withSlash } from './discover';
 import { CALDAV, DAV, parseMultistatus, propText, xml } from './multistatus';
@@ -110,7 +110,7 @@ type Target = { resource: Resource; instance?: EventV1 };
  * (`20261103T100000Z`) or, for all-day series, a date.
  *
  * @example
- * import { caldav } from '@calsdk/caldav';
+ * import { caldav } from '@cal-sdk/caldav';
  * const calendar = caldav({
  *   serverUrl: 'https://caldav.fastmail.com/dav/',
  *   username: 'me@fastmail.com',
@@ -710,7 +710,7 @@ export function caldav(settings: CaldavSettings): CaldavProvider {
  * account.apple.com under Sign-In and Security: iCloud does not accept the account password.
  *
  * @example
- * import { icloud } from '@calsdk/caldav';
+ * import { icloud } from '@cal-sdk/caldav';
  * const calendar = icloud({ appleId: 'me@icloud.com', appPassword: process.env.ICLOUD_APP_PASSWORD });
  */
 export function icloud({
@@ -735,7 +735,7 @@ export function icloud({
  * Passwords) when two-factor authentication is on.
  *
  * @example
- * import { zoho } from '@calsdk/caldav';
+ * import { zoho } from '@cal-sdk/caldav';
  * const calendar = zoho({ email: 'me@example.com', password: process.env.ZOHO_APP_PASSWORD });
  */
 export function zoho({

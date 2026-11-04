@@ -1,9 +1,9 @@
-import { mockCalendar } from '@calsdk/mock';
+import { mockCalendar } from '@cal-sdk/mock';
 import {
   type CalendarProviderV1,
   InvalidResponseDataError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { createEvent } from './create-event';
 import { syncEvents } from './sync-events';

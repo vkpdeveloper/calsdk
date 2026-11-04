@@ -10,7 +10,7 @@ You're building a booking page and need the times when both people are free, one
 `getFreeBusy` returns when each calendar is busy, without event details:
 
 ```ts
-import { getFreeBusy } from 'calsdk';
+import { getFreeBusy } from '@cal-sdk/core';
 
 const { calendars } = await getFreeBusy({
   calendar,
@@ -31,9 +31,9 @@ Only Google has a free/busy endpoint, which also works for calendars the user ca
 `findFreeTime` does both steps for you. It takes calendars from any mix of providers and returns the times when all of them are free:
 
 ```ts
-import { findFreeTime } from 'calsdk';
-import { google } from '@calsdk/google';
-import { microsoft } from '@calsdk/microsoft';
+import { findFreeTime } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
+import { microsoft } from '@cal-sdk/microsoft';
 
 const { slots } = await findFreeTime({
   calendars: [

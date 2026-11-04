@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { zoom } from './zoom-provider';
 
 // Replays test/fixtures/conformance.json. To re-record, run with CALSDK_RECORD=1 and

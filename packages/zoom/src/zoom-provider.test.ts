@@ -4,8 +4,8 @@ import {
   NotFoundError,
   type SyncChangeV1,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
-import { createRecordingFetch } from '@calsdk/provider-tests';
+} from '@cal-sdk/provider';
+import { createRecordingFetch } from '@cal-sdk/provider-tests';
 import { afterAll, afterEach, describe, expect, it, vi } from 'vitest';
 import type { Meeting, Occurrence } from './zoom-api';
 import { zoom } from './zoom-provider';

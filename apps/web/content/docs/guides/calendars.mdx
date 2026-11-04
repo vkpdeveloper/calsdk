@@ -6,7 +6,7 @@ description: List the calendars a user can see and pick the one to read or write
 Most accounts hold more than one calendar: the user's own, a shared team calendar, someone's holidays. When your app needs to put an event somewhere other than the default, or let the user choose where it goes, start with `listCalendars`:
 
 ```ts
-import { listCalendars } from 'calsdk';
+import { listCalendars } from '@cal-sdk/core';
 
 const { calendars } = await listCalendars({ calendar });
 

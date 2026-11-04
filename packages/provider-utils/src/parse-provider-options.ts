@@ -1,4 +1,4 @@
-import { InvalidArgumentError, type ProviderOptionsV1, type WarningV1 } from '@calsdk/provider';
+import { InvalidArgumentError, type ProviderOptionsV1, type WarningV1 } from '@cal-sdk/provider';
 import { formatSchemaIssues, type StandardSchemaV1, validateSchema } from './validate-schema';
 
 /**

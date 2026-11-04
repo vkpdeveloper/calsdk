@@ -1,10 +1,10 @@
-# @calsdk/calendly
+# @cal-sdk/calendly
 
 Calendly provider for calsdk. Scheduled meetings are the events. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { calendly } from '@calsdk/calendly';
-import { createEvent, listEvents } from 'calsdk';
+import { calendly } from '@cal-sdk/calendly';
+import { createEvent, listEvents } from '@cal-sdk/core';
 
 const calendar = calendly({ accessToken: process.env.CALENDLY_TOKEN });
 

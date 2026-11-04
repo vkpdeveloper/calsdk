@@ -1,5 +1,5 @@
-import { NotFoundError, PermissionDeniedError } from '@calsdk/provider';
-import { eventTimeToInstant, isAllDay } from '@calsdk/provider-utils';
+import { NotFoundError, PermissionDeniedError } from '@cal-sdk/provider';
+import { eventTimeToInstant, isAllDay } from '@cal-sdk/provider-utils';
 import { listEventPages } from './list-events';
 import type { BusyBlock, CallSettings, ResultMetadata, TimeInput, Warning } from './types';
 import { logWarnings } from './util/log-warnings';

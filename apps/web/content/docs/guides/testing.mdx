@@ -3,10 +3,10 @@ title: Test your code
 description: Run your app's calendar logic against an in-memory calendar, with no account and no network.
 ---
 
-Your booking flow shouldn't need a Google account, OAuth tokens or a network to prove it picks the right slot. `@calsdk/mock` is a full calendar in memory: your code calls the same functions it calls in production, and you check the result on the mock.
+Your booking flow shouldn't need a Google account, OAuth tokens or a network to prove it picks the right slot. `@cal-sdk/mock` is a full calendar in memory: your code calls the same functions it calls in production, and you check the result on the mock.
 
 ```npm
-npm install -D @calsdk/mock
+npm install -D @cal-sdk/mock
 ```
 
 ## Pass the calendar in
@@ -14,7 +14,7 @@ npm install -D @calsdk/mock
 The one change to make in your app is to take the provider as an argument instead of creating it inside the function. Production passes `google(...)`, tests pass the mock:
 
 ```ts title="book-intro-call.ts"
-import { type CalendarProvider, createEvent, findFreeTime } from 'calsdk';
+import { type CalendarProvider, createEvent, findFreeTime } from '@cal-sdk/core';
 
 export async function bookIntroCall(calendar: CalendarProvider, guest: string) {
   const { slots } = await findFreeTime({
@@ -41,7 +41,7 @@ export async function bookIntroCall(calendar: CalendarProvider, guest: string) {
 ```
 
 ```ts title="book-intro-call.test.ts"
-import { mockCalendar } from '@calsdk/mock';
+import { mockCalendar } from '@cal-sdk/mock';
 import { expect, test } from 'vitest';
 import { bookIntroCall } from './book-intro-call';
 

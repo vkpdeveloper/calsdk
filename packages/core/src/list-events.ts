@@ -1,4 +1,4 @@
-import { InvalidResponseDataError, type ListEventsResultV1 } from '@calsdk/provider';
+import { InvalidResponseDataError, type ListEventsResultV1 } from '@cal-sdk/provider';
 import type {
   CalendarEvent,
   CalendarProvider,

@@ -17,7 +17,7 @@ export async function GET() {
 
 > ${appDescription}
 
-calsdk is a library, not a hosted service: it runs in your app and calls each provider's API with tokens your app passes in. Install the core package and one package per calendar, for example \`npm install calsdk @calsdk/google\`. Every page below is also served as Markdown at its URL plus \`.md\`, and all of them together at ${siteUrl}/llms-full.txt.
+calsdk is a library, not a hosted service: it runs in your app and calls each provider's API with tokens your app passes in. Install the core package and one package per calendar, for example \`npm install @cal-sdk/core @cal-sdk/google\`. Every page below is also served as Markdown at its URL plus \`.md\`, and all of them together at ${siteUrl}/llms-full.txt.
 ${index}
 `);
 }

@@ -1,10 +1,10 @@
-# @calsdk/google
+# @cal-sdk/google
 
 Google Calendar provider for calsdk. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { google } from '@calsdk/google';
-import { listEvents } from 'calsdk';
+import { google } from '@cal-sdk/google';
+import { listEvents } from '@cal-sdk/core';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 

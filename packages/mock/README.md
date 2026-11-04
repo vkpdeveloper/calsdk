@@ -1,10 +1,10 @@
-# @calsdk/mock
+# @cal-sdk/mock
 
 An in-memory calendar provider for calsdk. Use it to try the SDK without credentials, to test your app's calendar logic offline, and as the reference implementation when writing a provider.
 
 ```ts
-import { mockCalendar } from '@calsdk/mock';
-import { listEvents } from 'calsdk';
+import { mockCalendar } from '@cal-sdk/mock';
+import { listEvents } from '@cal-sdk/core';
 
 const calendar = mockCalendar({
   events: [

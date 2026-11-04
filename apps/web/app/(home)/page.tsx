@@ -106,12 +106,14 @@ const PROVIDERS: {
 
 // Lines are kept to about 40 characters so the code fits a phone without scrolling.
 function providerCode(id: string, pkg: string, setup: string) {
-  const short = `import { ${id} } from '@calsdk/${pkg}';`;
+  const short = `import { ${id} } from '@cal-sdk/${pkg}';`;
   const provider = (
-    short.length > 41 ? `import {\n  ${id},\n} from '@calsdk/${pkg}';` : short
+    short.length > 41 ? `import {\n  ${id},\n} from '@cal-sdk/${pkg}';` : short
   ).split('\n');
   const calendar = `const calendar = ${setup};`.split('\n');
-  const code = ["import { listEvents } from 'calsdk';", ...provider, '', ...calendar].join('\n');
+  const code = ["import { listEvents } from '@cal-sdk/core';", ...provider, '', ...calendar].join(
+    '\n',
+  );
   // Highlighted lines are 1-based: the provider import, then the calendar after a blank line.
   const changed = [
     ...provider.map((_, i) => 2 + i),
@@ -144,7 +146,7 @@ const FEATURES = [
     title: 'Book a meeting, with the video link',
     body: 'Create a meeting with a Google Meet or Teams link. Provider changes come back as warnings.',
     code: `
-import { createEvent } from 'calsdk';
+import { createEvent } from '@cal-sdk/core';
 
 const result = await createEvent({
   calendar,
@@ -186,7 +188,7 @@ const result = await createEvent({
 import {
   listEvents,
   updateEvent,
-} from 'calsdk';
+} from '@cal-sdk/core';
 
 // Listing expands the weekday standup.
 const { events } = await listEvents({
@@ -238,7 +240,7 @@ if (friday) {
 import {
   SyncCursorExpiredError,
   syncEvents,
-} from 'calsdk';
+} from '@cal-sdk/core';
 
 async function sync(cursor?: string) {
   const result = await syncEvents({
@@ -326,7 +328,7 @@ import {
   ConflictError,
   RateLimitError,
   updateEvent,
-} from 'calsdk';
+} from '@cal-sdk/core';
 
 try {
   await updateEvent({
@@ -388,7 +390,7 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
     title: 'A calendar for tests',
     body: (
       <>
-        <code className="font-mono text-[0.9em] text-neutral-300">@calsdk/mock</code> keeps a real
+        <code className="font-mono text-[0.9em] text-neutral-300">@cal-sdk/mock</code> keeps a real
         calendar in memory. The demo at the top runs on it.
       </>
     ),
@@ -413,7 +415,7 @@ export default async function HomePage() {
         return {
           id,
           label,
-          pkg: `@calsdk/${pkg}`,
+          pkg: `@cal-sdk/${pkg}`,
           color,
           code: await highlightCode(code, { changed }),
           support: CAPABILITIES.map((capability, i): [string, Support] => [
@@ -452,7 +454,7 @@ export default async function HomePage() {
           >
             Get started
           </Link>
-          <CopyCommand command="npm i calsdk @calsdk/mock" />
+          <CopyCommand command="npm i @cal-sdk/core @cal-sdk/mock" />
         </div>
       </section>
 
@@ -572,7 +574,7 @@ export default async function HomePage() {
           >
             Read the quickstart
           </Link>
-          <CopyCommand command="npm i calsdk @calsdk/mock" />
+          <CopyCommand command="npm i @cal-sdk/core @cal-sdk/mock" />
         </div>
       </section>
 

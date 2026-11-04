@@ -12,7 +12,7 @@ import {
   SyncCursorExpiredError,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   createJsonFetcher,
@@ -26,7 +26,7 @@ import {
   parseProviderOptions,
   type QueryValue,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { z } from 'zod';
 import {
   cancelledDates,
@@ -84,7 +84,7 @@ const EXPIRED_SYNC_CODES = new Set(['SyncStateNotFound', 'SyncStateInvalid', 're
  * school and personal Microsoft accounts.
  *
  * @example
- * import { microsoft } from '@calsdk/microsoft';
+ * import { microsoft } from '@cal-sdk/microsoft';
  * const calendar = microsoft({ accessToken: () => getFreshToken() });
  */
 export function microsoft(settings: MicrosoftCalendarSettings): MicrosoftCalendarProvider {

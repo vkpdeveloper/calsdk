@@ -14,10 +14,10 @@
       },
     },
     "apps/web": {
-      "name": "@calsdk/web",
+      "name": "@cal-sdk/web",
       "dependencies": {
-        "@calsdk/mock": "workspace:*",
-        "calsdk": "workspace:*",
+        "@cal-sdk/core": "workspace:*",
+        "@cal-sdk/mock": "workspace:*",
         "fumadocs-core": "16.17.10",
         "fumadocs-mdx": "15.4.10",
         "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.10",
@@ -38,136 +38,136 @@
     "examples/quickstart": {
       "name": "calsdk-quickstart",
       "dependencies": {
-        "@calsdk/calcom": "workspace:*",
-        "@calsdk/caldav": "workspace:*",
-        "@calsdk/calendly": "workspace:*",
-        "@calsdk/google": "workspace:*",
-        "@calsdk/ics": "workspace:*",
-        "@calsdk/microsoft": "workspace:*",
-        "@calsdk/mock": "workspace:*",
-        "@calsdk/zoom": "workspace:*",
-        "calsdk": "workspace:*",
+        "@cal-sdk/calcom": "workspace:*",
+        "@cal-sdk/caldav": "workspace:*",
+        "@cal-sdk/calendly": "workspace:*",
+        "@cal-sdk/core": "workspace:*",
+        "@cal-sdk/google": "workspace:*",
+        "@cal-sdk/ics": "workspace:*",
+        "@cal-sdk/microsoft": "workspace:*",
+        "@cal-sdk/mock": "workspace:*",
+        "@cal-sdk/zoom": "workspace:*",
       },
     },
     "packages/calcom": {
-      "name": "@calsdk/calcom",
+      "name": "@cal-sdk/calcom",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
     "packages/caldav": {
-      "name": "@calsdk/caldav",
+      "name": "@cal-sdk/caldav",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/ics": "workspace:*",
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/ics": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "@xmldom/xmldom": "^0.9.12",
         "ical.js": "^2.2.1",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
     "packages/calendly": {
-      "name": "@calsdk/calendly",
+      "name": "@cal-sdk/calendly",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
-    "packages/calsdk": {
-      "name": "calsdk",
+    "packages/core": {
+      "name": "@cal-sdk/core",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
       },
       "devDependencies": {
-        "@calsdk/mock": "workspace:*",
+        "@cal-sdk/mock": "workspace:*",
       },
     },
     "packages/google": {
-      "name": "@calsdk/google",
+      "name": "@cal-sdk/google",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
     "packages/ics": {
-      "name": "@calsdk/ics",
+      "name": "@cal-sdk/ics",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "ical.js": "^2.2.1",
         "zod": "^4.6.7",
       },
     },
     "packages/microsoft": {
-      "name": "@calsdk/microsoft",
+      "name": "@cal-sdk/microsoft",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
     "packages/mock": {
-      "name": "@calsdk/mock",
+      "name": "@cal-sdk/mock",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "rrule-temporal": "^2.2.8",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
     "packages/provider": {
-      "name": "@calsdk/provider",
+      "name": "@cal-sdk/provider",
       "version": "0.0.0",
     },
     "packages/provider-tests": {
-      "name": "@calsdk/provider-tests",
+      "name": "@cal-sdk/provider-tests",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
       },
       "devDependencies": {
-        "@calsdk/mock": "workspace:*",
+        "@cal-sdk/mock": "workspace:*",
       },
       "peerDependencies": {
         "vitest": "^5.0.0",
       },
     },
     "packages/provider-utils": {
-      "name": "@calsdk/provider-utils",
+      "name": "@cal-sdk/provider-utils",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
         "@standard-schema/spec": "^1.1.0",
       },
       "devDependencies": {
@@ -175,15 +175,15 @@
       },
     },
     "packages/zoom": {
-      "name": "@calsdk/zoom",
+      "name": "@cal-sdk/zoom",
       "version": "0.0.0",
       "dependencies": {
-        "@calsdk/provider": "workspace:*",
-        "@calsdk/provider-utils": "workspace:*",
+        "@cal-sdk/provider": "workspace:*",
+        "@cal-sdk/provider-utils": "workspace:*",
         "zod": "^4.6.7",
       },
       "devDependencies": {
-        "@calsdk/provider-tests": "workspace:*",
+        "@cal-sdk/provider-tests": "workspace:*",
       },
     },
   },
@@ -218,29 +218,31 @@
 
     "@biomejs/cli-win32-x64": ["@biomejs/cli-win32-x64@2.6.4", "", { "os": "win32", "cpu": "x64" }, "sha512-pYsMy5AThiHFOZAsngg8qN4PurM6nInKBhVX7sbj3eNpRQqo1Hb0MgCwPL7VqVMrmcEEMj9Ks3qbkallR65e8g=="],
 
-    "@calsdk/calcom": ["@calsdk/calcom@workspace:packages/calcom"],
+    "@cal-sdk/calcom": ["@cal-sdk/calcom@workspace:packages/calcom"],
 
-    "@calsdk/caldav": ["@calsdk/caldav@workspace:packages/caldav"],
+    "@cal-sdk/caldav": ["@cal-sdk/caldav@workspace:packages/caldav"],
 
-    "@calsdk/calendly": ["@calsdk/calendly@workspace:packages/calendly"],
+    "@cal-sdk/calendly": ["@cal-sdk/calendly@workspace:packages/calendly"],
 
-    "@calsdk/google": ["@calsdk/google@workspace:packages/google"],
+    "@cal-sdk/core": ["@cal-sdk/core@workspace:packages/core"],
 
-    "@calsdk/ics": ["@calsdk/ics@workspace:packages/ics"],
+    "@cal-sdk/google": ["@cal-sdk/google@workspace:packages/google"],
 
-    "@calsdk/microsoft": ["@calsdk/microsoft@workspace:packages/microsoft"],
+    "@cal-sdk/ics": ["@cal-sdk/ics@workspace:packages/ics"],
 
-    "@calsdk/mock": ["@calsdk/mock@workspace:packages/mock"],
+    "@cal-sdk/microsoft": ["@cal-sdk/microsoft@workspace:packages/microsoft"],
 
-    "@calsdk/provider": ["@calsdk/provider@workspace:packages/provider"],
+    "@cal-sdk/mock": ["@cal-sdk/mock@workspace:packages/mock"],
 
-    "@calsdk/provider-tests": ["@calsdk/provider-tests@workspace:packages/provider-tests"],
+    "@cal-sdk/provider": ["@cal-sdk/provider@workspace:packages/provider"],
 
-    "@calsdk/provider-utils": ["@calsdk/provider-utils@workspace:packages/provider-utils"],
+    "@cal-sdk/provider-tests": ["@cal-sdk/provider-tests@workspace:packages/provider-tests"],
 
-    "@calsdk/web": ["@calsdk/web@workspace:apps/web"],
+    "@cal-sdk/provider-utils": ["@cal-sdk/provider-utils@workspace:packages/provider-utils"],
 
-    "@calsdk/zoom": ["@calsdk/zoom@workspace:packages/zoom"],
+    "@cal-sdk/web": ["@cal-sdk/web@workspace:apps/web"],
+
+    "@cal-sdk/zoom": ["@cal-sdk/zoom@workspace:packages/zoom"],
 
     "@changesets/apply-release-plan": ["@changesets/apply-release-plan@8.1.1", "", { "dependencies": { "@changesets/config": "^4.0.1", "@changesets/format": "^0.1.2", "@changesets/git": "^4.0.1", "@changesets/should-skip-package": "^1.0.0", "@changesets/types": "^7.0.0", "import-meta-resolve": "^4.2.0", "jsonc-parser": "^3.3.1", "semver": "^7.8.1" } }, "sha512-nk2Hbq3M9NeHMdaIRBDvawKrQJzXB9sGyBUE5yWnIKtvdcNCPj75zBekJYr0gTT2ecJH3eFeTrc8eisPImcv0Q=="],
 
@@ -635,8 +637,6 @@
     "baseline-browser-mapping": ["baseline-browser-mapping@2.11.35", "", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-GNk8KX52CHqeNKGk8+7tZnQab/2k1t/BgrUHPKNdijzpEhF1saPQZHVKb6m5loSAxB39gyrTYw34Qf9CQ3u1qQ=="],
 
     "cac": ["cac@7.1.0", "", {}, "sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA=="],
-
-    "calsdk": ["calsdk@workspace:packages/calsdk"],
 
     "calsdk-quickstart": ["calsdk-quickstart@workspace:examples/quickstart"],
 

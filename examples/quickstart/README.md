@@ -7,4 +7,4 @@ bun install
 bun run --cwd examples/quickstart start
 ```
 
-To use a real calendar, replace the mock with `google({ accessToken })` from `@calsdk/google` or `microsoft({ accessToken })` from `@calsdk/microsoft`. The rest of the code stays the same.
+To use a real calendar, replace the mock with `google({ accessToken })` from `@cal-sdk/google` or `microsoft({ accessToken })` from `@cal-sdk/microsoft`. The rest of the code stays the same.

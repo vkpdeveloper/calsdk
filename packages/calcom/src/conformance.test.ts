@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { calcom } from './calcom-provider';
 
 // A 60-minute event type created for recording and deleted afterwards. Its bookings are the

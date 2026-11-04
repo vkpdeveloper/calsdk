@@ -16,14 +16,14 @@ The website opens with a live demo. It runs in your browser on six sample calend
 ## Try it
 
 ```bash
-npm i calsdk @calsdk/mock
+npm i @cal-sdk/core @cal-sdk/mock
 ```
 
-`@calsdk/mock` keeps a calendar in memory, so you can try everything without an account or a network:
+`@cal-sdk/mock` keeps a calendar in memory, so you can try everything without an account or a network:
 
 ```ts
-import { createEvent, findFreeTime, listEvents } from 'calsdk';
-import { mockCalendar } from '@calsdk/mock';
+import { createEvent, findFreeTime, listEvents } from '@cal-sdk/core';
+import { mockCalendar } from '@cal-sdk/mock';
 
 const calendar = mockCalendar();
 
@@ -57,22 +57,22 @@ const { slots } = await findFreeTime({
 When the logic works, swap the mock for a real calendar. Only the import and the line that creates `calendar` change, and events come back in the same shape from every provider.
 
 ```ts
-import { google } from '@calsdk/google';
+import { google } from '@cal-sdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 ```
 
-| Provider | Package | Read | Write | Recurring | Video links | Sync |
-| --- | --- | --- | --- | --- | --- | --- |
-| Google Calendar | `@calsdk/google` | ✓ | ✓ | ✓ | Google Meet | ✓ |
-| Outlook and Microsoft 365 | `@calsdk/microsoft` | ✓ | ✓ | ✓ | Teams, work accounts | ✓ |
-| iCloud | `@calsdk/caldav` | ✓ | ✓ | ✓ | | ✓ |
-| Zoho Calendar | `@calsdk/caldav` | ✓ | ✓ | ✓ | | ✓ |
-| Any CalDAV server | `@calsdk/caldav` | ✓ | ✓ | ✓ | | ✓ |
-| Zoom | `@calsdk/zoom` | ✓ | ✓ | Zoom's patterns | Zoom | ✓ |
-| Cal.com | `@calsdk/calcom` | ✓ | Book an event type, move, cancel | | | ✓ |
-| Calendly | `@calsdk/calendly` | ✓ | Book an event type, cancel | | | ✓ |
-| ICS feed | `@calsdk/ics` | ✓ | | | | ✓ |
+| Provider                  | Package              | Read | Write                            | Recurring       | Video links          | Sync |
+| ------------------------- | -------------------- | ---- | -------------------------------- | --------------- | -------------------- | ---- |
+| Google Calendar           | `@cal-sdk/google`    | ✓    | ✓                                | ✓               | Google Meet          | ✓    |
+| Outlook and Microsoft 365 | `@cal-sdk/microsoft` | ✓    | ✓                                | ✓               | Teams, work accounts | ✓    |
+| iCloud                    | `@cal-sdk/caldav`    | ✓    | ✓                                | ✓               |                      | ✓    |
+| Zoho Calendar             | `@cal-sdk/caldav`    | ✓    | ✓                                | ✓               |                      | ✓    |
+| Any CalDAV server         | `@cal-sdk/caldav`    | ✓    | ✓                                | ✓               |                      | ✓    |
+| Zoom                      | `@cal-sdk/zoom`      | ✓    | ✓                                | Zoom's patterns | Zoom                 | ✓    |
+| Cal.com                   | `@cal-sdk/calcom`    | ✓    | Book an event type, move, cancel |                 |                      | ✓    |
+| Calendly                  | `@cal-sdk/calendly`  | ✓    | Book an event type, cancel       |                 |                      | ✓    |
+| ICS feed                  | `@cal-sdk/ics`       | ✓    |                                  |                 |                      | ✓    |
 
 [Compare providers](https://www.cal-sdk.com/docs/providers) has the full list of what each one can do.
 

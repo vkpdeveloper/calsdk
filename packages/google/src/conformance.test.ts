@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { google } from './google-provider';
 
 // A dedicated calendar created for recording and deleted afterwards.

@@ -26,7 +26,7 @@ export const googleListEventsOptionsSchema = z.object({
 });
 export type GoogleListEventsOptions = z.infer<typeof googleListEventsOptionsSchema>;
 
-/** The option and metadata types of the Google provider, for type checking in `calsdk`. */
+/** The option and metadata types of the Google provider, for type checking in `@cal-sdk/core`. */
 export type GoogleProviderTypes = {
   options: {
     listEvents: GoogleListEventsOptions;

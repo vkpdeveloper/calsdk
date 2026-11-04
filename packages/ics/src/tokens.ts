@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from '@calsdk/provider';
+import { InvalidArgumentError } from '@cal-sdk/provider';
 import { z } from 'zod';
 
 /** Where the next page of a listing starts: after this start instant and event id. */

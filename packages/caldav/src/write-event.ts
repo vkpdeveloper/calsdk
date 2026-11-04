@@ -1,4 +1,4 @@
-import { type ReadContext, wallClockOf, type Zone, zoneOf } from '@calsdk/ics/icalendar';
+import { type ReadContext, wallClockOf, type Zone, zoneOf } from '@cal-sdk/ics/icalendar';
 import {
   type EventInputV1,
   type EventPatchV1,
@@ -6,13 +6,13 @@ import {
   InvalidArgumentError,
   type SendUpdatesV1,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   instantToLocal,
   isAllDay,
   type LocalDateTime,
   parseRecurrence,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import ICAL from 'ical.js';
 
 const PRODID = '-//calsdk//CalDAV//EN';

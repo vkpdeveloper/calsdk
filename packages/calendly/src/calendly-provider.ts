@@ -10,7 +10,7 @@ import {
   type SyncChangeV1,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   createJsonFetcher,
@@ -22,7 +22,7 @@ import {
   parseProviderOptions,
   type QueryValue,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { z } from 'zod';
 import {
   eventTypeOutputSchema,
@@ -73,7 +73,7 @@ type Page<Item> = { collection: Item[]; pagination: { next_page_token?: string |
  * calendar.
  *
  * @example
- * import { calendly } from '@calsdk/calendly';
+ * import { calendly } from '@cal-sdk/calendly';
  * const calendar = calendly({ accessToken: process.env.CALENDLY_TOKEN });
  */
 export function calendly(settings: CalendlySettings): CalendlyProvider {

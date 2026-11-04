@@ -1,4 +1,4 @@
-/** The option and metadata types of the Zoom provider, for type checking in `calsdk`. */
+/** The option and metadata types of the Zoom provider, for type checking in `@cal-sdk/core`. */
 export type ZoomProviderTypes = {
   options: Record<never, never>;
   eventMetadata: ZoomEventMetadata;

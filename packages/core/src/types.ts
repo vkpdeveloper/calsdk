@@ -20,7 +20,7 @@ import type {
   SyncChangeV1,
   UpdateScopeV1,
   WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 
 /** A calendar provider instance, e.g. `google({ accessToken })` or `mockCalendar()`. */
 export type CalendarProvider = CalendarProviderV1;

@@ -4,7 +4,7 @@ import {
   InvalidResponseDataError,
   NotFoundError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { ics } from './ics-provider';
 

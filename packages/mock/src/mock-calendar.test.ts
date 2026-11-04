@@ -4,7 +4,7 @@ import {
   InvalidArgumentError,
   NotFoundError,
   SyncCursorExpiredError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { mockCalendar } from './mock-calendar';
 

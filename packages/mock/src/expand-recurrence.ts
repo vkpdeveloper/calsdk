@@ -2,7 +2,7 @@ import {
   type EventTimeV1,
   InvalidArgumentError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -14,7 +14,7 @@ import {
   parseLocalDateTime,
   parseRecurrence,
   type RRule,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { RRuleTemporal } from 'rrule-temporal';
 
 /** One instance of a recurring event. */

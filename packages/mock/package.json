@@ -1,13 +1,14 @@
 {
-  "name": "@calsdk/mock",
-  "version": "0.0.0",
+  "name": "@cal-sdk/mock",
+  "version": "0.1.0",
   "description": "In-memory calsdk calendar provider for tests, examples and offline development.",
   "license": "MIT",
+  "homepage": "https://www.cal-sdk.com",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@calsdk/source": "./src/index.ts",
+      "@cal-sdk/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
@@ -32,11 +33,11 @@
     "access": "public"
   },
   "dependencies": {
-    "@calsdk/provider": "workspace:*",
-    "@calsdk/provider-utils": "workspace:*",
+    "@cal-sdk/provider": "workspace:*",
+    "@cal-sdk/provider-utils": "workspace:*",
     "rrule-temporal": "^2.2.8"
   },
   "devDependencies": {
-    "@calsdk/provider-tests": "workspace:*"
+    "@cal-sdk/provider-tests": "workspace:*"
   }
 }

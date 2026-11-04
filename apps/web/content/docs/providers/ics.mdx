@@ -6,12 +6,12 @@ description: Read a subscribed iCalendar feed, such as a holiday calendar or a c
 Sometimes all you have is a link: a public holiday calendar, a team's shared `.ics` address, the feed a booking tool publishes. This provider reads it like any other calendar, recurring series and all, and syncs it. It can't write, because a feed is a file someone else publishes.
 
 ```npm
-npm install calsdk @calsdk/ics
+npm install @cal-sdk/core @cal-sdk/ics
 ```
 
 ```ts
-import { listEvents, syncEvents } from 'calsdk';
-import { ics } from '@calsdk/ics';
+import { listEvents, syncEvents } from '@cal-sdk/core';
+import { ics } from '@cal-sdk/ics';
 
 const calendar = ics({ url: 'webcal://example.com/holidays.ics' });
 

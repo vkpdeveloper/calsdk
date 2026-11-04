@@ -1,5 +1,5 @@
 {
-  "name": "@calsdk/web",
+  "name": "@cal-sdk/web",
   "private": true,
   "type": "module",
   "scripts": {
@@ -9,8 +9,8 @@
     "typecheck": "next typegen && tsc --noEmit"
   },
   "dependencies": {
-    "@calsdk/mock": "workspace:*",
-    "calsdk": "workspace:*",
+    "@cal-sdk/mock": "workspace:*",
+    "@cal-sdk/core": "workspace:*",
     "fumadocs-core": "16.17.10",
     "fumadocs-mdx": "15.4.10",
     "fumadocs-ui": "npm:@fumadocs/base-ui@16.17.10",

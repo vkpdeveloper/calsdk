@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from '@calsdk/provider';
+import { InvalidArgumentError } from '@cal-sdk/provider';
 import { z } from 'zod';
 
 // Cal.com's own list cursors page by booking uid whatever the sort, so calsdk pages by the

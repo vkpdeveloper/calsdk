@@ -6,7 +6,7 @@ description: Lists one page of events in a time window. iterateEvents walks ever
 The window's end is exclusive, and a recurring series comes back as its occurrences, each with its own id, unless you set `expandRecurring: false`. Use `iterateEvents` when you want every page without handling cursors.
 
 ```ts
-import { listEvents } from 'calsdk';
+import { listEvents } from '@cal-sdk/core';
 
 const { events, nextPageToken } = await listEvents({
   calendar,
@@ -50,7 +50,7 @@ Plus the [common options](/docs/reference#common-options). Strings in `timeMin` 
 ## iterateEvents
 
 ```ts
-import { iterateEvents } from 'calsdk';
+import { iterateEvents } from '@cal-sdk/core';
 
 for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
   console.log(event.title);

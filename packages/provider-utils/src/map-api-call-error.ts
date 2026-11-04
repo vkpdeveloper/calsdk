@@ -5,7 +5,7 @@ import {
   NotFoundError,
   PermissionDeniedError,
   RateLimitError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 
 /**
  * Parses `retry-after-ms` or `Retry-After` (seconds or an HTTP date) into milliseconds.

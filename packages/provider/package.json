@@ -1,13 +1,14 @@
 {
-  "name": "@calsdk/provider",
-  "version": "0.0.0",
+  "name": "@cal-sdk/provider",
+  "version": "0.1.0",
   "description": "The calsdk provider contract: types and error classes for calendar providers.",
   "license": "MIT",
+  "homepage": "https://www.cal-sdk.com",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@calsdk/source": "./src/index.ts",
+      "@cal-sdk/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },

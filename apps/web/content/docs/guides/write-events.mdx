@@ -8,7 +8,7 @@ You want every booking in your app to land in your users' real calendars, whiche
 ## Create an event
 
 ```ts
-import { createEvent } from 'calsdk';
+import { createEvent } from '@cal-sdk/core';
 
 const { event, warnings } = await createEvent({
   calendar,
@@ -77,7 +77,7 @@ Google adds a Meet link and Outlook a Teams meeting (work and school accounts on
 `updateEvent` takes a patch. Fields you leave out stay as they are, and `null` clears a field:
 
 ```ts
-import { updateEvent } from 'calsdk';
+import { updateEvent } from '@cal-sdk/core';
 
 const { event } = await updateEvent({
   calendar,
@@ -91,7 +91,7 @@ const { event } = await updateEvent({
 ## Delete an event
 
 ```ts
-import { deleteEvent } from 'calsdk';
+import { deleteEvent } from '@cal-sdk/core';
 
 await deleteEvent({ calendar, eventId });
 ```
@@ -103,7 +103,7 @@ A missing event throws `NotFoundError`. The exception is a retry: if an earlier 
 You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update then only goes through if nobody changed the event since you read it:
 
 ```ts
-import { ConflictError, getEvent, updateEvent } from 'calsdk';
+import { ConflictError, getEvent, updateEvent } from '@cal-sdk/core';
 
 const { event } = await getEvent({ calendar, eventId });
 

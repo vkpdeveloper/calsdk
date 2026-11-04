@@ -1,4 +1,4 @@
-import type { EventTimeV1 } from '@calsdk/provider';
+import type { EventTimeV1 } from '@cal-sdk/provider';
 import { formatLocalDate, localToInstant, parseLocalDateTime } from './zoned-time';
 
 /** Narrows an event time to the all-day form. */

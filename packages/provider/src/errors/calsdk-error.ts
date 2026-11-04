@@ -5,7 +5,7 @@ const symbol = Symbol.for(marker);
  * Base class of every error calsdk throws.
  *
  * Use the static `isInstance` checks instead of `instanceof`: they work even
- * when an app ends up with two copies of `@calsdk/provider` installed.
+ * when an app ends up with two copies of `@cal-sdk/provider` installed.
  *
  * @example
  * if (NotFoundError.isInstance(error)) { ... }

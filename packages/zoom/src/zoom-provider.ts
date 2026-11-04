@@ -12,7 +12,7 @@ import {
   type SyncChangeV1,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   createJsonFetcher,
@@ -25,7 +25,7 @@ import {
   parseRetryAfterMs,
   type QueryValue,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { z } from 'zod';
 import {
   fromMeeting,
@@ -79,7 +79,7 @@ type Resource = { type: 'calendar' | 'event'; id: string };
  * calendar, and recurring meetings with a fixed time are series.
  *
  * @example
- * import { zoom } from '@calsdk/zoom';
+ * import { zoom } from '@cal-sdk/zoom';
  * const calendar = zoom({ accessToken: process.env.ZOOM_TOKEN });
  */
 export function zoom(settings: ZoomSettings): ZoomProvider {

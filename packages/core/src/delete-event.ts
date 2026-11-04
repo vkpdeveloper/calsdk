@@ -1,4 +1,4 @@
-import { NotFoundError } from '@calsdk/provider';
+import { NotFoundError } from '@cal-sdk/provider';
 import type {
   CalendarProvider,
   CallSettings,

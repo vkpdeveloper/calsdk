@@ -5,9 +5,9 @@ import {
   type EventV1,
   type SyncChangeV1,
   SyncCursorExpiredError,
-} from '@calsdk/provider';
-import { createRecordingFetch } from '@calsdk/provider-tests';
-import type { FetchFunction } from '@calsdk/provider-utils';
+} from '@cal-sdk/provider';
+import { createRecordingFetch } from '@cal-sdk/provider-tests';
+import type { FetchFunction } from '@cal-sdk/provider-utils';
 import { afterAll, describe, expect, it } from 'vitest';
 import { pinWrites } from '../test/pin-writes';
 import { caldav } from './caldav-provider';

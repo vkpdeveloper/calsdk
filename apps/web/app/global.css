@@ -101,6 +101,8 @@ html > body[data-scroll-locked] {
 @media (min-width: 1024px) {
   .code-result .line {
     padding: 0 2rem;
+    /* No changed-line marker here, so drop its border to start exactly under the title. */
+    border-left-width: 0;
   }
 }
 

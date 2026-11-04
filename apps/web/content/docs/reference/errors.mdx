@@ -17,7 +17,7 @@ if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
 
 | Class | Fields | Thrown when |
 | --- | --- | --- |
-| `InvalidArgumentError` | `argument` | An option is invalid, before any request. `argument` is its path, such as `'event.start.timeZone'` |
+| `InvalidArgumentError` | `argument` | An option is invalid. `argument` is its path, such as `'event.start.timeZone'` |
 | `NoSuchProviderVersionError` | `provider`, `version` | The provider implements a contract version this calsdk does not know |
 | `UnsupportedFunctionalityError` | `provider`, `functionality` | The provider cannot do what was asked |
 

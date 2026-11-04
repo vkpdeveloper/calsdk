@@ -25,7 +25,7 @@ Use `isInstance` rather than `instanceof`. It still works when your app ends up 
 
 | Error                           | Thrown when                                           | Usually                             |
 | ------------------------------- | ----------------------------------------------------- | ----------------------------------- |
-| `InvalidArgumentError`          | Input is wrong, before any request                    | Fix the call. `argument` names the field |
+| `InvalidArgumentError`          | An input value is invalid                             | Fix the call. `argument` names the field |
 | `AuthenticationError`           | The token or password was rejected (401)              | Refresh the token or ask the user to reconnect |
 | `PermissionDeniedError`         | The user may not do this (403)                        | Ask for a wider scope, or skip this calendar |
 | `NotFoundError`                 | The calendar or event does not exist or is hidden (404, 410) | Drop your copy. `resource` is `'calendar'` or `'event'` |

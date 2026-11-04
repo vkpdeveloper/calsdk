@@ -60,7 +60,7 @@ Some providers leave attendees out of listings because reading them costs a requ
 
 `conference` is the video link, `{ provider, joinUrl, id? }`, where `provider` is `google-meet`, `teams`, `zoom` or `other`. `reminders` is `{ useDefault, overrides? }`, and each override is a `{ method: 'popup' | 'email', minutesBefore }`. `color` is a hex color like `'#RRGGBB'`, and `htmlLink` opens the event in the provider's own app.
 
-`etag` is a version tag: pass it back as `ifMatch` and the write only lands if nobody changed the event since you read it. `createdAt` and `updatedAt` are ISO 8601 timestamps. `providerMetadata` holds whatever only one provider has, keyed by provider id; [Provider options](/docs/guides/provider-options) covers it.
+`etag` is a version tag: pass it back as `ifMatch` and an update only lands if nobody changed the event since you read it. Deletes take it too, though [Outlook can miss a change](/docs/providers/microsoft#writing-events) made just before the delete. `createdAt` and `updatedAt` are ISO 8601 timestamps. `providerMetadata` holds whatever only one provider has, keyed by provider id; [Provider options](/docs/guides/provider-options) covers it.
 
 Every field except `id`, `calendarId`, `kind`, `start`, `end`, `status` and `showAs` is optional, because a provider leaves out what it doesn't have. A Cal.com booking has no color, and an ICS feed has no etag.
 

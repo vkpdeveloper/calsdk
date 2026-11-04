@@ -36,3 +36,7 @@ jobs:
       - run: bun run typecheck
       - run: bun run test
       - run: bun run build
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - run: bun run check:runtime

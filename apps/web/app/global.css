@@ -93,6 +93,8 @@ html > body[data-scroll-locked] {
   overflow-wrap: break-word;
 }
 .code-result .line {
+  /* Opting out of Fumadocs' code styles also drops the height it gives empty lines. */
+  min-height: 1lh;
   padding: 0 1.25rem;
 }
 @media (min-width: 640px) {

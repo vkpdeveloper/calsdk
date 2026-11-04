@@ -157,8 +157,13 @@ const result = await createEvent({
   sendUpdates: 'all',
 });`,
     result: `
-// result.event.conference.joinUrl
-'https://meet.google.com/abc-defg-hij'
+// result.event.conference
+{
+  provider: 'google-meet',
+  joinUrl:
+    'https://meet.google.com/…',
+  id: '…',
+}
 
 // result.warnings
 []`,

@@ -212,6 +212,14 @@ html > body[data-scroll-locked] {
   max-width: 75ch;
 }
 
+/* Inline code is short; splitting `google({ accessToken })` across lines makes it unreadable.
+   Phones keep wrapping so a long span can't push the page sideways. */
+@media (min-width: 640px) {
+  .prose :not(pre) > code {
+    white-space: nowrap;
+  }
+}
+
 /* On phones, wide docs tables scroll inside their own box with the header row in view.
    Short tables never reach the height cap. */
 @media (max-width: 767px) {

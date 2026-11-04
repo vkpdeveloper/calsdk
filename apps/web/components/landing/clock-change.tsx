@@ -101,7 +101,7 @@ function Card({
           <col />
         </colgroup>
         <thead>
-          <tr className="text-left text-xs text-neutral-500">
+          <tr className="text-left text-xs text-neutral-400">
             <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">Monday</th>
             <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">New York</th>
             <th className="px-3 pt-3 pb-2 sm:px-4 font-normal">Berlin</th>
@@ -117,7 +117,7 @@ function Card({
               <Fragment key={row.day}>
                 {change && (
                   <tr className="border-t border-dashed border-neutral-700">
-                    <td colSpan={3} className="px-3 py-1.5 sm:px-4 text-xs text-neutral-500">
+                    <td colSpan={3} className="px-3 py-1.5 sm:px-4 text-xs text-neutral-400">
                       {change}
                     </td>
                   </tr>
@@ -132,7 +132,7 @@ function Card({
                   </td>
                   <td className="px-3 py-3 sm:px-4 font-mono text-neutral-300">
                     {row.berlin}
-                    {shifted && <Note className="text-neutral-500">US changed first</Note>}
+                    {shifted && <Note className="text-neutral-400">US changed first</Note>}
                   </td>
                 </tr>
               </Fragment>

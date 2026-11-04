@@ -189,67 +189,71 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
           <Legend className="bg-accent-blue/40 border border-accent-blue">Free for both</Legend>
           <span className="ml-auto">New York time</span>
         </div>
-        <div className="grid grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 [--hour:44px] sm:px-4 lg:[--hour:60px]">
-          <div />
-          {DAY_NAMES.map((name) => (
-            <div key={name} className="py-2 text-center text-xs font-medium text-neutral-400">
-              {name}
-            </div>
-          ))}
-          <div className="relative" style={{ height: hours(CLOSE - OPEN) }}>
-            {[...HOURS, CLOSE].map((hour) => (
-              <span
-                key={hour}
-                className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-400"
-                style={{ top: hours(hour - OPEN) }}
-              >
-                {clock(hour * 60)}
-              </span>
+        {/* Phones scroll the week sideways at a width where event names still fit. */}
+        <div className="x-scroll overflow-x-auto">
+          <div className="grid min-w-[640px] grid-cols-[2.75rem_repeat(5,1fr)] px-2 pb-4 [--hour:44px] sm:px-4 lg:[--hour:60px]">
+            <div className="sticky left-0 z-10 bg-panel" />
+            {DAY_NAMES.map((name) => (
+              <div key={name} className="py-2 text-center text-xs font-medium text-neutral-400">
+                {name}
+              </div>
             ))}
-          </div>
-          {DAYS.map((date, day) => (
-            <div
-              key={date}
-              className="relative border-l border-line"
-              style={{ height: hours(CLOSE - OPEN) }}
-            >
-              {HOURS.map((hour) => (
-                <div
+            {/* Sticky, so the hours stay in view while a phone scrolls the week. */}
+            <div className="sticky left-0 z-10 bg-panel" style={{ height: hours(CLOSE - OPEN) }}>
+              {[...HOURS, CLOSE].map((hour) => (
+                <span
                   key={hour}
-                  className="absolute inset-x-0 border-t border-[#1c1c20]"
+                  className="absolute right-2 -translate-y-1/2 font-mono text-[10px] text-neutral-400"
                   style={{ top: hours(hour - OPEN) }}
-                />
+                >
+                  {clock(hour * 60)}
+                </span>
               ))}
-              {state &&
-                freeRanges(state.slots)
-                  .filter((range) => range.day === day)
-                  .map((range) => (
+            </div>
+            {DAYS.map((date, day) => (
+              <div
+                key={date}
+                className="relative border-l border-line"
+                style={{ height: hours(CLOSE - OPEN) }}
+              >
+                {HOURS.map((hour) => (
+                  <div
+                    key={hour}
+                    className="absolute inset-x-0 border-t border-[#1c1c20]"
+                    style={{ top: hours(hour - OPEN) }}
+                  />
+                ))}
+                {state &&
+                  freeRanges(state.slots)
+                    .filter((range) => range.day === day)
+                    .map((range) => (
+                      <Placed
+                        key={`free-${range.from}`}
+                        block={range}
+                        className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15"
+                      />
+                    ))}
+                {state?.you
+                  .filter((block) => block.day === day)
+                  .map((block) => (
                     <Placed
-                      key={`free-${range.from}`}
-                      block={range}
-                      className="inset-x-0.5 rounded-md border border-accent-blue/70 bg-accent-blue/15"
+                      key={`you-${block.from}-${block.title}`}
+                      block={block}
+                      className="left-1 right-1/2 mr-0.5 rounded bg-neutral-600 text-neutral-100"
                     />
                   ))}
-              {state?.you
-                .filter((block) => block.day === day)
-                .map((block) => (
-                  <Placed
-                    key={`you-${block.from}-${block.title}`}
-                    block={block}
-                    className="left-1 right-1/2 mr-0.5 rounded bg-neutral-600 text-neutral-100"
-                  />
-                ))}
-              {state?.sam
-                .filter((block) => block.day === day)
-                .map((block) => (
-                  <Placed
-                    key={`sam-${block.from}-${block.title}`}
-                    block={block}
-                    className="left-1/2 right-1 ml-0.5 rounded border border-dashed border-neutral-400 bg-fd-background text-neutral-300"
-                  />
-                ))}
-            </div>
-          ))}
+                {state?.sam
+                  .filter((block) => block.day === day)
+                  .map((block) => (
+                    <Placed
+                      key={`sam-${block.from}-${block.title}`}
+                      block={block}
+                      className="left-1/2 right-1 ml-0.5 rounded border border-dashed border-neutral-400 bg-fd-background text-neutral-300"
+                    />
+                  ))}
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -294,7 +298,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
         <div className="code overflow-hidden rounded-xl border border-line bg-panel">
           {lengths.find((length) => length.minutes === duration)?.code}
         </div>
-        <div className="flex items-center justify-between gap-3 text-xs text-neutral-500">
+        <div className="flex items-center justify-between gap-3 text-xs text-neutral-400">
           <span aria-live="polite">
             {booked ? `Booked ${booked}. ` : ''}
             {state ? `Ran in your browser in ${state.ms.toFixed(1)} ms.` : ''}
@@ -328,7 +332,7 @@ function Placed({ block, className }: { block: Block; className: string }) {
       className={`absolute overflow-hidden px-1.5 py-1 text-[10px] leading-tight sm:text-[11px] ${className}`}
       style={{ top: hours((block.from - OPEN * 60) / 60), height: hours(minutes / 60) }}
     >
-      {minutes >= 36 && block.title && <span className="hidden sm:block">{block.title}</span>}
+      {minutes >= 36 && block.title && <span className="block">{block.title}</span>}
     </div>
   );
 }

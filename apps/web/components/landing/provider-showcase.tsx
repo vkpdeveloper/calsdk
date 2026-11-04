@@ -94,7 +94,7 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
         <div key={current?.id} role="tabpanel" className="code code-flash flex-1 py-2">
           {current?.code}
         </div>
-        <p className="border-t border-line px-5 py-3 text-sm text-neutral-500">
+        <p className="border-t border-line px-5 py-3 text-sm text-neutral-400">
           Switching calendars changes the two blue lines. Nothing else.
         </p>
       </div>

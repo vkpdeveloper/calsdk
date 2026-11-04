@@ -79,8 +79,8 @@ const calendar = ${setup};
 
 const { events } = await listEvents({
   calendar,
-  timeMin: '2026-11-01',
-  timeMax: '2026-12-01',
+  timeMin: '2026-11-01T00:00:00Z',
+  timeMax: '2026-12-01T00:00:00Z',
 });`;
 
 // One weekday standup with a video link, as each API returns it. `«field»` marks the lines
@@ -398,6 +398,34 @@ const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['ICS feeds', 'ics', [true, false, 'Read only', false, true]],
 ];
 
+// Real warnings, word for word from the provider packages, for a call each provider can't
+// honor exactly.
+const WARNINGS = [
+  {
+    provider: 'Google Calendar',
+    asked: "color: '#d00000'",
+    type: 'compatibility',
+    feature: 'color',
+    details:
+      'Google Calendar has a fixed palette. #d00000 was saved as the nearest color, #d50000.',
+  },
+  {
+    provider: 'Outlook',
+    asked: 'createConference: true',
+    type: 'unsupported',
+    feature: 'createConference',
+    details:
+      'Outlook did not create a Teams meeting. Personal Microsoft accounts and some work accounts cannot create Teams meetings through Graph.',
+  },
+  {
+    provider: 'Cal.com',
+    asked: "title: 'Intro call'",
+    type: 'unsupported',
+    feature: 'title',
+    details: 'Cal.com names bookings after their event type.',
+  },
+];
+
 // What each API calls an event's title, as in the payloads above.
 const TITLE_NAMES = [
   ['Google', 'summary'],
@@ -482,7 +510,7 @@ export default async function HomePage() {
   return (
     <div className="mx-auto w-full max-w-[1360px] border-x border-line">
       <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
-        <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
           Calendar SDK for TypeScript
         </p>
         <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
@@ -523,7 +551,7 @@ export default async function HomePage() {
               style={{ animationDelay: `${300 + i * 120}ms` }}
               className="chip-in rounded-md border border-line bg-panel px-2.5 py-1.5"
             >
-              <span className="font-sans text-neutral-500">{provider}</span>{' '}
+              <span className="font-sans text-neutral-400">{provider}</span>{' '}
               <span className="text-neutral-300">{name}</span>
             </span>
           ))}
@@ -561,6 +589,24 @@ export default async function HomePage() {
         title="Four APIs, four ways to write one standup"
       >
         <FieldCompare payloads={payloads} />
+        <p className="mt-12 mb-4 text-neutral-300">
+          And when a provider can't do exactly what you asked, the result tells you in{' '}
+          <code className="font-mono text-sm text-white">warnings</code>:
+        </p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {WARNINGS.map(({ provider, asked, type, feature, details }) => (
+            <div key={provider} className="rounded-xl border border-line bg-panel p-4">
+              <div className="flex items-baseline justify-between gap-3 text-xs">
+                <span className="font-medium text-neutral-200">{provider}</span>
+                <code className="font-mono text-neutral-400">{asked}</code>
+              </div>
+              <p className="mt-3 font-mono text-xs text-accent-blue">
+                {type} · {feature}
+              </p>
+              <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{details}</p>
+            </div>
+          ))}
+        </div>
       </Section>
 
       <Section
@@ -657,7 +703,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-500 sm:px-10">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-400 sm:px-10">
         <span>MIT License</span>
         <div className="flex gap-5">
           <Link href="/docs" className="hover:text-white">
@@ -684,8 +730,8 @@ function SectionHeading({
   intro?: string;
 }) {
   return (
-    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-24 sm:pb-10">
-      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
+    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-20 sm:pb-10">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-400">
         <span className="text-accent-blue">{index}</span> / {eyebrow}
       </p>
       <h2 className="mt-4 max-w-4xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
@@ -711,7 +757,7 @@ function Section({
   return (
     <section id={id} className="scroll-mt-20 border-t border-line">
       <SectionHeading {...heading} />
-      <div className="px-5 pb-16 sm:px-10 sm:pb-24">{children}</div>
+      <div className="px-5 pb-16 sm:px-10 sm:pb-20">{children}</div>
     </section>
   );
 }
@@ -722,10 +768,10 @@ function Capability({ label, value }: { label: string; value: Support }) {
       <span
         aria-hidden
         className={`size-2 shrink-0 rounded-full ${
-          value === false ? 'border border-neutral-700' : 'bg-accent-blue'
+          value === false ? 'border border-neutral-500' : 'bg-accent-blue'
         }`}
       />
-      <span className={value === false ? 'text-neutral-600' : 'text-neutral-200'}>
+      <span className={value === false ? 'text-neutral-400' : 'text-neutral-200'}>
         {label}
         <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
       </span>

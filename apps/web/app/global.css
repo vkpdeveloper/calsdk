@@ -265,7 +265,8 @@ html > body[data-scroll-locked] {
 @supports (animation-timeline: scroll()) {
   .code pre,
   .fd-scroll-container,
-  .prose div:has(> table) {
+  .prose div:has(> table),
+  .x-scroll {
     animation: scroll-fade linear both;
     animation-timeline: scroll(self inline);
   }

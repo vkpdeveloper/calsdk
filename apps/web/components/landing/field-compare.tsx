@@ -81,7 +81,7 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
                 {/* A radio-style dot: the cards are a choice of which payload feeds the result. */}
                 <span className="size-2.5 rounded-full border border-neutral-500 group-hover:border-neutral-300 group-aria-pressed:border-accent-blue group-aria-pressed:bg-accent-blue" />
                 <span className="font-medium text-neutral-200">{name}</span>
-                <span className="ml-auto font-mono text-neutral-500">{format}</span>
+                <span className="ml-auto font-mono text-neutral-400">{format}</span>
               </button>
               {/* Grows so the notes line up along the bottom of each row of cards. */}
               <div className="code code-sm flex-1">{code}</div>
@@ -98,7 +98,7 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
           <div className="flex items-center gap-2 border-b border-line px-4 py-2.5 text-xs">
             <Mark className="size-4 text-white" />
             <span className="font-medium text-white">calsdk</span>
-            <span className="ml-auto font-mono text-neutral-500">
+            <span className="ml-auto font-mono text-neutral-400">
               Event from {picked?.name.replace(' Calendar', '')}
             </span>
           </div>

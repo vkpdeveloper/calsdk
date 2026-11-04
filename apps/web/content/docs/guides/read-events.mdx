@@ -12,8 +12,9 @@ import { listEvents } from 'calsdk';
 
 const { events, nextPageToken } = await listEvents({
   calendar,
-  timeMin: new Date(),
-  timeMax: '2026-12-31T00:00:00Z',
+  // The week of 9 November, in New York.
+  timeMin: '2026-11-09T00:00:00-05:00',
+  timeMax: '2026-11-16T00:00:00-05:00',
 });
 ```
 

@@ -22,6 +22,10 @@ const { events } = await listEvents({
 
 The APIs don't all support the same things, and calsdk won't pretend they do. When a provider can't do part of a request, the call returns `warnings`, or throws `UnsupportedFunctionalityError` when going ahead would save something other than what you asked for. It never quietly changes your data.
 
+<Callout title="No hosted service">
+  calsdk is a library. It has no server, database or queue, and it doesn't run OAuth flows. Your app keeps the tokens and passes them in.
+</Callout>
+
 ## Start here
 
 <Cards>
@@ -82,7 +86,3 @@ calsdk has providers for Google Calendar, Outlook, iCloud, Zoho and other CalDAV
     Add a calendar calsdk doesn't support yet.
   </Card>
 </Cards>
-
-<Callout title="No hosted service">
-  calsdk is a library. It has no server, database or queue, and it doesn't run OAuth flows. Your app keeps the tokens and passes them in.
-</Callout>

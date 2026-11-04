@@ -99,7 +99,7 @@ Ids are predictable, so you can assert on them: events are `evt_1`, `evt_2` and 
 
 ## What the mock does
 
-The mock behaves like a full-featured provider, so your tests take the same paths real calendars do. Recurring events follow RFC 5545, with one `RRULE` line plus `EXDATE` lines, and all three scopes work; `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`. Etags change on every write, so a stale `ifMatch` throws `ConflictError`. Sync keeps a change log, with cursors and pages like a real provider. Search, attendees, video links, reminders and colors are stored as given.
+The mock behaves like a full-featured provider, so your tests take the same paths real calendars do. Recurring events follow RFC 5545, with one `RRULE` line plus `EXDATE` lines, and all three scopes work; `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`. Etags change on every write, so a stale `ifMatch` throws `ConflictError`. Sync keeps a change log, with cursors and pages like a real provider. Search works, and attendees, video links, reminders and colors are stored as given.
 
 Free/busy has no endpoint of its own, so `getFreeBusy` and `findFreeTime` compute it from events and return a `compatibility` warning, as they do for most providers.
 

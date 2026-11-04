@@ -98,7 +98,7 @@ await deleteEvent({ calendar, eventId });
 
 A missing event throws `NotFoundError`. The exception is a retry: if an earlier attempt deleted the event but its response got lost, calsdk treats the delete as done instead of failing.
 
-## Do not overwrite someone else's change
+## Don't overwrite someone else's change
 
 You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update or delete then only goes through if nobody changed the event since you read it:
 

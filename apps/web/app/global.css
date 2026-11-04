@@ -238,3 +238,23 @@ html > body[data-scroll-locked] {
       inset 0 -1px 0 var(--color-fd-border);
   }
 }
+
+/* Code wider than its box fades at the right edge until it is scrolled to the end, so it
+   reads as scrollable rather than cut off. With nothing to scroll the timeline is inactive
+   and the fade never applies. Browsers without scroll timelines just show no fade. */
+@supports (animation-timeline: scroll()) {
+  .code pre,
+  .fd-scroll-container {
+    animation: scroll-fade linear both;
+    animation-timeline: scroll(self inline);
+  }
+}
+@keyframes scroll-fade {
+  0%,
+  96% {
+    mask-image: linear-gradient(to right, black calc(100% - 3rem), transparent);
+  }
+  100% {
+    mask-image: none;
+  }
+}

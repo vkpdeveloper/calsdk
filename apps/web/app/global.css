@@ -206,11 +206,22 @@ html > body[data-scroll-locked] {
   border-left-color: #4f7cff;
 }
 
-/* On phones, wide docs tables scroll sideways. Keep each row's label in view. */
+/* On phones, wide docs tables scroll inside their own box, with the header row and each
+   row's label kept in view. Short tables never reach the height cap. */
 @media (max-width: 767px) {
+  .prose div:has(> table) {
+    max-height: 70dvh;
+  }
   /* `hidden` would stop the cells sticking; `clip` still rounds the corners. */
   .prose table {
     overflow: clip;
+  }
+  .prose table th {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background-color: rgb(20 20 20);
+    box-shadow: inset 0 -1px 0 var(--color-fd-border);
   }
   .prose table :is(th, td):first-child {
     position: sticky;
@@ -220,6 +231,10 @@ html > body[data-scroll-locked] {
     box-shadow: inset -1px 0 0 var(--color-fd-border);
   }
   .prose table th:first-child {
+    z-index: 3;
     background-color: rgb(20 20 20);
+    box-shadow:
+      inset -1px 0 0 var(--color-fd-border),
+      inset 0 -1px 0 var(--color-fd-border);
   }
 }

@@ -99,20 +99,29 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
   }}
 />
 
-## People
+## Person
+
+An event's `organizer`.
 
 <TypeTable
   type={{
     email: { type: 'string', required: true },
     name: { type: 'string' },
     self: { type: 'boolean', description: '`true` when this person is the signed-in user.' },
-    responseStatus: { type: "'needsAction' | 'accepted' | 'declined' | 'tentative'", description: 'Required on `Attendee`, absent on `Person`.', required: true },
-    optional: { type: 'boolean', description: 'Attendee only.' },
-    organizer: { type: 'boolean', description: 'Attendee only.' },
   }}
 />
 
-`Person` has `email`, `name` and `self`. `Attendee` adds the rest, with `responseStatus` required.
+## Attendee
+
+Every `Person` field, plus:
+
+<TypeTable
+  type={{
+    responseStatus: { type: "'needsAction' | 'accepted' | 'declined' | 'tentative'", description: 'Their reply to the invitation.', required: true },
+    optional: { type: 'boolean', description: 'Their attendance is optional.' },
+    organizer: { type: 'boolean', description: '`true` when this attendee also organizes the event.' },
+  }}
+/>
 
 ## Conference
 

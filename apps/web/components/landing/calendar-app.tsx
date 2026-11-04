@@ -2,7 +2,7 @@
 
 import { type MockCalendarProvider, mockCalendar } from '@calsdk/mock';
 import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } from 'calsdk';
-import { type ReactNode, useCallback, useEffect, useState } from 'react';
+import { type ReactNode, type Ref, useCallback, useEffect, useRef, useState } from 'react';
 
 // A fixed week, so New York stays on one offset and every visitor sees the same calendar.
 const ZONE = 'America/New_York';
@@ -192,6 +192,15 @@ export function CalendarApp() {
   const [booked, setBooked] = useState<string>();
   // The day the phone agenda shows.
   const [day, setDay] = useState(0);
+  const inspector = useRef<HTMLDivElement>(null);
+
+  // Below 1024px the event panel sits under the calendar, so bring it into view.
+  function pick(key: string) {
+    setSelected(key);
+    requestAnimationFrame(() =>
+      inspector.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }),
+    );
+  }
 
   const sources = SOURCES.filter((source) => enabled.includes(source.id));
   // New meetings go to the first calendar that is turned on, so they always show up.
@@ -294,7 +303,7 @@ export function CalendarApp() {
         <span className="hidden sm:inline">
           {searching ? 'listEvents + findFreeTime' : 'listEvents'} ·{' '}
         </span>
-        {sources.length} calendars · {run.events.length} events · {run.ms.toFixed(1)} ms
+        {sources.length} sample calendars · {run.events.length} events · {run.ms.toFixed(1)} ms
       </>
     );
   }
@@ -327,14 +336,15 @@ export function CalendarApp() {
         </button>
       </div>
 
-      <div className="grid md:grid-cols-[10.5rem_minmax(0,1fr)] xl:grid-cols-[10.5rem_minmax(0,1fr)_21rem]">
-        <fieldset className="min-w-0 border-line max-md:border-b md:border-r">
+      <div className="grid md:grid-cols-[10.5rem_minmax(0,1fr)] lg:grid-cols-[minmax(0,1fr)_21rem] xl:grid-cols-[10.5rem_minmax(0,1fr)_21rem]">
+        {/* From lg to xl the calendars sit in a row on top, so the event panel fits beside the week. */}
+        <fieldset className="min-w-0 border-line max-md:border-b md:border-r lg:col-span-2 lg:border-r-0 lg:border-b xl:col-span-1 xl:border-b-0 xl:border-r">
           <legend className="sr-only">Calendars</legend>
-          <p className="hidden px-4 pt-4 pb-2 text-xs font-medium text-neutral-500 md:block">
-            Calendars
+          <p className="hidden px-4 pt-4 pb-2 text-xs font-medium text-neutral-500 md:block lg:hidden xl:block">
+            Sample calendars
           </p>
           {/* Phones get the calendars as a row that scrolls sideways. */}
-          <div className="x-scroll flex gap-1 overflow-x-auto p-2 md:flex-col md:overflow-visible md:pt-0">
+          <div className="x-scroll flex gap-1 overflow-x-auto p-2 md:flex-col md:overflow-visible md:pt-0 lg:flex-row lg:pt-2 xl:flex-col xl:pt-0">
             {SOURCES.map((source) => {
               const on = enabled.includes(source.id);
               return (
@@ -381,7 +391,7 @@ export function CalendarApp() {
                   <button
                     type="button"
                     aria-pressed={item.key === current?.key}
-                    onClick={() => setSelected(item.key)}
+                    onClick={() => pick(item.key)}
                     className="flex min-h-11 w-full items-center gap-3 rounded-lg px-2 py-2 text-left text-sm aria-pressed:bg-white/[0.06]"
                   >
                     <span className="w-[5.5rem] shrink-0 font-mono text-[11px] text-neutral-400">
@@ -480,7 +490,7 @@ export function CalendarApp() {
                       key={listed.key}
                       listed={listed}
                       active={listed.key === current?.key}
-                      onSelect={() => setSelected(listed.key)}
+                      onSelect={() => pick(listed.key)}
                     />
                   ))}
               </div>
@@ -488,7 +498,7 @@ export function CalendarApp() {
           </div>
         </div>
 
-        <Inspector listed={current} />
+        <Inspector listed={current} ref={inspector} />
       </div>
 
       <div className="flex min-h-11 items-center justify-between gap-x-4 border-t border-line px-4 py-1.5 font-mono text-[11px] text-neutral-500">
@@ -553,17 +563,23 @@ function EventBlock({
 // The fields worth showing, in the order CalendarEvent lists them.
 const FIELDS = ['id', 'kind', 'seriesId', 'title', 'start', 'end', 'status', 'showAs'] as const;
 
-function Inspector({ listed }: { listed?: Listed }) {
+function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> }) {
   if (!listed) {
     return (
-      <div className="flex items-center justify-center border-line p-6 text-sm text-neutral-500 max-xl:border-t md:col-span-2 xl:col-span-1 xl:border-l">
+      <div
+        ref={ref}
+        className="flex items-center justify-center border-line p-6 text-sm text-neutral-500 max-lg:border-t md:col-span-2 lg:col-span-1 lg:border-l"
+      >
         Pick an event to see what calsdk returns.
       </div>
     );
   }
   const { event, source, at: block } = listed;
   return (
-    <div className="min-w-0 border-line max-xl:border-t md:col-span-2 xl:col-span-1 xl:border-l">
+    <div
+      ref={ref}
+      className="min-w-0 scroll-mt-20 border-line max-lg:border-t md:col-span-2 lg:col-span-1 lg:border-l"
+    >
       <div className="p-4">
         <div className="flex items-center gap-2 text-xs text-neutral-400">
           <span className="size-2 rounded-full" style={{ background: source.color }} />

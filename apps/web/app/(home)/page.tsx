@@ -1,13 +1,4 @@
-import {
-  ArrowRight,
-  CalendarSearch,
-  FlaskConical,
-  Globe,
-  type LucideIcon,
-  Plug,
-  Scale,
-  ShieldCheck,
-} from 'lucide-react';
+import { ArrowRight, FlaskConical, Globe, type LucideIcon, Plug, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { CalendarApp } from '@/components/landing/calendar-app';
@@ -84,7 +75,7 @@ const PROVIDERS: {
     pkg: 'calcom',
     color: '#e4e4e7',
     setup: 'calcom({ accessToken })',
-    support: [true, 'book, move, cancel', false, false, true],
+    support: [true, 'book an event type, move, cancel', false, false, true],
   },
   {
     id: 'calendly',
@@ -92,7 +83,7 @@ const PROVIDERS: {
     pkg: 'calendly',
     color: '#f5b94a',
     setup: 'calendly({ accessToken })',
-    support: [true, 'book, cancel', false, false, true],
+    support: [true, 'book an event type, cancel', false, false, true],
   },
   {
     id: 'ics',
@@ -233,16 +224,15 @@ try {
   },
 ];
 
-// What each API calls an event's title.
-const TITLE_NAMES = [
-  ['Google', 'summary'],
-  ['Outlook', 'subject'],
-  ['iCloud', 'SUMMARY'],
-  ['Zoom', 'topic'],
-];
+// The weekday standup's recurrence, as Outlook stores it.
+const OUTLOOK_PATTERN = `"pattern": {
+  "type": "weekly",
+  "daysOfWeek": ["monday", "tuesday",
+    "wednesday", "thursday", "friday"]
+}`;
 
-// A weekly 9:30 New York standup seen from Berlin. The US changes its clocks on March 14,
-// Europe on March 28.
+// A weekly 9:30 New York standup seen from Berlin in March 2027. The US changes its clocks on
+// March 14, Europe on March 28.
 const BERLIN = [
   ['Mon, Mar 8', '15:30', false],
   ['Mon, Mar 15', '14:30', true],
@@ -255,11 +245,6 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
     icon: Globe,
     title: 'Runs anywhere',
     body: 'Only fetch, no vendor SDKs. Node, Bun, Deno and edge runtimes.',
-  },
-  {
-    icon: CalendarSearch,
-    title: 'Free time across providers',
-    body: 'findFreeTime merges busy time from any mix of calendars.',
   },
   {
     icon: FlaskConical,
@@ -280,11 +265,6 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
     icon: Plug,
     title: 'Bring your own provider',
     body: 'A provider is one object with a few functions, checked by the conformance suite.',
-  },
-  {
-    icon: Scale,
-    title: 'MIT licensed',
-    body: 'Open source. Read every line on GitHub.',
   },
 ];
 
@@ -314,7 +294,7 @@ export default async function HomePage() {
   return (
     <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
       <section className="flex flex-col items-center pt-14 text-center sm:pt-20">
-        <h1 className="text-balance text-[clamp(3rem,9vw,5.5rem)] leading-[0.92] font-semibold tracking-[-0.055em] text-white">
+        <h1 className="text-balance text-[clamp(3rem,9vw,5.5rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-white">
           Every calendar.
           <br />
           One API.
@@ -330,14 +310,15 @@ export default async function HomePage() {
           >
             Get started
           </Link>
-          <CopyCommand command="npm i calsdk @calsdk/google" />
+          <CopyCommand command="npm i calsdk @calsdk/mock" />
         </div>
       </section>
 
       <section className="mt-12 sm:mt-16 xl:-mx-10 2xl:-mx-20" aria-label="Live demo">
         <CalendarApp />
         <p className="mt-4 text-center text-sm text-neutral-500">
-          Running in your browser: six in-memory calendars, the real listEvents and findFreeTime.
+          Running in your browser: six sample calendars in memory, with the real listEvents,
+          findFreeTime and createEvent.
         </p>
       </section>
 
@@ -350,26 +331,24 @@ export default async function HomePage() {
       </Section>
 
       <Section
-        title="The quirks are handled. The rest is reported."
-        aside="Field names, time zones and recurrence are converted for you. When a provider can't do what you asked, the result says so."
+        title={
+          <>
+            <span className="block">The quirks are handled.</span>
+            <span className="block">The rest is reported.</span>
+          </>
+        }
+        aside="Recurrence, time zones and field names are converted for you. When a provider can't do what you asked, the result says so."
         link={{ href: '/docs/concepts/warnings', label: 'How warnings work' }}
       >
         <div className="grid gap-4 md:grid-cols-3">
           <Card
-            title="One name for every field"
-            body="Google says summary, Outlook subject, Zoom topic. You always get title."
+            title="Recurrence is always an RRULE"
+            body="Outlook stores a pattern object and Zoom numbers its weekdays. You read and write one RRULE."
           >
-            <div className="flex flex-col gap-1.5 font-mono text-xs">
-              {TITLE_NAMES.map(([provider, name]) => (
-                <div key={provider} className="flex items-center gap-2">
-                  <span className="w-16 font-sans text-neutral-500">{provider}</span>
-                  <span className="w-[4.75rem] rounded bg-white/[0.06] px-1.5 py-0.5 text-neutral-300">
-                    {name}
-                  </span>
-                  <ArrowRight aria-hidden className="size-3 text-neutral-600" />
-                  <span className="rounded bg-accent-blue/15 px-1.5 py-0.5 text-white">title</span>
-                </div>
-              ))}
+            <div className="font-mono text-[11px] leading-relaxed">
+              <pre className="text-neutral-500">{OUTLOOK_PATTERN}</pre>
+              <ArrowRight aria-hidden className="my-2 size-3.5 rotate-90 text-neutral-600" />
+              <p className="break-all text-[#a5d6ff]">'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'</p>
             </div>
           </Card>
           <Card
@@ -386,7 +365,8 @@ export default async function HomePage() {
                 <Swatch color="#e67c73" label="saved" />
               </div>
               <p className="mt-3 text-neutral-300">
-                <span className="text-accent-blue">compatibility</span> · color
+                warnings: [{'{'} type: <span className="text-[#a5d6ff]">'compatibility'</span>,
+                feature: <span className="text-[#a5d6ff]">'color'</span> {'}'}]
               </p>
             </div>
           </Card>
@@ -395,7 +375,7 @@ export default async function HomePage() {
             body="The standup stays at 9:30 in New York. Berlin sees it an hour early until Europe changes its clocks too."
           >
             <div className="text-xs">
-              <p className="mb-2 text-neutral-500">9:30 New York standup, in Berlin</p>
+              <p className="mb-2 text-neutral-500">9:30 New York standup, in Berlin, March 2027</p>
               {BERLIN.map(([date, time, early]) => (
                 <div
                   key={date}
@@ -419,7 +399,7 @@ export default async function HomePage() {
         <FeatureTabs features={features} />
       </Section>
 
-      <section className="mt-24 grid gap-x-10 gap-y-10 border-t border-line pt-16 sm:mt-32 sm:grid-cols-2 lg:grid-cols-3">
+      <section className="mt-24 grid gap-x-10 gap-y-10 border-t border-line pt-16 sm:mt-32 sm:grid-cols-2 lg:grid-cols-4">
         {EXTRAS.map(({ icon: Icon, title, body }) => (
           <div key={title}>
             <Icon aria-hidden className="size-5 text-neutral-300" strokeWidth={1.75} />
@@ -432,7 +412,7 @@ export default async function HomePage() {
       <section className="mt-24 flex flex-col items-center border-t border-line py-24 text-center sm:mt-32 sm:py-32">
         <Mark className="size-12 text-white" />
         <h2 className="mt-8 max-w-2xl text-balance text-[clamp(2.25rem,6vw,4rem)] leading-[0.98] font-semibold tracking-[-0.05em] text-white">
-          Start with a calendar in memory
+          Try it without connecting a calendar
         </h2>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
@@ -466,7 +446,7 @@ function Section({
   link,
   children,
 }: {
-  title: string;
+  title: ReactNode;
   aside?: string;
   link: { href: string; label: string };
   children: ReactNode;

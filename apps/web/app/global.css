@@ -74,6 +74,11 @@ html > body[data-scroll-locked] {
     animation: none;
   }
 }
+@media (max-width: 639px) {
+  .code pre {
+    font-size: 0.75rem;
+  }
+}
 .code-sm pre {
   font-size: 0.75rem;
 }

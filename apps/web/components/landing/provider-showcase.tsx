@@ -70,9 +70,16 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
           <ul className="flex flex-wrap gap-x-5 gap-y-2 border-t border-line px-5 py-4 text-sm">
             {current.support.map(([capability, value]) => (
               <li key={capability} className="flex items-center gap-2">
+                {/* Full support is a filled dot, partial support a ring with its note. */}
                 <span
                   aria-hidden
-                  className={`size-1.5 rounded-full ${value === false ? 'border border-neutral-500' : 'bg-accent-blue'}`}
+                  className={`size-1.5 rounded-full ${
+                    value === true
+                      ? 'bg-accent-blue'
+                      : value === false
+                        ? 'border border-neutral-500'
+                        : 'border border-accent-blue'
+                  }`}
                 />
                 <span
                   className={value === false ? 'text-neutral-500 line-through' : 'text-neutral-200'}
@@ -80,9 +87,9 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
                   {capability}
                 </span>
                 {typeof value === 'string' && <span className="text-neutral-500">{value}</span>}
-                <span className="sr-only">
-                  {value === false ? ', not supported' : ', supported'}
-                </span>
+                {typeof value === 'boolean' && (
+                  <span className="sr-only">{value ? ', supported' : ', not supported'}</span>
+                )}
               </li>
             ))}
           </ul>

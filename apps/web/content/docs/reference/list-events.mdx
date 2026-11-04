@@ -3,7 +3,7 @@ title: listEvents
 description: Lists one page of events in a time window. iterateEvents walks every page.
 ---
 
-Use `listEvents` to show what's on a calendar between two times, such as a week view. It returns one page at a time, and `iterateEvents` walks every page for you.
+The window's end is exclusive, and a recurring series comes back as its occurrences, each with its own id, unless you set `expandRecurring: false`. Use `iterateEvents` when you want every page without handling cursors.
 
 ```ts
 import { listEvents } from 'calsdk';

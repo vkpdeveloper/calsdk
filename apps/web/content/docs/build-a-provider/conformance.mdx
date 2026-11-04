@@ -3,7 +3,7 @@ title: Conformance tests
 description: Check a provider against the calsdk contract with the suite most official providers run, recorded once and replayed offline.
 ---
 
-An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. `@calsdk/provider-tests` registers the Vitest tests most official providers run to catch those: calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. Tests run only for the capabilities your provider declares as `true`, so a provider without recurring events isn't asked to split a series.
+An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. Run `@calsdk/provider-tests` against your provider to catch round-trip and error-mapping mistakes like these. Most official providers use the same suite, and it skips anything your provider doesn't declare as supported.
 
 ```ts title="test/conformance.test.ts"
 import { describeProviderConformance } from '@calsdk/provider-tests';
@@ -20,6 +20,8 @@ describeProviderConformance({
 ```
 
 Pass the suite's `fetch` through to your provider. That's how the suite records, replays and stubs error responses.
+
+The tests cover calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. A provider without recurring events, say, is never asked to split a series.
 
 ## Record once, replay everywhere
 

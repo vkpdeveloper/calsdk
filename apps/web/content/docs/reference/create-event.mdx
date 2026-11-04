@@ -3,7 +3,7 @@ title: createEvent
 description: Creates an event or a recurring series and returns it as the provider stored it.
 ---
 
-Use `createEvent` to put an event or a repeating series on a calendar, such as a confirmed booking on someone's primary calendar. You get the event back as the provider stored it, with its new id.
+Keep the returned `id` for later updates, and check `warnings` for anything the provider changed or ignored, such as the title Cal.com replaces with its event type's name.
 
 ```ts
 import { createEvent } from 'calsdk';

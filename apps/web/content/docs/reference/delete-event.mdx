@@ -3,7 +3,7 @@ title: deleteEvent
 description: Deletes an event, one occurrence, or a series.
 ---
 
-Use `deleteEvent` to cancel a meeting or remove a booking. For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes.
+For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes. Pass `sendUpdates` to tell the guests, where the provider can.
 
 ```ts
 import { deleteEvent } from 'calsdk';

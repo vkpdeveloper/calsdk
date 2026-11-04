@@ -1,4 +1,4 @@
-import type { EventTimeV1 } from '@calsdk/provider';
+import type { EventTimeV1 } from '@cal-sdk/provider';
 import {
   formatICalDate,
   formatLocalDate,
@@ -9,7 +9,7 @@ import {
   isValidTimeZone,
   localToInstant,
   windowsToIana,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import ICAL from 'ical.js';
 
 /**

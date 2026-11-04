@@ -1,5 +1,5 @@
-import { InvalidResponseDataError } from '@calsdk/provider';
-import { isValidTimeZone } from '@calsdk/provider-utils';
+import { InvalidResponseDataError } from '@cal-sdk/provider';
+import { isValidTimeZone } from '@cal-sdk/provider-utils';
 import ICAL from 'ical.js';
 import type { ReadContext } from './ical-time';
 

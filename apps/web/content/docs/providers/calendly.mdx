@@ -6,12 +6,12 @@ description: Read, book and cancel Calendly meetings as calendar events.
 Calendly is a scheduling tool, so its events are the meetings people have booked with your user. You can list them, sync them, book a new one on an event type and cancel one. Two limits shape everything else: Calendly can't change a scheduled meeting at all, and booking through its API needs a paid plan.
 
 ```npm
-npm install calsdk @calsdk/calendly
+npm install @cal-sdk/core @cal-sdk/calendly
 ```
 
 ```ts
-import { createEvent, listEvents } from 'calsdk';
-import { calendly } from '@calsdk/calendly';
+import { createEvent, listEvents } from '@cal-sdk/core';
+import { calendly } from '@cal-sdk/calendly';
 
 const calendar = calendly({ accessToken: process.env.CALENDLY_TOKEN! });
 

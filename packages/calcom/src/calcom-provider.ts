@@ -9,7 +9,7 @@ import {
   type SyncChangeV1,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   createJsonFetcher,
@@ -21,7 +21,7 @@ import {
   parseProviderOptions,
   type QueryValue,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { z } from 'zod';
 import {
   API_VERSIONS,
@@ -79,7 +79,7 @@ const SYNC_OVERLAP_MS = 60_000;
  * the user, and each event type is a calendar holding its own bookings.
  *
  * @example
- * import { calcom } from '@calsdk/calcom';
+ * import { calcom } from '@cal-sdk/calcom';
  * const calendar = calcom({ accessToken: process.env.CALCOM_API_KEY });
  */
 export function calcom(settings: CalcomSettings): CalcomProvider {

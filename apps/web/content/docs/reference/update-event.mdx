@@ -6,7 +6,7 @@ description: Applies a partial update to an event, one occurrence, or a series.
 Use `updateEvent` to move a meeting, rename it or change who's invited. Send only the fields that change, and for a recurring event, `scope` decides how much of the series changes with it.
 
 ```ts
-import { updateEvent } from 'calsdk';
+import { updateEvent } from '@cal-sdk/core';
 
 const { event } = await updateEvent({
   calendar,

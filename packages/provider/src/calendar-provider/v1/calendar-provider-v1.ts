@@ -38,7 +38,7 @@ export type ProviderOperationV1 =
 
 /**
  * The types of a provider's own `providerOptions` and `providerMetadata` entries. Only a
- * type: providers never set it at runtime. `calsdk` reads it to check options and to type
+ * type: providers never set it at runtime. `@cal-sdk/core` reads it to check options and to type
  * metadata against the provider passed as `calendar`.
  */
 export type ProviderTypesV1 = {
@@ -53,7 +53,7 @@ export type ProviderTypesV1 = {
  *
  * Providers are thin, stateless translators between a calendar API and these
  * normalized shapes. Apps do not call `do*` methods directly: they pass the
- * provider to the functions in `calsdk`, which add validation, retries,
+ * provider to the functions in `@cal-sdk/core`, which add validation, retries,
  * pagination and fallbacks.
  *
  * Every provider must resolve the calendar id `'primary'` to the user's default calendar.

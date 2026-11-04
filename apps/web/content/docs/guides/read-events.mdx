@@ -8,7 +8,7 @@ description: List events in a time window, walk every page, fetch one event and 
 A week view needs every event that touches the week, including the one that started Sunday night. `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
 
 ```ts
-import { listEvents } from 'calsdk';
+import { listEvents } from '@cal-sdk/core';
 
 const { events, nextPageToken } = await listEvents({
   calendar,
@@ -25,7 +25,7 @@ Because the end is exclusive, an event ending exactly on a boundary never shows 
 `listEvents` returns one page. You can pass `nextPageToken` back as `pageToken` to get the next one, but it's usually easier to let `iterateEvents` do it:
 
 ```ts
-import { iterateEvents } from 'calsdk';
+import { iterateEvents } from '@cal-sdk/core';
 
 for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
   console.log(event.title);
@@ -52,7 +52,7 @@ Deleted instances are not events, so listings leave them out. [Recurring events]
 ## Fetch one event
 
 ```ts
-import { getEvent } from 'calsdk';
+import { getEvent } from '@cal-sdk/core';
 
 const { event } = await getEvent({ calendar, eventId });
 ```

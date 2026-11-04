@@ -1,5 +1,5 @@
-import { APICallError, RateLimitError } from '@calsdk/provider';
-import { parseRetryAfterMs } from '@calsdk/provider-utils';
+import { APICallError, RateLimitError } from '@cal-sdk/provider';
+import { parseRetryAfterMs } from '@cal-sdk/provider-utils';
 
 const INITIAL_DELAY_MS = 1000;
 const BACKOFF_FACTOR = 2;

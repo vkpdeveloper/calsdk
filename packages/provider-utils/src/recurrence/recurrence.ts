@@ -1,4 +1,4 @@
-import { InvalidArgumentError } from '@calsdk/provider';
+import { InvalidArgumentError } from '@cal-sdk/provider';
 import { formatLocalDate, formatLocalDateTime, instantToLocal } from '../time/zoned-time';
 
 export type Weekday = 'MO' | 'TU' | 'WE' | 'TH' | 'FR' | 'SA' | 'SU';

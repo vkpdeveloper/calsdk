@@ -1,4 +1,4 @@
-import type { WarningV1 } from '@calsdk/provider';
+import type { WarningV1 } from '@cal-sdk/provider';
 
 /**
  * How calsdk reports warnings, in addition to returning them on every result.

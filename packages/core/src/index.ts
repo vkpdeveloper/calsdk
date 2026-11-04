@@ -11,7 +11,7 @@ export {
   RateLimitError,
   SyncCursorExpiredError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 export {
   type CreateEventOptions,
   type CreateEventResult,

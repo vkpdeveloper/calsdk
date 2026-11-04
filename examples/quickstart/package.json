@@ -3,17 +3,17 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "bun --conditions=@calsdk/source src/index.ts"
+    "start": "bun --conditions=@cal-sdk/source src/index.ts"
   },
   "dependencies": {
-    "@calsdk/calcom": "workspace:*",
-    "@calsdk/caldav": "workspace:*",
-    "@calsdk/calendly": "workspace:*",
-    "@calsdk/google": "workspace:*",
-    "@calsdk/ics": "workspace:*",
-    "@calsdk/microsoft": "workspace:*",
-    "@calsdk/zoom": "workspace:*",
-    "@calsdk/mock": "workspace:*",
-    "calsdk": "workspace:*"
+    "@cal-sdk/calcom": "workspace:*",
+    "@cal-sdk/caldav": "workspace:*",
+    "@cal-sdk/calendly": "workspace:*",
+    "@cal-sdk/google": "workspace:*",
+    "@cal-sdk/ics": "workspace:*",
+    "@cal-sdk/microsoft": "workspace:*",
+    "@cal-sdk/zoom": "workspace:*",
+    "@cal-sdk/mock": "workspace:*",
+    "@cal-sdk/core": "workspace:*"
   }
 }

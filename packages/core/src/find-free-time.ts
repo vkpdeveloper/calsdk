@@ -1,5 +1,5 @@
-import { InvalidArgumentError } from '@calsdk/provider';
-import { getTimeZoneOffset, isValidTimeZone } from '@calsdk/provider-utils';
+import { InvalidArgumentError } from '@cal-sdk/provider';
+import { getTimeZoneOffset, isValidTimeZone } from '@cal-sdk/provider-utils';
 import { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
 import { getFreeBusy, mergeBusy } from './get-free-busy';
 import type { CallSettings, TimeInput, Warning } from './types';

@@ -1,4 +1,4 @@
-import { InvalidArgumentError, UnsupportedFunctionalityError } from '@calsdk/provider';
+import { InvalidArgumentError, UnsupportedFunctionalityError } from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import {
   assertSupportedRecurrence,

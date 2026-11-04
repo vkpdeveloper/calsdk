@@ -3,7 +3,7 @@ import {
   InvalidArgumentError,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -20,7 +20,7 @@ import {
   type RRule,
   WEEKDAYS,
   type Weekday,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { GraphRecurrence, GraphWeekday } from './microsoft-api';
 
 // Outlook stores recurrence as a pattern plus a range instead of an RRULE. Only RRULEs

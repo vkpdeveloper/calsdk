@@ -1,5 +1,5 @@
-import { mockCalendar } from '@calsdk/mock';
-import type { CalendarProviderV1 } from '@calsdk/provider';
+import { mockCalendar } from '@cal-sdk/mock';
+import type { CalendarProviderV1 } from '@cal-sdk/provider';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FreeBusyUnavailableError } from './errors/free-busy-unavailable-error';
 import { findFreeTime } from './find-free-time';

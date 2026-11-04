@@ -6,7 +6,7 @@ description: Creates an event or a recurring series and returns it as the provid
 Keep the returned `id` for later updates, and check `warnings` for anything the provider changed or ignored, such as the title Cal.com replaces with its event type's name.
 
 ```ts
-import { createEvent } from 'calsdk';
+import { createEvent } from '@cal-sdk/core';
 
 const { event } = await createEvent({
   calendar,

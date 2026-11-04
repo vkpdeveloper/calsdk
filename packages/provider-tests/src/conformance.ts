@@ -10,7 +10,7 @@ import {
   PermissionDeniedError,
   RateLimitError,
   type SyncChangeV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -19,7 +19,7 @@ import {
   isAllDay,
   isValidTimeZone,
   localToInstant,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { afterAll, afterEach, describe, expect, it } from 'vitest';
 import { createRecordingFetch, type RecordingMode } from './recording-fetch';
 

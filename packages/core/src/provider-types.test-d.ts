@@ -1,5 +1,5 @@
 // Compile-time checks for provider-typed options and metadata. `bun run typecheck` runs them.
-import type { CalendarProviderV1, JSONValue } from '@calsdk/provider';
+import type { CalendarProviderV1, JSONValue } from '@cal-sdk/provider';
 import { expectTypeOf } from 'vitest';
 import { createEvent } from './create-event';
 import { getEvent } from './get-event';

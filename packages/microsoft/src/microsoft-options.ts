@@ -23,7 +23,7 @@ export const microsoftSyncOptionsSchema = z.object({
 });
 export type MicrosoftSyncOptions = z.infer<typeof microsoftSyncOptionsSchema>;
 
-/** The option and metadata types of the Microsoft provider, for type checking in `calsdk`. */
+/** The option and metadata types of the Microsoft provider, for type checking in `@cal-sdk/core`. */
 export type MicrosoftProviderTypes = {
   options: {
     createEvent: MicrosoftEventOptions;

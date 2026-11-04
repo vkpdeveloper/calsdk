@@ -1,10 +1,10 @@
-# @calsdk/zoom
+# @cal-sdk/zoom
 
 Zoom provider for calsdk. Scheduled Zoom meetings are the events. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { zoom } from '@calsdk/zoom';
-import { createEvent, listEvents } from 'calsdk';
+import { zoom } from '@cal-sdk/zoom';
+import { createEvent, listEvents } from '@cal-sdk/core';
 
 const calendar = zoom({ accessToken: process.env.ZOOM_TOKEN });
 

@@ -1,10 +1,10 @@
-# @calsdk/calcom
+# @cal-sdk/calcom
 
 Cal.com provider for calsdk. Bookings are the events. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { calcom } from '@calsdk/calcom';
-import { createEvent, listEvents } from 'calsdk';
+import { calcom } from '@cal-sdk/calcom';
+import { createEvent, listEvents } from '@cal-sdk/core';
 
 const calendar = calcom({ accessToken: process.env.CALCOM_API_KEY });
 

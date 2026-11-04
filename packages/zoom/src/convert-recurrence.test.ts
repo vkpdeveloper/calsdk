@@ -1,4 +1,4 @@
-import { UnsupportedFunctionalityError } from '@calsdk/provider';
+import { UnsupportedFunctionalityError } from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { fromZoomRecurrence, toZoomRecurrence } from './convert-recurrence';
 

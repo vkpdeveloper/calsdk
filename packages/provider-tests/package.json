@@ -1,13 +1,14 @@
 {
-  "name": "@calsdk/provider-tests",
+  "name": "@cal-sdk/provider-tests",
   "version": "0.0.0",
   "description": "Conformance tests and a record/replay fetch for calsdk calendar providers.",
   "license": "MIT",
+  "homepage": "https://www.cal-sdk.com",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@calsdk/source": "./src/index.ts",
+      "@cal-sdk/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
@@ -32,13 +33,13 @@
     "access": "public"
   },
   "dependencies": {
-    "@calsdk/provider": "workspace:*",
-    "@calsdk/provider-utils": "workspace:*"
+    "@cal-sdk/provider": "workspace:*",
+    "@cal-sdk/provider-utils": "workspace:*"
   },
   "peerDependencies": {
     "vitest": "^5.0.0"
   },
   "devDependencies": {
-    "@calsdk/mock": "workspace:*"
+    "@cal-sdk/mock": "workspace:*"
   }
 }

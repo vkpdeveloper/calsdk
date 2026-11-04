@@ -3,24 +3,24 @@ title: Install
 description: Add calsdk and a provider package to a TypeScript project.
 ---
 
-calsdk is split into a core package and one package per calendar, so your app only installs the providers it talks to. Start with `calsdk` and one provider:
+calsdk is split into a core package and one package per calendar, so your app only installs the providers it talks to. Start with `@cal-sdk/core` and one provider:
 
 ```npm
-npm install calsdk @calsdk/google
+npm install @cal-sdk/core @cal-sdk/google
 ```
 
 ## Pick your providers
 
 | Calendar                                 | Package             | Function                        |
 | ---------------------------------------- | ------------------- | ------------------------------- |
-| Google Calendar                          | `@calsdk/google`    | `google()`                      |
-| Microsoft Outlook                        | `@calsdk/microsoft` | `microsoft()`                   |
-| iCloud, Zoho Calendar, any CalDAV server | `@calsdk/caldav`    | `icloud()`, `zoho()`, `caldav()` |
-| Cal.com                                  | `@calsdk/calcom`    | `calcom()`                      |
-| Calendly                                 | `@calsdk/calendly`  | `calendly()`                    |
-| Zoom                                     | `@calsdk/zoom`      | `zoom()`                        |
-| ICS feeds                                | `@calsdk/ics`       | `ics()`                         |
-| In-memory, for tests and examples        | `@calsdk/mock`      | `mockCalendar()`                |
+| Google Calendar                          | `@cal-sdk/google`    | `google()`                      |
+| Microsoft Outlook                        | `@cal-sdk/microsoft` | `microsoft()`                   |
+| iCloud, Zoho Calendar, any CalDAV server | `@cal-sdk/caldav`    | `icloud()`, `zoho()`, `caldav()` |
+| Cal.com                                  | `@cal-sdk/calcom`    | `calcom()`                      |
+| Calendly                                 | `@cal-sdk/calendly`  | `calendly()`                    |
+| Zoom                                     | `@cal-sdk/zoom`      | `zoom()`                        |
+| ICS feeds                                | `@cal-sdk/ics`       | `ics()`                         |
+| In-memory, for tests and examples        | `@cal-sdk/mock`      | `mockCalendar()`                |
 
 Not sure which one fits? [Choose a provider](/docs/choose-a-provider) walks through the credentials each one needs.
 
@@ -37,7 +37,7 @@ Providers take OAuth access tokens, API keys or app passwords, which is everythi
 calsdk doesn't run OAuth flows or refresh tokens: your app owns the user's account, so it owns the tokens too. Pass a token, or a function that returns a fresh one. calsdk calls the function before each request, so it can refresh and cache tokens however your app already does:
 
 ```ts
-import { google } from '@calsdk/google';
+import { google } from '@cal-sdk/google';
 
 const calendar = google({
   accessToken: async () => {

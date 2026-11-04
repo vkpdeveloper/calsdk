@@ -1,11 +1,11 @@
-import { mockCalendar } from '@calsdk/mock';
+import { mockCalendar } from '@cal-sdk/mock';
 import {
   APICallError,
   type CalendarProviderV1,
   InvalidArgumentError,
   NoSuchProviderVersionError,
   NotFoundError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createEvent } from './create-event';
 import { deleteEvent } from './delete-event';

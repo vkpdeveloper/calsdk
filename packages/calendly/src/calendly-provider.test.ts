@@ -4,8 +4,8 @@ import {
   NotFoundError,
   type SyncChangeV1,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
-import { createRecordingFetch } from '@calsdk/provider-tests';
+} from '@cal-sdk/provider';
+import { createRecordingFetch } from '@cal-sdk/provider-tests';
 import { afterAll, describe, expect, it } from 'vitest';
 import { calendly } from './calendly-provider';
 

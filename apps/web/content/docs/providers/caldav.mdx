@@ -6,11 +6,11 @@ description: Read and write iCloud, Zoho Calendar, Fastmail, Nextcloud, Radicale
 CalDAV (RFC 4791) is the open standard behind iCloud, Zoho, Fastmail, Nextcloud and many self-hosted calendars, so one package reaches all of them, with shortcuts for iCloud and Zoho. Expect solid reads and writes, recurring series and sync. What you won't get is anything CalDAV leaves out: video links, reminders, colors and search.
 
 ```npm
-npm install calsdk @calsdk/caldav
+npm install @cal-sdk/core @cal-sdk/caldav
 ```
 
 ```ts tab="iCloud"
-import { icloud } from '@calsdk/caldav';
+import { icloud } from '@cal-sdk/caldav';
 
 // iCloud needs an app-specific password, made at account.apple.com under Sign-In and Security.
 const calendar = icloud({
@@ -20,7 +20,7 @@ const calendar = icloud({
 ```
 
 ```ts tab="Zoho"
-import { zoho } from '@calsdk/caldav';
+import { zoho } from '@cal-sdk/caldav';
 
 // The account's password, or an app-specific password when two-factor authentication is on.
 const calendar = zoho({
@@ -30,7 +30,7 @@ const calendar = zoho({
 ```
 
 ```ts tab="Any CalDAV server"
-import { caldav } from '@calsdk/caldav';
+import { caldav } from '@cal-sdk/caldav';
 
 const calendar = caldav({
   serverUrl: 'https://caldav.fastmail.com/dav/',

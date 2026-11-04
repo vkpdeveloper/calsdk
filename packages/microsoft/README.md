@@ -1,10 +1,10 @@
-# @calsdk/microsoft
+# @cal-sdk/microsoft
 
 Microsoft Outlook calendar provider for calsdk, built on Microsoft Graph. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes. Works with work, school and personal Microsoft accounts.
 
 ```ts
-import { microsoft } from '@calsdk/microsoft';
-import { listEvents } from 'calsdk';
+import { microsoft } from '@cal-sdk/microsoft';
+import { listEvents } from '@cal-sdk/core';
 
 const calendar = microsoft({ accessToken: () => getFreshAccessToken() });
 

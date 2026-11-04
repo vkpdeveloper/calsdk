@@ -1,4 +1,4 @@
-import { mockCalendar } from '@calsdk/mock';
+import { mockCalendar } from '@cal-sdk/mock';
 import {
   type CalendarProviderV1,
   ConflictError,
@@ -7,14 +7,14 @@ import {
   type FreeBusyResultV1,
   NotFoundError,
   type UpdateScopeV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   createJsonFetcher,
   type FetchFunction,
   isAllDay,
   mapAPICallError,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { describeProviderConformance } from './conformance';
 
 // A provider that reads and updates events over HTTP, backed by an in-process server

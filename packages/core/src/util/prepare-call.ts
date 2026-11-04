@@ -3,7 +3,7 @@ import {
   InvalidArgumentError,
   NoSuchProviderVersionError,
   type ResultBaseV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import type { CallSettings, ResultMetadata } from '../types';
 import { logWarnings } from './log-warnings';
 import { type RetryPolicy, withRetries } from './retry';

@@ -1,4 +1,4 @@
-import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@calsdk/provider';
+import { APICallError, InvalidArgumentError, InvalidResponseDataError } from '@cal-sdk/provider';
 import { combineHeaders } from './headers';
 import { formatSchemaIssues, type StandardSchemaV1, validateSchema } from './validate-schema';
 

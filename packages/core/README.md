@@ -8,8 +8,8 @@
 One TypeScript API for Google Calendar, Microsoft Outlook, iCloud, Zoho Calendar and other CalDAV servers, Cal.com, Calendly, Zoom meetings, ICS feeds and any other calendar provider. Pick a provider, then call plain functions.
 
 ```ts
-import { createEvent, findFreeTime, listEvents } from 'calsdk';
-import { mockCalendar } from '@calsdk/mock';
+import { createEvent, findFreeTime, listEvents } from '@cal-sdk/core';
+import { mockCalendar } from '@cal-sdk/mock';
 
 const calendar = mockCalendar(); // or google({ accessToken }), microsoft({ accessToken }), calcom({ accessToken }), calendly({ accessToken }), zoom({ accessToken })
 
@@ -69,7 +69,7 @@ When a provider cannot honor part of a request, the call still succeeds and retu
 Errors extend `CalsdkError`. Check them with `isInstance`, which works across duplicated package copies:
 
 ```ts
-import { SyncCursorExpiredError, syncEvents } from 'calsdk';
+import { SyncCursorExpiredError, syncEvents } from '@cal-sdk/core';
 
 try {
   await syncEvents({ calendar, cursor });

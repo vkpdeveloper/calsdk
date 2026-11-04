@@ -8,7 +8,7 @@ To mirror your users' calendars into Postgres, apply the changes `syncEvents` re
 After that you get back only what changed, though some providers have to reread the whole calendar to find it. Check [how each provider syncs](#how-each-provider-syncs) before you choose how often to run it.
 
 ```ts
-import { SyncCursorExpiredError, syncEvents } from 'calsdk';
+import { SyncCursorExpiredError, syncEvents } from '@cal-sdk/core';
 
 async function sync(calendarId: string) {
   const stored = await db.syncCursors.get(calendarId);
@@ -32,7 +32,7 @@ async function sync(calendarId: string) {
 Apply changes in the order they come. The same event can show up more than once in a round (Outlook does this), and the later entry is the newer one, so applying them in order leaves you with the latest version. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
 
 ```ts
-import type { SyncChange } from 'calsdk';
+import type { SyncChange } from '@cal-sdk/core';
 
 async function applyChanges(changes: SyncChange[]) {
   for (const change of changes) {

@@ -6,12 +6,12 @@ description: Read, schedule, move and delete Zoom meetings, including recurring 
 Use this provider when the meeting itself is the thing you're scheduling: a sales call, a client check-in, a weekly office hour. Zoom's scheduled meetings are the events, and every one has its Zoom link in `conference`. Recurring meetings work, within the patterns Zoom supports, but Zoom isn't a calendar, so there are no all-day events and listing is slower than you'd expect.
 
 ```npm
-npm install calsdk @calsdk/zoom
+npm install @cal-sdk/core @cal-sdk/zoom
 ```
 
 ```ts
-import { createEvent } from 'calsdk';
-import { zoom } from '@calsdk/zoom';
+import { createEvent } from '@cal-sdk/core';
+import { zoom } from '@cal-sdk/zoom';
 
 const calendar = zoom({ accessToken: () => getFreshAccessToken() });
 

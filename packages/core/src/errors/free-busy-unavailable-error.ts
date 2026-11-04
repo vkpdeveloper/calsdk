@@ -1,4 +1,4 @@
-import { CalsdkError } from '@calsdk/provider';
+import { CalsdkError } from '@cal-sdk/provider';
 
 const name = 'FreeBusyUnavailableError';
 const marker = `calsdk.error.${name}`;

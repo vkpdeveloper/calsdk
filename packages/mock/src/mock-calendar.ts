@@ -12,7 +12,7 @@ import {
   type SyncChangeV1,
   SyncCursorExpiredError,
   type UpdateScopeV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   addDaysToDate,
   eventTimeToInstant,
@@ -26,7 +26,7 @@ import {
   isValidTimeZone,
   parseICalDate,
   parseRecurrence,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import {
   assertSupportedRecurrence,
   expandInRange,

@@ -6,7 +6,7 @@ description: Finds slots when every listed calendar is free, across providers.
 Pass everyone's calendars, even on different providers, and set `workingHours` so slots land inside the working day of the person you're booking. Slots come back as UTC instants, ready to show in each viewer's own zone.
 
 ```ts
-import { findFreeTime } from 'calsdk';
+import { findFreeTime } from '@cal-sdk/core';
 
 const { slots } = await findFreeTime({
   calendars: [{ calendar: google({ accessToken }) }, { calendar: microsoft({ accessToken }) }],

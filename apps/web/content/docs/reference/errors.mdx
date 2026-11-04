@@ -6,7 +6,7 @@ description: Every error class calsdk throws, its fields and when it is thrown.
 When a call fails, the error's class tells you what went wrong and its fields tell you where. All errors extend `CalsdkError`, which extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
 
 ```ts
-import { NotFoundError } from 'calsdk';
+import { NotFoundError } from '@cal-sdk/core';
 
 if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
 ```

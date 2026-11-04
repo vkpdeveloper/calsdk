@@ -1,10 +1,10 @@
-import type { AttendeeV1, EventTimeV1, EventV1 } from '@calsdk/provider';
+import type { AttendeeV1, EventTimeV1, EventV1 } from '@cal-sdk/provider';
 import {
   formatRdates,
   formatZonedDateTime,
   instantToICalDate,
   isValidTimeZone,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { fromZoomRecurrence } from './convert-recurrence';
 import { type Meeting, type Occurrence, RECURRING } from './zoom-api';
 import type { ZoomEventMetadata } from './zoom-options';

@@ -3,10 +3,10 @@ title: Conformance tests
 description: Check a provider against the calsdk contract with the suite most official providers run, recorded once and replayed offline.
 ---
 
-An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. Run `@calsdk/provider-tests` against your provider to catch round-trip and error-mapping mistakes like these. Most official providers use the same suite, and it skips anything your provider doesn't declare as supported.
+An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. Run `@cal-sdk/provider-tests` against your provider to catch round-trip and error-mapping mistakes like these. Most official providers use the same suite, and it skips anything your provider doesn't declare as supported.
 
 ```ts title="test/conformance.test.ts"
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { acme } from '../src/acme';
 
 describeProviderConformance({

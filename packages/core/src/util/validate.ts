@@ -3,7 +3,7 @@ import {
   type EventPatchV1,
   type EventTimeV1,
   InvalidArgumentError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   formatZonedDateTime,
   isAllDay,
@@ -12,7 +12,7 @@ import {
   parseLocalDateTime,
   parseRecurrence,
   windowsToIana,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { TimeInput } from '../types';
 
 const invalid = (argument: string, message: string) =>

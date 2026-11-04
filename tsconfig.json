@@ -5,7 +5,7 @@
     "types": [],
     "module": "Preserve",
     "moduleResolution": "bundler",
-    "customConditions": ["@calsdk/source"],
+    "customConditions": ["@cal-sdk/source"],
     "resolveJsonModule": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,

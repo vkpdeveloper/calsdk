@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { pinWrites } from '../test/pin-writes';
 import { caldav } from './caldav-provider';
 

@@ -5,7 +5,7 @@ import {
   NotFoundError,
   PermissionDeniedError,
   RateLimitError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { mapAPICallError, parseRetryAfterMs } from './map-api-call-error';
 

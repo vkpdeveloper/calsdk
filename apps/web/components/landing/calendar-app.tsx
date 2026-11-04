@@ -1,7 +1,7 @@
 'use client';
 
-import { type MockCalendarProvider, mockCalendar } from '@calsdk/mock';
-import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } from 'calsdk';
+import { createEvent, type EventOf, type FreeSlot, findFreeTime, listEvents } from '@cal-sdk/core';
+import { type MockCalendarProvider, mockCalendar } from '@cal-sdk/mock';
 import { Plus } from 'lucide-react';
 import { type ReactNode, type Ref, useCallback, useEffect, useRef, useState } from 'react';
 

@@ -1,5 +1,5 @@
-import { APICallError, type CallOptionsV1 } from '@calsdk/provider';
-import { combineHeaders, type FetchFunction } from '@calsdk/provider-utils';
+import { APICallError, type CallOptionsV1 } from '@cal-sdk/provider';
+import { combineHeaders, type FetchFunction } from '@cal-sdk/provider-utils';
 
 const MAX_REDIRECTS = 5;
 

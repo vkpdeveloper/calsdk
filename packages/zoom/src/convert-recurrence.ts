@@ -1,4 +1,4 @@
-import { UnsupportedFunctionalityError } from '@calsdk/provider';
+import { UnsupportedFunctionalityError } from '@cal-sdk/provider';
 import {
   formatExdates,
   formatRRule,
@@ -11,7 +11,7 @@ import {
   type RRule,
   WEEKDAYS,
   type Weekday,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { ZoomRecurrence } from './zoom-api';
 
 // Zoom stores recurrence as a daily, weekly or monthly pattern instead of an RRULE. Only

@@ -6,7 +6,7 @@ description: Deletes an event, one occurrence, or a series.
 For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes. Pass `sendUpdates` to tell the guests, where the provider can.
 
 ```ts
-import { deleteEvent } from 'calsdk';
+import { deleteEvent } from '@cal-sdk/core';
 
 await deleteEvent({ calendar, eventId });
 ```

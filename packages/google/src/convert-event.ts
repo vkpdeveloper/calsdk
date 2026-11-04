@@ -6,8 +6,8 @@ import {
   type EventV1,
   InvalidResponseDataError,
   type WarningV1,
-} from '@calsdk/provider';
-import { formatZonedDateTime, isAllDay, isValidTimeZone } from '@calsdk/provider-utils';
+} from '@cal-sdk/provider';
+import { formatZonedDateTime, isAllDay, isValidTimeZone } from '@cal-sdk/provider-utils';
 import type { GoogleEvent, GoogleTime } from './google-api';
 import { GOOGLE_EVENT_COLORS, nearestColorId } from './google-colors';
 import type { GoogleEventMetadata } from './google-options';

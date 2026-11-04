@@ -1,4 +1,4 @@
-import { type EventTimeV1, InvalidResponseDataError } from '@calsdk/provider';
+import { type EventTimeV1, InvalidResponseDataError } from '@cal-sdk/provider';
 import {
   formatLocalDate,
   formatLocalDateTime,
@@ -9,7 +9,7 @@ import {
   localToInstant,
   parseLocalDateTime,
   windowsToIana,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import type { GraphTime } from './microsoft-api';
 
 /**

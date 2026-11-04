@@ -3,11 +3,11 @@ title: Write a provider
 description: Add a calendar calsdk does not support yet, with the same contract, helpers and tests as the official providers.
 ---
 
-A provider is a function that returns a plain object implementing `CalendarProviderV1` from `@calsdk/provider`. Its job is narrow on purpose: translate calsdk's requests into one API's requests, and the responses back into calsdk's shapes. What would be the same for every calendar lives in `calsdk` instead (validation, retries, pagination loops, the free/busy fallback and warning logging), so you only write the part that's specific to your API.
+A provider is a function that returns a plain object implementing `CalendarProviderV1` from `@cal-sdk/provider`. Its job is narrow on purpose: translate calsdk's requests into one API's requests, and the responses back into calsdk's shapes. What would be the same for every calendar lives in `@cal-sdk/core` instead (validation, retries, pagination loops, the free/busy fallback and warning logging), so you only write the part that's specific to your API.
 
 ```npm
-npm install @calsdk/provider @calsdk/provider-utils zod
-npm install -D @calsdk/provider-tests
+npm install @cal-sdk/provider @cal-sdk/provider-utils zod
+npm install -D @cal-sdk/provider-tests
 ```
 
 The official providers are built on exactly these packages, so yours gets the same tools.
@@ -52,14 +52,14 @@ import {
   type CalendarProviderV1,
   type EventV1,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   type AccessToken,
   createJsonFetcher,
   type FetchFunction,
   mapAPICallError,
   urlPath,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import { z } from 'zod';
 
 const eventSchema = z.object({

@@ -1,4 +1,4 @@
-import { InvalidResponseDataError } from '@calsdk/provider';
+import { InvalidResponseDataError } from '@cal-sdk/provider';
 import { DOMParser, type Element } from '@xmldom/xmldom';
 
 export const DAV = 'DAV:';

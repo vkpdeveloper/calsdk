@@ -7,14 +7,14 @@ import {
   type SyncChangeV1,
   UnsupportedFunctionalityError,
   type WarningV1,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import {
   combineHeaders,
   eventTimeToInstant,
   type FetchFunction,
   isValidTimeZone,
   mapAPICallError,
-} from '@calsdk/provider-utils';
+} from '@cal-sdk/provider-utils';
 import {
   cancelledKeys,
   findEvent,
@@ -67,7 +67,7 @@ const READ_ONLY = { condition: 'Read only: feeds cannot be changed.' };
  * start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date.
  *
  * @example
- * import { ics } from '@calsdk/ics';
+ * import { ics } from '@cal-sdk/ics';
  * const holidays = ics({ url: 'webcal://example.com/holidays.ics' });
  */
 export function ics(settings: IcsSettings): IcsProvider {

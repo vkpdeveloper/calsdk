@@ -1,11 +1,11 @@
-# @calsdk/provider-tests
+# @cal-sdk/provider-tests
 
 Conformance tests for calsdk calendar providers, plus a `fetch` that records and replays HTTP traffic. Official and third-party providers run the same suite.
 
 ```ts
 // test/conformance.test.ts
-import { describeProviderConformance } from '@calsdk/provider-tests';
-import { google } from '@calsdk/google';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
+import { google } from '@cal-sdk/google';
 
 describeProviderConformance({
   name: 'google',

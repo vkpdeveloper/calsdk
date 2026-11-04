@@ -1,10 +1,10 @@
-# @calsdk/ics
+# @cal-sdk/ics
 
 ICS feed provider for calsdk: reads a subscribed iCalendar feed, such as a holiday calendar or a calendar shared by its secret address. Uses `fetch` only, so it runs on Node, Bun, Deno and edge runtimes.
 
 ```ts
-import { ics } from '@calsdk/ics';
-import { listEvents, syncEvents } from 'calsdk';
+import { ics } from '@cal-sdk/ics';
+import { listEvents, syncEvents } from '@cal-sdk/core';
 
 const calendar = ics({ url: 'webcal://example.com/holidays.ics' });
 

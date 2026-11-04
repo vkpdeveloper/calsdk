@@ -35,7 +35,7 @@ export const calcomDeleteOptionsSchema = z.object({
 });
 export type CalcomDeleteOptions = z.infer<typeof calcomDeleteOptionsSchema>;
 
-/** The option and metadata types of the Cal.com provider, for type checking in `calsdk`. */
+/** The option and metadata types of the Cal.com provider, for type checking in `@cal-sdk/core`. */
 export type CalcomProviderTypes = {
   options: {
     createEvent: CalcomCreateOptions;

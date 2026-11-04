@@ -3,7 +3,7 @@ title: Quickstart
 description: Create a recurring event, move one occurrence and find free time, with no account and no network.
 ---
 
-Start with a calendar you can't break: `@calsdk/mock`, which keeps events in memory. You'll create a weekday standup, move Wednesday's to later in the morning, and find a free slot around it.
+Start with a calendar you can't break: `@cal-sdk/mock`, which keeps events in memory. You'll create a weekday standup, move Wednesday's to later in the morning, and find a free slot around it.
 
 <Steps>
 <Step>
@@ -11,7 +11,7 @@ Start with a calendar you can't break: `@calsdk/mock`, which keeps events in mem
 ### Install
 
 ```npm
-npm install calsdk @calsdk/mock
+npm install @cal-sdk/core @cal-sdk/mock
 ```
 
 </Step>
@@ -22,8 +22,8 @@ npm install calsdk @calsdk/mock
 Save this as `quickstart.ts`:
 
 ```ts title="quickstart.ts"
-import { createEvent, findFreeTime, listEvents, updateEvent } from 'calsdk';
-import { mockCalendar } from '@calsdk/mock';
+import { createEvent, findFreeTime, listEvents, updateEvent } from '@cal-sdk/core';
+import { mockCalendar } from '@cal-sdk/mock';
 
 const calendar = mockCalendar();
 
@@ -139,22 +139,22 @@ That's a [warning](/docs/concepts/warnings), not an error. The mock has no free/
 When the logic does what you want, install a provider and swap it in for the mock. Only the line that creates `calendar` changes; every call after it stays the same.
 
 ```ts tab="Google"
-// npm install @calsdk/google
-import { google } from '@calsdk/google';
+// npm install @cal-sdk/google
+import { google } from '@cal-sdk/google';
 
 const calendar = google({ accessToken: () => getFreshAccessToken() });
 ```
 
 ```ts tab="Outlook"
-// npm install @calsdk/microsoft
-import { microsoft } from '@calsdk/microsoft';
+// npm install @cal-sdk/microsoft
+import { microsoft } from '@cal-sdk/microsoft';
 
 const calendar = microsoft({ accessToken: () => getFreshAccessToken() });
 ```
 
 ```ts tab="iCloud"
-// npm install @calsdk/caldav
-import { icloud } from '@calsdk/caldav';
+// npm install @cal-sdk/caldav
+import { icloud } from '@cal-sdk/caldav';
 
 const calendar = icloud({
   appleId: 'me@icloud.com',
@@ -163,8 +163,8 @@ const calendar = icloud({
 ```
 
 ```ts tab="Zoom"
-// npm install @calsdk/zoom
-import { zoom } from '@calsdk/zoom';
+// npm install @cal-sdk/zoom
+import { zoom } from '@cal-sdk/zoom';
 
 const calendar = zoom({ accessToken: () => getFreshAccessToken() });
 ```

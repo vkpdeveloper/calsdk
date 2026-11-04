@@ -1,13 +1,14 @@
 {
-  "name": "@calsdk/provider-utils",
+  "name": "@cal-sdk/provider-utils",
   "version": "0.0.0",
   "description": "Helpers for writing calsdk calendar providers.",
   "license": "MIT",
+  "homepage": "https://www.cal-sdk.com",
   "type": "module",
   "sideEffects": false,
   "exports": {
     ".": {
-      "@calsdk/source": "./src/index.ts",
+      "@cal-sdk/source": "./src/index.ts",
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
@@ -32,7 +33,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@calsdk/provider": "workspace:*",
+    "@cal-sdk/provider": "workspace:*",
     "@standard-schema/spec": "^1.1.0"
   },
   "devDependencies": {

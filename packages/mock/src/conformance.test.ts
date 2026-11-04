@@ -1,4 +1,4 @@
-import { describeProviderConformance } from '@calsdk/provider-tests';
+import { describeProviderConformance } from '@cal-sdk/provider-tests';
 import { mockCalendar } from './mock-calendar';
 
 describeProviderConformance({

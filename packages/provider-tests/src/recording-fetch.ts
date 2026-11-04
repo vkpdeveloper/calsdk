@@ -1,5 +1,5 @@
 import { readFile, writeFile } from 'node:fs/promises';
-import type { FetchFunction } from '@calsdk/provider-utils';
+import type { FetchFunction } from '@cal-sdk/provider-utils';
 import { expect } from 'vitest';
 
 export type RecordingMode = 'replay' | 'record';

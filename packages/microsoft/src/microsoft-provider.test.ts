@@ -3,7 +3,7 @@ import {
   NotFoundError,
   SyncCursorExpiredError,
   UnsupportedFunctionalityError,
-} from '@calsdk/provider';
+} from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { microsoft } from './microsoft-provider';
 

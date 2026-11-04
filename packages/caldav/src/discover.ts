@@ -1,4 +1,4 @@
-import { type CalendarV1, InvalidResponseDataError } from '@calsdk/provider';
+import { type CalendarV1, InvalidResponseDataError } from '@cal-sdk/provider';
 import type { Call, DavClient } from './dav-client';
 import {
   APPLE,

@@ -1,4 +1,4 @@
-import { InvalidArgumentError, type WarningV1 } from '@calsdk/provider';
+import { InvalidArgumentError, type WarningV1 } from '@cal-sdk/provider';
 import { describe, expect, it } from 'vitest';
 import { applyPatch, newCalendar, setScheduleAgent } from './write-event';
 

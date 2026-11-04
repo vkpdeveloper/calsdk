@@ -1,0 +1,177 @@
+---
+title: Write a provider
+description: Add a calendar calsdk does not support yet, with the same contract, helpers and tests as the official providers.
+---
+
+A provider is a function that returns a plain object implementing `CalendarProviderV1` from `@calsdk/provider`. It translates calsdk's requests into one API's requests and the responses back into calsdk's shapes. The functions in `calsdk` do the rest: validation, retries, pagination loops, free/busy fallback and warning logging.
+
+```npm
+npm install @calsdk/provider @calsdk/provider-utils
+npm install -D @calsdk/provider-tests
+```
+
+Official providers use exactly these packages, so a community provider gets the same tools.
+
+## The contract
+
+An outline of the type. The package has the full option and result types for each method.
+
+```ts
+type CalendarProviderV1<Provider extends string, Types extends ProviderTypesV1> = {
+  readonly specificationVersion: 'v1';
+  readonly provider: Provider; // also the key in providerOptions and providerMetadata
+  readonly capabilities: CalendarCapabilitiesV1;
+
+  doListCalendars(options): PromiseLike<{ calendars; warnings }>;
+  doGetEvent(options): PromiseLike<{ event; warnings }>;
+  doListEvents(options): PromiseLike<{ events; nextPageToken?; warnings }>;
+  doCreateEvent(options): PromiseLike<{ event; warnings }>;
+  doUpdateEvent(options): PromiseLike<{ event; warnings }>;
+  doDeleteEvent(options): PromiseLike<{ warnings }>;
+
+  doFreeBusy?(options): PromiseLike<{ calendars; warnings }>; // calsdk falls back to doListEvents
+  doSyncEvents?(options): PromiseLike<{ changes; nextPageToken?; nextCursor?; warnings }>;
+};
+```
+
+Rules every provider follows:
+
+- **Resolve `'primary'`** to the user's default calendar.
+- **Stay stateless.** Do not cache between calls; calsdk and your users may call from many places at once.
+- **Return exact times.** Timed `dateTime`s carry an offset, and `timeZone` is an IANA name.
+- **Map errors** to calsdk's classes: `mapAPICallError` does this for HTTP status codes.
+- **Never save something else.** If the API cannot store what was asked, throw `UnsupportedFunctionalityError`. If you drop a harmless part, such as a color, return an `unsupported` warning.
+- **Pass `abortSignal` and `headers`** to every request.
+- **Read only your own key** in `providerOptions`.
+
+## A minimal provider
+
+```ts title="acme.ts"
+import {
+  type CalendarProviderV1,
+  type EventV1,
+  UnsupportedFunctionalityError,
+} from '@calsdk/provider';
+import {
+  type AccessToken,
+  createJsonFetcher,
+  type FetchFunction,
+  mapAPICallError,
+  urlPath,
+} from '@calsdk/provider-utils';
+import { z } from 'zod';
+
+const eventSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  starts: z.string(),
+  ends: z.string(),
+  zone: z.string(),
+});
+
+function fromAcme(raw: z.infer<typeof eventSchema>, calendarId: string): EventV1 {
+  return {
+    id: raw.id,
+    calendarId,
+    kind: 'single',
+    title: raw.name,
+    start: { dateTime: raw.starts, timeZone: raw.zone },
+    end: { dateTime: raw.ends, timeZone: raw.zone },
+    status: 'confirmed',
+    showAs: 'busy',
+  };
+}
+
+type AcmeSettings = { accessToken: AccessToken; fetch?: FetchFunction };
+
+export function acme(settings: AcmeSettings): CalendarProviderV1<'acme'> {
+  const request = createJsonFetcher({ baseURL: 'https://api.acme.example/v1', ...settings });
+
+  return {
+    specificationVersion: 'v1',
+    provider: 'acme',
+    capabilities: {
+      events: {
+        details: true,
+        allDay: false,
+        recurrence: false,
+        recurrenceScopeThisAndFollowing: false,
+        serverSideExpansion: false,
+        attendees: false,
+        conference: false,
+        reminders: false,
+        color: false,
+        etag: false,
+        search: false,
+      },
+      freeBusy: false,
+      sync: false,
+      webhooks: false,
+    },
+
+    async doGetEvent({ calendarId, eventId, abortSignal, headers }) {
+      try {
+        const { value } = await request({
+          method: 'GET',
+          path: urlPath`/calendars/${calendarId}/events/${eventId}`,
+          schema: eventSchema,
+          abortSignal,
+          headers,
+        });
+        return { event: fromAcme(value, calendarId), warnings: [] };
+      } catch (error) {
+        throw mapAPICallError(error, { provider: 'acme', resource: { type: 'event', id: eventId } });
+      }
+    },
+
+    async doCreateEvent({ calendarId, event }) {
+      if (event.recurrence) {
+        throw new UnsupportedFunctionalityError({ provider: 'acme', functionality: 'recurring events' });
+      }
+      // ...
+    },
+
+    // doListCalendars, doListEvents, doUpdateEvent, doDeleteEvent
+  };
+}
+```
+
+`createJsonFetcher` sends the bearer token, resolving it per request, validates responses with any Standard Schema library such as zod, never follows redirects, and never puts request headers in its errors. `urlPath` encodes ids, which can contain `@`, `/` and `#`.
+
+## Type your options and metadata
+
+Declare what each operation reads from `providerOptions`, and what you put in `providerMetadata`. calsdk then type-checks them against the provider passed as `calendar`:
+
+```ts
+type AcmeTypes = {
+  options: { createEvent: { notifyRoom?: boolean } };
+  eventMetadata: { roomId?: string };
+};
+
+export function acme(settings: AcmeSettings): CalendarProviderV1<'acme', AcmeTypes> {
+  // ...
+}
+```
+
+Validate the options at runtime too, since callers may not use TypeScript. `parseProviderOptions` reads your key, throws `InvalidArgumentError` for wrong values and warns about unknown keys:
+
+```ts
+const { options, warnings } = await parseProviderOptions({
+  provider: 'acme',
+  providerOptions,
+  schema: z.object({ notifyRoom: z.boolean().optional() }),
+});
+```
+
+## Next
+
+<Cards>
+  <Card title="Test it" href="/docs/build-a-provider/conformance">
+    Run the conformance suite the official providers pass.
+  </Card>
+  <Card title="Helpers" href="/docs/build-a-provider/provider-utils">
+    Fetching, errors, options, time zones and recurrence.
+  </Card>
+</Cards>
+
+The [mock provider](https://github.com/vkpdeveloper/calsdk/tree/main/packages/mock) implements every operation in memory and is the clearest reference.

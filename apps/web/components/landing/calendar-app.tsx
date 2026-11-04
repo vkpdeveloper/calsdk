@@ -599,7 +599,7 @@ function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> 
   const { event, source, at: block } = listed;
   return (
     <div ref={ref} className="min-w-0 scroll-mt-20 border-line max-lg:border-t lg:border-l">
-      <div className="p-4">
+      <div className="px-3 py-4 sm:px-4">
         <div className="flex items-center gap-2 text-xs text-neutral-400">
           <span className="size-2 rounded-full" style={{ background: source.color }} />
           {source.name}
@@ -620,8 +620,8 @@ function Inspector({ listed, ref }: { listed?: Listed; ref: Ref<HTMLDivElement> 
           </code>
         </p>
       </div>
-      {/* Wraps rather than scrolls: the values are for reading. */}
-      <pre className="border-t border-line px-4 py-3 font-mono text-[11px] leading-[1.7] break-all whitespace-pre-wrap text-neutral-300">
+      {/* Wraps rather than scrolls: the values are for reading. The longest line fits at 360px. */}
+      <pre className="border-t border-line px-3 py-3 sm:px-4 font-mono text-[11px] leading-[1.7] break-all whitespace-pre-wrap text-neutral-300">
         <span className="text-neutral-500">{'// CalendarEvent'}</span>
         {'\n{\n'}
         {FIELDS.map((field) => {

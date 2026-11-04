@@ -410,6 +410,7 @@ const WARNINGS = [
     feature: 'color',
     details:
       'Google Calendar has a fixed palette. #d00000 was saved as the nearest color, #d50000.',
+    colors: { asked: '#d00000', saved: '#d50000' },
   },
   {
     provider: 'Outlook',
@@ -596,7 +597,7 @@ export default async function HomePage() {
           <code className="font-mono text-sm text-white">warnings</code>:
         </p>
         <div className="grid gap-4 md:grid-cols-3">
-          {WARNINGS.map(({ provider, asked, type, feature, details }) => (
+          {WARNINGS.map(({ provider, asked, type, feature, details, colors }) => (
             <div key={provider} className="rounded-xl border border-line bg-panel p-4">
               <div className="flex items-baseline justify-between gap-3 text-xs">
                 <span className="font-medium text-neutral-200">{provider}</span>
@@ -606,6 +607,13 @@ export default async function HomePage() {
                 {type} · {feature}
               </p>
               <p className="mt-1.5 text-sm leading-relaxed text-neutral-300">{details}</p>
+              {colors && (
+                <div className="mt-3 flex items-center gap-2 font-mono text-xs text-neutral-400">
+                  <Swatch color={colors.asked} label="asked" />
+                  <ArrowRight className="size-3.5" aria-hidden />
+                  <Swatch color={colors.saved} label="saved" />
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -781,5 +789,14 @@ function Capability({ label, value }: { label: string; value: Support }) {
         <span className="text-xs text-neutral-400 sm:ml-auto sm:text-right">{value}</span>
       )}
     </li>
+  );
+}
+
+function Swatch({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="flex items-center gap-1.5">
+      <span className="size-4 rounded" style={{ background: color }} />
+      {color} {label}
+    </span>
   );
 }

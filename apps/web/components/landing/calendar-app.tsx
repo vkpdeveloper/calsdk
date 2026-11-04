@@ -376,6 +376,12 @@ export function CalendarApp() {
                     className="opacity-35 transition-opacity group-aria-pressed:opacity-100"
                   />
                   {source.short}
+                  {/* The color key for this calendar's events in the week view. */}
+                  <span
+                    aria-hidden
+                    className="ml-auto size-2 shrink-0 rounded-full opacity-35 group-aria-pressed:opacity-100"
+                    style={{ background: source.color }}
+                  />
                 </button>
               );
             })}

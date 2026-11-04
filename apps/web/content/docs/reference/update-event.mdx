@@ -24,7 +24,7 @@ const { event } = await updateEvent({
     patch: { type: 'EventPatch', description: 'Fields to change. Left out fields stay as they are; `null` clears a field. `start` and `end` can be replaced, not cleared.', required: true },
     calendarId: { type: 'string', default: "'primary'" },
     scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: change only this instance, the whole series, or this and later instances.', default: "'this'" },
-    ifMatch: { type: 'string', description: "Only update if the event's `etag` still matches. Otherwise throws `ConflictError`." },
+    ifMatch: { type: 'string', description: "Only update if the event's `etag` still matches, otherwise throw `ConflictError`." },
     sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
   }}
 />

@@ -18,7 +18,7 @@ await deleteEvent({ calendar, eventId });
     eventId: { type: 'string', required: true },
     calendarId: { type: 'string', default: "'primary'" },
     scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: delete only this instance, the whole series, or this and later instances.', default: "'this'" },
-    ifMatch: { type: 'string', description: "Only delete if the event's `etag` still matches, otherwise throw `ConflictError`. Outlook compares it just before deleting, so a change between the two isn't caught." },
+    ifMatch: { type: 'string', description: "Only delete if the event's `etag` still matches, otherwise throw `ConflictError`. On Outlook, calsdk checks it just before deleting, so a change in between isn't caught." },
     sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
   }}
 />

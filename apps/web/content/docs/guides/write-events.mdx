@@ -115,7 +115,7 @@ try {
 }
 ```
 
-`deleteEvent` takes `ifMatch` too. Outlook can't make a delete conditional, so it compares the etag first and then deletes, and a change made between the two isn't caught.
+`deleteEvent` takes `ifMatch` too. Outlook ignores it on deletes, so calsdk reads the event, compares the etag and then deletes. A change made between the read and the delete isn't caught.
 
 Google, Outlook, CalDAV and the mock support `ifMatch`. Cal.com, Calendly and Zoom throw `UnsupportedFunctionalityError` when you pass it.
 

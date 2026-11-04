@@ -60,16 +60,18 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
           {payloads.map(({ name, format, code }, i) => (
             <div
               key={name}
-              className={`min-w-0 overflow-hidden rounded-xl border bg-panel transition-colors ${i === shown ? 'border-accent-blue/60' : 'border-line max-md:hidden'}`}
+              className={`min-w-0 overflow-hidden rounded-xl border bg-panel transition-colors ${i === shown ? 'border-accent-blue/60' : 'border-line hover:border-neutral-600 max-md:hidden'}`}
             >
               <button
                 type="button"
                 aria-pressed={i === shown}
                 onClick={() => setShown(i)}
-                className="flex w-full items-center justify-between border-b border-line px-4 py-2.5 text-left text-xs hover:bg-white/[0.03]"
+                className="group flex w-full cursor-pointer items-center gap-2 border-b border-line px-4 py-2.5 text-left text-xs hover:bg-white/[0.03]"
               >
+                {/* A radio-style dot: the cards are a choice of which payload feeds the result. */}
+                <span className="size-2.5 rounded-full border border-neutral-500 group-hover:border-neutral-300 group-aria-pressed:border-accent-blue group-aria-pressed:bg-accent-blue" />
                 <span className="font-medium text-neutral-200">{name}</span>
-                <span className="font-mono text-neutral-500">{format}</span>
+                <span className="ml-auto font-mono text-neutral-500">{format}</span>
               </button>
               <div className="code code-sm">{code}</div>
             </div>

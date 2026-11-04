@@ -200,7 +200,7 @@ const eventCode = ({ provider, joinUrl }: { provider: string; joinUrl: string })
     provider: '${provider}',«link»
     joinUrl: '${joinUrl}',«link»
   },«link»
-  // Plus id, calendarId, end, status and the rest.
+  // Plus id, end, status and more.
 }`;
 
 const demoCode = (duration: number) => `
@@ -226,7 +226,7 @@ const FEATURES = [
     label: 'Book',
     title: 'Book a meeting, with the video link',
     points: [
-      'createConference adds Google Meet on Google and Teams on Outlook.',
+      'createConference adds Google Meet on Google and Teams on Outlook work accounts.',
       'sendUpdates emails the guests, where the provider can.',
       'Anything the provider changed or ignored comes back in warnings.',
     ],
@@ -564,7 +564,7 @@ export default async function HomePage() {
 
       <section className="hero-grid relative flex flex-col items-center overflow-hidden border-t border-line px-5 py-24 text-center sm:py-32">
         <Mark className="size-14 text-white" />
-        <h2 className="mt-8 max-w-3xl text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
+        <h2 className="mt-8 max-w-3xl text-balance text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
           Try it without an account
         </h2>
         <p className="mt-5 max-w-md text-neutral-400">
@@ -613,7 +613,7 @@ function SectionHeading({
       <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
         <span className="text-accent-blue">{index}</span> / {eyebrow}
       </p>
-      <h2 className="mt-4 max-w-4xl text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
+      <h2 className="mt-4 max-w-4xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
         {title}
       </h2>
       {intro && <p className="mt-5 max-w-2xl text-lg text-neutral-400">{intro}</p>}

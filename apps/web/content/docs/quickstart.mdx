@@ -121,9 +121,13 @@ bun quickstart.ts
 
 Along with your own output, you'll see this line:
 
+<div className="wrap-code">
+
 ```txt title="Output"
 calsdk warning (mock, getFreeBusy): freeBusy uses a fallback: Provider "mock" has no free/busy endpoint, so busy times were computed from events.
 ```
+
+</div>
 
 That's a [warning](/docs/concepts/warnings), not an error. The mock has no free/busy endpoint, so calsdk worked out busy times from its events and tells you it did. calsdk does the same for Outlook, so expect a similar line there.
 

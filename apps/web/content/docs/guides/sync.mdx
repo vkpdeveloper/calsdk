@@ -1,9 +1,11 @@
 ---
 title: Sync changes
-description: Keep a copy of a calendar up to date by fetching only what changed since the last sync.
+description: Keep a local copy of a calendar up to date with the changes since a saved cursor.
 ---
 
-Say you're mirroring your users' calendars into Postgres. Reading every event on each run gets slower as calendars grow, so `syncEvents` returns only what changed since a cursor you stored. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window. See [how each provider syncs](#how-each-provider-syncs).
+To mirror your users' calendars into Postgres, apply the changes `syncEvents` returns and save its cursor for the next run. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window.
+
+Google, Outlook, CalDAV and Cal.com send only what changed. Calendly, Zoom and ICS have no change feed, so calsdk reads the whole calendar and compares it with the last sync: you still get only the changes, but every run fetches everything. See [how each provider syncs](#how-each-provider-syncs).
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
@@ -27,7 +29,7 @@ async function sync(calendarId: string) {
 
 ## Apply changes in order
 
-Changes come oldest first, in the order the provider reports them, and the same event can show up more than once in a round (Outlook does this). Apply them in order so the last version wins. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
+Apply changes in the order they come. They aren't a history of edits, but the same event can show up more than once in a round (Outlook does this), and a later entry replaces an earlier one. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
 
 ```ts
 import type { SyncChange } from 'calsdk';

@@ -117,10 +117,12 @@ const PAYLOADS = [
     code: `
 {
   "subject": "Standup",«title»
+  "type": "seriesMaster",«repeat»
   "start": {«start»
-    "dateTime": "2026-11-09T09:30:00.0000000",«start»
-    "timeZone": "Eastern Standard Time"«start»
+    "dateTime": "2026-11-09T14:30:00.0000000",«start»
+    "timeZone": "UTC"«start»
   },«start»
+  "originalStartTimeZone": "Eastern Standard Time",«start»
   "recurrence": {«repeat»
     "pattern": {«repeat»
       "type": "weekly",«repeat»
@@ -467,7 +469,8 @@ export default async function HomePage() {
           <div>
             <p className="text-lg leading-relaxed text-neutral-300">
               Read, write and sync events on Google, Outlook, iCloud, Zoom, Cal.com, Calendly and
-              any CalDAV server. Same functions, same types, on every one.
+              any CalDAV server. One set of typed functions, and a clear warning or error wherever a
+              provider falls short.
             </p>
             <div className="mt-7 flex flex-wrap items-center gap-3">
               <Link

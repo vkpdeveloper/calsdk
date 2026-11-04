@@ -1,11 +1,17 @@
 import { mockCalendar } from '@calsdk/mock';
 import { createEvent, listEvents } from 'calsdk';
+import { Fragment } from 'react';
 
 // A weekly 9:30 standup in New York across March 2027: the US changes its clocks on the
 // 14th, Europe on the 28th, so for two weeks the gap between the cities is an hour short.
 const ZONE = 'America/New_York';
 const FIRST_UTC = '2027-03-08T14:30:00Z';
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+// Where each clock change falls between the weekly rows, keyed by the row it follows.
+const CHANGES: Record<number, string> = {
+  0: 'US clocks go forward, 14 Mar',
+  2: 'Europe clocks go forward, 28 Mar',
+};
 
 const day = new Intl.DateTimeFormat('en-GB', {
   timeZone: ZONE,
@@ -97,17 +103,27 @@ function Card({
           </tr>
         </thead>
         <tbody>
-          {rows.map((row) => {
+          {rows.map((row, i) => {
             const late = row.newYork !== home;
+            const change = CHANGES[i - 1];
             return (
-              <tr key={row.day} className="border-t border-line">
-                <td className="px-4 py-3 text-neutral-400">{row.day}</td>
-                <td className={`px-4 py-3 font-mono ${late ? 'text-red-400' : 'text-white'}`}>
-                  {row.newYork}
-                  {late && <span className="ml-2 font-sans text-xs">an hour late</span>}
-                </td>
-                <td className="px-4 py-3 font-mono text-neutral-300">{row.berlin}</td>
-              </tr>
+              <Fragment key={row.day}>
+                {change && (
+                  <tr className="border-t border-dashed border-neutral-700">
+                    <td colSpan={3} className="px-4 py-1.5 text-xs text-neutral-500">
+                      {change}
+                    </td>
+                  </tr>
+                )}
+                <tr className="border-t border-line">
+                  <td className="px-4 py-3 text-neutral-400">{row.day}</td>
+                  <td className={`px-4 py-3 font-mono ${late ? 'text-red-400' : 'text-white'}`}>
+                    {row.newYork}
+                    {late && <span className="ml-2 font-sans text-xs">an hour late</span>}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-neutral-300">{row.berlin}</td>
+                </tr>
+              </Fragment>
             );
           })}
         </tbody>

@@ -261,7 +261,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
                 type="button"
                 aria-pressed={value === duration}
                 onClick={() => setDuration(value)}
-                className="h-9 flex-1 rounded-md text-sm text-neutral-400 hover:text-white aria-pressed:bg-neutral-800 aria-pressed:text-white"
+                className="h-11 flex-1 rounded-md text-sm sm:h-9 text-neutral-400 hover:text-white aria-pressed:bg-neutral-800 aria-pressed:text-white"
               >
                 {value} min
               </button>
@@ -278,7 +278,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
                   key={slot.start}
                   type="button"
                   onClick={() => void book(slot)}
-                  className="h-9 rounded-md border border-line px-3 font-mono text-xs text-neutral-200 hover:border-accent-blue hover:text-white"
+                  className="h-11 rounded-md border border-line px-3 font-mono text-xs sm:h-9 text-neutral-200 hover:border-accent-blue hover:text-white"
                 >
                   {DAY_NAMES[day]} {clock(minutes)}
                 </button>
@@ -300,7 +300,7 @@ export function FreeTimeDemo({ lengths }: { lengths: { minutes: number; code: Re
           <button
             type="button"
             onClick={reset}
-            className="h-8 shrink-0 rounded-md px-2 text-neutral-400 hover:text-white"
+            className="h-11 shrink-0 rounded-md px-3 text-neutral-400 sm:h-8 sm:px-2 hover:text-white"
           >
             Reset
           </button>

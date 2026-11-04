@@ -31,7 +31,7 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
             type="button"
             aria-pressed={id === field}
             onClick={() => setField(id)}
-            className="h-10 rounded-full border border-line px-4 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:text-white aria-pressed:border-accent-blue aria-pressed:bg-accent-blue/10 aria-pressed:text-white"
+            className="h-11 rounded-full border border-line px-4 text-sm sm:h-10 text-neutral-400 transition-colors hover:border-neutral-600 hover:text-white aria-pressed:border-accent-blue aria-pressed:bg-accent-blue/10 aria-pressed:text-white"
           >
             {label}
           </button>
@@ -49,7 +49,7 @@ export function FieldCompare({ payloads }: { payloads: Payload[] }) {
             role="tab"
             aria-selected={i === shown}
             onClick={() => setShown(i)}
-            className="-mb-px h-10 flex-1 border-b-2 border-transparent px-1 text-[13px] text-neutral-400 aria-selected:border-accent-blue aria-selected:text-white"
+            className="-mb-px h-11 flex-1 border-b-2 border-transparent px-1 text-[13px] text-neutral-400 aria-selected:border-accent-blue aria-selected:text-white"
           >
             {name.replace(' Calendar', '')}
           </button>

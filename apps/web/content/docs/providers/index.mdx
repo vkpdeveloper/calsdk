@@ -3,32 +3,34 @@ title: Compare providers
 description: See what each calendar can do before you build on it, straight from the capabilities every provider declares.
 ---
 
-Calendar APIs agree on less than you'd hope. Google can split a recurring series in two, Outlook can't, and Cal.com names every booking after its event type no matter what title you send. Every provider declares what it supports in `calendar.capabilities`, and this table is that data. A dash means no, and "Some" means it depends on a condition, explained below the table.
+Calendar APIs agree on less than you'd hope. Google can split a recurring series in two, Outlook can't, and Cal.com names every booking after its event type no matter what title you send. Every provider declares what it supports in `calendar.capabilities`, and most of this table comes straight from that data. A dash means no, and "Some" means it depends on a condition, explained below the table.
 
-| Feature                    | Google | Outlook | CalDAV | Cal.com | Calendly | Zoom | ICS  | Mock |
-| -------------------------- | :----: | :-----: | :----: | :-----: | :------: | :--: | :--: | :--: |
-| Write events               | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | -   | Yes  |
-| Keeps title and description | Yes   | Yes     | Yes    | -      | -       | Yes  | -   | Yes  |
-| All-day events             | Yes    | Yes     | Yes    | -      | -       | -   | Some | Yes  |
-| Recurring events           | Yes    | Yes     | Yes    | -      | -       | Some | Some | Yes  |
-| This and following         | Yes    | -      | -     | -      | -       | -   | -   | Yes  |
-| Attendees                  | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Some | Yes  |
-| Creates video links        | Yes    | Some    | -     | -      | -       | Yes  | -   | Yes  |
-| Reminders                  | Yes    | Some    | -     | -      | -       | -   | -   | Yes  |
-| Colors                     | Yes    | -      | -     | -      | -       | -   | -   | Yes  |
-| Etags and `ifMatch`        | Yes    | Yes     | Yes    | -      | -       | -   | -   | Yes  |
-| Search                     | Yes    | -      | -     | -      | -       | -   | -   | Yes  |
-| Free/busy endpoint         | Yes    | -      | -     | -      | -       | -   | -   | -   |
-| Sync                       | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Yes  | Yes  |
+| Feature            | Google | Outlook | CalDAV | Cal.com | Calendly | Zoom | ICS  | Mock |
+| ------------------ | :----: | :-----: | :----: | :-----: | :------: | :--: | :--: | :--: |
+| Write events       | Yes    | Yes     | Yes    | Some    | Some     | Yes  | -    | Yes  |
+| Keeps title        | Yes    | Yes     | Yes    | -       | -        | Yes  | -    | Yes  |
+| All-day            | Yes    | Yes     | Yes    | -       | -        | -    | Some | Yes  |
+| Recurring          | Yes    | Yes     | Yes    | -       | -        | Some | Some | Yes  |
+| This and following | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| Attendees          | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Some | Yes  |
+| Video links        | Yes    | Some    | -      | -       | -        | Yes  | -    | Yes  |
+| Reminders          | Yes    | Some    | -      | -       | -        | -    | -    | Yes  |
+| Colors             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| `ifMatch`          | Yes    | Yes     | Yes    | -       | -        | -    | -    | Yes  |
+| Search             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| Free/busy API      | Yes    | -       | -      | -       | -        | -    | -    | -    |
+| Sync               | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Yes  | Yes  |
 
 ## Conditions
 
 - **Outlook video links:** Teams meetings need a work or school account.
 - **Outlook reminders:** one popup reminder per event.
+- **Cal.com writes:** book, move (as a new booking with a new id) and cancel.
+- **Calendly writes:** book and cancel. `updateEvent` throws.
 - **Zoom recurring events:** daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
 - **ICS:** feeds are read only. All-day, recurring and attendee data is read but can't be written.
 
-"Keeps title and description" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning rather than saved.
+"Keeps title" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning rather than saved.
 
 Free/busy works on every provider. Where there's no endpoint, calsdk computes it from events and returns a warning, so `findFreeTime` behaves the same everywhere. Search is different: providers without it throw `UnsupportedFunctionalityError`, and you filter the listed events yourself.
 

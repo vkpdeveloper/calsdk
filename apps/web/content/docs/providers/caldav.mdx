@@ -61,29 +61,35 @@ const { events } = await listEvents({ calendar, timeMin, timeMax });
 
 `zoho()` defaults to Zoho's US data center. If the account lives in another one, pass the CalDAV address Zoho Calendar shows under Settings, Synchronize, CalDAV as `serverUrl`.
 
-## Supports
+## Not supported
 
-All-day and recurring events (scopes `this` and `all`), attendees, etags and sync. Not supported: `thisAndFollowing`, search, creating video links, reminders, colors and a free/busy endpoint (calsdk computes free/busy from events).
+CalDAV has no `thisAndFollowing`, search, reminders, colors or free/busy endpoint, and calsdk can't create video links through it. Free/busy is computed from events. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-**Discovery.** You give the provider a server address, and it finds the account's calendars from there. That takes several requests, so it runs once per provider. `'primary'` is the server's default calendar for invitations, or else the first calendar that holds events. Task lists aren't listed.
+### Discovery and ids
 
-**Ids.** A calendar id is the calendar's path, as `listCalendars` returns it. An event id is the name of its `.ics` file without the extension, normally its `UID`. Instances of a series are `<id>_<original start>`, the start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date (`20261103`).
+You give the provider a server address, and it finds the account's calendars from there. That takes several requests, so it runs once per provider. `'primary'` is the server's default calendar for invitations, or else the first calendar that holds events. Task lists aren't listed, and files whose names don't end in `.ics` are skipped.
 
-**Recurring events.** CalDAV stores the series, not its occurrences, so calsdk expands them, with the same limits as [ICS feeds](/docs/providers/ics): rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance, with a warning. Changing one instance stores an exception, and deleting one adds an `EXDATE`. Changing a whole series through one of its instances moves the series by as much as that instance moved. When a series changes its start or its rule, exceptions for instances it no longer has are dropped.
+A calendar id is the calendar's path, as `listCalendars` returns it. An event id is the name of its `.ics` file without the extension, normally its `UID`. Instances of a series are `<id>_<original start>`, the start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date (`20261103`).
 
-**Etags.** Updates and deletes send `ifMatch` to the server, and a stale one throws `ConflictError`. Every update is also conditional on the version calsdk just read, so a change someone makes in between is never overwritten.
+### Recurring events
 
-**Video links.** calsdk can't create one, but it reads a Meet, Teams or Zoom link from the event's URL, location or description into `conference`.
+CalDAV stores the series, not its occurrences, so calsdk expands them, with the same limits as [ICS feeds](/docs/providers/ics): rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance, with a warning. Changing one instance stores an exception, and deleting one adds an `EXDATE`. Changing a whole series through one of its instances moves the series by as much as that instance moved. When a series changes its start or its rule, exceptions for instances it no longer has are dropped.
 
-**Attendees** are invited by the server, from the account's email address. `sendUpdates: 'none'` asks the server not to send invitations.
+### Writing events
 
-**Sync** uses the server's sync tokens (RFC 6578). Each sync reports the single events, series and exceptions that changed, never computed occurrences. A token the server no longer accepts throws `SyncCursorExpiredError`.
+Updates and deletes send `ifMatch` to the server, and a stale one throws `ConflictError`. Every update is also conditional on the version calsdk just read, so a change someone makes in between is never overwritten.
 
-**Credentials.** CalDAV sends your password with every request, so calsdk only sends it to the server's own origin and to the HTTPS host discovery finds the calendars on (iCloud keeps them on a host of their own). A redirect anywhere else fails rather than leaking the password.
+The server invites attendees, from the account's email address, and `sendUpdates: 'none'` asks it not to send invitations. calsdk can't create a video link, but it reads a Meet, Teams or Zoom link from the event's URL, location or description into `conference`.
 
-Files whose names don't end in `.ics` are skipped.
+### Sync
+
+Sync uses the server's sync tokens (RFC 6578). Each sync reports the single events, series and exceptions that changed, never computed occurrences. A token the server no longer accepts throws `SyncCursorExpiredError`.
+
+### Your password
+
+CalDAV sends your password with every request, so calsdk only sends it to the server's own origin and to the HTTPS host discovery finds the calendars on (iCloud keeps them on a host of their own). A redirect anywhere else fails rather than leaking the password.
 
 ## Provider options
 

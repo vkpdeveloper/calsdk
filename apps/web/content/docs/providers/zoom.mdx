@@ -64,41 +64,37 @@ const calendar = zoom({
   }}
 />
 
-## Supports
+## Not supported
 
-Meetings with titles and agendas, recurring meetings within Zoom's limits, invitees, Zoom links and sync. Not supported: all-day events, `thisAndFollowing`, `ifMatch` and search, which throw `UnsupportedFunctionalityError`. `location`, `visibility`, `reminders` and `color` are ignored with a warning. Free/busy is computed from meetings.
+All-day events, `thisAndFollowing`, `ifMatch` and search throw `UnsupportedFunctionalityError`. `location`, `visibility`, `reminders` and `color` are ignored with a warning, since a Zoom meeting takes place at its link, has no visibility or color, and gets the reminders the account is set up with. Free/busy is computed from meetings. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-**Calendars.** `'primary'` holds the meetings the user hosts. Its time zone is the user's Zoom time zone.
+### Recurring meetings
 
-**Ids.** An event id is the meeting id. An occurrence of a series is `<meeting id>_<original start in UTC>`, such as `84512345678_20261103T090000Z`.
+Zoom repeats meetings daily (every 1 to 99 days), weekly on set weekdays (every 1 to 50 weeks), or monthly on a day of the month or an nth weekday (every 1 to 10 months), for up to 60 meetings or until a date. Other rules throw `UnsupportedFunctionalityError` rather than saving a different schedule, as do rules whose days leave out the first meeting. Zoom's weeks start on Monday, so a rule repeating every few weeks on several days with another `WKST` throws too. Zoom keeps no list of excluded dates: delete occurrences one by one instead of passing `EXDATE` lines.
 
-**Times** are shown in the time zone the meeting was scheduled in. Meetings last whole minutes, up to 24 hours.
+Zoom schedules no meetings for a series that starts years ahead, so calsdk would have nothing to show. Creating one, or moving a meeting or series that far, throws `UnsupportedFunctionalityError`, and calsdk deletes what Zoom created or undoes the change.
 
-**Attendees** are Zoom's meeting invitees, by email address only. `getEvent` returns them with the host as `organizer`. Listing and sync leave `attendees` and `organizer` out, as Zoom doesn't list them.
+You can only move or resize one occurrence on its own. Other changes need `scope: 'all'`, which changes the whole series, and moving an occurrence with `scope: 'all'` moves the series by as much. Moving a series makes Zoom schedule every meeting of it again, so occurrences you deleted, moved or resized on their own come back as they were, with ids for their new starts. The update returns a warning when that happens, so you can tell your user.
 
-**Recurring meetings.** Zoom repeats meetings daily (every 1 to 99 days), weekly on set weekdays (every 1 to 50 weeks), or monthly on a day of the month or an nth weekday (every 1 to 10 months), for up to 60 meetings or until a date. Other rules throw `UnsupportedFunctionalityError` rather than saving a different schedule, as do rules whose days leave out the first meeting. Zoom's weeks start on Monday, so a rule repeating every few weeks on several days with another `WKST` throws too. Zoom keeps no list of excluded dates: delete occurrences one by one instead of passing `EXDATE` lines.
+### Calendars, ids and times
 
-**Series far ahead.** Zoom schedules no meetings for a series that starts years ahead, so calsdk would have nothing to show. Creating one, or moving a meeting or series that far, throws `UnsupportedFunctionalityError`, and calsdk deletes what Zoom created or undoes the change.
+`'primary'` holds the meetings the user hosts, and its time zone is the user's Zoom time zone. An event id is the meeting id. An occurrence of a series is `<meeting id>_<original start in UTC>`, such as `84512345678_20261103T090000Z`. Times are shown in the time zone the meeting was scheduled in, and meetings last whole minutes, up to 24 hours.
 
-**Changing one occurrence** can only move or resize it. Other changes need `scope: 'all'`, which changes the whole series. Moving an occurrence with `scope: 'all'` moves the series by as much.
+### Invitees
 
-**Moving a series** makes Zoom schedule every meeting of it again. Occurrences you deleted, moved or resized on their own come back as they were, with ids for their new starts. The update returns a warning when that happens, so you can tell your user.
+Attendees are Zoom's meeting invitees, by email address only. `getEvent` returns them with the host as `organizer`. Listing and sync leave `attendees` and `organizer` out, as Zoom doesn't list them. Zoom doesn't email invitees about changes made through its API, so `sendUpdates` values other than `'none'` return a warning.
 
-**`sendUpdates`.** Zoom doesn't email invitees about changes made through its API, so values other than `'none'` return a warning.
+### Listing and sync
 
-**Listing** reads every scheduled meeting and filters them, since Zoom can't list meetings by time. Each series takes a request of its own, made one at a time to stay under Zoom's rate limits, so an account with many recurring meetings lists slowly. Zoom also cuts agendas in listings to 250 characters and stops listing meetings some time after they end.
+Listing reads every scheduled meeting and filters them, since Zoom can't list meetings by time. Each series takes a request of its own, made one at a time to stay under Zoom's rate limits, so an account with many recurring meetings lists slowly. Zoom also cuts agendas in listings to 250 characters and stops listing meetings some time after they end.
 
-**Sync.** Zoom can't list meetings by when they changed either, so each sync reads every meeting and compares it with the last sync. All changes come on one page. Meetings Zoom stops listing after they end aren't reported as deleted.
-
-## Provider options
-
-None.
+Zoom can't list meetings by when they changed either, so each sync reads every meeting and compares it with the last sync. All changes come on one page. Meetings Zoom stops listing after they end aren't reported as deleted.
 
 ## Metadata
 
-Events carry `providerMetadata.zoom`:
+Zoom has no provider options. Events carry `providerMetadata.zoom`:
 
 | Field          | Type |
 | -------------- | ---- |

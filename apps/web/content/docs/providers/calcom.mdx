@@ -52,29 +52,29 @@ await createEvent({
 
 `'primary'` holds every booking of the user. Each event type is also a calendar, whose id is the event type id (such as `'123456'`), holding that event type's bookings.
 
-## Supports
+## Not supported
 
-Booking, moving and cancelling, attendees and sync. Not supported: all-day and recurring events, `ifMatch` and search, which throw `UnsupportedFunctionalityError`. Free/busy is computed from bookings.
+All-day and recurring events, `ifMatch` and search throw `UnsupportedFunctionalityError`. Free/busy is computed from bookings. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-**Ids.** An event id is the booking's `uid`.
+### Booking
 
-**Creating** books an event type: the calendar's, or `providerOptions.calcom.eventTypeId` on `'primary'`. The first attendee books the slot and the others are added as guests. Without attendees, the user books it for themselves. The description becomes the booking's notes. Cal.com names bookings after their event type, so `title`, and fields the event type sets (`location`, `createConference`, `reminders`, `color`, `visibility`), are ignored with a warning.
+Creating an event books an event type: the calendar's, or `providerOptions.calcom.eventTypeId` on `'primary'`. The first attendee books the slot and the others are added as guests. Without attendees, the user books it for themselves. The description becomes the booking's notes. Cal.com names bookings after their event type, so `title`, and fields the event type sets (`location`, `createConference`, `reminders`, `color`, `visibility`), are ignored with a warning.
 
-**Lengths.** A booking lasts as long as its event type, or one of the lengths the event type offers. Other lengths throw `InvalidArgumentError`.
+A booking lasts as long as its event type, or one of the lengths the event type offers. Other lengths throw `InvalidArgumentError`. As with any other calendar, calsdk writes the times you give it, so by default a booking may overlap others and fall outside the event type's availability. To have Cal.com enforce its rules, set `allowConflicts` or `allowBookingOutOfBounds` to `false`.
 
-**Availability.** As with any other calendar, calsdk writes the times you give it, so by default a booking may overlap others and fall outside the event type's availability. To have Cal.com enforce its rules, set `allowConflicts` or `allowBookingOutOfBounds` to `false`.
+### Moving and cancelling
 
-**Updating** can only move a booking. Cal.com moves a booking by replacing it, so the returned event has a **new id** and the old id reads as deleted. If you store booking ids, update them after every move. Changes to other fields are ignored with a warning, and the booking keeps the time zone it was made in.
+An event id is the booking's `uid`, and that id doesn't survive a move. Updating can only move a booking, and Cal.com moves a booking by replacing it, so the returned event has a **new id** and the old id reads as deleted. If you store booking ids, update them after every move. Changes to other fields are ignored with a warning, and the booking keeps the time zone it was made in.
 
-**Deleting** cancels the booking. Cancelled and rejected bookings read as deleted events, and bookings waiting for confirmation are `tentative`.
+Deleting cancels the booking. Cancelled and rejected bookings read as deleted events, and bookings waiting for confirmation are `tentative`. Cal.com always emails attendees, so `sendUpdates` values other than `'all'` return a warning.
 
-**Listing** finds bookings by their start, because Cal.com can't filter them by their end. To catch bookings that started before `timeMin` and are still running, calsdk looks back as far as the longest length your event types allow (at least a day). A booking that started before that lookback is missed: one of a team event type you don't own, or one longer than its event type now allows.
+### Listing and sync
 
-**`sendUpdates`.** Cal.com always emails attendees, so values other than `'all'` return a warning.
+Listing finds bookings by their start, because Cal.com can't filter them by their end. To catch bookings that started before `timeMin` and are still running, calsdk looks back as far as the longest length your event types allow (at least a day). A booking that started before that lookback is missed: one of a team event type you don't own, or one longer than its event type now allows.
 
-**Sync** reads bookings by the time they last changed. A booking saved in a slow transaction can show up after later ones, so each sync reads the minute before the newest change it saw again, and that booking isn't missed. A first sync returns active bookings only.
+Sync reads bookings by the time they last changed. A booking saved in a slow transaction can show up after later ones, so each sync reads the minute before the newest change it saw again, and that booking isn't missed. A first sync returns active bookings only.
 
 ## Provider options
 

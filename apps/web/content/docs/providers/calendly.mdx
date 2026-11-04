@@ -49,31 +49,31 @@ await createEvent({
   }}
 />
 
-## Supports
+## Not supported
 
-Booking and cancelling, attendees and sync. Not supported: updating, all-day and recurring events, `ifMatch` and search. Free/busy is computed from meetings.
+Updating, all-day and recurring events, `ifMatch` and search aren't supported. Free/busy is computed from meetings. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-**Calendars.** `'primary'` holds every meeting the user hosts. Calendly can't list meetings by event type, so there are no other calendars.
+### Calendars, ids and times
 
-**Ids.** An event id is the scheduled event's uuid.
+`'primary'` holds every meeting the user hosts. Calendly can't list meetings by event type, so there are no other calendars. An event id is the scheduled event's uuid, and times are shown in the user's Calendly time zone.
 
-**Times** are shown in the user's Calendly time zone.
+### Booking
 
-**Attendees.** `getEvent` and `createEvent` return the hosts, the invitees and the guests they added. Listing and sync leave `attendees` out, because Calendly needs a request per meeting for its invitees, and a month of meetings would mean a request for each. Hosts are in `organizer`.
+Creating an event books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type, and other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
 
-**Creating** books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type, and other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
+### Changing and cancelling
 
-**Updating** throws `UnsupportedFunctionalityError`, since Calendly can't change a scheduled meeting. To reschedule, delete it and book a new one.
+Updating throws `UnsupportedFunctionalityError`, since Calendly can't change a scheduled meeting. To reschedule, delete it and book a new one. Deleting cancels the meeting, and cancelled meetings read as deleted events. Calendly always emails invitees, so `sendUpdates` values other than `'all'` return a warning.
 
-**Deleting** cancels the meeting. Cancelled meetings read as deleted events.
+### Listing and sync
 
-**Listing** finds meetings by their start. Calendly meetings last at most 12 hours, so calsdk looks back a day to catch meetings that started before `timeMin` and end inside the window.
+Listing finds meetings by their start. Calendly meetings last at most 12 hours, so calsdk looks back a day to catch meetings that started before `timeMin` and end inside the window.
 
-**`sendUpdates`.** Calendly always emails invitees, so values other than `'all'` return a warning.
+`getEvent` and `createEvent` return the hosts, the invitees and the guests they added. Listing and sync leave `attendees` out, because Calendly needs a request per meeting for its invitees, and a month of meetings would mean a request for each. Hosts are in `organizer`.
 
-**Sync.** Calendly can't list meetings by when they changed, so each sync reads every active meeting and compares it with the last sync. All changes come on one page, and the cursor grows with the number of meetings.
+Calendly can't list meetings by when they changed, so each sync reads every active meeting and compares it with the last sync. All changes come on one page, and the cursor grows with the number of meetings.
 
 ## Provider options
 

@@ -37,35 +37,37 @@ const { events } = await listEvents({
   }}
 />
 
-## Supports
+## Not supported
 
-All-day and recurring events (scopes `this` and `all`), attendees, Teams meetings on work and school accounts, one reminder per event, etags and sync. Not supported: `thisAndFollowing`, colors, search and a free/busy endpoint (calsdk computes free/busy from events).
+Outlook has no `thisAndFollowing`, event colors, search or free/busy endpoint. Search throws `UnsupportedFunctionalityError`, so filter the listed events instead, and calsdk computes free/busy from events. See the [comparison](/docs/providers) for every provider.
 
 ## How it behaves
 
-**Ids.** calsdk asks Graph for immutable ids, so an event keeps its id when it moves to another calendar and the ids you've stored stay valid.
+### Recurrence patterns
 
-**Time zones.** Events keep the zone they were scheduled in. Outlook names zones the Windows way ("Pacific Standard Time"), and calsdk turns those into IANA names.
+Outlook stores recurrence as patterns, not RRULEs. Rules with an exact Outlook pattern are converted both ways. Others, such as `RDATE`, `FREQ=HOURLY` or `BYMONTHDAY=31` alone, throw `UnsupportedFunctionalityError`, because saving them would quietly schedule a different set of meetings. One difference shows up when reading: Outlook moves a day a month lacks, such as the 31st, to the month's last day, so that rule reads back as `BYMONTHDAY=28,29,30,31;BYSETPOS=-1`.
 
-**Recurrence.** Outlook stores patterns, not RRULEs. Rules with an exact Outlook pattern are converted both ways. Others, such as `RDATE`, `FREQ=HOURLY` or `BYMONTHDAY=31` alone, throw `UnsupportedFunctionalityError`, because saving them would quietly schedule a different set of meetings. One difference shows up when reading: Outlook moves a day a month lacks, such as the 31st, to the month's last day, so that rule reads back as `BYMONTHDAY=28,29,30,31;BYSETPOS=-1`.
+Outlook also keeps no list of excluded dates, only occurrences deleted one by one. calsdk reads those back as `EXDATE` lines on the series, which costs one extra request per series. To exclude a new date, delete that occurrence instead of adding an `EXDATE`.
 
-**Deleted occurrences** read back as `EXDATE` lines on the series, which costs one extra request per series. Outlook keeps no list of excluded dates, only occurrences deleted one by one, so to exclude a new date, delete that occurrence instead of adding an `EXDATE`.
+### No "this and following"
 
-**`thisAndFollowing`** throws `UnsupportedFunctionalityError`. Moving one occurrence with scope `all` moves the series by the same wall-clock distance. On a monthly or yearly series that throws, since its pattern picks days by date and would land on different ones.
+`thisAndFollowing` throws `UnsupportedFunctionalityError`. You can still move a whole series from one of its occurrences: with scope `all`, the series moves by the same wall-clock distance. On a monthly or yearly series that throws too, since its pattern picks days by date and would land on different ones.
 
-**Conditional deletes.** Outlook ignores `If-Match` on deletes, so `deleteEvent` with `ifMatch` compares the etag first. That leaves a small gap: a change made between the check and the delete isn't detected.
+### A fixed sync window
 
-**Colors.** Outlook events have no color of their own, only categories, which carry Outlook's colors. `color` is ignored with a warning, so use the `categories` option instead.
+Sync uses Graph delta queries, which work over a date range. So a sync covers a fixed window, by default one year back and two years ahead of the first sync, and the cursor keeps it. Changes cover single events, series and changed occurrences. Deleting one occurrence changes its series, so it arrives as an update of the series with a new `EXDATE`.
 
-**Reminders.** Outlook allows one popup reminder per event. It also has no default reminder to go back to, so `reminders: null` and `useDefault: true` leave the reminder unchanged, with a warning. To turn it off, pass `{ useDefault: false, overrides: [] }`.
+### Ids and time zones
 
-**Teams meetings.** `createConference: true` asks for a Teams meeting. Personal accounts can't create one through Graph, so the event is saved without it and the result carries a warning.
+calsdk asks Graph for immutable ids, so an event keeps its id when someone moves it to another calendar, and the ids you've stored stay valid. Times keep the zone they were scheduled in; Outlook names zones the Windows way ("Pacific Standard Time"), and calsdk turns those into IANA names.
 
-**`sendUpdates`.** Outlook always notifies attendees, so values other than `'all'` return a warning.
+### Writing events
 
-**Search** throws `UnsupportedFunctionalityError`. Filter the listed events instead.
+Outlook ignores `If-Match` on deletes, so `deleteEvent` with `ifMatch` compares the etag first. That leaves a small gap: a change made between the check and the delete isn't detected.
 
-**Sync** uses Graph delta queries, which work over a date range. So a sync covers a fixed window, by default one year back and two years ahead of the first sync, and the cursor keeps it. Changes cover single events, series and changed occurrences. Deleting one occurrence changes its series, so it arrives as an update of the series with a new `EXDATE`.
+`createConference: true` asks for a Teams meeting. Personal accounts can't create one through Graph, so on those the event is saved without it and the result carries a warning. Outlook also always notifies attendees, so `sendUpdates` values other than `'all'` return a warning.
+
+Outlook allows one popup reminder per event, and it has no default reminder to go back to. So `reminders: null` and `useDefault: true` leave the reminder unchanged, with a warning. To turn it off, pass `{ useDefault: false, overrides: [] }`. Events have no color of their own either, only categories, which carry Outlook's colors. `color` is ignored with a warning, so use the `categories` option instead.
 
 ## Provider options
 

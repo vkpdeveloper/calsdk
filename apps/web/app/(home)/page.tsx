@@ -155,11 +155,13 @@ const result = await createEvent({
     createConference: true,
   },
   sendUpdates: 'all',
-});
+});`,
+    result: `
+// result.event.conference.joinUrl
+'https://meet.google.com/abc-defg-hij'
 
-result.event.conference?.joinUrl;
-// Anything the provider changed:
-result.warnings;`,
+// result.warnings
+[]`,
   },
   {
     id: 'recurring',
@@ -200,6 +202,18 @@ if (friday) {
     },
   });
 }`,
+    result: `
+// Friday's standup, listed again
+{
+  id: 'evt_1_20261113T143000Z',
+  kind: 'exception',
+  seriesId: 'evt_1',
+  start: {
+    dateTime:
+      '2026-11-13T10:00:00-05:00',
+    timeZone: 'America/New_York',
+  },
+}`,
   },
   {
     id: 'sync',
@@ -237,6 +251,12 @@ try {
   await db.clear();
   await sync();
 }`,
+    result: `
+// result.changes, from a later sync
+[
+  { type: 'upsert', event: {…} },
+  { type: 'delete', eventId: 'evt_1' },
+]`,
   },
   {
     id: 'typed',
@@ -269,6 +289,9 @@ const { event: created } = await createEvent({
 });
 // string | undefined
 created.providerMetadata?.google?.iCalUID;`,
+    result: `
+error TS2561: Object literal may only specify known properties, but 'guestsCanModfy' does not exist in type '{ guestsCanModify?: boolean | undefined; … }'. Did you mean to write 'guestsCanModify'?`,
+    resultLang: 'text',
   },
   {
     id: 'errors',
@@ -299,6 +322,18 @@ try {
   }
   throw error;
 }`,
+    result: `
+// When someone edited it first
+ConflictError {
+  provider: 'google',
+  eventId: '…',
+}
+
+// error.message
+// The event "…" on provider "google"
+// changed since its etag was read.
+// Fetch the event again and retry
+// with the new etag.`,
   },
 ];
 
@@ -366,9 +401,10 @@ export default async function HomePage() {
       }),
     ),
     Promise.all(
-      FEATURES.map(async ({ code, ...feature }) => ({
+      FEATURES.map(async ({ code, result, resultLang, ...feature }) => ({
         ...feature,
         code: await highlightCode(code),
+        result: await highlightCode(result, { lang: resultLang }),
       })),
     ),
   ]);
@@ -586,8 +622,8 @@ function Card({ title, body, children }: { title: string; body: string; children
 
 function Swatch({ color, label }: { color: string; label: string }) {
   return (
-    <span className="flex items-center gap-1.5">
-      <span className="size-4 rounded" style={{ background: color }} />
+    <span className="flex items-center gap-1.5 whitespace-nowrap">
+      <span className="size-4 shrink-0 rounded" style={{ background: color }} />
       {color} {label}
     </span>
   );

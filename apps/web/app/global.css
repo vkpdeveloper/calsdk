@@ -85,6 +85,21 @@ html > body[data-scroll-locked] {
 .code-sm .line {
   padding: 0 0.75rem;
 }
+/* A result sits in a narrow column, so long values wrap (at spaces first) instead of
+   scrolling. From 640px the inset matches the feature text above it (sm:p-8). */
+.code-result pre {
+  font-size: 0.75rem;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+.code-result .line {
+  padding: 0 1.25rem;
+}
+@media (min-width: 640px) {
+  .code-result .line {
+    padding: 0 2rem;
+  }
+}
 
 /* The landing page is 1200px wide, so the nav lines up with it. */
 #nd-home-layout {

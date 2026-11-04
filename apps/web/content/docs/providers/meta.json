@@ -1,0 +1,4 @@
+{
+  "title": "Providers",
+  "pages": ["index", "google", "microsoft", "caldav", "calcom", "calendly", "zoom", "ics", "mock"]
+}

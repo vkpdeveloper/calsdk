@@ -1,0 +1,93 @@
+---
+title: Google Calendar
+description: Read and write Google Calendar events, with Meet links, free/busy and sync tokens.
+---
+
+```npm
+npm install calsdk @calsdk/google
+```
+
+```ts
+import { listEvents } from 'calsdk';
+import { google } from '@calsdk/google';
+
+const calendar = google({ accessToken: () => getFreshAccessToken() });
+
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-01T00:00:00Z',
+  timeMax: '2026-12-01T00:00:00Z',
+});
+```
+
+## Credentials
+
+`accessToken` is an OAuth access token with a Calendar scope, such as `https://www.googleapis.com/auth/calendar`, or `calendar.readonly` for reading only. calsdk does not run the OAuth flow: get tokens with your auth library and pass a function that returns a fresh one. It is called before every request.
+
+## Settings
+
+<TypeTable
+  type={{
+    accessToken: { type: 'string | (() => string | PromiseLike<string>)', description: 'OAuth access token, or a function that returns a fresh one.', required: true },
+    baseURL: { type: 'string', default: "'https://www.googleapis.com/calendar/v3'" },
+    headers: { type: 'Record<string, string | undefined>', description: 'Headers sent with every request.' },
+    fetch: { type: 'typeof fetch', description: 'A custom fetch, for example to log or record requests.' },
+  }}
+/>
+
+## Supports
+
+Everything calsdk models: all-day and recurring events with all three scopes, attendees, Meet links, reminders, colors, etags, search, a native free/busy endpoint and sync.
+
+## How it behaves
+
+- **Colors.** Google has 11 event colors. Another hex color is saved as the nearest one, with a `compatibility` warning.
+- **Meet links.** `createConference: true` adds a Google Meet link.
+- **Changed occurrences.** Google's expanded listings do not say which instances were changed, so calsdk makes one extra request per page that has recurring instances, to tell an `exception` from an `occurrence`.
+- **`thisAndFollowing`.** calsdk starts a new series at the chosen instance, copying attendees and the meeting link, and ends the old one just before it. A `COUNT` is split between the two, and `EXDATE` and `RDATE` lines go to the half they fall in. A series with a `COUNT` and `EXDATE` or `RDATE` lines before the split throws `UnsupportedFunctionalityError`, since the occurrences left cannot be counted: give it an `UNTIL` first. If ending the old series fails, calsdk deletes the new one.
+- **Moving a series.** A new `start` with scope `all` or `thisAndFollowing` moves the series on the wall clock of its time zone, so occurrences keep their local time across daylight saving changes. Rules that pick days of the month or year cannot be moved this way and throw `UnsupportedFunctionalityError`. The time zone of a series cannot change through an instance: update the series id instead.
+- **Edited occurrences.** Google resets single-instance changes when a series moves or splits. Deleted occurrences are kept, as `EXDATE`s; edited ones lose their changes, with a `compatibility` warning.
+- **Free/busy** uses Google's endpoint, so events shown as free are ignored and calendars the user can only see as free/busy work.
+- **Sync** uses Google sync tokens. An expired one throws `SyncCursorExpiredError`.
+
+## Provider options
+
+```ts
+await createEvent({
+  calendar,
+  event,
+  providerOptions: {
+    google: {
+      guestsCanModify: true,
+      guestsCanInviteOthers: false,
+      guestsCanSeeOtherGuests: false,
+      extendedProperties: { private: { orderId: '42' } },
+    },
+  },
+});
+
+await listEvents({
+  calendar,
+  timeMin,
+  timeMax,
+  providerOptions: { google: { eventTypes: ['default'] } },
+});
+```
+
+| Function                     | Option                    | Type |
+| ---------------------------- | ------------------------- | ---- |
+| `createEvent`, `updateEvent` | `guestsCanModify`         | `boolean` |
+| `createEvent`, `updateEvent` | `guestsCanInviteOthers`   | `boolean` |
+| `createEvent`, `updateEvent` | `guestsCanSeeOtherGuests` | `boolean` |
+| `createEvent`, `updateEvent` | `extendedProperties`      | `{ private?: Record<string, string>; shared?: Record<string, string> }`. `private` is only visible on this calendar |
+| `listEvents`                 | `eventTypes`              | `('birthday' \| 'default' \| 'focusTime' \| 'fromGmail' \| 'outOfOffice' \| 'workingLocation')[]` |
+
+## Metadata
+
+Events carry `providerMetadata.google`:
+
+| Field                | Type     |
+| -------------------- | -------- |
+| `iCalUID`            | `string` |
+| `eventType`          | `string`, such as `'default'`, `'outOfOffice'` or `'focusTime'` |
+| `extendedProperties` | `{ private?: Record<string, string>; shared?: Record<string, string> }` |

@@ -2,29 +2,69 @@ import Link from 'next/link';
 import type { ReactNode } from 'react';
 import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
+import { FeatureTabs } from '@/components/landing/feature-tabs';
+import { FieldCompare } from '@/components/landing/field-compare';
 import { FreeTimeDemo } from '@/components/landing/free-time-demo';
-import { TabbedCode } from '@/components/landing/tabbed-code';
+import { ProviderShowcase } from '@/components/landing/provider-showcase';
 import { Mark } from '@/components/logo';
 import { githubUrl } from '@/lib/shared';
 
 const PROVIDERS = [
-  { id: 'google', label: 'Google', pkg: 'google', setup: 'google({ accessToken })' },
-  { id: 'microsoft', label: 'Outlook', pkg: 'microsoft', setup: 'microsoft({ accessToken })' },
-  { id: 'icloud', label: 'iCloud', pkg: 'caldav', setup: 'icloud({ appleId, appPassword })' },
-  { id: 'zoho', label: 'Zoho', pkg: 'caldav', setup: 'zoho({ email, password })' },
+  {
+    id: 'google',
+    label: 'Google',
+    pkg: 'google',
+    color: '#8ab4f8',
+    setup: 'google({ accessToken })',
+  },
+  {
+    id: 'microsoft',
+    label: 'Outlook',
+    pkg: 'microsoft',
+    color: '#4cc2ff',
+    setup: 'microsoft({ accessToken })',
+  },
+  {
+    id: 'icloud',
+    label: 'iCloud',
+    pkg: 'caldav',
+    color: '#ff7a70',
+    setup: 'icloud({ appleId, appPassword })',
+  },
+  {
+    id: 'zoho',
+    label: 'Zoho',
+    pkg: 'caldav',
+    color: '#ffc857',
+    setup: 'zoho({ email, password })',
+  },
   {
     id: 'caldav',
     label: 'CalDAV',
     pkg: 'caldav',
+    color: '#b8b8c0',
     setup: 'caldav({ serverUrl, username, password })',
   },
-  { id: 'zoom', label: 'Zoom', pkg: 'zoom', setup: 'zoom({ accessToken })' },
-  { id: 'calcom', label: 'Cal.com', pkg: 'calcom', setup: 'calcom({ accessToken })' },
-  { id: 'calendly', label: 'Calendly', pkg: 'calendly', setup: 'calendly({ accessToken })' },
+  { id: 'zoom', label: 'Zoom', pkg: 'zoom', color: '#6c8cff', setup: 'zoom({ accessToken })' },
+  {
+    id: 'calcom',
+    label: 'Cal.com',
+    pkg: 'calcom',
+    color: '#f2f2f2',
+    setup: 'calcom({ accessToken })',
+  },
+  {
+    id: 'calendly',
+    label: 'Calendly',
+    pkg: 'calendly',
+    color: '#5aa9ff',
+    setup: 'calendly({ accessToken })',
+  },
   {
     id: 'ics',
     label: 'ICS feed',
     pkg: 'ics',
+    color: '#8fe0b0',
     setup: "ics({ url: 'webcal://example.com/team.ics' })",
   },
 ];
@@ -41,6 +81,122 @@ const { events } = await listEvents({
   timeMax: '2026-12-01',
 });`;
 
+// One weekday standup with a video link, as each API returns it. `«field»` marks the lines
+// that FieldCompare lights up together.
+const PAYLOADS = [
+  {
+    name: 'Google Calendar',
+    format: 'JSON',
+    lang: 'json',
+    code: `
+{
+  "summary": "Standup",«title»
+  "start": {«start»
+    "dateTime": "2026-11-09T09:30:00-05:00",«start»
+    "timeZone": "America/New_York"«start»
+  },«start»
+  "recurrence": [«repeat»
+    "RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR"«repeat»
+  ],«repeat»
+  "conferenceData": {«link»
+    "entryPoints": [{«link»
+      "entryPointType": "video",«link»
+      "uri": "https://meet.google.com/abc-defg-hij"«link»
+    }]«link»
+  }«link»
+}`,
+  },
+  {
+    name: 'Outlook',
+    format: 'JSON',
+    lang: 'json',
+    code: `
+{
+  "subject": "Standup",«title»
+  "start": {«start»
+    "dateTime": "2026-11-09T09:30:00.0000000",«start»
+    "timeZone": "Eastern Standard Time"«start»
+  },«start»
+  "recurrence": {«repeat»
+    "pattern": {«repeat»
+      "type": "weekly",«repeat»
+      "interval": 1,«repeat»
+      "daysOfWeek": [«repeat»
+        "monday", "tuesday", "wednesday",«repeat»
+        "thursday", "friday"«repeat»
+      ]«repeat»
+    },«repeat»
+    "range": {«repeat»
+      "type": "noEnd",«repeat»
+      "startDate": "2026-11-09"«repeat»
+    }«repeat»
+  },«repeat»
+  "onlineMeeting": {«link»
+    "joinUrl": "https://teams.microsoft.com/l/..."«link»
+  }«link»
+}`,
+  },
+  {
+    name: 'iCloud',
+    format: 'iCalendar',
+    lang: 'text',
+    code: `
+BEGIN:VEVENT
+UID:8C1F2A70-standup
+SUMMARY:Standup«title»
+DTSTART;TZID=America/New_York:20261109T093000«start»
+DTEND;TZID=America/New_York:20261109T094500
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR«repeat»
+URL:https://meet.google.com/abc-defg-hij«link»
+END:VEVENT`,
+  },
+  {
+    name: 'Zoom',
+    format: 'JSON',
+    lang: 'json',
+    code: `
+{
+  "topic": "Standup",«title»
+  "type": 8,
+  "timezone": "America/New_York",«start»
+  "recurrence": {«repeat»
+    "type": 2,«repeat»
+    "repeat_interval": 1,«repeat»
+    "weekly_days": "2,3,4,5,6"«repeat»
+  },«repeat»
+  "occurrences": [«start»
+    {«start»
+      "start_time": "2026-11-09T14:30:00Z",«start»
+      "duration": 15«start»
+    },«start»
+    {
+      "start_time": "2026-11-10T14:30:00Z",
+      "duration": 15
+    }
+  ],
+  "join_url": "https://zoom.us/j/85512345678"«link»
+}`,
+  },
+];
+
+const EVENT_CODE = `
+{
+  kind: 'series',
+  title: 'Standup',«title»
+  start: {«start»
+    dateTime: '2026-11-09T09:30:00-05:00',«start»
+    timeZone: 'America/New_York',«start»
+  },«start»
+  recurrence: [«repeat»
+    'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',«repeat»
+  ],«repeat»
+  // From any Meet, Teams or Zoom link.
+  conference: {«link»
+    provider: 'teams',«link»
+    joinUrl: 'https://teams.microsoft.com/l/...',«link»
+  },«link»
+}`;
+
 const demoCode = (duration: number) => `
 const { slots } = await findFreeTime({
   calendars: [{ calendar: you }, { calendar: sam }],
@@ -55,11 +211,16 @@ const { slots } = await findFreeTime({
   },
 });`;
 
-const EXAMPLES = [
+const FEATURES = [
   {
     id: 'book',
-    label: 'Book a meeting',
-    note: 'createConference adds a Google Meet link on Google and a Teams link on Outlook.',
+    label: 'Book',
+    title: 'Book a meeting, with the video link',
+    points: [
+      'createConference adds Google Meet on Google and Teams on Outlook.',
+      'sendUpdates emails the guests, where the provider can.',
+      'Anything the provider changed or ignored comes back in warnings.',
+    ],
     code: `
 import { createEvent } from 'calsdk';
 
@@ -79,8 +240,13 @@ event.conference?.joinUrl;`,
   },
   {
     id: 'recurring',
-    label: 'Recurring events',
-    note: 'Series are plain RRULEs. Listing expands them, and each instance has its own id.',
+    label: 'Repeat',
+    title: 'Recurring events are plain RRULEs',
+    points: [
+      'Listing expands a series, and each occurrence has its own id.',
+      "Move one occurrence, or 'thisAndFollowing', or the whole series.",
+      'Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
+    ],
     code: `
 const { event: series } = await createEvent({
   calendar,
@@ -92,7 +258,7 @@ const { event: series } = await createEvent({
   },
 });
 
-// Move only Friday's standup. 'all' and 'thisAndFollowing' change more of the series.
+// Move only Friday's standup.
 const friday = { timeMin: '2026-11-13', timeMax: '2026-11-14' };
 for await (const event of iterateEvents({ calendar, ...friday })) {
   if (event.seriesId !== series.id) continue;
@@ -111,7 +277,12 @@ for await (const event of iterateEvents({ calendar, ...friday })) {
   {
     id: 'sync',
     label: 'Sync',
-    note: 'The first call returns everything. Later calls return only what changed.',
+    title: 'Keep a copy in your database',
+    points: [
+      'The first call returns every event. Later calls return only changes.',
+      'Changes are upserts and deletes, ready to apply.',
+      'An expired cursor is its own error, so a full resync is one branch.',
+    ],
     code: `
 import { SyncCursorExpiredError, syncEvents } from 'calsdk';
 
@@ -124,15 +295,19 @@ try {
   }
   await db.saveCursor(nextCursor);
 } catch (error) {
-  // The provider forgot the cursor: start over with a full sync.
   if (SyncCursorExpiredError.isInstance(error)) await db.clear();
   else throw error;
 }`,
   },
   {
     id: 'typed',
-    label: 'Typed options',
-    note: 'Options and metadata are typed by the provider you pass, so a typo is a compile error.',
+    label: 'Types',
+    title: 'Typed by the calendar you pass',
+    points: [
+      'Provider options are checked against the provider in calendar.',
+      'Provider metadata comes back typed too.',
+      'A misspelled option is a compile error, not a silent no-op.',
+    ],
     code: `
 const calendar = google({ accessToken });
 
@@ -153,12 +328,16 @@ created.providerMetadata?.google?.iCalUID; // string | undefined`,
   {
     id: 'errors',
     label: 'Errors',
-    note: 'Every error extends CalsdkError. isInstance works even with two copies of calsdk installed.',
+    title: 'Errors you can branch on',
+    points: [
+      'Conflicts, rate limits, auth and missing events each have a class.',
+      'ifMatch updates only if nobody changed the event since you read it.',
+      "A provider that can't do something warns or throws. It never quietly drops it.",
+    ],
     code: `
 import { ConflictError, RateLimitError, updateEvent } from 'calsdk';
 
 try {
-  // Only update if nobody changed the event since we read it.
   await updateEvent({ calendar, eventId: event.id, ifMatch: event.etag, patch: { title } });
 } catch (error) {
   if (ConflictError.isInstance(error)) return reloadAndAskAgain();
@@ -168,28 +347,39 @@ try {
   },
 ];
 
-const ROWS: [name: string, pkg: string, write: string, recurring: string, links: string][] = [
-  ['Google Calendar', 'google', 'Yes', 'Yes', 'Google Meet'],
-  ['Microsoft Outlook', 'microsoft', 'Yes', 'Yes', 'Teams'],
-  ['iCloud', 'caldav', 'Yes', 'Yes', 'No'],
-  ['Zoho Calendar', 'caldav', 'Yes', 'Yes', 'No'],
-  ['Any CalDAV server', 'caldav', 'Yes', 'Yes', 'No'],
-  ['Zoom', 'zoom', 'Yes', "Zoom's patterns", 'Zoom'],
-  ['Cal.com', 'calcom', 'Book, move, cancel', 'No', 'No'],
-  ['Calendly', 'calendly', 'Book, cancel', 'No', 'No'],
-  ['ICS feeds', 'ics', 'Read only', 'Yes', 'No'],
+type Support = boolean | string;
+const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Adds video links', 'Sync'];
+const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
+  ['Google Calendar', 'google', [true, true, true, 'Google Meet', true]],
+  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams', true]],
+  ['iCloud', 'caldav', [true, true, true, false, true]],
+  ['Zoho Calendar', 'caldav', [true, true, true, false, true]],
+  ['Any CalDAV server', 'caldav', [true, true, true, false, true]],
+  ['Zoom', 'zoom', [true, true, "Zoom's patterns", 'Zoom', true]],
+  ['Cal.com', 'calcom', [true, 'Book, move, cancel', false, false, true]],
+  ['Calendly', 'calendly', [true, 'Book, cancel', false, false, true]],
+  ['ICS feeds', 'ics', [true, false, true, false, true]],
+];
+
+const STATS = [
+  ['9', 'calendars'],
+  ['1', 'Event type'],
+  ['0', 'vendor SDKs'],
+  ['4', 'runtimes: Node, Bun, Deno, edge'],
 ];
 
 const PROVIDER_CODE = `
 import type { CalendarProviderV1 } from '@calsdk/provider';
 
-export function fastmail(settings: FastmailSettings): CalendarProviderV1<'fastmail'> {
+type Fastmail = CalendarProviderV1<'fastmail'>;
+
+export function fastmail(settings: Settings): Fastmail {
   return {
     specificationVersion: 'v1',
     provider: 'fastmail',
     capabilities: { /* what it supports */ },
     async doListCalendars(options) { /* ... */ },
-    // doGetEvent, doListEvents, doCreateEvent, doUpdateEvent, doDeleteEvent
+    // doGetEvent, doListEvents, doCreateEvent, ...
   };
 }`;
 
@@ -206,132 +396,148 @@ describeProviderConformance({
 });`;
 
 export default async function HomePage() {
-  const providerTabs = await Promise.all(
-    PROVIDERS.map(async ({ id, label, pkg, setup }) => ({
-      id,
-      label,
-      code: await highlightCode(providerCode(id, pkg, setup), [2, 4]),
-    })),
-  );
-  const lengths = await Promise.all(
-    [30, 60, 90].map(async (minutes) => ({
-      minutes,
-      code: await highlightCode(demoCode(minutes), [5]),
-    })),
-  );
-  const examples = await Promise.all(
-    EXAMPLES.map(async ({ id, label, note, code }) => ({
-      id,
-      label,
-      note,
-      code: await highlightCode(code),
-    })),
-  );
-  const [contractCode, conformanceCode] = await Promise.all([
-    highlightCode(PROVIDER_CODE),
-    highlightCode(CONFORMANCE_CODE),
-  ]);
+  const [providers, payloads, eventCode, lengths, features, contractCode, conformanceCode] =
+    await Promise.all([
+      Promise.all(
+        PROVIDERS.map(async ({ id, label, pkg, color, setup }) => ({
+          id,
+          label,
+          color,
+          code: await highlightCode(providerCode(id, pkg, setup), { changed: [2, 4] }),
+        })),
+      ),
+      Promise.all(
+        PAYLOADS.map(async ({ name, format, lang, code }) => ({
+          name,
+          format,
+          code: await highlightCode(code, { lang }),
+        })),
+      ),
+      highlightCode(EVENT_CODE),
+      Promise.all(
+        [30, 60, 90].map(async (minutes) => ({
+          minutes,
+          code: await highlightCode(demoCode(minutes), { changed: [5] }),
+        })),
+      ),
+      Promise.all(
+        FEATURES.map(async ({ code, ...feature }) => ({
+          ...feature,
+          code: await highlightCode(code),
+        })),
+      ),
+      highlightCode(PROVIDER_CODE),
+      highlightCode(CONFORMANCE_CODE),
+    ]);
 
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 sm:px-6">
-      <section className="grid items-center gap-10 py-16 sm:py-24 lg:grid-cols-[1fr_1.1fr]">
-        <div>
-          <h1 className="text-4xl font-semibold tracking-[-0.035em] text-white sm:text-6xl">
-            One API for every calendar
+    <div className="mx-auto w-full max-w-[1200px] border-x border-line">
+      <section className="hero-grid relative overflow-hidden px-5 pt-16 pb-12 sm:px-10 sm:pt-28 sm:pb-16">
+        <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
+          Calendar SDK for TypeScript
+        </p>
+        <div className="mt-6 grid items-end gap-10 lg:grid-cols-[1.35fr_1fr]">
+          <h1 className="text-[clamp(3.25rem,10vw,7.75rem)] leading-[0.9] font-semibold tracking-[-0.055em] text-white">
+            Every calendar.
+            <br />
+            <span className="text-neutral-500">One API.</span>
           </h1>
-          <p className="mt-5 max-w-xl text-lg text-neutral-400">
-            Read, write and sync events on Google Calendar, Outlook, iCloud, Zoom, Cal.com and more.
-            The same functions and types on every provider.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Link
-              href="/docs/quickstart"
-              className="flex h-11 items-center rounded-lg bg-white px-5 text-sm font-medium text-black hover:bg-neutral-200"
-            >
-              Get started
-            </Link>
-            <a
-              href={githubUrl}
-              className="flex h-11 items-center rounded-lg border border-line px-5 text-sm font-medium text-neutral-200 hover:border-neutral-600"
-            >
-              GitHub
-            </a>
-          </div>
-          <div className="mt-6">
-            <CopyCommand command="bun add calsdk @calsdk/google" />
+          <div>
+            <p className="text-lg leading-relaxed text-neutral-300">
+              Read, write and sync events on Google, Outlook, iCloud, Zoom, Cal.com, Calendly and
+              any CalDAV server. Same functions, same types, on every one.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center gap-3">
+              <Link
+                href="/docs/quickstart"
+                className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
+              >
+                Get started
+              </Link>
+              <a
+                href={githubUrl}
+                className="flex h-11 items-center rounded-full border border-line px-6 text-sm font-medium text-neutral-200 hover:border-neutral-500"
+              >
+                GitHub
+              </a>
+            </div>
+            <div className="mt-4">
+              <CopyCommand command="bun add calsdk @calsdk/google" />
+            </div>
           </div>
         </div>
-        <TabbedCode
-          label="Provider"
-          tabs={providerTabs.map((tab) => ({
-            ...tab,
-            note: 'Switch providers: only the blue lines change.',
-          }))}
-        />
       </section>
+
+      <ProviderShowcase providers={providers} />
+
+      <div className="grid grid-cols-2 border-t border-line lg:grid-cols-4">
+        {STATS.map(([value, label]) => (
+          <div
+            key={label}
+            className="border-line px-5 py-8 sm:px-10 odd:border-r lg:border-r lg:last:border-r-0 [&:nth-child(-n+2)]:border-b lg:[&:nth-child(-n+2)]:border-b-0"
+          >
+            <div className="text-5xl font-semibold tracking-[-0.04em] text-white">{value}</div>
+            <div className="mt-2 text-sm text-neutral-400">{label}</div>
+          </div>
+        ))}
+      </div>
+
+      <Section
+        id="why"
+        index="01"
+        eyebrow="The problem"
+        title="Four APIs. Four ways to write one standup."
+      >
+        <FieldCompare payloads={payloads} result={eventCode} />
+      </Section>
 
       <Section
         id="demo"
-        title="Find a time that works for everyone"
-        intro="This is calsdk running in your browser, on two in-memory calendars. Change the length, then book a slot to put it on both."
+        index="02"
+        eyebrow="Live"
+        title="Find a time that works for both"
+        intro="This is the real findFreeTime, running in your browser on two in-memory calendars. Book a slot and both calendars update."
       >
         <FreeTimeDemo lengths={lengths} />
       </Section>
 
-      <Section id="examples" title="The calendar code you would rather not write">
-        <TabbedCode label="Example" tabs={examples} />
-      </Section>
+      <section id="features" className="scroll-mt-20 border-t border-line">
+        <SectionHeading
+          index="03"
+          eyebrow="Features"
+          title="The calendar code you'd rather not write"
+        />
+        <FeatureTabs features={features} />
+      </section>
 
-      <Section id="why" title="Why calsdk">
-        <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-3">
-          <Point title="Built on fetch">
-            No vendor SDKs. It runs on Node, Bun, Deno and edge runtimes.
-          </Point>
-          <Point title="Tested against real accounts">
-            Google, Outlook, Zoho, Zoom, Cal.com and Calendly are recorded against their real APIs,
-            and the recordings replay in CI.
-          </Point>
-          <Point title="Clear about gaps">
-            When a provider cannot do something, you get a warning or an error, never a quietly
-            different event.
-          </Point>
-        </div>
-      </Section>
-
-      <Section id="providers" title="Providers">
-        <div className="overflow-x-auto rounded-xl border border-line">
-          <table className="w-full min-w-[40rem] text-left text-sm">
-            <thead className="bg-panel text-neutral-400">
-              <tr>
-                {['Provider', 'Package', 'Write', 'Recurring', 'Meeting links', 'Sync'].map((h) => (
-                  <th key={h} className="px-4 py-3 font-medium">
-                    {h}
-                  </th>
+      <Section id="providers" index="04" eyebrow="Providers" title="Nine calendars today">
+        <div className="grid gap-px overflow-hidden rounded-xl border border-line bg-line sm:grid-cols-2 lg:grid-cols-3">
+          {SUPPORT.map(([name, pkg, support]) => (
+            <div key={name} className="bg-fd-background p-6">
+              <div className="flex items-baseline justify-between gap-3">
+                <h3 className="text-lg font-semibold tracking-[-0.02em] text-white">{name}</h3>
+                <span className="font-mono text-xs text-neutral-500">@calsdk/{pkg}</span>
+              </div>
+              <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-2 text-sm sm:mt-5 sm:block sm:space-y-2">
+                {CAPABILITIES.map((capability, i) => (
+                  <Capability key={capability} label={capability} value={support[i] ?? false} />
                 ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-line">
-              {ROWS.map(([name, pkg, write, recurring, links]) => (
-                <tr key={name}>
-                  <td className="px-4 py-3 font-medium text-white">{name}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-neutral-400">@calsdk/{pkg}</td>
-                  <Cell value={write} />
-                  <Cell value={recurring} />
-                  <Cell value={links} />
-                  <Cell value="Yes" />
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </ul>
+            </div>
+          ))}
         </div>
-        <p className="mt-4 text-sm text-neutral-400">
-          Free/busy and findFreeTime work on all of them, and across them.
+        <p className="mt-5 text-sm text-neutral-400">
+          Free/busy and findFreeTime work on every provider, and across providers. Google, Outlook,
+          Zoho, Zoom, Cal.com and Calendly are tested against their real APIs, and the recordings
+          replay in CI.
         </p>
       </Section>
 
       <Section
         id="your-provider"
-        title="Add any calendar"
+        index="05"
+        eyebrow="Extend"
+        title="Bring your own calendar"
         intro="A provider is one object with a few functions. Test it with the conformance suite most official providers run."
       >
         <div className="grid gap-4 lg:grid-cols-2">
@@ -344,18 +550,27 @@ export default async function HomePage() {
         </div>
       </Section>
 
-      <section className="flex flex-col items-center gap-6 border-t border-line py-20 text-center">
-        <Mark className="size-12 text-white" />
-        <h2 className="text-3xl font-semibold tracking-[-0.03em] text-white">
-          Try it without credentials
+      <section className="hero-grid relative flex flex-col items-center overflow-hidden border-t border-line px-5 py-24 text-center sm:py-32">
+        <Mark className="size-14 text-white" />
+        <h2 className="mt-8 max-w-3xl text-[clamp(2.5rem,7vw,5rem)] leading-[0.95] font-semibold tracking-[-0.05em] text-white">
+          Try it without an account
         </h2>
-        <CopyCommand command="bun add calsdk @calsdk/mock" />
-        <Link href="/docs/quickstart" className="text-sm text-accent-blue hover:underline">
-          Read the quickstart
-        </Link>
+        <p className="mt-5 max-w-md text-neutral-400">
+          The mock provider is a real calendar in memory. Swap in Google or Outlook when you're
+          ready.
+        </p>
+        <div className="mt-8 flex flex-col items-center gap-4">
+          <CopyCommand command="bun add calsdk @calsdk/mock" />
+          <Link
+            href="/docs/quickstart"
+            className="flex h-11 items-center rounded-full bg-white px-6 text-sm font-medium text-black hover:bg-neutral-200"
+          >
+            Read the quickstart
+          </Link>
+        </div>
       </section>
 
-      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line py-8 text-sm text-neutral-500">
+      <footer className="flex flex-wrap items-center justify-between gap-4 border-t border-line px-5 py-8 text-sm text-neutral-500 sm:px-10">
         <span>MIT License</span>
         <div className="flex gap-5">
           <Link href="/docs" className="hover:text-white">
@@ -366,41 +581,70 @@ export default async function HomePage() {
           </a>
         </div>
       </footer>
-    </main>
+    </div>
+  );
+}
+
+function SectionHeading({
+  index,
+  eyebrow,
+  title,
+  intro,
+}: {
+  index: string;
+  eyebrow: string;
+  title: string;
+  intro?: string;
+}) {
+  return (
+    <div className="px-5 pt-16 pb-8 sm:px-10 sm:pt-24 sm:pb-10">
+      <p className="font-mono text-xs uppercase tracking-[0.2em] text-neutral-500">
+        <span className="text-accent-blue">{index}</span> / {eyebrow}
+      </p>
+      <h2 className="mt-4 max-w-4xl text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-6xl">
+        {title}
+      </h2>
+      {intro && <p className="mt-5 max-w-2xl text-lg text-neutral-400">{intro}</p>}
+    </div>
   );
 }
 
 function Section({
   id,
-  title,
-  intro,
   children,
+  ...heading
 }: {
   id: string;
+  index: string;
+  eyebrow: string;
   title: string;
   intro?: string;
   children: ReactNode;
 }) {
   return (
-    <section id={id} className="scroll-mt-20 border-t border-line py-16 sm:py-20">
-      <h2 className="text-2xl font-semibold tracking-[-0.03em] text-white sm:text-3xl">{title}</h2>
-      {intro && <p className="mt-3 max-w-2xl text-neutral-400">{intro}</p>}
-      <div className="mt-8">{children}</div>
+    <section id={id} className="scroll-mt-20 border-t border-line">
+      <SectionHeading {...heading} />
+      <div className="px-5 pb-16 sm:px-10 sm:pb-24">{children}</div>
     </section>
   );
 }
 
-function Point({ title, children }: { title: string; children: ReactNode }) {
+function Capability({ label, value }: { label: string; value: Support }) {
   return (
-    <div className="bg-fd-background p-6">
-      <h3 className="font-semibold text-white">{title}</h3>
-      <p className="mt-2 text-sm text-neutral-400">{children}</p>
-    </div>
+    <li className="flex items-center gap-2 sm:gap-3">
+      <span
+        aria-hidden
+        className={`size-2 shrink-0 rounded-full ${
+          value === false ? 'border border-neutral-700' : 'bg-accent-blue'
+        }`}
+      />
+      <span className={value === false ? 'text-neutral-600' : 'text-neutral-200'}>
+        {label}
+        <span className="sr-only">{value === false ? ', not supported' : ', supported'}</span>
+      </span>
+      {typeof value === 'string' && (
+        <span className="text-xs text-neutral-500 sm:ml-auto sm:text-right">{value}</span>
+      )}
+    </li>
   );
-}
-
-function Cell({ value }: { value: string }) {
-  const tone =
-    value === 'No' ? 'text-neutral-600' : value === 'Yes' ? 'text-neutral-200' : 'text-neutral-300';
-  return <td className={`px-4 py-3 ${tone}`}>{value}</td>;
 }

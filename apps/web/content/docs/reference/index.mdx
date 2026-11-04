@@ -24,7 +24,7 @@ Every function except `findFreeTime` takes these. `findFreeTime` takes `maxRetri
 
 <TypeTable
   type={{
-    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as google({ accessToken }).', required: true },
+    calendar: { type: 'CalendarProvider', description: 'The provider to call, such as `google({ accessToken })`.', required: true },
     maxRetries: { type: 'number', description: 'Retries for rate limits, timeouts, server errors and network failures. Creates only retry rate limits.', default: '2' },
     abortSignal: { type: 'AbortSignal', description: 'Cancels the call, including waits between retries.' },
     headers: { type: 'Record<string, string>', description: 'Extra HTTP headers sent with each provider request.' },

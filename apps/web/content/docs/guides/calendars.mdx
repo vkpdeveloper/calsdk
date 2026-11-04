@@ -46,11 +46,11 @@ Check `accessRole` before you offer a calendar as somewhere to save events. `own
 
 <TypeTable
   type={{
-    id: { type: 'string', description: 'Pass it as calendarId.', required: true },
+    id: { type: 'string', description: 'Pass it as `calendarId`.', required: true },
     name: { type: 'string', required: true },
     description: { type: 'string' },
     timeZone: { type: 'string', description: "IANA time zone, such as 'Asia/Kolkata'." },
-    color: { type: 'string', description: "Hex color, '#RRGGBB'." },
+    color: { type: 'string', description: "Hex color, `'#RRGGBB'`." },
     isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
     providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id.' },

@@ -69,15 +69,15 @@ test('books the first free half hour', async () => {
   type={{
     calendars: {
       type: '(Partial<Calendar> & { id: string })[]',
-      description: "Calendars to start with. The first is primary unless another sets isPrimary. Defaults to one calendar, 'cal_1'.",
+      description: "Calendars to start with. The first is primary unless another sets `isPrimary`. Defaults to one calendar, `'cal_1'`.",
     },
     events: {
       type: '(EventInput & { id?: string; calendarId?: string })[]',
-      description: 'Events to start with, created in order. They skip the checks createEvent runs, so give every dateTime an offset.',
+      description: 'Events to start with, created in order. They skip the checks `createEvent` runs, so give every `dateTime` an offset.',
     },
     now: {
       type: '() => Date',
-      description: 'Clock for createdAt and updatedAt. Defaults to the real time.',
+      description: 'Clock for `createdAt` and `updatedAt`. Defaults to the real time.',
     },
     user: {
       type: 'Person',
@@ -85,7 +85,7 @@ test('books the first free half hour', async () => {
     },
     defaultPageSize: {
       type: 'number',
-      description: 'Page size for listings without pageSize, and for sync rounds.',
+      description: 'Page size for listings without `pageSize`, and for sync rounds.',
       default: '250',
     },
   }}

@@ -21,12 +21,12 @@ const { slots } = await findFreeTime({
 
 <TypeTable
   type={{
-    calendars: { type: '{ calendar; calendarIds?; headers?; providerOptions? }[]', description: "Every calendar that must be free, grouped by provider. calendarIds defaults to ['primary']. headers and providerOptions apply to that provider's requests.", required: true },
+    calendars: { type: '{ calendar; calendarIds?; headers?; providerOptions? }[]', description: "Every calendar that must be free, grouped by provider. `calendarIds` defaults to `['primary']`. `headers` and `providerOptions` apply to that provider's requests.", required: true },
     timeMin: { type: 'Date | string', required: true },
     timeMax: { type: 'Date | string', required: true },
     duration: { type: 'number', description: 'Meeting length in minutes. A positive whole number.', required: true },
     workingHours: { type: 'WorkingHours', description: 'Only return slots inside these hours. Leave out to search the whole window.' },
-    slotInterval: { type: 'number', description: 'Minutes between slot starts, lined up with the hour in workingHours.timeZone, or UTC.', default: '15' },
+    slotInterval: { type: 'number', description: 'Minutes between slot starts, lined up with the hour in `workingHours.timeZone`, or UTC.', default: '15' },
     maxRetries: { type: 'number', default: '2' },
     abortSignal: { type: 'AbortSignal' },
   }}
@@ -47,7 +47,7 @@ const { slots } = await findFreeTime({
 
 <TypeTable
   type={{
-    slots: { type: '{ start: string; end: string }[]', description: 'Free slots in order, as UTC ISO 8601 instants. Neighbouring slots overlap when slotInterval is less than duration.', required: true },
+    slots: { type: '{ start: string; end: string }[]', description: 'Free slots in order, as UTC ISO 8601 instants. Neighbouring slots overlap when `slotInterval` is less than duration.', required: true },
     warnings: { type: 'Warning[]', description: 'Warnings from every provider, such as the free/busy fallback.', required: true },
   }}
 />

@@ -17,10 +17,10 @@ await saveCursor(nextCursor);
 
 <TypeTable
   type={{
-    cursor: { type: 'string', description: 'nextCursor from the previous sync. Leave out for a full first sync.' },
+    cursor: { type: 'string', description: '`nextCursor` from the previous sync. Leave out for a full first sync.' },
     calendarId: { type: 'string', default: "'primary'" },
-    paginate: { type: 'boolean', description: 'false returns one page at a time.', default: 'true' },
-    pageToken: { type: 'string', description: 'With paginate: false, nextPageToken from the previous page of this round.' },
+    paginate: { type: 'boolean', description: '`false` returns one page at a time.', default: 'true' },
+    pageToken: { type: 'string', description: 'With `paginate: false`, `nextPageToken` from the previous page of this round.' },
   }}
 />
 
@@ -31,8 +31,8 @@ Plus the [common options](/docs/reference#common-options).
 <TypeTable
   type={{
     changes: { type: "({ type: 'upsert'; event: CalendarEvent } | { type: 'delete'; eventId: string })[]", description: 'Every change since cursor, in the order the provider returns them. Apply them in that order.', required: true },
-    nextCursor: { type: 'string', description: 'Store it and pass it as cursor next time. Always present by default. With paginate: false, only on the last page.' },
-    nextPageToken: { type: 'string', description: 'With paginate: false: more pages are left in this round.' },
+    nextCursor: { type: 'string', description: 'Store it and pass it as `cursor` next time. Always present by default. With `paginate: false`, only on the last page.' },
+    nextPageToken: { type: 'string', description: 'With `paginate: false`: more pages are left in this round.' },
     warnings: { type: 'Warning[]', required: true },
   }}
 />

@@ -20,7 +20,7 @@ export function remarkTypeTableSearch() {
         const props = readTypeProp(node);
         const contents = Object.entries(props).map(([name, prop]) => ({
           heading: undefined,
-          content: `${name}: ${prop.type}. ${prop.description ?? ''}`.trim(),
+          content: `${name}: ${prop.type}. ${prop.description?.replaceAll('`', '') ?? ''}`.trim(),
         }));
         node.data = { ...node.data, structuredData: { contents } };
       }

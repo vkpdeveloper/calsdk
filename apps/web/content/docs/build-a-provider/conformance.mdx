@@ -47,7 +47,7 @@ Credentials aren't saved: only the few request headers that change what a reques
     createProvider: { type: '(settings: { fetch }) => CalendarProviderV1', description: "Creates the provider under test. Pass fetch through.", required: true },
     calendarId: { type: 'string', description: 'Calendar the tests write to.', default: "'primary'" },
     recording: { type: "{ path: string; mode?: 'record' | 'replay' }", description: 'Record and replay HTTP traffic. Leave out to call the API live.' },
-    http: { type: 'boolean', description: 'Run the tests that stub HTTP responses. Set false for providers that do not call fetch.', default: 'true' },
+    http: { type: 'boolean', description: 'Run the tests that stub HTTP responses. Set `false` for providers that do not call `fetch`.', default: 'true' },
     firstDay: { type: 'string', description: "First day test events are placed on, 'YYYY-MM-DD'. Fixed rather than relative to today, so recordings replay.", default: "'2030-01-07'" },
   }}
 />

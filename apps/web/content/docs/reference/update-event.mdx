@@ -21,10 +21,10 @@ const { event } = await updateEvent({
 <TypeTable
   type={{
     eventId: { type: 'string', required: true },
-    patch: { type: 'EventPatch', description: 'Fields to change. Left out fields stay as they are; null clears a field. start and end can be replaced, not cleared.', required: true },
+    patch: { type: 'EventPatch', description: 'Fields to change. Left out fields stay as they are; `null` clears a field. `start` and `end` can be replaced, not cleared.', required: true },
     calendarId: { type: 'string', default: "'primary'" },
     scope: { type: "'this' | 'all' | 'thisAndFollowing'", description: 'For occurrence and exception ids: change only this instance, the whole series, or this and later instances.', default: "'this'" },
-    ifMatch: { type: 'string', description: "Only update if the event's etag still matches. Otherwise throws ConflictError." },
+    ifMatch: { type: 'string', description: "Only update if the event's `etag` still matches. Otherwise throws `ConflictError`." },
     sendUpdates: { type: "'all' | 'externalOnly' | 'none'", description: 'Whether attendees are notified.' },
   }}
 />
@@ -35,7 +35,7 @@ Plus the [common options](/docs/reference#common-options). `EventPatch` has the 
 
 <TypeTable
   type={{
-    event: { type: 'CalendarEvent', description: 'The updated event. Its id can differ from eventId: Cal.com replaces a booking when it moves. Use the returned id from then on.', required: true },
+    event: { type: 'CalendarEvent', description: 'The updated event. Its `id` can differ from `eventId`: Cal.com replaces a booking when it moves. Use the returned id from then on.', required: true },
     warnings: { type: 'Warning[]', required: true },
   }}
 />

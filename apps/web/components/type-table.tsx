@@ -27,10 +27,29 @@ export function TypeTable({ type }: { type: Record<string, TypeTableProp> }) {
             )}
           </dt>
           {prop.description ? (
-            <dd className="mt-1 text-fd-muted-foreground leading-relaxed">{prop.description}</dd>
+            <dd className="mt-1 text-fd-muted-foreground leading-relaxed">
+              <Description text={prop.description} />
+            </dd>
           ) : null}
         </div>
       ))}
     </dl>
+  );
+}
+
+/** Descriptions are plain strings; backtick spans render as inline code, like in Markdown. */
+function Description({ text }: { text: string }) {
+  return text.split('`').map((part, i) =>
+    i % 2 === 1 ? (
+      <code
+        // biome-ignore lint/suspicious/noArrayIndexKey: the parts of one string never reorder
+        key={i}
+        className="rounded bg-fd-muted px-1 py-0.5 font-mono text-[0.85em] text-fd-foreground"
+      >
+        {part}
+      </code>
+    ) : (
+      part
+    ),
   );
 }

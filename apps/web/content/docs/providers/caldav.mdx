@@ -50,9 +50,9 @@ const { events } = await listEvents({ calendar, timeMin, timeMax });
 
 <TypeTable
   type={{
-    serverUrl: { type: 'string', description: "The server's CalDAV address. The provider finds the account's calendars from it. Set by icloud(); optional for zoho().", required: true },
-    username: { type: 'string', description: 'appleId for icloud(), email for zoho().', required: true },
-    password: { type: 'string', description: 'The password, or an app-specific password where the server asks for one. appPassword for icloud().', required: true },
+    serverUrl: { type: 'string', description: "The server's CalDAV address. The provider finds the account's calendars from it. Set by `icloud()`; optional for `zoho()`.", required: true },
+    username: { type: 'string', description: '`appleId` for `icloud()`, email for `zoho()`.', required: true },
+    password: { type: 'string', description: 'The password, or an app-specific password where the server asks for one. `appPassword` for `icloud()`.', required: true },
     timeZone: { type: 'string', description: 'Zone for times stored without one, and for the bounds of all-day events in listings.', default: "'UTC'" },
     headers: { type: 'Record<string, string | undefined>', description: 'Headers sent with every request.' },
     fetch: { type: 'typeof fetch', description: 'A custom fetch, for example to log or record requests.' },

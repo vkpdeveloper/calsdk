@@ -3,7 +3,7 @@ title: Provider options
 description: Reach provider features calsdk does not model, with options and metadata typed by the provider you pass.
 ---
 
-Say you want to tag each Google event with the order it came from, so you can find it again later. The shared event shape only covers what calendars have in common, and an order id isn't one of those things. For anything provider-specific, like Google's private properties and guest permissions or Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
+The shared event shape covers what every calendar has in common, and the order a booking came from isn't one of those things. For anything provider-specific, like tagging a Google event with its order id or setting Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
 
 ```ts
 import { createEvent } from 'calsdk';

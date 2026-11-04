@@ -101,7 +101,7 @@ await deleteEvent({
 });
 ```
 
-| Function      | Option                    | Type |
+| Function      | Option                    | Type and notes |
 | ------------- | ------------------------- | ---- |
 | `createEvent` | `eventTypeId`             | `number`. Required on `'primary'` |
 | `createEvent` | `metadata`                | `Record<string, string>`, stored on the booking |
@@ -114,7 +114,7 @@ await deleteEvent({
 
 Events carry `providerMetadata.calcom`:
 
-| Field                | Type |
+| Field                | Type and notes |
 | -------------------- | ---- |
 | `bookingId`          | `number`, Cal.com's numeric id. The event id is the `uid` |
 | `eventTypeId`        | `number` |

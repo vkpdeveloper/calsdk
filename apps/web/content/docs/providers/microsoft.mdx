@@ -88,7 +88,7 @@ await syncEvents({
 });
 ```
 
-| Function                     | Option          | Type |
+| Function                     | Option          | Type and notes |
 | ---------------------------- | --------------- | ---- |
 | `createEvent`, `updateEvent` | `showAs`        | `'free' \| 'tentative' \| 'busy' \| 'oof' \| 'workingElsewhere'`. Overrides `showAs` on the event |
 | `createEvent`, `updateEvent` | `importance`    | `'low' \| 'normal' \| 'high'` |
@@ -100,7 +100,7 @@ await syncEvents({
 
 Events carry `providerMetadata.microsoft`:
 
-| Field        | Type |
+| Field        | Type and notes |
 | ------------ | ---- |
 | `showAs`     | `string`: Outlook's own `'free'`, `'tentative'`, `'busy'`, `'oof'`, `'workingElsewhere'` or `'unknown'` |
 | `importance` | `string` |

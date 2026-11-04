@@ -61,7 +61,7 @@ Updating, all-day and recurring events, `ifMatch` and search aren't supported. F
 
 ### Booking
 
-Creating an event books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type, and other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests, up to 10. Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
+Creating an event books an event type through Calendly's Scheduling API, which needs a paid Calendly plan. The meeting lasts as long as the event type, and other lengths throw `InvalidArgumentError`. Calendly only books times the event type has free. The first attendee books the meeting and the others are added as guests (Calendly accepts up to 10). Without attendees, the user books it for themselves. Fields the event type sets (`title`, `description`, `location`, `createConference`, `reminders`, `color`, `visibility`) are ignored with a warning.
 
 ### Changing and cancelling
 
@@ -93,7 +93,7 @@ await deleteEvent({
 });
 ```
 
-| Function      | Option      | Type |
+| Function      | Option      | Type and notes |
 | ------------- | ----------- | ---- |
 | `createEvent` | `eventType` | `string`, required. The event type's URI or uuid |
 | `createEvent` | `location`  | `{ kind: string; location?: string }`, passed to Calendly as is, such as `{ kind: 'zoom_conference' }` |
@@ -103,7 +103,7 @@ await deleteEvent({
 
 Events carry `providerMetadata.calendly`:
 
-| Field       | Type |
+| Field       | Type and notes |
 | ----------- | ---- |
 | `uri`       | `string`, the scheduled event's URI |
 | `eventType` | `string`, the URI of the event type it was booked on |

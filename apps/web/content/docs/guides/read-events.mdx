@@ -5,7 +5,7 @@ description: List events in a time window, walk every page, fetch one event and 
 
 ## List a time window
 
-Say you're rendering a user's week. `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
+A week view needs every event that touches the week, including the one that started Sunday night. `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
 
 ```ts
 import { listEvents } from 'calsdk';

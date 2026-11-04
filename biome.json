@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/fixtures", "!.changeset/*.md"]
+    "includes": ["**", "!**/fixtures", "!.changeset/*.md", "!apps/web/public/providers"]
   },
   "formatter": {
     "indentStyle": "space",

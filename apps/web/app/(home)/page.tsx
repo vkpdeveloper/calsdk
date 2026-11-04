@@ -34,7 +34,7 @@ const PROVIDERS: {
     label: 'Outlook',
     pkg: 'microsoft',
     color: '#37c5d9',
-    setup: 'microsoft({ accessToken })',
+    setup: 'microsoft({\n  accessToken,\n})',
     support: [true, true, true, 'Teams, work accounts', true],
   },
   {
@@ -42,7 +42,7 @@ const PROVIDERS: {
     label: 'iCloud',
     pkg: 'caldav',
     color: '#ff7a70',
-    setup: 'icloud({ appleId, appPassword })',
+    setup: 'icloud({\n  appleId,\n  appPassword,\n})',
     support: [true, true, true, false, true],
   },
   {
@@ -50,7 +50,7 @@ const PROVIDERS: {
     label: 'Zoho',
     pkg: 'caldav',
     color: '#f0883e',
-    setup: 'zoho({ email, password })',
+    setup: 'zoho({\n  email,\n  password,\n})',
     support: [true, true, true, false, true],
   },
   {
@@ -58,7 +58,7 @@ const PROVIDERS: {
     label: 'CalDAV',
     pkg: 'caldav',
     color: '#a1a1aa',
-    setup: 'caldav({ serverUrl, username, password })',
+    setup: 'caldav({\n  serverUrl,\n  username,\n  password,\n})',
     support: [true, true, true, false, true],
   },
   {
@@ -82,7 +82,7 @@ const PROVIDERS: {
     label: 'Calendly',
     pkg: 'calendly',
     color: '#f5b94a',
-    setup: 'calendly({ accessToken })',
+    setup: 'calendly({\n  accessToken,\n})',
     support: [true, 'book an event type, cancel', false, false, true],
   },
   {
@@ -90,16 +90,27 @@ const PROVIDERS: {
     label: 'ICS feed',
     pkg: 'ics',
     color: '#5ee08f',
-    setup: "ics({ url: 'webcal://example.com/team.ics' })",
+    setup: 'ics({ url: feedUrl })',
     support: [true, false, 'read only', false, true],
   },
 ];
 
-const providerCode = (id: string, pkg: string, setup: string) => `
-import { listEvents } from 'calsdk';
-import { ${id} } from '@calsdk/${pkg}';
-
-const calendar = ${setup};
+// Lines are kept to about 40 characters so the code fits a phone without scrolling.
+function providerCode(id: string, pkg: string, setup: string) {
+  const short = `import { ${id} } from '@calsdk/${pkg}';`;
+  const provider = (
+    short.length > 41 ? `import {\n  ${id},\n} from '@calsdk/${pkg}';` : short
+  ).split('\n');
+  const calendar = `const calendar = ${setup};`.split('\n');
+  const code = ["import { listEvents } from 'calsdk';", ...provider, '', ...calendar].join('\n');
+  // Highlighted lines are 1-based: the provider import, then the calendar after a blank line.
+  const changed = [
+    ...provider.map((_, i) => 2 + i),
+    ...calendar.map((_, i) => 3 + provider.length + i),
+  ];
+  return {
+    changed,
+    code: `${code}
 
 const { events } = await listEvents({
   calendar,
@@ -108,78 +119,124 @@ const { events } = await listEvents({
 });
 
 for (const event of events) {
-  console.log(event.title, event.start, event.conference?.joinUrl);
-}`;
+  console.log(
+    event.title,
+    event.start,
+    event.conference?.joinUrl,
+  );
+}`,
+  };
+}
 
 const FEATURES = [
   {
     id: 'book',
     label: 'Book',
     title: 'Book a meeting, with the video link',
-    body: 'createConference adds Google Meet on Google and Teams on Outlook work accounts. sendUpdates emails the guests, and anything the provider changed or ignored comes back in warnings.',
+    body: 'Create a meeting with a Google Meet or Teams link. Provider changes come back as warnings.',
     code: `
 import { createEvent } from 'calsdk';
 
-const { event, warnings } = await createEvent({
+const result = await createEvent({
   calendar,
   event: {
     title: 'Intro call',
-    start: { dateTime: '2026-11-12T15:00:00', timeZone: 'Europe/Berlin' },
-    end: { dateTime: '2026-11-12T15:30:00', timeZone: 'Europe/Berlin' },
-    attendees: [{ email: 'guest@example.com' }],
+    start: {
+      dateTime: '2026-11-12T15:00:00',
+      timeZone: 'Europe/Berlin',
+    },
+    end: {
+      dateTime: '2026-11-12T15:30:00',
+      timeZone: 'Europe/Berlin',
+    },
+    attendees: [
+      { email: 'guest@example.com' },
+    ],
     createConference: true,
   },
   sendUpdates: 'all',
 });
 
-event.conference?.joinUrl;`,
+result.event.conference?.joinUrl;
+// Anything the provider changed:
+result.warnings;`,
   },
   {
     id: 'recurring',
     label: 'Repeat',
     title: 'Recurring events are plain RRULEs',
-    body: 'Listing expands a series, and each occurrence has its own id. Move one occurrence or the whole series. Outlook patterns and Zoom recurrence are converted to and from RRULEs.',
+    body: 'Listing expands a series into occurrences. Move one, or the whole series.',
     code: `
-const { event: series } = await createEvent({
+const standup = await createEvent({
   calendar,
   event: {
     title: 'Standup',
-    start: { dateTime: '2026-11-09T09:30:00', timeZone: 'America/New_York' },
-    end: { dateTime: '2026-11-09T09:45:00', timeZone: 'America/New_York' },
-    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR'],
+    start: {
+      dateTime: '2026-11-09T09:30:00',
+      timeZone: 'America/New_York',
+    },
+    end: {
+      dateTime: '2026-11-09T09:45:00',
+      timeZone: 'America/New_York',
+    },
+    recurrence: [
+      'RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR',
+    ],
   },
 });
 
 // Move only Friday's standup.
-const { events } = await listEvents({ calendar, timeMin: '2026-11-13', timeMax: '2026-11-14' });
-const friday = events.find((event) => event.seriesId === series.id);
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-13',
+  timeMax: '2026-11-14',
+});
+const friday = events.find(
+  (e) => e.seriesId === standup.event.id,
+);
 
 if (friday) {
-  await updateEvent({ calendar, eventId: friday.id, scope: 'this', patch: { start, end } });
+  await updateEvent({
+    calendar,
+    eventId: friday.id,
+    scope: 'this',
+    patch: { start, end },
+  });
 }`,
   },
   {
     id: 'sync',
     label: 'Sync',
     title: 'Keep a copy in your database',
-    body: 'The first call returns what the provider syncs. Later calls return only changes, as upserts and deletes. An expired cursor is its own error, so a full resync is one branch.',
+    body: 'Later calls return only what changed. An expired cursor is its own error, so a full resync is one branch.',
     code: `
-import { SyncCursorExpiredError, syncEvents } from 'calsdk';
+import {
+  SyncCursorExpiredError,
+  syncEvents,
+} from 'calsdk';
 
 async function sync(cursor?: string) {
-  const { changes, nextCursor } = await syncEvents({ calendar, cursor });
-  for (const change of changes) {
-    if (change.type === 'delete') await db.remove(change.eventId);
-    else await db.save(change.event);
+  const result = await syncEvents({
+    calendar,
+    cursor,
+  });
+  for (const change of result.changes) {
+    if (change.type === 'delete') {
+      await db.remove(change.eventId);
+    } else {
+      await db.save(change.event);
+    }
   }
-  await db.saveCursor(nextCursor);
+  await db.saveCursor(result.nextCursor);
 }
 
 try {
   await sync(await db.cursor());
 } catch (error) {
-  if (!SyncCursorExpiredError.isInstance(error)) throw error;
-  // The cursor expired: drop this calendar's copy and cursor, then start over.
+  if (!SyncCursorExpiredError.isInstance(error)) {
+    throw error;
+  }
+  // Expired: drop the copy, start over.
   await db.clear();
   await sync();
 }`,
@@ -188,7 +245,7 @@ try {
     id: 'typed',
     label: 'Types',
     title: 'Typed by the calendar you pass',
-    body: 'Provider options and metadata are checked against the provider in calendar, so a misspelled option is a compile error, not a silent no-op.',
+    body: 'Provider options are checked against the calendar you pass, so a typo fails to compile.',
     code: `
 const calendar = google({ accessToken });
 
@@ -200,25 +257,49 @@ await createEvent({
   },
 });
 
-// Type error: Google has no \`guestsCanModfy\` option.
-await createEvent({ calendar, event, providerOptions: { google: { guestsCanModfy: true } } });
+// Type error: misspelled option.
+await createEvent({
+  calendar,
+  event,
+  providerOptions: {
+    google: { guestsCanModfy: true },
+  },
+});
 
-const { event: created } = await createEvent({ calendar, event });
-created.providerMetadata?.google?.iCalUID; // string | undefined`,
+const { event: created } = await createEvent({
+  calendar,
+  event,
+});
+// string | undefined
+created.providerMetadata?.google?.iCalUID;`,
   },
   {
     id: 'errors',
     label: 'Errors',
     title: 'Errors you can branch on',
-    body: "Conflicts, rate limits, auth and missing events each have a class. ifMatch updates only if nobody changed the event since you read it. A provider that can't do something warns or throws, and never quietly drops it.",
+    body: 'Conflicts, rate limits, auth and missing events each have their own error class.',
     code: `
-import { ConflictError, RateLimitError, updateEvent } from 'calsdk';
+import {
+  ConflictError,
+  RateLimitError,
+  updateEvent,
+} from 'calsdk';
 
 try {
-  await updateEvent({ calendar, eventId: event.id, ifMatch: event.etag, patch: { title } });
+  await updateEvent({
+    calendar,
+    eventId: event.id,
+    // Only if nobody edited it since.
+    ifMatch: event.etag,
+    patch: { title },
+  });
 } catch (error) {
-  if (ConflictError.isInstance(error)) return reloadAndAskAgain();
-  if (RateLimitError.isInstance(error)) return retryLater();
+  if (ConflictError.isInstance(error)) {
+    return reloadAndAskAgain();
+  }
+  if (RateLimitError.isInstance(error)) {
+    return retryLater();
+  }
   throw error;
 }`,
   },
@@ -271,17 +352,20 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
 export default async function HomePage() {
   const [providers, features] = await Promise.all([
     Promise.all(
-      PROVIDERS.map(async ({ id, label, pkg, color, setup, support }) => ({
-        id,
-        label,
-        pkg: `@calsdk/${pkg}`,
-        color,
-        code: await highlightCode(providerCode(id, pkg, setup), { changed: [2, 4] }),
-        support: CAPABILITIES.map((capability, i): [string, Support] => [
-          capability,
-          support[i] ?? false,
-        ]),
-      })),
+      PROVIDERS.map(async ({ id, label, pkg, color, setup, support }) => {
+        const { code, changed } = providerCode(id, pkg, setup);
+        return {
+          id,
+          label,
+          pkg: `@calsdk/${pkg}`,
+          color,
+          code: await highlightCode(code, { changed }),
+          support: CAPABILITIES.map((capability, i): [string, Support] => [
+            capability,
+            support[i] ?? false,
+          ]),
+        };
+      }),
     ),
     Promise.all(
       FEATURES.map(async ({ code, ...feature }) => ({
@@ -454,7 +538,7 @@ function Section({
   return (
     <section className="mt-24 sm:mt-36">
       <div className="mb-10 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
-        <h2 className="max-w-2xl text-balance text-4xl leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-5xl">
+        <h2 className="max-w-2xl text-balance text-[2rem] leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-5xl">
           {title}
         </h2>
         <div className="lg:max-w-sm">

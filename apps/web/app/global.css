@@ -85,6 +85,16 @@ html > body[data-scroll-locked] {
 #nd-home-layout {
   --fd-layout-width: 1360px;
 }
+/* Same insets as the page sections (px-5, sm:px-10), so the logo and GitHub icon sit on
+   the content edges. */
+#nd-home-layout #nd-nav nav > div {
+  padding-inline: 1.25rem;
+}
+@media (min-width: 640px) {
+  #nd-home-layout #nd-nav nav > div {
+    padding-inline: 2.5rem;
+  }
+}
 
 /* A faint week grid behind the hero and the closing section. */
 .hero-grid {
@@ -264,9 +274,10 @@ html > body[data-scroll-locked] {
       inset 0 -1px 0 var(--color-fd-border);
   }
   /* Narrower tables hold prose after the first column; keep those columns wide enough to
-     read, and let the table scroll instead of squeezing them into strips. Four-column
-     tables end in longer notes. */
-  .prose table:not(:has(th:nth-child(5))) td:not(:first-child) {
+     read, and let the table scroll instead of squeezing them into strips. A cell holding
+     just a link, such as a function name, stays narrow. Four-column tables end in longer
+     notes. */
+  .prose table:not(:has(th:nth-child(5))) td:not(:first-child):not(:has(> a:only-child)) {
     min-width: 9rem;
   }
   .prose table:not(:has(th:nth-child(5))) td:last-child {

@@ -3,6 +3,7 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 import { Tab, Tabs } from 'fumadocs-ui/components/tabs';
 import defaultMdxComponents from 'fumadocs-ui/mdx';
 import type { MDXComponents } from 'mdx/types';
+import { ProviderLogo, type ProviderLogoId } from './provider-logo';
 import { TypeTable } from './type-table';
 
 export function getMDXComponents(components?: MDXComponents) {
@@ -10,6 +11,10 @@ export function getMDXComponents(components?: MDXComponents) {
     ...defaultMdxComponents,
     Accordion,
     Accordions,
+    // Docs tables are tight on phones, where the logo would push the name onto its own line.
+    ProviderLogo: ({ id }: { id: ProviderLogoId }) => (
+      <ProviderLogo id={id} className="me-1 max-sm:hidden" />
+    ),
     Step,
     Steps,
     Tab,

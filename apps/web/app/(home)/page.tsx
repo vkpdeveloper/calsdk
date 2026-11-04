@@ -390,7 +390,7 @@ type Support = boolean | string;
 const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Adds video links', 'Sync'];
 const SUPPORT: [name: string, pkg: string, support: Support[]][] = [
   ['Google Calendar', 'google', [true, true, true, 'Google Meet', true]],
-  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams', true]],
+  ['Microsoft Outlook', 'microsoft', [true, true, true, 'Teams (work)', true]],
   ['iCloud', 'caldav', [true, true, true, false, true]],
   ['Zoho Calendar', 'caldav', [true, true, true, false, true]],
   ['Any CalDAV server', 'caldav', [true, true, true, false, true]],

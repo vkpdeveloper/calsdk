@@ -9,7 +9,7 @@ These are the shapes every function takes and returns, the same for every provid
 import type { Calendar, CalendarEvent, EventInput, EventPatch, EventTime } from 'calsdk';
 ```
 
-The event type is named `CalendarEvent` so it does not clash with the DOM's `Event`.
+The event type is named `CalendarEvent` so it doesn't clash with the DOM's `Event`.
 
 ## CalendarEvent
 
@@ -26,14 +26,14 @@ The event type is named `CalendarEvent` so it does not clash with the DOM's `Eve
     start: { type: 'EventTime', required: true },
     end: { type: 'EventTime', required: true },
     recurrence: { type: 'string[]', description: 'RFC 5545 lines. Set on series.' },
-    status: { type: "'confirmed' | 'tentative' | 'cancelled'", description: 'cancelled is for events that keep their details, such as a cancelled Outlook meeting. Deleted events are not returned.', required: true },
+    status: { type: "'confirmed' | 'tentative' | 'cancelled'", description: "`'cancelled'` means the event still exists with its details, such as a cancelled Outlook meeting. Deleted events aren't returned.", required: true },
     showAs: { type: "'busy' | 'free'", description: 'Whether the event blocks time in free/busy.', required: true },
     visibility: { type: "'default' | 'public' | 'private'" },
     organizer: { type: 'Person' },
     attendees: { type: 'Attendee[]' },
     conference: { type: 'Conference' },
     reminders: { type: 'Reminders' },
-    color: { type: 'string', description: "`'#RRGGBB'`." },
+    color: { type: 'string', description: "A hex color, `'#RRGGBB'`." },
     htmlLink: { type: 'string', description: "Opens the event in the provider's app." },
     etag: { type: 'string', description: 'Version tag. Pass as `ifMatch`.' },
     createdAt: { type: 'string', description: 'ISO 8601.' },
@@ -83,7 +83,7 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
     name: { type: 'string', required: true },
     description: { type: 'string' },
     timeZone: { type: 'string', description: 'IANA time zone.' },
-    color: { type: 'string', description: "`'#RRGGBB'`." },
+    color: { type: 'string', description: "A hex color, `'#RRGGBB'`." },
     isPrimary: { type: 'boolean', description: "The user's default calendar. `'primary'` resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
     providerMetadata: { type: 'Record<string, JSONObject>' },

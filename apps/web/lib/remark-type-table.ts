@@ -44,11 +44,16 @@ export function remarkTypeTableSearch() {
   };
 }
 
-/** "Label: value" for two columns; otherwise each later cell is named by its header. */
+/**
+ * "Label: value." for two columns; otherwise each later cell is named by its header, and
+ * every part ends as a sentence.
+ */
 function rowSentence(header: string[], [label = '', ...cells]: string[]) {
-  if (cells.length === 1) return `${label}: ${cells[0]}`;
-  return [label, ...cells.map((cell, i) => `${header[i + 1]}: ${cell}`)].join('. ');
+  if (cells.length === 1) return stop(`${label}: ${cells[0]}`);
+  return [label, ...cells.map((cell, i) => `${header[i + 1]}: ${cell}`)].map(stop).join(' ');
 }
+
+const stop = (text: string) => (/[.!?:]$/.test(text) ? text : `${text}.`);
 
 function cellText(node: Node): string {
   if (node.type === 'inlineCode') return `\`${node.value}\``;

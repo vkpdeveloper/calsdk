@@ -53,6 +53,6 @@ Check `accessRole` before you offer a calendar as somewhere to save events. `own
     color: { type: 'string', description: "Hex color, `'#RRGGBB'`." },
     isPrimary: { type: 'boolean', description: "The user's default calendar. 'primary' resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific fields, keyed by provider id.' },
   }}
 />

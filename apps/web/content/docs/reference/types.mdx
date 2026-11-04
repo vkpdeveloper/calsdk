@@ -38,7 +38,7 @@ The event type is named `CalendarEvent` so it doesn't clash with the DOM's `Even
     etag: { type: 'string', description: 'Version tag. Pass as `ifMatch`.' },
     createdAt: { type: 'string', description: 'ISO 8601.' },
     updatedAt: { type: 'string', description: 'ISO 8601.' },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific fields, keyed by provider id. Typed by the provider.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific fields, keyed by provider id. Typed by the provider.' },
   }}
 />
 
@@ -95,7 +95,7 @@ What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, 
     color: { type: 'string', description: "A hex color, `'#RRGGBB'`." },
     isPrimary: { type: 'boolean', description: "The user's default calendar. `'primary'` resolves to it.", required: true },
     accessRole: { type: "'owner' | 'writer' | 'reader' | 'freeBusyReader'", required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>' },
+    providerMetadata: { type: 'ProviderMetadata' },
   }}
 />
 
@@ -163,3 +163,4 @@ type Warning =
 | `CalendarCapabilities` | See [Capabilities](/docs/reference/capabilities) |
 | `EventOf<C>` | `CalendarEvent` with `providerMetadata` typed by provider `C` |
 | `ProviderOptionsFor<C, Operation>` | The `providerOptions` provider `C` accepts for an operation |
+| `ProviderMetadata` | `Record<string, JSONObject>`: one plain JSON object per provider id |

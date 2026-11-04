@@ -39,7 +39,7 @@ Every result except `findFreeTime`'s has these. `findFreeTime` returns `slots` a
 <TypeTable
   type={{
     warnings: { type: 'Warning[]', description: 'Parts of the request the provider could not honor, or fallbacks used.', required: true },
-    providerMetadata: { type: 'Record<string, JSONObject>', description: 'Provider-specific output for the call.' },
+    providerMetadata: { type: 'ProviderMetadata', description: 'Provider-specific output for the call.' },
     response: { type: '{ headers?: Record<string, string>; body?: unknown }', description: 'The raw response, for debugging only.' },
   }}
 />

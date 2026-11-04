@@ -1,13 +1,22 @@
 import { ArrowRight, FlaskConical, Globe, type LucideIcon, Plug, ShieldCheck } from 'lucide-react';
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { JsonLd } from '@/components/json-ld';
 import { CalendarApp } from '@/components/landing/calendar-app';
 import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { ProviderShowcase } from '@/components/landing/provider-showcase';
 import { Mark } from '@/components/logo';
-import { githubUrl } from '@/lib/shared';
+import { pageMetadata, softwareJsonLd } from '@/lib/seo';
+import { appDescription, githubUrl } from '@/lib/shared';
+
+export const metadata: Metadata = pageMetadata({
+  title: { absolute: 'calsdk: TypeScript SDK for Google Calendar, Outlook and iCloud' },
+  description: appDescription,
+  path: '/',
+});
 
 type Support = boolean | string;
 const CAPABILITIES = ['Read', 'Write', 'Recurring', 'Video links', 'Sync'];
@@ -425,6 +434,7 @@ export default async function HomePage() {
 
   return (
     <div className="mx-auto w-full max-w-[1200px] px-5 sm:px-8">
+      <JsonLd data={softwareJsonLd} />
       <section className="flex flex-col items-center pt-14 text-center sm:pt-20">
         <h1 className="text-balance text-[clamp(3rem,9vw,5.5rem)] leading-[0.92] font-semibold tracking-[-0.045em] text-white">
           Every calendar.

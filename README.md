@@ -54,6 +54,8 @@ const { slots } = await findFreeTime({
 });
 ```
 
+For a whole app, the [Next.js booking page](examples/nextjs-booking) shows your free times, takes bookings and deploys to Vercel in one click.
+
 ## Switch calendars, not code
 
 When the logic works, swap the mock for a real calendar. Only the import and the line that creates `calendar` change, and events come back in the same shape from every provider.

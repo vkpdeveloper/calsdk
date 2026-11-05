@@ -96,6 +96,36 @@ function postJsonLd(slug: string, post: ReturnType<typeof getPost>) {
         isPartOf: { '@id': website['@id'] },
         about: { '@type': 'SoftwareSourceCode', name: appName, codeRepository: githubUrl },
       },
+      ...faqJsonLd(post),
     ],
   };
+}
+
+/**
+ * A post's `## FAQ` section as FAQPage data, built from the post itself so the two can't drift:
+ * every heading after `## FAQ` is a question, and the text under it is the answer.
+ */
+function faqJsonLd(post: ReturnType<typeof getPost>) {
+  const { headings, contents } = post.structuredData;
+  const start = headings.findIndex((heading) => heading.content === 'FAQ');
+  if (start === -1) return [];
+
+  return [
+    {
+      '@type': 'FAQPage',
+      mainEntity: headings.slice(start + 1).map((heading) => ({
+        '@type': 'Question',
+        name: heading.content,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: contents
+            .filter((block) => block.heading === heading.id)
+            .map((block) => block.content)
+            .join(' ')
+            // Search text keeps inline code backticks; an answer is plain text.
+            .replaceAll('`', ''),
+        },
+      })),
+    },
+  ];
 }

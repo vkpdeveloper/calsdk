@@ -10,7 +10,7 @@ Here's the event I'll use for the rest of this post: a standup at 9:30 in Berlin
 
 I've spent a lot of time with these differences while building [calsdk](/docs), so here is how each provider stores that week, and the places where it caught me out.
 
-## Google: RRULE, plus objects for everything else
+## How does Google Calendar store a recurring event?
 
 Google is the closest to the standard. The series is one event with a `recurrence` array of RFC 5545 lines:
 
@@ -41,7 +41,7 @@ For reading, `singleEvents=true` expands the series on Google's side and gives y
 
 The hard part is "this and following events". Google Calendar's UI offers it, but the API has no such operation. You build it yourself: end the old series just before the chosen occurrence, and create a new series starting there. If the rule has a `COUNT`, you split the count between the two halves. Then you learn that Google resets edited occurrences when a series moves or splits, so Friday's change to 10:00 is lost unless you carry it over.
 
-## Outlook: patterns instead of rules
+## How does Outlook store a recurring event?
 
 Microsoft Graph doesn't use RRULE at all. A series is a `seriesMaster` with a `recurrence` object made of a pattern and a range:
 
@@ -76,7 +76,7 @@ Instances have a `type` of `occurrence` or `exception` and a `seriesMasterId`. C
 
 There's no "this and following" here either. You end the series and create a new one, with the same bookkeeping as on Google.
 
-## CalDAV: the series is a file
+## How do iCloud and CalDAV store a recurring event?
 
 iCloud, Fastmail, Nextcloud and Zoho all speak CalDAV. CalDAV stores calendars as iCalendar files on a server, so the whole series, with every exception, is one `.ics` resource:
 
@@ -108,7 +108,7 @@ Then you expand the series yourself. CalDAV does let you ask the server to expan
 
 Servers vary in small ways too. Zoho, for example, answers a calendar query without the event data, so every event has to be fetched again.
 
-## Putting one API over all three
+## How do you put one API over all three?
 
 The design choice that made the rest possible was to speak RFC 5545 everywhere. Google and CalDAV already use it, so only Outlook needs translating, in both directions. Every event has a `kind`: `single`, `series`, `occurrence` or `exception`. Occurrences and exceptions carry a `seriesId` and an `originalStart`, which stays put when the occurrence moves. Here's the standup week, which works the same with `microsoft()` or `icloud()` in place of `google()`:
 
@@ -151,3 +151,25 @@ await updateEvent({
 The rule I held to is to never save a schedule that's different from the one you asked for. If Outlook can't store a rule exactly, calsdk throws instead of saving something close. If the call can still do what you meant, but something is lost along the way, such as Google resetting edited occurrences when a series moves, the call succeeds and returns a warning that says so. A standup that quietly lands on the wrong days is worse than an error.
 
 The [recurring events guide](/docs/guides/recurring-events) has every scope and the limits for each provider. If you want to see it work without connecting an account, the [quickstart](/docs/quickstart) runs against an in-memory calendar.
+
+## FAQ
+
+### How does Google Calendar mark a cancelled occurrence?
+
+In one of two ways: an `EXDATE` line in the series' `recurrence`, or, when the occurrence was deleted through the API, an instance with `status: "cancelled"`. Code that reads Google events has to handle both.
+
+### Does Microsoft Graph support RRULE?
+
+No. Graph stores a recurring event as a pattern and a range, with Windows time zone names. Most RRULEs translate, but hourly rules, `RDATE` and some `BYDAY` and `BYMONTHDAY` combinations have no Outlook pattern.
+
+### How do I find the deleted occurrences of an Outlook recurring event?
+
+Read `cancelledOccurrences` on the series master. Graph only returns it when you `$select` it on a single event by id, so it costs one request per series.
+
+### Do the calendar APIs support "this and following events"?
+
+Google, Outlook and CalDAV don't have that operation. You end the old series before the chosen occurrence and create a new series from it. calsdk does that split for you on Google.
+
+### How do you edit one occurrence on CalDAV?
+
+Rewrite the series' `.ics` file: add or change a `VEVENT` with a `RECURRENCE-ID` for that occurrence, then `PUT` the file back with `If-Match` on its ETag.

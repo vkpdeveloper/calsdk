@@ -8,7 +8,7 @@ Sooner or later, every app that shows a user's calendar wants its own copy of it
 
 Google Calendar, Microsoft Outlook and CalDAV servers like iCloud can all tell you "here's what changed since last time". They just do it in three quite different ways, and each one breaks in its own way. Here's what I learned wiring up all three.
 
-## Google: sync tokens
+## How do Google Calendar sync tokens work?
 
 Google has the cleanest model. You list a calendar's events once with no filters, follow `pageToken` through every page, and the last page hands you a `nextSyncToken`:
 
@@ -28,7 +28,7 @@ Tokens also expire, for example after a while unused, or when the calendar's sha
 
 One more detail: if you sync without `singleEvents=true`, a recurring meeting arrives as one series event with an RRULE, and any occurrence someone moved or edited arrives as its own exception event. That's what you want for a copy, since an endless daily standup has no finite list of occurrences to sync.
 
-## Outlook: delta queries over a window
+## How does Outlook delta sync work?
 
 Microsoft Graph uses delta queries, and for calendars the one that works across a whole range is `calendarView/delta`. Unlike Google, it requires a window up front:
 
@@ -53,7 +53,7 @@ Two more things surprised me. The same event can appear more than once in a roun
 
 Expiry looks different too. Depending on the case, Graph answers `410 Gone` or an error code like `SyncStateNotFound`, `SyncStateInvalid` or `resyncRequired`. All of them mean the same thing: start over.
 
-## CalDAV: sync-collection, and the CTags before it
+## How do you sync an iCloud or CalDAV calendar?
 
 CalDAV is the protocol behind iCloud, Fastmail, Nextcloud, Zoho and many self-hosted servers. It speaks WebDAV over XML, and its sync story has two generations.
 
@@ -75,7 +75,7 @@ There are a few rough edges. A server can truncate the answer, which it signals 
 
 And one CalDAV resource is a whole series: the master and all its exceptions live in one `.ics` file. When it changes, you have to compare its exceptions with the ones you saw last time to find out which were removed.
 
-## Calendars with no change feed
+## What about calendars with no change feed?
 
 Not every API has any of this. Calendly and Zoom can't list meetings by when they last changed. The honest approach there is to read every meeting each time and compare it with what you saw last time. To keep that cheap, you store a short hash per event rather than the event itself, so your "cursor" is a list of ids and fingerprints that grows with the calendar. ICS feeds are the same, except the server can save you the download with `304 Not Modified` if you send its `ETag` back. Cal.com sits in between: it can list bookings sorted by when they were updated, so you can read from the last change you saw (with some overlap, because a slow write can land a little out of order).
 
@@ -111,3 +111,25 @@ Under the hood it's exactly the approaches above. Google uses sync tokens over t
 Save the cursor only after the changes are applied. If your process dies in between, the next run replays them instead of losing them.
 
 The [sync guide](/docs/guides/sync) covers paging through a large first sync and how much each provider reads per round. If you want to see the API without connecting a real account, the [quickstart](/docs/quickstart) runs against an in-memory calendar.
+
+## FAQ
+
+### What happens when a Google Calendar sync token expires?
+
+Google answers `410 Gone`. Delete your copy of the calendar and run a full sync again. There's no way to resume from where you were.
+
+### Can I use timeMin with a Google sync token?
+
+No. `timeMin`, `timeMax`, `updatedMin`, `q`, `orderBy`, `iCalUID` and the extended property filters can't be combined with `syncToken`, so the first sync has to read the whole calendar.
+
+### How does Microsoft Graph report deleted events in a delta query?
+
+As stubs with an `@removed` annotation. The same stub also marks events outside the window that changed, so an event moved out of your window looks like a deletion.
+
+### Does iCloud support incremental sync?
+
+Yes. iCloud is a CalDAV server, and CalDAV's `sync-collection` REPORT (RFC 6578) returns the resources that changed or were removed since your last sync token.
+
+### When should I save the sync cursor?
+
+Only after the changes are applied to your copy. If your process dies in between, the next run replays the changes instead of losing them.

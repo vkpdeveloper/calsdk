@@ -8,7 +8,7 @@ Here's a feature request that sounds like an afternoon's work: show the times wh
 
 You fetch two lists of busy times, merge them and look for the gaps. The merge really is the easy part. The hard part is getting a busy time you can trust from each provider, because the three big calendar APIs each answer "when is this person busy?" in a different way, and one of them barely answers it at all.
 
-## Google: a real free/busy endpoint
+## How does Google Calendar report busy time?
 
 Google is the easy one. You `POST /freeBusy` with a window and a list of calendar ids, and get back busy ranges per calendar:
 
@@ -29,7 +29,7 @@ There are two things to notice. First, Google has already applied its own rules:
 
 The only limit worth knowing is that one request covers at most 50 calendars, so a big team needs batching.
 
-## Outlook: an endpoint you probably can't use
+## Why not use Outlook's getSchedule?
 
 Microsoft Graph does have a free/busy endpoint, `getSchedule`. You give it email addresses and a window, and it gives you back an `availabilityView` string with one digit per time slot:
 
@@ -47,7 +47,7 @@ Interestingly, `getSchedule` writes "working elsewhere" as `0`, which is free. I
 
 Time zones need care too. Graph names zones the Windows way, like `"Pacific Standard Time"`, not `"America/Los_Angeles"`, and a `Prefer: outlook.timezone` header changes which zone it writes times in. For busy time, ask for UTC with `Prefer: outlook.timezone="UTC"` and you skip the mapping entirely.
 
-## iCloud and CalDAV: compute it yourself
+## How do you get busy time from iCloud and CalDAV?
 
 CalDAV is the protocol behind iCloud, Fastmail, Nextcloud, Zoho and most self-hosted calendars. On paper it has free/busy too: RFC 4791 defines a `free-busy-query` REPORT. In practice I didn't want a feature where whether it works depends on which server the user happens to be on, so calsdk treats CalDAV the same way as Outlook: list the events and compute.
 
@@ -70,7 +70,7 @@ What comes back is raw iCalendar text, and everything is now your problem. Recur
 
 Some servers have extra quirks. Zoho answers a calendar query without the event data, so every event has to be fetched again with a `calendar-multiget`. If one of those fetches fails, it's tempting to skip that event. Don't: a missing event is time that looks free. calsdk fails the whole listing instead.
 
-## The gotchas that cut across all three
+## What catches people out on every provider?
 
 All-day events are dates, not instants. A holiday on November 9 means November 9 in the calendar's own time zone, so to turn it into a busy range you need that zone, which you only get from the calendar list. If you can't get it, the safe choice is to block the day in every zone, from UTC+14 through UTC-12. That covers more than a day, but it never shows a holiday as free.
 
@@ -80,7 +80,7 @@ Declined invitations are a judgment call. The event fallback in calsdk only look
 
 Rate limits are real once you list a week of events for 20 people. Retry `429`s after the `Retry-After` the provider sends, and keep the window as small as the feature allows.
 
-## The merge, and why it should fail closed
+## How do you merge busy times without double booking?
 
 With trustworthy busy ranges in hand, the algorithm is short:
 
@@ -126,3 +126,25 @@ try {
 Slots come back as UTC instants, ready to show in each viewer's own zone. The [free time guide](/docs/guides/free-time) covers slot intervals, overlapping slots and booking the one the user picks.
 
 If you want to poke at it without connecting a real account, the [quickstart](/docs/quickstart) runs against an in-memory calendar in a couple of minutes.
+
+## FAQ
+
+### Does Outlook have a free/busy API?
+
+Yes: Microsoft Graph's `getSchedule`. It doesn't support personal Microsoft accounts (outlook.com and hotmail.com), and it gives up past 1000 entries in the window. Listing events with `calendarView` and computing busy time yourself works for every account.
+
+### Does iCloud support free/busy queries?
+
+iCloud speaks CalDAV, and RFC 4791 defines a `free-busy-query` REPORT, but support varies between CalDAV servers. Listing events with a `calendar-query` REPORT and computing busy time yourself works the same on every server.
+
+### Should tentative and declined events count as busy?
+
+Count everything except events marked "show as free" as busy, including tentative ones. calsdk also treats a declined invite that is still on the calendar as busy, because offering a taken slot is worse than hiding a free one.
+
+### What should happen when one calendar can't be read?
+
+Fail and say which calendar it was. Slots computed without that calendar are guesses that can clash. calsdk's `findFreeTime` throws `FreeBusyUnavailableError` with the provider and calendar id.
+
+### How many calendars can one Google freeBusy request check?
+
+50. Batch the request for larger teams.

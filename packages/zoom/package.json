@@ -2,6 +2,15 @@
   "name": "@cal-sdk/zoom",
   "version": "0.1.0",
   "description": "Zoom provider for calsdk: scheduled Zoom meetings as calendar events.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "zoom",
+    "zoom-meetings",
+    "video-conferencing"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

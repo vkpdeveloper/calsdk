@@ -2,6 +2,23 @@
   "name": "@cal-sdk/core",
   "version": "0.1.0",
   "description": "One typed API for Google Calendar, Microsoft Outlook and other calendar providers.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "google-calendar",
+    "outlook",
+    "microsoft-graph",
+    "icloud",
+    "caldav",
+    "free-busy",
+    "recurring-events",
+    "calendar-sync",
+    "scheduling",
+    "sdk",
+    "nylas-alternative"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",
@@ -32,13 +49,6 @@
   "publishConfig": {
     "access": "public"
   },
-  "keywords": [
-    "calendar",
-    "google-calendar",
-    "outlook",
-    "microsoft-graph",
-    "sdk"
-  ],
   "dependencies": {
     "@cal-sdk/provider": "workspace:*",
     "@cal-sdk/provider-utils": "workspace:*"

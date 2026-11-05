@@ -2,6 +2,14 @@
   "name": "@cal-sdk/provider-utils",
   "version": "0.1.0",
   "description": "Helpers for writing calsdk calendar providers.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "calendar-provider",
+    "helpers"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

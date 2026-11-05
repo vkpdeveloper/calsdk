@@ -2,6 +2,15 @@
   "name": "@cal-sdk/calendly",
   "version": "0.1.0",
   "description": "Calendly provider for calsdk: scheduled meetings as calendar events.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "calendly",
+    "bookings",
+    "scheduling"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

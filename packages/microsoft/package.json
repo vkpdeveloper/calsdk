@@ -2,6 +2,18 @@
   "name": "@cal-sdk/microsoft",
   "version": "0.1.0",
   "description": "Microsoft Outlook (Graph) calendar provider for calsdk.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "outlook",
+    "outlook-calendar",
+    "microsoft-graph",
+    "office-365",
+    "microsoft-365",
+    "teams"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>calsdk playground</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        font-family: ui-sans-serif, system-ui, sans-serif;
+        background: #09090a;
+        color: #e5e5e5;
+      }
+      body {
+        margin: 0;
+        padding: 24px 16px 48px;
+      }
+      h1 {
+        margin: 0 0 4px;
+        font-size: 20px;
+      }
+      p {
+        margin: 0 0 20px;
+        color: #a3a3a3;
+        font-size: 14px;
+      }
+      #week {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+      }
+      .day {
+        border: 1px solid #222226;
+        border-radius: 10px;
+        padding: 10px;
+        background: #0f0f11;
+      }
+      .day h2 {
+        margin: 0 0 8px;
+        font-size: 13px;
+        color: #a3a3a3;
+        font-weight: 500;
+      }
+      .item {
+        margin-top: 6px;
+        padding: 6px 8px;
+        border-radius: 6px;
+        border-left: 3px solid var(--color);
+        background: #18181b;
+        font-size: 13px;
+      }
+      .item time {
+        display: block;
+        font: 11px ui-monospace, monospace;
+        color: #a3a3a3;
+      }
+      .free {
+        border-left-style: dashed;
+        background: transparent;
+        color: #86efac;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>calsdk playground</h1>
+    <p>Two in-memory calendars, one API. Edit <code>src/main.ts</code> and the week redraws.</p>
+    <div id="week"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

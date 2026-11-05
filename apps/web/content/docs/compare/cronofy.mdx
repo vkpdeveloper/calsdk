@@ -1,0 +1,67 @@
+---
+title: calsdk vs Cronofy
+description: An open source alternative to the Cronofy calendar API. How a hosted sync service and a library differ in cost, data and features.
+---
+
+Cronofy is a hosted calendar service. Your users connect their calendars to Cronofy, Cronofy keeps a synced copy of their events, and your app reads and writes through Cronofy's API. calsdk is a library that runs inside your app and calls Google, Microsoft, iCloud and the others directly, with tokens your app holds. There's no copy of anyone's calendar on a third-party server, and no monthly bill.
+
+## Side by side
+
+|                         | Cronofy                                                       | calsdk                                                                   |
+| ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| What it is              | Hosted API with its own synced copy of each calendar          | Open source TypeScript library (MIT)                                     |
+| Price                   | From $819 a month for 500 accounts                            | Free                                                                     |
+| Calendars               | Google, Microsoft 365, Outlook.com, Exchange, iCloud          | Google, Microsoft, iCloud, Zoho, any CalDAV server, Zoom, Cal.com, Calendly, ICS feeds |
+| Calendar data           | Stored by Cronofy, 42 days back to 201 days ahead             | Not stored anywhere but your app, if you choose to                       |
+| OAuth                   | Users authorize Cronofy; your app holds Cronofy tokens        | Your app holds the provider tokens                                       |
+| Change notifications    | Push notification channels                                    | Incremental [sync](/docs/guides/sync) you run on a schedule              |
+| Availability            | Multi-person and sequenced availability API                   | [findFreeTime](/docs/guides/free-time) across any mix of providers       |
+| Scheduling UI           | UI Elements and an embeddable scheduler                       | None                                                                     |
+| Languages               | .NET, PHP, Ruby, Python and Node SDKs                         | TypeScript and JavaScript only                                           |
+
+Cronofy prices and features are from [cronofy.com/pricing](https://www.cronofy.com/pricing) and the [Cronofy docs](https://docs.cronofy.com/developers/), checked in November 2026.
+
+## What it costs
+
+Cronofy's API plans start with Emerging at $819 a month on annual billing ($899 month to month), which includes 500 synced accounts, then $1.39 for each one after that. Growth is $2,399 a month for 3,000 accounts. There's a free trial but no free production plan.
+
+For an app with 1,000 connected users, that's about $1,500 a month on Emerging. For an app with 50 users, it's still $819, which is often the deciding factor for a small product where calendars are one feature among many.
+
+calsdk costs nothing. The provider APIs it calls are free within their quotas.
+
+## Where your users' data goes
+
+Cronofy's model is a synced copy. Its docs say it stores event information for a window from 42 days in the past to 201 days ahead, and reads are limited to that window unless you ask support to extend it. Data lives in the data center you pick (US, UK, Germany, Canada, Australia or Singapore), and each one is a separate account.
+
+Because users authorize Cronofy rather than your app, your app holds Cronofy's tokens, not Google's or Microsoft's. If you ever move off Cronofy, your users have to connect their calendars again.
+
+With calsdk, your app holds the provider tokens and talks to the provider directly. If you want a local copy, [syncEvents](/docs/guides/sync) keeps one in your own database, with whatever window you like.
+
+## When Cronofy is the better choice
+
+Cronofy does a lot that calsdk doesn't. Pick it if you want a hosted scheduling UI, sequenced availability (book an interviewer, then a second one straight after), meeting rooms, or push notifications without running your own sync job. Pick it for its compliance paperwork (ISO 27001, SOC 2, HIPAA) if a buyer asks for a vendor that has it. And pick it if your backend isn't JavaScript.
+
+## When calsdk fits better
+
+calsdk fits when calendars are a feature of your app rather than the product, and $819 a month before your first user doesn't make sense. It fits when you'd rather not add a vendor that stores your users' calendars, when you need Zoho, Fastmail, Nextcloud, Cal.com or Calendly, and when your app already has the user's Google or Microsoft token from sign in.
+
+Here's free time across two providers, the core of most scheduling features:
+
+```ts
+import { findFreeTime } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
+import { microsoft } from '@cal-sdk/microsoft';
+
+const { slots } = await findFreeTime({
+  calendars: [
+    { calendar: google({ accessToken: hostToken }) },
+    { calendar: microsoft({ accessToken: guestToken }) },
+  ],
+  timeMin: new Date(),
+  timeMax: new Date(Date.now() + 7 * 86_400_000),
+  duration: 30,
+  workingHours: { start: '09:00', end: '17:00', timeZone: 'Europe/London' },
+});
+```
+
+[Install calsdk](/docs/installation) or try it without an account in the [quickstart](/docs/quickstart).

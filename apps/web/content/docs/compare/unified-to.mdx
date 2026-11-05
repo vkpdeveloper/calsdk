@@ -1,0 +1,51 @@
+---
+title: calsdk vs Unified.to
+description: An open source alternative to the Unified.to calendar API. A hosted unified API and a library compared on cost, coverage and data.
+---
+
+Unified.to is a hosted unified API that covers many categories, calendars among them. Your app calls Unified.to, and it calls the calendar provider live, without keeping a copy. calsdk does the calendar part as a library: it runs in your app and calls the providers directly, with tokens your app holds. Both normalize events across providers. The difference is the hop through a vendor, and the bill that comes with it.
+
+## Side by side
+
+|                         | Unified.to                                                  | calsdk                                                                   |
+| ----------------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------ |
+| What it is              | Hosted unified API, calendars are one category of many      | Open source TypeScript library (MIT), calendars only                     |
+| Price                   | Per API call, from $750 a month for production              | Free                                                                     |
+| Calendars               | Google, Outlook, Exchange, iCloud, Zoom, Calendly, Cal.com, Zoho and others | Google, Microsoft, iCloud, Zoho, any CalDAV server, Zoom, Cal.com, Calendly, ICS feeds |
+| Where requests go       | Your app, then Unified.to, then the provider                | Your app, then the provider                                              |
+| OAuth                   | Embeddable authorization component                          | Your app's job                                                           |
+| Change notifications    | Native webhooks, or polled "virtual" webhooks               | Incremental [sync](/docs/guides/sync) you run on a schedule              |
+| Free/busy               | A busy object per integration                               | [findFreeTime](/docs/guides/free-time) across any mix of providers       |
+| Languages               | TypeScript, Python, PHP, Java, C#, Ruby and Go SDKs         | TypeScript and JavaScript only                                           |
+
+Unified.to prices and features are from [unified.to/pricing](https://unified.to/pricing) and [unified.to/calendar](https://unified.to/calendar), checked in November 2026.
+
+## What it costs
+
+Unified.to bills by API volume rather than by connected account, with unlimited connections. The free Test plan is for non-production use. Production starts with Grow at $750 a month for 750,000 calls, then $1 per 1,000 calls, and goes up to Scale at $3,000 a month.
+
+That model is friendly if you have many users who each make few calls. It's less friendly for calendars, where a sync job or a free-time search makes several calls per user every few minutes.
+
+calsdk costs nothing, and provider APIs are free within their quotas.
+
+## Where your users' data goes
+
+Unified.to says it never stores end-customer data and that every request hits the provider live, with no caching. That's a better position than a service that keeps a copy, but every request still passes through Unified.to's servers (US, EU or AU). With calsdk there's no middle hop: your server calls Google or Microsoft directly.
+
+## When Unified.to is the better choice
+
+Pick Unified.to if you need many categories at once, say a CRM, an ATS and calendars, behind one vendor and one auth component. Pick it if your backend is in Go, Java or C#, or if you want webhooks without writing a sync job.
+
+## When calsdk fits better
+
+calsdk fits when calendars are what you need, and you want them deep rather than broad. It handles recurring series with per-occurrence edits and "this and following" where the provider supports it, free time that fails closed instead of guessing, and sync with a stored cursor, with typed warnings whenever a provider can't do exactly what you asked. It also fits when $750 a month doesn't make sense for one feature, and when you'd rather your users' calendar traffic not pass through a third party.
+
+```ts
+import { listEvents } from '@cal-sdk/core';
+import { icloud } from '@cal-sdk/caldav';
+
+const calendar = icloud({ appleId, appPassword });
+const { events } = await listEvents({ calendar, timeMin, timeMax });
+```
+
+[Install calsdk](/docs/installation) or try it without an account in the [quickstart](/docs/quickstart).

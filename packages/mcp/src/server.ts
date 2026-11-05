@@ -119,7 +119,7 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       annotations: { readOnlyHint: true },
     },
     async ({ account }) => {
-      const chosen = account ? [account] : names;
+      const chosen = account === undefined ? names : [account];
       const result = await Promise.all(
         chosen.map(async (name) => {
           const { calendars, warnings } = await listCalendars({ calendar: calendarOf(name) });

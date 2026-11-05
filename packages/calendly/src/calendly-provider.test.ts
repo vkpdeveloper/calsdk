@@ -11,7 +11,7 @@ import { calendly } from './calendly-provider';
 
 // The 30 minute event type of a test account, and a time it was free when recorded. To
 // re-record, set them to an event type and free slot of your account, and run with
-// CALSDK_RECORD=1 and CALENDLY_TOKEN set. Booking needs a paid plan. The account must
+// CALSDK_RECORD=1 and CALENDLY_TOKEN set. The free plan allows 5 bookings a day. The account must
 // have no other active meetings, as a sync reads all of them. Then redact the recording
 // with scripts/redact-recording.ts.
 const EVENT_TYPE = 'a098fbc8-efdc-4617-919c-5990a514addb';

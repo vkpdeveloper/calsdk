@@ -9,6 +9,9 @@ export const appDescription =
 // the bare domain redirects here.
 export const siteUrl = 'https://www.cal-sdk.com';
 
+// Google Analytics 4 web stream for www.cal-sdk.com.
+export const gaMeasurementId = 'G-M7MHD0NEWY';
+
 export const docsRoute = '/docs';
 export const docsImageRoute = '/og/docs';
 export const docsContentRoute = '/llms.mdx/docs';

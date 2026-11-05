@@ -116,13 +116,13 @@ describe('event time', () => {
   });
 
   it('reads a date-time without an offset in its own time zone, not the host zone', () => {
-    expect(
-      eventTimeToInstant({ dateTime: '2026-11-09T10:00:00', timeZone: 'Europe/Berlin' }),
-    ).toBe(Date.parse('2026-11-09T09:00:00Z'));
+    expect(eventTimeToInstant({ dateTime: '2026-11-09T10:00:00', timeZone: 'Europe/Berlin' })).toBe(
+      Date.parse('2026-11-09T09:00:00Z'),
+    );
     // Daylight saving time in New York.
-    expect(
-      eventTimeToInstant({ dateTime: '2026-07-01T09:30', timeZone: 'America/New_York' }),
-    ).toBe(Date.parse('2026-07-01T13:30:00Z'));
+    expect(eventTimeToInstant({ dateTime: '2026-07-01T09:30', timeZone: 'America/New_York' })).toBe(
+      Date.parse('2026-07-01T13:30:00Z'),
+    );
   });
 
   it('adds days across month and year ends', () => {

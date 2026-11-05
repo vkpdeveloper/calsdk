@@ -2,6 +2,15 @@
   "name": "@cal-sdk/provider-tests",
   "version": "0.1.0",
   "description": "Conformance tests and a record/replay fetch for calsdk calendar providers.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "calendar-provider",
+    "conformance-tests",
+    "testing"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

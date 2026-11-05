@@ -2,6 +2,15 @@
   "name": "@cal-sdk/mock",
   "version": "0.1.0",
   "description": "In-memory calsdk calendar provider for tests, examples and offline development.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "mock",
+    "testing",
+    "in-memory"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

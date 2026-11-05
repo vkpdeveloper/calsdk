@@ -2,6 +2,16 @@
   "name": "@cal-sdk/google",
   "version": "0.1.0",
   "description": "Google Calendar provider for calsdk.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "google-calendar",
+    "google-calendar-api",
+    "google-meet",
+    "gcal"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

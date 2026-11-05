@@ -2,6 +2,16 @@
   "name": "@cal-sdk/calcom",
   "version": "0.1.0",
   "description": "Cal.com provider for calsdk: bookings as calendar events.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "cal.com",
+    "calcom",
+    "bookings",
+    "scheduling"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

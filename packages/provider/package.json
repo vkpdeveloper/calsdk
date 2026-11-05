@@ -2,6 +2,14 @@
   "name": "@cal-sdk/provider",
   "version": "0.1.0",
   "description": "The calsdk provider contract: types and error classes for calendar providers.",
+  "keywords": [
+    "calendar",
+    "calendar-api",
+    "typescript",
+    "calsdk",
+    "calendar-provider",
+    "provider"
+  ],
   "license": "MIT",
   "homepage": "https://www.cal-sdk.com",
   "type": "module",

@@ -81,6 +81,18 @@ describe('createCalendarServer', () => {
     expect(noIds.isError).toBe(true);
   });
 
+  it('refuses a free-time window too long to search', async () => {
+    const call = await connect();
+    const result = await call('find_free_time', {
+      timeMin: '2026-01-01T00:00:00Z',
+      timeMax: '2036-01-01T00:00:00Z',
+      duration: 30,
+      slotInterval: 1,
+    });
+    expect(result.isError).toBe(true);
+    expect(result.text).toMatch(/at most 92 days/);
+  });
+
   it('reports calendar errors to the model instead of crashing', async () => {
     const call = await connect();
     const result = await call('delete_event', { eventId: 'missing' });

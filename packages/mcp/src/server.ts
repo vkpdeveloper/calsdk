@@ -49,6 +49,9 @@ const timeBound = (edge: string) =>
     .string()
     .describe(`${edge} of the window: ISO 8601 with an offset, e.g. 2026-11-09T09:00:00+01:00`);
 
+const DAY_MS = 86_400_000;
+const MAX_FREE_TIME_DAYS = 92;
+
 const eventInput = z.object({
   title: z.string().optional(),
   description: z.string().optional(),
@@ -160,8 +163,7 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
     'find_free_time',
     {
       title: 'Find free time',
-      description:
-        'Find meeting slots when every listed calendar is free, across accounts and providers. Fails instead of guessing if a calendar cannot be read.',
+      description: `Find meeting slots when every listed calendar is free, across accounts and providers, in a window of up to ${MAX_FREE_TIME_DAYS} days. Fails instead of guessing if a calendar cannot be read.`,
       inputSchema: z.object({
         // An empty list would read no calendar and call every slot free.
         calendars: z
@@ -201,6 +203,15 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       annotations: { readOnlyHint: true },
     },
     async ({ calendars, maxSlots = 20, ...options }) => {
+      // findFreeTime builds every slot in the window before maxSlots applies, so a long
+      // window with a short interval would block the server. Unparseable bounds are left
+      // to findFreeTime, which rejects them.
+      const windowMs = Date.parse(options.timeMax) - Date.parse(options.timeMin);
+      if (windowMs > MAX_FREE_TIME_DAYS * DAY_MS) {
+        throw new Error(
+          `find_free_time searches at most ${MAX_FREE_TIME_DAYS} days at a time. Split the window.`,
+        );
+      }
       const selected = calendars ?? names.map((account) => ({ account, calendarIds: undefined }));
       const { slots, warnings } = await findFreeTime({
         ...options,

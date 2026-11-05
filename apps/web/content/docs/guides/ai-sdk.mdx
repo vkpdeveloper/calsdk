@@ -90,11 +90,14 @@ import { google } from '@cal-sdk/google';
 import { generateText, isStepCount } from 'ai';
 import { calendarTools } from './calendar-tools';
 
+// "Tomorrow" depends on where the user is, not where the server is.
+const today = new Date().toLocaleDateString('en-US', { timeZone: user.timeZone, dateStyle: 'full' });
+
 const { text } = await generateText({
   model: anthropic('claude-sonnet-5-5'),
   tools: calendarTools(google({ accessToken: user.googleAccessToken }), user.timeZone),
   stopWhen: isStepCount(6),
-  instructions: `You manage the user's calendar. Today is ${new Date().toDateString()}.`,
+  instructions: `You manage the user's calendar. Today is ${today}. All times are in ${user.timeZone}.`,
   prompt: 'Find an hour tomorrow afternoon for a planning session with ana@example.com and book it.',
 });
 ```

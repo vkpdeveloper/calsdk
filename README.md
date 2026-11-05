@@ -90,6 +90,11 @@ const calendar = google({ accessToken: () => getFreshAccessToken() });
 - **Errors you can branch on.** Conflicts, rate limits, auth failures and missing events each have their own error class.
 - **Types that follow the calendar.** Provider options are checked against the calendar you pass, so a misspelled option fails to compile.
 
+## For AI agents
+
+- **MCP server.** `npx -y @cal-sdk/mcp` gives Claude, Cursor or any MCP client tools to read events, find free time across calendars and book meetings. Add `--demo` to try it without an account. [Setup](https://www.cal-sdk.com/docs/guides/mcp).
+- **AI SDK tools.** A few lines turn calsdk functions into tools for an agent, using each user's own token. [Guide](https://www.cal-sdk.com/docs/guides/ai-sdk) and [example](examples/ai-agent).
+
 ## Good to know
 
 - **It's a library, not a hosted service.** It runs in your app and calls each provider directly with tokens you pass in. Your users' calendar data doesn't pass through anyone else.

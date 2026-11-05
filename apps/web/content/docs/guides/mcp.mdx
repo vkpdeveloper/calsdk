@@ -1,0 +1,111 @@
+---
+title: MCP server
+description: Give Claude, Cursor or any MCP client your Google, Outlook or iCloud calendar, with tools to read events, find free time and book meetings.
+---
+
+`@cal-sdk/mcp` is a [Model Context Protocol](https://modelcontextprotocol.io) server built on calsdk. Point an MCP client at it and the model can see your schedule, find a slot that works across all your accounts and put a meeting in it. It runs on your machine and talks to the calendar APIs directly: no hosted service sits in between.
+
+Try it first on two in-memory calendars, no account needed:
+
+```bash
+npx -y @cal-sdk/mcp --demo
+```
+
+## Tools
+
+| Tool | What it does |
+| --- | --- |
+| `list_calendars` | Calendars on every connected account, with ids and access |
+| `list_events` | Events in a window, recurring events expanded into occurrences |
+| `find_free_time` | Slots when every chosen calendar is free, across accounts |
+| `create_event` | A new event, optionally recurring, with attendees or a meeting link |
+| `update_event` | Change some fields, for one occurrence or the whole series |
+| `delete_event` | Remove an event, one occurrence or the rest of a series |
+
+Connect more than one account and each tool takes an `account` argument (`google`, `microsoft`, `icloud` or `caldav`). `find_free_time` takes a `calendars` list instead, with an `account` and optional `calendarIds` in each entry. Left out, it checks the primary calendar of every account, and it fails instead of guessing when one can't be read, so the model never books over a meeting it couldn't see.
+
+## Add it to your client
+
+<Tabs items={['Claude Code', 'Claude Desktop', 'Cursor']}>
+<Tab value="Claude Code">
+
+```bash
+claude mcp add calendar \
+  -e ICLOUD_APPLE_ID=me@icloud.com -e ICLOUD_APP_PASSWORD=xxxx-xxxx-xxxx-xxxx \
+  -- npx -y @cal-sdk/mcp
+```
+
+</Tab>
+<Tab value="Claude Desktop">
+
+Add this to `claude_desktop_config.json` and restart the app:
+
+```json
+{
+  "mcpServers": {
+    "calendar": {
+      "command": "npx",
+      "args": ["-y", "@cal-sdk/mcp"],
+      "env": {
+        "GOOGLE_CLIENT_ID": "...",
+        "GOOGLE_CLIENT_SECRET": "...",
+        "GOOGLE_REFRESH_TOKEN": "..."
+      }
+    }
+  }
+}
+```
+
+</Tab>
+<Tab value="Cursor">
+
+Add this to `.cursor/mcp.json` in your project, or `~/.cursor/mcp.json` for every project:
+
+```json
+{
+  "mcpServers": {
+    "calendar": {
+      "command": "npx",
+      "args": ["-y", "@cal-sdk/mcp"],
+      "env": { "MICROSOFT_CLIENT_ID": "...", "MICROSOFT_REFRESH_TOKEN": "..." }
+    }
+  }
+}
+```
+
+</Tab>
+</Tabs>
+
+## Connect your calendars
+
+Set the variables for each calendar you want. Any mix works.
+
+| Calendar | Variables |
+| --- | --- |
+| Google | `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REFRESH_TOKEN` (or a short-lived `GOOGLE_ACCESS_TOKEN`) |
+| Outlook | `MICROSOFT_CLIENT_ID`, `MICROSOFT_REFRESH_TOKEN`, plus `MICROSOFT_CLIENT_SECRET` for confidential apps (or `MICROSOFT_ACCESS_TOKEN`) |
+| iCloud | `ICLOUD_APPLE_ID`, `ICLOUD_APP_PASSWORD` |
+| Any CalDAV server | `CALDAV_URL`, `CALDAV_USERNAME`, `CALDAV_PASSWORD` |
+
+With a refresh token the server gets a new access token whenever the old one is about to expire, so it keeps working after the first hour.
+
+**iCloud** is the quickest: make an app-specific password at [account.apple.com](https://account.apple.com) under Sign-In and Security, and use it with your Apple ID.
+
+**Google** needs an OAuth client of your own. Create one in the Google Cloud console (type "Web application", with `https://developers.google.com/oauthplayground` as a redirect URI) and enable the Google Calendar API. Then open the [OAuth Playground](https://developers.google.com/oauthplayground), tick "Use your own OAuth credentials" in the settings, authorize the `https://www.googleapis.com/auth/calendar` scope and exchange the code for a refresh token. While the app's publishing status is "Testing", Google expires refresh tokens after 7 days, so publish it (it can stay unverified for your own account) to keep the token.
+
+**Outlook** needs an app registration in Microsoft Entra with the delegated `Calendars.ReadWrite` permission. Get a refresh token with any OAuth tool that requests `offline_access Calendars.ReadWrite`. Set `MICROSOFT_TENANT` if the app is single-tenant, and `MICROSOFT_SCOPE` if you granted something other than `Calendars.ReadWrite`.
+
+## Use it from code
+
+The server is also a function, so you can host it yourself, for example over HTTP with your users' tokens:
+
+```ts
+import { google } from '@cal-sdk/google';
+import { createCalendarServer } from '@cal-sdk/mcp';
+
+const server = createCalendarServer({
+  work: google({ accessToken: () => getTokenFor(userId) }),
+});
+```
+
+Building an agent with the AI SDK instead? You may not need MCP at all: see [AI SDK tools](/docs/guides/ai-sdk).

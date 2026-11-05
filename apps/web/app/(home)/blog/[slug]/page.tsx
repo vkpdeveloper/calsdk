@@ -35,7 +35,7 @@ export default async function Post(props: PageProps<'/blog/[slug]'>) {
         · <time dateTime={post.date}>{formatPostDate(post.date)}</time>
       </p>
       {/* Long inline code, like a full property path, would push the page sideways on phones. */}
-      <article className="prose mt-12 max-w-none border-t border-line pt-10 [&_:not(pre)>code]:[overflow-wrap:anywhere]">
+      <article className="prose mt-12 max-w-none border-t border-line pt-10">
         <MDX components={getMDXComponents()} />
       </article>
       <div className="mt-16 rounded-2xl border border-line bg-panel p-6">

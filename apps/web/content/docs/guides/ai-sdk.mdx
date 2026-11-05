@@ -1,0 +1,113 @@
+---
+title: AI SDK tools
+description: Let an agent built with the Vercel AI SDK read a user's calendar, find free time and book meetings, with each user's own token.
+---
+
+An MCP server is the right fit when the calendar belongs to whoever runs the client. In your own product it usually belongs to the user talking to your agent, and you already hold their OAuth token. Then the simplest setup is a few AI SDK tools that call calsdk directly, built per request with that user's provider.
+
+```npm
+npm install ai @ai-sdk/anthropic zod @cal-sdk/core @cal-sdk/google
+```
+
+## Define the tools
+
+```ts title="calendar-tools.ts"
+import { type CalendarProvider, createEvent, findFreeTime, listEvents } from '@cal-sdk/core';
+import { tool } from 'ai';
+import { z } from 'zod';
+
+const instant = z.string().describe('ISO 8601 date-time with an offset');
+const localTime = z.string().describe('Local date-time, e.g. 2026-11-09T14:00:00');
+
+export function calendarTools(calendar: CalendarProvider, timeZone: string) {
+  return {
+    listEvents: tool({
+      description:
+        'List events between two times, recurring events expanded. If nextPageToken is returned, call again with it as pageToken for the rest.',
+      inputSchema: z.object({ from: instant, to: instant, pageToken: z.string().optional() }),
+      execute: async ({ from, to, pageToken }) => {
+        const { events, nextPageToken } = await listEvents({
+          calendar,
+          timeMin: from,
+          timeMax: to,
+          pageToken,
+        });
+        return {
+          events: events.map(({ id, title, start, end }) => ({ id, title, start, end })),
+          nextPageToken,
+        };
+      },
+    }),
+
+    findFreeTime: tool({
+      description: 'Find free slots of a given length during working hours.',
+      inputSchema: z.object({ from: instant, to: instant, minutes: z.number().int() }),
+      execute: async ({ from, to, minutes }) => {
+        const { slots } = await findFreeTime({
+          calendars: [{ calendar }],
+          timeMin: from,
+          timeMax: to,
+          duration: minutes,
+          workingHours: { start: '09:00', end: '18:00', timeZone },
+        });
+        return slots.slice(0, 10);
+      },
+    }),
+
+    createEvent: tool({
+      description: 'Book an event and invite attendees.',
+      inputSchema: z.object({
+        title: z.string(),
+        start: localTime,
+        end: localTime,
+        attendees: z.array(z.string()).optional(),
+      }),
+      execute: async ({ title, start, end, attendees }) => {
+        const { event } = await createEvent({
+          calendar,
+          event: {
+            title,
+            start: { dateTime: start, timeZone },
+            end: { dateTime: end, timeZone },
+            attendees: attendees?.map((email) => ({ email })),
+          },
+          sendUpdates: 'all',
+        });
+        return { id: event.id, start: event.start, link: event.htmlLink };
+      },
+    }),
+  };
+}
+```
+
+Keep the outputs small. A model doesn't need etags or provider metadata, and every field you return costs tokens on each later step.
+
+## Run the agent
+
+```ts
+import { anthropic } from '@ai-sdk/anthropic';
+import { google } from '@cal-sdk/google';
+import { generateText, isStepCount } from 'ai';
+import { calendarTools } from './calendar-tools';
+
+// "Tomorrow" depends on where the user is, not where the server is.
+const today = new Date().toLocaleDateString('en-US', { timeZone: user.timeZone, dateStyle: 'full' });
+
+const { text } = await generateText({
+  model: anthropic('claude-sonnet-5-5'),
+  tools: calendarTools(google({ accessToken: user.googleAccessToken }), user.timeZone),
+  stopWhen: isStepCount(6),
+  instructions: `You manage the user's calendar. Today is ${today}. All times are in ${user.timeZone}.`,
+  prompt: 'Find an hour tomorrow afternoon for a planning session with ana@example.com and book it.',
+});
+```
+
+Swap `google(...)` for `microsoft(...)` or `icloud(...)` and nothing else changes. To check every calendar the user connected before booking, pass them all to `findFreeTime` in `calendars`.
+
+The full example, which runs on an in-memory calendar when no token is set, is in [examples/ai-agent](https://github.com/vkpdeveloper/calsdk/tree/main/examples/ai-agent).
+
+## Things worth deciding
+
+- **Confirm before writing.** For anything that emails attendees, many apps let the model propose a slot and ask the user before calling `createEvent`. The AI SDK's tool approval support fits this well.
+- **Time zones.** Give the model the user's zone in the instructions and have it pass local times for events, as above. calsdk turns them into the right offsets, including across daylight saving changes.
+- **Read-only first.** If your agent only needs to answer "am I free on Thursday?", give it `listEvents` and `findFreeTime` and request a read-only scope.

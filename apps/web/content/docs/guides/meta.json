@@ -8,6 +8,8 @@
     "free-time",
     "sync",
     "provider-options",
-    "testing"
+    "testing",
+    "mcp",
+    "ai-sdk"
   ]
 }

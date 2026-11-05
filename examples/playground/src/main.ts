@@ -2,9 +2,8 @@ import { createEvent, findFreeTime, listEvents, updateEvent } from '@cal-sdk/cor
 import { mockCalendar } from '@cal-sdk/mock';
 
 // Two in-memory calendars stand in for real accounts, so nothing here needs a login.
-// For real ones, change the provider lines and nothing else:
-//   import { google } from '@cal-sdk/google';       const work = google({ accessToken });
-//   import { microsoft } from '@cal-sdk/microsoft'; const home = microsoft({ accessToken });
+// In a real app you'd create `google({ accessToken })` or `microsoft({ accessToken })` instead,
+// in server code, since a token gives full access to someone's calendar. The calls stay the same.
 const timeZone = 'America/New_York';
 const at = (day: number, time: string) => ({
   dateTime: `2026-11-${String(day).padStart(2, '0')}T${time}:00-05:00`,
@@ -62,7 +61,8 @@ const items: { start: string; title: string; color: string; free?: boolean }[] =
 for (const { calendar, name, color } of sources) {
   const { events } = await listEvents({ calendar, ...week, expandRecurring: true });
   for (const event of events) {
-    const start = event.start.dateTime ?? event.start.date ?? '';
+    // An all-day event has only a date. Place it at midnight here, not in UTC, so it keeps its day.
+    const start = event.start.dateTime ?? `${event.start.date}T00:00:00-05:00`;
     items.push({ start, title: `${event.title} (${name})`, color });
   }
 }

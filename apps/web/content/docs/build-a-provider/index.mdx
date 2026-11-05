@@ -1,9 +1,10 @@
 ---
 title: Write a provider
-description: Add a calendar calsdk does not support yet, with the same contract, helpers and tests as the official providers.
+metaTitle: Write a provider for any calendar API
+description: A calsdk provider is a function that adds support for one calendar API, using the same contract, helpers and tests as the official providers.
 ---
 
-A provider is a function that returns a plain object implementing `CalendarProviderV1` from `@cal-sdk/provider`. Its job is narrow on purpose: translate calsdk's requests into one API's requests, and the responses back into calsdk's shapes. What would be the same for every calendar lives in `@cal-sdk/core` instead (validation, retries, pagination loops, the free/busy fallback and warning logging), so you only write the part that's specific to your API.
+Each provider returns a plain object implementing `CalendarProviderV1` from `@cal-sdk/provider`, and its job is narrow on purpose: translate calsdk's requests into one API's requests, and the responses back into calsdk's shapes. What would be the same for every calendar lives in `@cal-sdk/core` instead (validation, retries, pagination loops, the free/busy fallback and warning logging), so you only write the part that's specific to your API.
 
 ```npm
 npm install @cal-sdk/provider @cal-sdk/provider-utils zod
@@ -12,9 +13,9 @@ npm install -D @cal-sdk/provider-tests
 
 The official providers are built on exactly these packages, so yours gets the same tools.
 
-## The contract
+## What does a calsdk provider implement?
 
-Here's an outline of the type. The package has the full option and result types for each method.
+Every provider implements `CalendarProviderV1`: six required methods, optional ones such as free/busy and sync, and a `capabilities` object. The outline below leaves out the option and result types, which the package has in full.
 
 ```ts
 type CalendarProviderV1<Provider extends string, Types extends ProviderTypesV1> = {
@@ -36,12 +37,12 @@ type CalendarProviderV1<Provider extends string, Types extends ProviderTypesV1> 
 
 The types catch shape mistakes. These rules cover what they can't:
 
-- **Declare capabilities honestly.** calsdk picks fallbacks from them, and the conformance suite only tests what you declare as `true`.
+- **Declare [capabilities](/docs/reference/capabilities) honestly.** calsdk picks fallbacks from them, and the conformance suite only tests what you declare as `true`.
 - **Resolve `'primary'`** to the user's default calendar.
 - **Keep progress in cursors.** Calls may run at once from many places, so never keep sync position or other per-call state in the provider. Caching setup that doesn't change, such as CalDAV's server discovery, is fine.
 - **Return exact times.** Timed `dateTime`s carry an offset, and `timeZone` is an IANA name, so every reader gets the same instant.
-- **Map errors** to calsdk's classes, so apps can catch `NotFoundError` or `ConflictError` the same way for every calendar. `mapAPICallError` does this for HTTP status codes.
-- **Never save something else.** If the API can't store what was asked, throw `UnsupportedFunctionalityError`: a meeting on the wrong day is worse than an error. If you drop a harmless part, such as a color, return an `unsupported` warning instead.
+- **Map errors** to calsdk's [error classes](/docs/concepts/errors), so apps can catch `NotFoundError` or `ConflictError` the same way for every calendar. `mapAPICallError` does this for HTTP status codes.
+- **Never save something else.** If the API can't store what was asked, throw `UnsupportedFunctionalityError`: a meeting on the wrong day is worse than an error. If you drop a harmless part, such as a color, return an `unsupported` [warning](/docs/concepts/warnings) instead.
 - **Pass `abortSignal` and `headers`** to every request, so callers can cancel a call and add their own headers.
 - **Read only your own key** in `providerOptions`. Apps may pass options for several providers at once.
 
@@ -139,7 +140,7 @@ export function acme(settings: AcmeSettings): CalendarProviderV1<'acme'> {
 
 `createJsonFetcher` sends the bearer token, resolving it per request, and validates responses with any Standard Schema library such as zod. It never follows redirects and never puts request headers in its errors, so the token can't leak to another host or into your logs. `urlPath` encodes ids, which can contain `@`, `/` and `#`.
 
-## Type your options and metadata
+## How do I type provider options and metadata? [#typed-provider-options]
 
 Declare what each operation reads from `providerOptions`, and what you put in `providerMetadata`, and calsdk type-checks them against the provider passed as `calendar`:
 
@@ -168,9 +169,9 @@ const { options, warnings } = await parseProviderOptions({
 
 <Cards>
   <Card title="Test it" href="/docs/build-a-provider/conformance">
-    Run the conformance suite the official providers pass.
+    Run the same conformance suite calsdk's own packages pass.
   </Card>
-  <Card title="Helpers" href="/docs/build-a-provider/provider-utils">
+  <Card title="Provider helpers" href="/docs/build-a-provider/provider-utils">
     Fetching, errors, options, time zones and recurrence.
   </Card>
 </Cards>

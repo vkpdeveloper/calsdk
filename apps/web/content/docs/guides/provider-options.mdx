@@ -1,9 +1,14 @@
 ---
 title: Provider options
-description: Reach provider features calsdk does not model, with options and metadata typed by the provider you pass.
+metaTitle: Provider options and provider metadata
+description: providerOptions sets fields only one provider has, such as Google extended properties or Outlook categories, and providerMetadata reads them on events.
 ---
 
-The shared event shape covers what every calendar has in common, and the order a booking came from isn't one of those things. For anything provider-specific, like tagging a Google event with its order id or setting Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id.
+The [shared event shape](/docs/concepts/events) covers what every calendar has in common, and the order a booking came from isn't one of those things. For anything provider-specific, like tagging a Google event with its order id or setting Outlook's categories, pass `providerOptions` and read `providerMetadata`. Both are keyed by provider id, and both are typed by the provider you pass.
+
+## Tag an event with an order id
+
+This Google event carries the order it came from, and reads it back from `providerMetadata`:
 
 ```ts
 import { createEvent } from '@cal-sdk/core';
@@ -29,9 +34,9 @@ const { event } = await createEvent({
 event.providerMetadata?.google?.extendedProperties?.private?.orderId; // '42'
 ```
 
-## Typed by the provider
+## How are provider options type-checked?
 
-The types follow the provider you pass as `calendar`, so your editor knows which options exist. A typo, an option the provider doesn't take for this function, or another provider's key is a type error:
+TypeScript checks `providerOptions` against the provider you pass as `calendar`, so your editor knows which options exist. A typo, an option the provider doesn't take for this function, or another provider's key is a type error:
 
 ```ts
 await createEvent({
@@ -44,7 +49,7 @@ await createEvent({
 });
 ```
 
-Providers check options at runtime too, because options don't always come from code TypeScript has seen. A wrong value, such as a string where Google wants a boolean, throws `InvalidArgumentError` before any request. An unknown key is dropped with an `unsupported` warning rather than failing the call.
+Providers check options at runtime too, because options don't always come from code TypeScript has seen. A wrong value, such as a string where Google's [`guestsCanModify`](https://developers.google.com/workspace/calendar/api/v3/reference/events/insert) wants a boolean, throws `InvalidArgumentError` before any request. An unknown key is dropped with an `unsupported` warning rather than failing the call.
 
 Often you don't know the provider at compile time, because a function returns Google or Outlook depending on what the user connected. When the provider type is a union like that, each provider's key is allowed, and at runtime each provider reads only its own:
 
@@ -59,7 +64,9 @@ await createEvent({
 });
 ```
 
-## Options by provider
+## Which options does each provider accept?
+
+Google, Outlook, Cal.com and Calendly accept options, each on certain functions only: for example `guestsCanModify` on Google creates and updates, or `categories` on Outlook. CalDAV, Zoom, ICS and the mock take none, and an option on any other function is a type error:
 
 | Provider    | Functions                                   | Options |
 | ----------- | ------------------------------------------- | ------- |
@@ -73,9 +80,11 @@ await createEvent({
 | `calendly`  | `createEvent`                               | `eventType` (required), `location` |
 | `calendly`  | `deleteEvent`                               | `reason` |
 
-CalDAV, Zoom, ICS and the mock take no options.
+Each option maps to a field or parameter of the provider's own API, so its official docs say what each value does: Google's [`events.insert`](https://developers.google.com/workspace/calendar/api/v3/reference/events/insert) and [`events.list`](https://developers.google.com/workspace/calendar/api/v3/reference/events/list), the Microsoft Graph [event resource](https://learn.microsoft.com/en-us/graph/api/resources/event) and [calendar view delta](https://learn.microsoft.com/en-us/graph/api/event-delta), Cal.com's [create](https://cal.com/docs/api-reference/v2/bookings/create-a-booking), [reschedule](https://cal.com/docs/api-reference/v2/bookings/reschedule-a-booking) and [cancel](https://cal.com/docs/api-reference/v2/bookings/cancel-a-booking) booking endpoints, and Calendly's [Create Event Invitee](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/create-event-invitee) and [Cancel Event](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/create-scheduled-event-cancellation).
 
-## Metadata by provider
+## What metadata does each provider return? [#what-each-provider-returns]
+
+Events from five providers carry `providerMetadata` under their own key. CalDAV, ICS and the mock return none:
 
 | Provider    | `providerMetadata` on events |
 | ----------- | ---------------------------- |
@@ -85,4 +94,4 @@ CalDAV, Zoom, ICS and the mock take no options.
 | `calendly`  | `uri`, `eventType` |
 | `zoom`      | `uuid`, `occurrenceId` |
 
-Each [provider page](/docs/providers) explains its options.
+Outlook's `showAs` metadata keeps the value from the [Graph event resource](https://learn.microsoft.com/en-us/graph/api/resources/event), such as `'oof'` (out of office) or `'tentative'`, which the shared `showAs` reduces to busy or free. Each [provider page](/docs/providers) explains its options.

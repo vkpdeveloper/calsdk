@@ -1,16 +1,16 @@
 ---
 title: Three ways a calendar tells you what changed
-description: Google sync tokens, Microsoft Graph delta links and CalDAV sync-collection all answer "what changed?", and each one fails in its own way.
-date: 2026-11-06
+description: Sync tokens, delta links and sync-collection are the three ways Google Calendar, Outlook and CalDAV tell you what changed in a calendar.
+date: 2026-11-05
 ---
 
-Sooner or later, every app that shows a user's calendar wants its own copy of it. You want to search events in your database, join them with your own data, and show a week without waiting on three slow APIs. So you copy the calendar into a table, and then you have the real problem: keeping that table correct without downloading the whole calendar every five minutes.
+Sooner or later, every app that shows a user's calendar wants its own copy of it, so it can search events, join them with its own data and skip three slow APIs. The real problem is keeping that copy correct without downloading the whole calendar every five minutes.
 
-Google Calendar, Microsoft Outlook and CalDAV servers like iCloud can all tell you "here's what changed since last time". They just do it in three quite different ways, and each one breaks in its own way. Here's what I learned wiring up all three.
+All three APIs can tell you "here's what changed since last time". Each one just does it differently, and each one breaks in its own way.
 
 ## How do Google Calendar sync tokens work?
 
-Google has the cleanest model. You list a calendar's events once with no filters, follow `pageToken` through every page, and the last page hands you a `nextSyncToken`:
+Google has the cleanest model. You [list a calendar's events](https://developers.google.com/calendar/api/guides/sync) once with no filters, follow `pageToken` through every page, and the last page hands you a `nextSyncToken`:
 
 ```http
 GET /calendar/v3/calendars/primary/events?maxResults=2500
@@ -20,26 +20,26 @@ GET /calendar/v3/calendars/primary/events?maxResults=2500
 { "items": [ ... ], "nextSyncToken": "CPDAlvWDx70CEPDAlvWDx70CGAU=" }
 ```
 
-Next time, you send that token back and get only what changed since then. Deleted events come back too, as items with `"status": "cancelled"`, and Google always includes them on a sync. You can't hide them, and you wouldn't want to, because that's how your copy learns about deletions.
+Next time, you send that token back and get only what changed since then. Deleted events come back too, as items with `"status": "cancelled"`, and Google [always includes them](https://developers.google.com/calendar/api/v3/reference/events/list) on a sync. You can't hide them, and you wouldn't want to, because that's how your copy learns about deletions.
 
-The catch is that the token remembers the query that created it. The `events.list` reference names the parameters you can't combine with `syncToken`: `iCalUID`, `orderBy`, `privateExtendedProperty`, `q`, `sharedExtendedProperty`, `timeMin`, `timeMax` and `updatedMin`. The one that bites people is `timeMin`. It's natural to sync "the next three months", but a sync token covers the whole calendar, so your first sync has to read the whole calendar too. Everything else you pass should match the initial request exactly.
+The catch is that the token remembers the query that created it. The [`events.list` reference](https://developers.google.com/calendar/api/v3/reference/events/list) names the parameters you can't combine with `syncToken`: `iCalUID`, `orderBy`, `privateExtendedProperty`, `q`, `sharedExtendedProperty`, `timeMin`, `timeMax` and `updatedMin`. The one that bites people is `timeMin`. It's natural to sync "the next three months", but a sync token covers the whole calendar, so your first sync has to read the whole calendar too. Everything else you pass should match the initial request exactly.
 
-Tokens also expire, for example after a while unused, or when the calendar's sharing changes. Google then answers `410 Gone`, and the only fix is the one Google recommends: wipe your copy and do a full sync again. There's no way to resume from a partial state.
+Tokens also expire, for example after a while unused, or when the calendar's sharing changes. Google then answers `410 Gone`, and the only fix is the one the [sync guide](https://developers.google.com/calendar/api/guides/sync) recommends: wipe your copy and do a full sync again. There's no way to resume from a partial state.
 
-One more detail: if you sync without `singleEvents=true`, a recurring meeting arrives as one series event with an RRULE, and any occurrence someone moved or edited arrives as its own exception event. That's what you want for a copy, since an endless daily standup has no finite list of occurrences to sync.
+One more detail: if you sync without [`singleEvents=true`](https://developers.google.com/calendar/api/guides/recurringevents), a recurring meeting arrives as one series event with an RRULE, and any occurrence someone moved or edited arrives as its own exception event. That's what you want for a copy, since an endless daily standup has no finite list of occurrences to sync.
 
 ## How does Outlook delta sync work?
 
-Microsoft Graph uses delta queries, and for calendars the one that works across a whole range is `calendarView/delta`. Unlike Google, it requires a window up front:
+Microsoft Graph uses [delta queries](https://learn.microsoft.com/en-us/graph/delta-query-events), and for calendars the one that works across a whole range is [`calendarView/delta`](https://learn.microsoft.com/en-us/graph/api/event-delta). Unlike Google, it requires a window up front:
 
 ```http
 GET /me/calendarView/delta?startDateTime=2025-11-06T00:00:00Z&endDateTime=2028-11-06T00:00:00Z
 Prefer: odata.maxpagesize=200
 ```
 
-Each page ends with either an `@odata.nextLink` (more pages in this round) or an `@odata.deltaLink` (the round is done). You don't build the next request yourself: Graph encodes your parameters, the window included, into those links, and you call them as they are. The delta link is your sync cursor.
+Each page ends with either an `@odata.nextLink` (more pages in this round) or an `@odata.deltaLink` (the round is done). You don't build the next request yourself: Graph encodes your parameters, the window included, into those links, and you [call them as they are](https://learn.microsoft.com/en-us/graph/delta-query-events). The delta link is your sync cursor.
 
-That has a consequence that's easy to miss: the window is fixed when you start. If you begin syncing on November 6th with "the next two years", you're still syncing that same two years next summer. To move the window you start a new round from scratch.
+Encoding the window into the link has a consequence that's easy to miss: the window is fixed when you start. If you begin syncing on November 6th with "the next two years", you're still syncing that same two years next summer. To move the window you start a new round from scratch.
 
 Deletions come back as stubs with an `@removed` annotation:
 
@@ -47,19 +47,25 @@ Deletions come back as stubs with an `@removed` annotation:
 { "id": "AAMkAGI2...", "@removed": { "reason": "deleted" } }
 ```
 
-Graph's docs warn that `@removed` covers two cases: events in the window that were deleted, and events outside the window that changed. An event moved from inside your window to outside it looks exactly like a deletion, which, for a copy of that window, is the right answer anyway.
+[Graph's docs warn](https://learn.microsoft.com/en-us/graph/api/event-delta) that `@removed` covers two cases: events in the window that were deleted, and events outside the window that changed. An event moved from inside your window to outside it looks exactly like a deletion, which, for a copy of that window, is the right answer anyway.
 
-Two more things surprised me. The same event can appear more than once in a round, so you have to apply changes in order and let the later one win. And recurring meetings come back as a series master plus every occurrence in the window, where unmodified occurrences are thin stubs. For a copy, you keep the master and the exceptions and drop the stubs. To know which occurrences of a series were deleted, you read the master's `cancelledOccurrences`, which costs one more request per changed series.
+Two more things surprised me. The same event can [appear more than once](https://learn.microsoft.com/en-us/graph/delta-query-overview) in a round, so you have to apply changes in order and let the later one win. And recurring meetings come back as a series master plus every occurrence in the window, where unmodified occurrences are thin stubs. For a copy, you keep the master and the exceptions and drop the stubs. To know which occurrences of a series were deleted, you read the master's [`cancelledOccurrences`](https://learn.microsoft.com/en-us/graph/api/resources/event), which costs one more request per changed series.
 
-Expiry looks different too. Depending on the case, Graph answers `410 Gone` or an error code like `SyncStateNotFound`, `SyncStateInvalid` or `resyncRequired`. All of them mean the same thing: start over.
+Expiry looks different too. The [delta query overview](https://learn.microsoft.com/en-us/graph/delta-query-overview) documents `410 Gone`, and in practice the error body carries a code like `SyncStateNotFound`, `SyncStateInvalid` or `resyncRequired`. All of them mean the same thing: start over.
 
 ## How do you sync an iCloud or CalDAV calendar?
 
-CalDAV is the protocol behind iCloud, Fastmail, Nextcloud, Zoho and many self-hosted servers. It speaks WebDAV over XML, and its sync story has two generations.
+CalDAV, the protocol behind iCloud, Fastmail, Nextcloud, Zoho and many self-hosted servers, has two generations of sync: [CTags](https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-ctag.txt) and ETags, and the newer [`sync-collection` REPORT](https://datatracker.ietf.org/doc/html/rfc6578). Both speak WebDAV over XML.
 
-The old way is the CTag, a calendarserver.org extension: one `getctag` property on the calendar that changes whenever anything in it changes. It tells you *that* something changed, not *what*. So you then list the ETag of every event resource with a `PROPFIND`, compare them with the ETags you stored, and fetch the ones that differ. It works, but every check reads the whole calendar's list of ETags.
+The old way is the CTag, a [calendarserver.org extension](https://github.com/apple/ccs-calendarserver/blob/master/doc/Extensions/caldav-ctag.txt): one `getctag` property on the calendar that changes whenever anything in it changes. It tells you *that* something changed, not *what*, so a sync takes three steps:
 
-The modern way is RFC 6578's `sync-collection` REPORT. You send the token from last time (an empty one for the first sync):
+1. Read the calendar's `getctag`. If it hasn't changed, stop.
+2. List the ETag of every event resource with a `PROPFIND`, and compare them with the ETags you stored.
+3. Fetch the events whose ETags differ.
+
+It works, but every check reads the whole calendar's list of ETags.
+
+The modern way is [RFC 6578](https://datatracker.ietf.org/doc/html/rfc6578)'s `sync-collection` REPORT. You send the token from last time (an empty one for the first sync):
 
 ```xml
 <D:sync-collection xmlns:D="DAV:">
@@ -69,17 +75,31 @@ The modern way is RFC 6578's `sync-collection` REPORT. You send the token from l
 </D:sync-collection>
 ```
 
-The server answers with the resources that changed (with their new ETags), the ones that were removed (with a `404 Not Found` status), and a new token. Then you fetch the changed ones' iCalendar data with a `calendar-multiget` REPORT, in batches.
+The server answers with the resources that changed (with their new ETags), the ones that were removed (with a `404 Not Found` status), and a new token. Then you fetch the changed ones' iCalendar data with a [`calendar-multiget` REPORT](https://datatracker.ietf.org/doc/html/rfc4791#section-7.9), in batches.
 
-There are a few rough edges. A server can truncate the answer, which it signals with a `507 Insufficient Storage` status on the collection itself, and you ask again from the new token. A token the server no longer accepts fails the `DAV:valid-sync-token` precondition, usually as a `403` or `409` (some servers use `410`), and you start over. Some servers also list long-deleted resources in an initial sync, so you can't treat every `404` as "delete this" when you had nothing to begin with.
+There are a few rough edges. A server can [truncate the answer](https://datatracker.ietf.org/doc/html/rfc6578#section-3.6), which it signals with a `507 Insufficient Storage` status on the collection itself, and you ask again from the new token. A token the server no longer accepts fails the `DAV:valid-sync-token` precondition, usually as a `403` or `409` (some servers use `410`), and you start over. Some servers also list long-deleted resources in an initial sync, so you can't treat every `404` as "delete this" when you had nothing to begin with.
 
-And one CalDAV resource is a whole series: the master and all its exceptions live in one `.ics` file. When it changes, you have to compare its exceptions with the ones you saw last time to find out which were removed.
+And one CalDAV resource is a whole series: the master and all its exceptions live in [one `.ics` file](https://datatracker.ietf.org/doc/html/rfc4791#section-4.1). When it changes, you have to compare its exceptions with the ones you saw last time to find out which were removed.
+
+## How do Google, Outlook and CalDAV sync compare?
+
+All three hand you an opaque cursor and tell you to start over when it expires. They differ in what the cursor covers and how a deletion looks:
+
+| Provider                | Mechanism                                                                                      | Needs a window? | Deletions                                    | Expired cursor                                     |
+| ----------------------- | ---------------------------------------------------------------------------------------------- | --------------- | -------------------------------------------- | -------------------------------------------------- |
+| Google Calendar         | [`nextSyncToken`](https://developers.google.com/calendar/api/guides/sync)                      | No, and none is allowed | Items with `"status": "cancelled"`   | `410 Gone`                                         |
+| Outlook                 | [`calendarView/delta`](https://learn.microsoft.com/en-us/graph/api/event-delta) delta link     | Yes, fixed at the start | Stubs with `@removed`                | `410 Gone` or `SyncStateNotFound`-style codes      |
+| iCloud and other CalDAV | [`sync-collection`](https://datatracker.ietf.org/doc/html/rfc6578) sync token                  | No              | Resources with a `404 Not Found` status      | `DAV:valid-sync-token` precondition, often `403`   |
 
 ## What about calendars with no change feed?
 
-Not every API has any of this. Calendly and Zoom can't list meetings by when they last changed. The honest approach there is to read every meeting each time and compare it with what you saw last time. To keep that cheap, you store a short hash per event rather than the event itself, so your "cursor" is a list of ids and fingerprints that grows with the calendar. ICS feeds are the same, except the server can save you the download with `304 Not Modified` if you send its `ETag` back. Cal.com sits in between: it can list bookings sorted by when they were updated, so you can read from the last change you saw (with some overlap, because a slow write can land a little out of order).
+Calendly and Zoom have no change feed, so you read every meeting each time and diff it against what you saw last time. Neither [Calendly's event list](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/list-scheduled-events) nor [Zoom's meetings API](https://developers.zoom.us/docs/api/meetings/) can list meetings by when they last changed.
 
-These cursors never expire, since there's no server state behind them. They're just a record of what you saw.
+To keep the diff cheap, you store a short hash per event rather than the event itself, so your "cursor" is a list of ids and fingerprints that grows with the calendar. ICS feeds work the same way, except the server can save you the download with [`304 Not Modified`](https://www.rfc-editor.org/rfc/rfc9110#status.304) if you send its `ETag` back.
+
+Cal.com sits in between: its [bookings endpoint](https://cal.com/docs/api-reference/v2/bookings/get-all-bookings) can filter and sort by when bookings were updated, so you can read from the last change you saw (with some overlap, because a slow write can land a little out of order).
+
+These cursors never expire, since there's no server state behind them. A fingerprint list is just a record of what you saw.
 
 ## How calsdk handles it
 
@@ -116,19 +136,19 @@ The [sync guide](/docs/guides/sync) covers paging through a large first sync and
 
 ### What happens when a Google Calendar sync token expires?
 
-Google answers `410 Gone`. Delete your copy of the calendar and run a full sync again. There's no way to resume from where you were.
+Google answers `410 Gone`. Delete your copy of the calendar and run a full sync again, as Google's [sync guide](https://developers.google.com/calendar/api/guides/sync) recommends. There's no way to resume from where you were.
 
 ### Can I use timeMin with a Google sync token?
 
-No. `timeMin`, `timeMax`, `updatedMin`, `q`, `orderBy`, `iCalUID` and the extended property filters can't be combined with `syncToken`, so the first sync has to read the whole calendar.
+No. `timeMin`, `timeMax`, `updatedMin`, `q`, `orderBy`, `iCalUID` and the extended property filters can't be combined with `syncToken`, according to the [`events.list` reference](https://developers.google.com/calendar/api/v3/reference/events/list). The first sync has to read the whole calendar.
 
 ### How does Microsoft Graph report deleted events in a delta query?
 
-As stubs with an `@removed` annotation. The same stub also marks events outside the window that changed, so an event moved out of your window looks like a deletion.
+As stubs with an `@removed` annotation. The [event delta reference](https://learn.microsoft.com/en-us/graph/api/event-delta) says the same stub also marks events outside the window that changed, so an event moved out of your window looks like a deletion.
 
 ### Does iCloud support incremental sync?
 
-Yes. iCloud is a CalDAV server, and CalDAV's `sync-collection` REPORT (RFC 6578) returns the resources that changed or were removed since your last sync token.
+Yes. iCloud is a CalDAV server, and CalDAV's `sync-collection` REPORT ([RFC 6578](https://datatracker.ietf.org/doc/html/rfc6578)) returns the resources that changed or were removed since your last sync token.
 
 ### When should I save the sync cursor?
 

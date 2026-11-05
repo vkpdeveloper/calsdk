@@ -1,6 +1,7 @@
 ---
 title: updateEvent
-description: Applies a partial update to an event, one occurrence, or a series.
+metaTitle: "updateEvent: change an event, occurrence or series"
+description: updateEvent applies a partial update to a calendar event, one occurrence or a whole series, changing only the fields you send.
 ---
 
 Use `updateEvent` to move a meeting, rename it or change who's invited. Send only the fields that change, and for a recurring event, `scope` decides how much of the series changes with it.
@@ -35,10 +36,12 @@ Plus the [common options](/docs/reference#common-options). `EventPatch` has the 
 
 <TypeTable
   type={{
-    event: { type: 'CalendarEvent', description: 'The updated event. Its `id` can differ from `eventId`: Cal.com replaces a booking when it moves. Use the returned id from then on.', required: true },
+    event: { type: 'CalendarEvent', description: 'The updated event. Its `id` can differ from `eventId`. Use the returned id from then on.', required: true },
     warnings: { type: 'Warning[]', required: true },
   }}
 />
+
+Moving a Cal.com booking, for example, gives it a new id: Cal.com [reschedules a booking](https://cal.com/docs/api-reference/v2/bookings/reschedule-a-booking) by creating a new one and cancelling the old one.
 
 ## Throws
 

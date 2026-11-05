@@ -1,9 +1,9 @@
 ---
 title: iCloud, Zoho and CalDAV
-description: Read and write iCloud, Zoho Calendar, Fastmail, Nextcloud, Radicale and any other CalDAV server.
+description: The calsdk CalDAV provider connects to iCloud, Zoho Calendar, Fastmail, Nextcloud, Radicale and any other CalDAV server to read and write events.
 ---
 
-CalDAV (RFC 4791) is the open standard behind iCloud, Zoho, Fastmail, Nextcloud and many self-hosted calendars, so one package reaches all of them, with shortcuts for iCloud and Zoho. Expect solid reads and writes, recurring series and sync. What you won't get is anything CalDAV leaves out: video links, reminders, colors and search.
+[CalDAV (RFC 4791)](https://datatracker.ietf.org/doc/html/rfc4791) is the open standard behind iCloud, Zoho, Fastmail, Nextcloud and many self-hosted calendars, so one package reaches all of them, with shortcuts for iCloud and Zoho. Expect solid reads and writes, recurring series and sync. What you won't get through this provider: video links, reminders, colors and search.
 
 ```npm
 npm install @cal-sdk/core @cal-sdk/caldav
@@ -59,13 +59,13 @@ const { events } = await listEvents({ calendar, timeMin, timeMax });
   }}
 />
 
-`zoho()` defaults to Zoho's US data center. If the account lives in another one, pass the CalDAV address Zoho Calendar shows under Settings, Synchronize, CalDAV as `serverUrl`.
+`icloud()` needs an [app-specific password](https://support.apple.com/en-us/102654), not the Apple Account password. `zoho()` defaults to Zoho's US data center. If the account lives in another one, pass the CalDAV address Zoho Calendar shows under Settings, Synchronize, CalDAV as `serverUrl`, as [Zoho's CalDAV guide](https://www.zoho.com/calendar/help/setup-caldav-sync.html) explains.
 
-## Not supported
+## What does the CalDAV provider not support?
 
-CalDAV has no `thisAndFollowing`, search, reminders, colors or free/busy endpoint, and calsdk can't create video links through it. Free/busy is computed from events. See the [comparison](/docs/providers) for every provider.
+The CalDAV provider doesn't support `thisAndFollowing`, search, reminders or colors, and it can't create video links. Free/busy is computed from events instead of asked of the server. See the [comparison](/docs/providers) for every provider.
 
-## How it behaves
+## CalDAV behavior
 
 ### Discovery and ids
 
@@ -75,21 +75,21 @@ A calendar id is the calendar's path, as `listCalendars` returns it. An event id
 
 ### Recurring events
 
-CalDAV stores the series, not its occurrences, so calsdk expands them, with the same limits as [ICS feeds](/docs/providers/ics): rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance, with a warning. Changing one instance stores an exception, and deleting one adds an `EXDATE`. Changing a whole series through one of its instances moves the series by as much as that instance moved. When a series changes its start or its rule, exceptions for instances it no longer has are dropped.
+[CalDAV](https://datatracker.ietf.org/doc/html/rfc4791) stores the series, not its occurrences, so calsdk expands them, with the same limits as [ICS feeds](/docs/providers/ics): rules repeating every minute or second, or with an `INTERVAL` above 1,000, list only their first instance, with a warning. Changing one instance stores an exception, and deleting one adds an `EXDATE`. Changing a whole series through one of its instances moves the series by as much as that instance moved. When a series changes its start or its rule, exceptions for instances it no longer has are dropped. [Recurring events](/docs/guides/recurring-events) covers scopes and exceptions on every provider.
 
 ### Writing events
 
 Updates and deletes send `ifMatch` to the server, and a stale one throws `ConflictError`. Every update is also conditional on the version calsdk just read, so a change someone makes in between is never overwritten.
 
-The server invites attendees, from the account's email address, and `sendUpdates: 'none'` asks it not to send invitations. calsdk can't create a video link, but it reads a Meet, Teams or Zoom link from the event's URL, location or description into `conference`.
+The server invites attendees, from the account's email address, using [CalDAV scheduling](https://datatracker.ietf.org/doc/html/rfc6638), and `sendUpdates: 'none'` asks it not to send invitations. calsdk can't create a video link, but it reads a Meet, Teams or Zoom link from the event's URL, location or description into `conference`.
 
 ### Sync
 
-Sync uses the server's sync tokens (RFC 6578). Each sync reports the single events, series and exceptions that changed, never computed occurrences. A token the server no longer accepts throws `SyncCursorExpiredError`.
+[Sync](/docs/guides/sync) uses the server's sync tokens, defined in [RFC 6578](https://datatracker.ietf.org/doc/html/rfc6578). Each sync reports the single events, series and exceptions that changed, never computed occurrences. A token the server no longer accepts throws `SyncCursorExpiredError`.
 
-### Your password
+### Where does calsdk send my CalDAV password?
 
-CalDAV sends your password with every request, so calsdk only sends it to the server's own origin and to the HTTPS host discovery finds the calendars on (iCloud keeps them on a host of their own). A redirect anywhere else fails rather than leaking the password.
+Only to the server's own origin, and to the HTTPS host where discovery finds the account's [calendar home](https://datatracker.ietf.org/doc/html/rfc4791#section-6.2.1). On iCloud, that's a different host from `caldav.icloud.com`. calsdk sends the password with every CalDAV request, so a redirect anywhere else fails rather than leaking it.
 
 ## Provider options
 

@@ -1,33 +1,38 @@
 ---
-title: Helpers
-description: The fetch client, error mapping, options parsing, time zone and recurrence helpers in @cal-sdk/provider-utils.
+title: Provider helpers
+metaTitle: 'Provider helpers: @cal-sdk/provider-utils'
+description: '@cal-sdk/provider-utils is the helper package behind the official calsdk providers, covering requests, error mapping, options, time zones and recurrence.'
 ---
 
-Most of a provider is the same few chores: authenticated JSON requests, mapping HTTP errors, time zone arithmetic and recurrence rules. `@cal-sdk/provider-utils` holds the helpers the official providers use for them, so you can skip the parts that are easy to get subtly wrong.
+Most of a provider is the same few chores: authenticated JSON requests, mapping HTTP errors, time zone arithmetic and recurrence rules. Using the same helpers as the official providers lets you skip the parts that are easy to get subtly wrong, and spend your time on the [contract](/docs/build-a-provider) itself.
 
 ```npm
 npm install @cal-sdk/provider-utils
 ```
 
-## Requests
+## How do I make authenticated requests from a provider?
+
+Create a client with `createJsonFetcher`, which sends the bearer token and validates each response, and turn its failures into calsdk's [error classes](/docs/concepts/errors) with `mapAPICallError`:
 
 | Export | What it does |
 | --- | --- |
 | `createJsonFetcher({ baseURL, accessToken, headers?, fetch? })` | A JSON client. Sends `Authorization: Bearer`, resolving the token per request; validates responses with a schema; throws `APICallError` for non-2xx responses and network failures; never follows redirects |
 | `urlPath` | A template tag that percent-encodes every value: ``urlPath`/calendars/${id}/events` `` |
 | `mapAPICallError(error, { provider, resource?, eventId? })` | Turns 401 into `AuthenticationError`, 403 into `PermissionDeniedError`, 404 and 410 into `NotFoundError` (given `resource`), 412 into `ConflictError` (given `eventId`) and 429 into `RateLimitError`. Other errors pass through unchanged |
-| `parseRetryAfterMs(headers)` | Reads `Retry-After` as milliseconds |
+| `parseRetryAfterMs(headers)` | Reads the [`Retry-After`](https://www.rfc-editor.org/rfc/rfc9110#field.retry-after) header as milliseconds |
 | `combineHeaders`, `withUserAgentSuffix` | Merge header objects, and add your provider to the user agent |
 
 ## Options and schemas
 
 | Export | What it does |
 | --- | --- |
-| `parseProviderOptions({ provider, providerOptions, schema })` | Reads your key from `providerOptions`. Throws `InvalidArgumentError` for wrong values, warns about unknown keys |
+| `parseProviderOptions({ provider, providerOptions, schema })` | Reads your key from [`providerOptions`](/docs/guides/provider-options). Throws `InvalidArgumentError` for wrong values, warns about unknown keys |
 | `validateSchema(schema, value)` | Validates with any Standard Schema library, such as zod |
 | `formatSchemaIssues(issues)` | A readable message from schema issues |
 
-## Time
+## Which time zone helpers does provider-utils export?
+
+The time helpers handle all-day dates, zone offsets, conversions between wall-clock times and instants, and Windows zone names, following the rules in [Time and time zones](/docs/concepts/time-zones):
 
 | Export | What it does |
 | --- | --- |
@@ -38,13 +43,13 @@ npm install @cal-sdk/provider-utils
 | `localToInstant`, `instantToLocal`, `parseLocalDateTime`, `formatLocalDateTime`, `formatLocalDate` | Convert between wall-clock times in a zone and instants |
 | `getTimeZoneOffset(instant, zone)` | A zone's offset at an instant |
 | `isValidTimeZone(zone)` | Whether a string is an IANA zone |
-| `windowsToIana`, `ianaToWindows` | Convert Windows zone names, as Outlook uses them |
+| `windowsToIana`, `ianaToWindows` | Convert Windows zone names, as [Microsoft Graph uses them](https://learn.microsoft.com/en-us/graph/api/resources/datetimetimezone) |
 
 ## Recurrence
 
 | Export | What it does |
 | --- | --- |
-| `parseRecurrence(lines)` | Splits RFC 5545 lines into the rule, `EXDATE`s and `RDATE`s. Throws `InvalidArgumentError` for malformed lines |
+| `parseRecurrence(lines)` | Splits [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5) lines into the rule, `EXDATE`s and `RDATE`s. Throws `InvalidArgumentError` for malformed lines |
 | `parseRRule`, `formatRRule` | Read and write one `RRULE` as an object |
 | `parseICalDate`, `formatICalDate`, `instantToICalDate`, `instantToICalDateOnly` | iCalendar date and date-time values |
 | `formatExdates`, `formatRdates` | Build `EXDATE` and `RDATE` lines |

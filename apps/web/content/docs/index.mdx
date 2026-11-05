@@ -1,11 +1,18 @@
 ---
-title: Overview
-description: One TypeScript API for Google Calendar, Outlook, iCloud, Zoom, Cal.com, Calendly, CalDAV and ICS feeds.
+title: calsdk overview
+metaTitle: 'calsdk docs overview: one TypeScript API for every calendar'
+description: calsdk is an open source TypeScript library with one API for Google Calendar, Outlook, iCloud, Zoom, Cal.com, Calendly, CalDAV and ICS feeds.
 ---
 
-Every calendar API has its own idea of what an event is. Google describes a repeating series with RRULE text, Outlook with a pattern object and Windows time zone names, and iCloud with iCalendar files over CalDAV. Each one reports a missing event or an expired token in its own way, too. So supporting a second calendar usually means writing a second integration.
+Every provider returns the same event shape, so moving a feature from Google Calendar to Outlook changes one line of your code. When a calendar can't do what you asked, calsdk tells you instead of guessing.
 
-calsdk gives your app one set of functions and one event shape for all of them. You create a provider, such as `google({ accessToken })`, and pass it to plain functions like `listEvents` and `createEvent`. Switching calendars changes the provider line and nothing else.
+<Callout title="No hosted service">
+  calsdk is a library. It has no server, database or queue, and it doesn't run OAuth flows. Your app keeps the tokens and passes them in.
+</Callout>
+
+## How does calsdk work?
+
+You create a provider for each calendar, such as `google({ accessToken })`, and pass it to plain functions like `listEvents` and `createEvent` from `@cal-sdk/core`. Switching calendars changes the provider line and nothing else.
 
 ```ts
 import { listEvents } from '@cal-sdk/core';
@@ -20,11 +27,13 @@ const { events } = await listEvents({
 });
 ```
 
-The APIs don't all support the same things, and calsdk won't pretend they do. When a provider can't do part of a request, the call returns `warnings`, or throws `UnsupportedFunctionalityError` when going ahead would save something other than what you asked for. It never quietly changes your data.
+The calendar APIs don't all support the same things, and calsdk won't pretend they do. When a provider can't do part of a request, the call returns [`warnings`](/docs/concepts/warnings), or throws `UnsupportedFunctionalityError` when going ahead would save something other than what you asked for. calsdk never quietly changes your data.
 
-<Callout title="No hosted service">
-  calsdk is a library. It has no server, database or queue, and it doesn't run OAuth flows. Your app keeps the tokens and passes them in.
-</Callout>
+## Why use one API for every calendar?
+
+Without one, every new calendar means a new integration, because each API has its own idea of what an event is. Google describes a repeating series with [RRULE text](https://developers.google.com/calendar/api/guides/recurringevents), and Outlook with a [pattern object](https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence) and [Windows time zone names](https://learn.microsoft.com/en-us/graph/api/resources/datetimetimezone).
+
+iCloud stores events as iCalendar files over [CalDAV](https://datatracker.ietf.org/doc/html/rfc4791), and every provider reports a missing event or an expired token in its own way. calsdk gives your app one set of functions, one event shape and [one set of errors](/docs/reference/errors) for all of them.
 
 ## Start here
 
@@ -66,14 +75,16 @@ The APIs don't all support the same things, and calsdk won't pretend they do. Wh
   </Card>
 </Cards>
 
-## Providers
+## Which calendars does calsdk support?
 
-calsdk has providers for Google Calendar, Outlook, iCloud, Zoho and other CalDAV servers, Cal.com, Calendly, Zoom and ICS feeds, plus an in-memory mock for tests. [Choose a provider](/docs/choose-a-provider) helps you pick a package and the credentials it needs, and the [comparison](/docs/providers) shows what each one supports.
+calsdk has providers for Google Calendar, Outlook, iCloud, Zoho and other CalDAV servers, Cal.com, Calendly, Zoom and ICS feeds, plus an in-memory mock for tests.
+
+[Choose a provider](/docs/choose-a-provider) helps you pick a package and the credentials it needs, and the [comparison](/docs/providers) shows what each one supports.
 
 ## Reference
 
 <Cards>
-  <Card title="API overview" href="/docs/reference">
+  <Card title="API reference" href="/docs/reference">
     Every function, its options and its result.
   </Card>
   <Card title="Types" href="/docs/reference/types">
@@ -86,3 +97,5 @@ calsdk has providers for Google Calendar, Outlook, iCloud, Zoho and other CalDAV
     Add a calendar calsdk doesn't support yet.
   </Card>
 </Cards>
+
+Stuck on something else? The [FAQ](/docs/faq) answers the questions people ask most.

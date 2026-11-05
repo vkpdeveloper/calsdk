@@ -1,6 +1,7 @@
 ---
 title: Conformance tests
-description: Check a provider against the calsdk contract with the suite most official providers run, recorded once and replayed offline.
+metaTitle: Conformance tests for your calendar provider
+description: The calsdk conformance suite, @cal-sdk/provider-tests, checks that a provider keeps the contract, with API traffic recorded once and replayed offline.
 ---
 
 An all-day event that comes back a day early or a 412 that surfaces as a generic error is easy to miss until a user finds it. Run `@cal-sdk/provider-tests` against your provider to catch round-trip and error-mapping mistakes like these. Most official providers use the same suite, and it skips anything your provider doesn't declare as supported.
@@ -21,9 +22,13 @@ describeProviderConformance({
 
 Pass the suite's `fetch` through to your provider. That's how the suite records, replays and stubs error responses.
 
-The tests cover calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. A provider without recurring events, say, is never asked to split a series.
+## What does the conformance suite test?
 
-## Record once, replay everywhere
+The suite tests the [provider contract](/docs/build-a-provider) on calendars, event create, read, update and delete, all-day and time zone round trips, pagination, recurring series and their exceptions, etags, sync, free/busy and HTTP error mapping. A provider without recurring events, say, is never asked to split a series.
+
+## How does the conformance suite record and replay API traffic?
+
+The suite records the real API's responses to a JSON file once, then replays them on every later run with no network and no credentials. `mode` picks which:
 
 | Mode | What happens |
 | --- | --- |
@@ -54,4 +59,4 @@ Credentials aren't saved: only the few request headers that change what a reques
 
 ## Your own tests
 
-For tests of behavior specific to your API, `createRecordingFetch` is exported with the same record and replay modes. The suite needs Vitest 5 and a runtime with `node:fs`.
+For tests of behavior specific to your API, `createRecordingFetch` is exported with the same record and replay modes. The suite needs Vitest 5 and a runtime with `node:fs`. To test an app rather than a provider, use the in-memory calendar in [Test your code](/docs/guides/testing).

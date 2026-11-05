@@ -1,11 +1,16 @@
 ---
 title: Quickstart
-description: Create a recurring event, move one occurrence and find free time, with no account and no network.
+metaTitle: 'Quickstart: create and move a recurring event'
+description: This quickstart creates a recurring event, moves one occurrence and finds free time using @cal-sdk/mock, with no account and no network.
 ---
 
 Start with a calendar you can't break: `@cal-sdk/mock`, which keeps events in memory. You'll create a weekday standup, move Wednesday's to later in the morning, and find a free slot around it.
 
 To skip the install, open the [playground on StackBlitz](https://stackblitz.com/github/vkpdeveloper/calsdk/tree/main/examples/playground?file=src/main.ts): the same steps across two calendars, drawn as a week in your browser.
+
+## How do I create and move a recurring event with calsdk?
+
+Create the series with `createEvent` and an RRULE, list it to get each occurrence's id, and pass one id to `updateEvent`. The steps below build that up in one file, `quickstart.ts`, and end by finding free time around it.
 
 <Steps>
 <Step>
@@ -136,7 +141,7 @@ That's a [warning](/docs/concepts/warnings), not an error. The mock has no free/
 </Step>
 </Steps>
 
-## Use a real calendar
+## How do I switch the quickstart to Google, Outlook or iCloud?
 
 When the logic does what you want, install a provider and swap it in for the mock. Only the line that creates `calendar` changes; every call after it stays the same.
 

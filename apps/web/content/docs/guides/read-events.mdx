@@ -1,11 +1,14 @@
 ---
 title: Read events
-description: List events in a time window, walk every page, fetch one event and search.
+metaTitle: "Read events: list, page through, fetch and search"
+description: listEvents returns the events in a time window, iterateEvents walks every page of them, and getEvent fetches one event by its id.
 ---
 
-## List a time window
+A week view, an agenda and a search box all start with a read, and the same three functions work on every provider. By default each recurring series comes back as its individual occurrences, so a daily standup shows up on every day of the week. Search works only on Google and the mock, and keeping a local copy up to date is a job for [`syncEvents`](/docs/guides/sync).
 
-A week view needs every event that touches the week, including the one that started Sunday night. `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
+## How do I list events in a time window?
+
+Pass `timeMin` and `timeMax` to `listEvents`. A week view needs every event that touches the week, including the one that started Sunday night, so `listEvents` returns the events that overlap `[timeMin, timeMax)`, meaning events that end after `timeMin` and start before `timeMax`:
 
 ```ts
 import { listEvents } from '@cal-sdk/core';
@@ -20,9 +23,9 @@ const { events, nextPageToken } = await listEvents({
 
 Because the end is exclusive, an event ending exactly on a boundary never shows up in two back-to-back windows. `timeMin` and `timeMax` take a `Date` or an ISO 8601 string. Watch out for strings without a time: `'2026-11-01'` means midnight UTC, so pass an offset when you mean midnight in Berlin or Kolkata.
 
-## Walk every page
+## How do I read every page of events?
 
-`listEvents` returns one page. You can pass `nextPageToken` back as `pageToken` to get the next one, but it's usually easier to let `iterateEvents` do it:
+Loop over `iterateEvents`. `listEvents` returns one page, and you could pass its `nextPageToken` back as `pageToken` yourself, but the iterator does that for you:
 
 ```ts
 import { iterateEvents } from '@cal-sdk/core';
@@ -32,7 +35,7 @@ for await (const event of iterateEvents({ calendar, timeMin, timeMax })) {
 }
 ```
 
-It fetches pages as you loop, so you can `break` early without reading the rest. Since it yields events rather than results, there's nowhere to return warnings, and they go to the [warnings setting](/docs/concepts/warnings) instead. Set `pageSize` to change how many events each request asks for; providers may return fewer.
+Pages load as you loop, so you can `break` early without reading the rest. Since it yields events rather than results, there's nowhere to return warnings, and they go to the [warnings setting](/docs/concepts/warnings) instead. Set `pageSize` to change how many events each request asks for. Providers may return fewer: Google's [`maxResults`](https://developers.google.com/workspace/calendar/api/v3/reference/events/list), for example, is an upper limit, and a page can hold fewer events, or none, even when more are left.
 
 ## Recurring events
 
@@ -65,7 +68,7 @@ const { event } = await getEvent({ calendar, eventId });
 const { events } = await listEvents({ calendar, timeMin, timeMax, query: 'design review' });
 ```
 
-Search is the read most providers can't do. Only Google and the mock support `query`, and the others throw `UnsupportedFunctionalityError` rather than quietly ignoring it. If your app accepts any provider, check `calendar.capabilities.events.search` first.
+Search is the read most providers can't do. Only Google and the mock support `query`; the Google provider passes it to the [`q` parameter of `events.list`](https://developers.google.com/workspace/calendar/api/v3/reference/events/list), which matches the title, description, location, attendees and organizer. The others throw `UnsupportedFunctionalityError` rather than quietly ignoring it. If your app accepts any provider, check `calendar.capabilities.events.search` first.
 
 ## Another calendar
 

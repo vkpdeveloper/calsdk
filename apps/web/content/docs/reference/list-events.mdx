@@ -1,9 +1,10 @@
 ---
 title: listEvents
-description: Lists one page of events in a time window. iterateEvents walks every page.
+metaTitle: "listEvents and iterateEvents: read events in a window"
+description: listEvents lists one page of calendar events in a time window, with recurring series expanded, and iterateEvents walks every page for you.
 ---
 
-The window's end is exclusive, and a recurring series comes back as its occurrences, each with its own id, unless you set `expandRecurring: false`. Use `iterateEvents` when you want every page without handling cursors.
+The window's end is exclusive, and a recurring series comes back as its occurrences, each with its own id, unless you set `expandRecurring: false`. Use [`iterateEvents`](#iterateevents) when you want every page without handling cursors. The [Read events](/docs/guides/read-events) guide covers search and recurring series in more depth.
 
 ```ts
 import { listEvents } from '@cal-sdk/core';

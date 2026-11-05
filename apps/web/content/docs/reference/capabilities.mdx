@@ -1,9 +1,10 @@
 ---
 title: Capabilities
-description: The capability flags every provider declares, and what each one means.
+metaTitle: "Capabilities: what each calendar provider supports"
+description: Capabilities are the flags each calsdk provider declares, such as events.recurrence or freeBusy, to say which calendar features it supports.
 ---
 
-Before you offer a feature, such as "edit this and following" or a video link, you'll want to know the user's calendar can do it. Every provider has a `capabilities` object that tells you. calsdk also uses it to pick fallbacks, the conformance suite runs only the tests a provider declares, and these docs build the [provider comparison](/docs/providers) from it.
+Check them before you offer a feature, such as "edit this and following" or a video link, so you only show what the user's calendar can do. calsdk also uses them to pick fallbacks, the [conformance suite](/docs/build-a-provider/conformance) runs only the tests a provider declares, and these docs build the [provider comparison](/docs/providers) from them.
 
 ```ts
 calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'unknown' or { condition }
@@ -17,6 +18,8 @@ calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'u
 | `false` | Never supported |
 | `'unknown'` | The provider cannot tell ahead of time. Not the same as unsupported |
 | `{ condition: string }` | Supported only under the condition, such as `'Teams meetings need a work or school account.'` |
+
+Outlook's `events.conference` carries that condition: calsdk asks for a `teamsForBusiness` meeting, and Outlook calendars [offer Teams meetings through a Microsoft 365 business or enterprise plan](https://learn.microsoft.com/en-us/graph/outlook-calendar-online-meetings). A [custom provider](/docs/build-a-provider) declares its own flags the same way.
 
 ## Flags
 
@@ -33,7 +36,7 @@ calendar.capabilities.events.recurrenceScopeThisAndFollowing; // true, false, 'u
     'events.color': { type: 'Capability', description: 'Set event colors.', required: true },
     'events.etag': { type: 'Capability', description: 'Events carry `etag` and writes honor `ifMatch`.', required: true },
     'events.search': { type: 'Capability', description: 'Free-text search with `query` on `listEvents`.', required: true },
-    freeBusy: { type: 'Capability', description: 'A free/busy endpoint. Without one, calsdk computes free/busy from events.', required: true },
+    freeBusy: { type: 'Capability', description: 'A free/busy endpoint for `getFreeBusy`. Without one, calsdk computes free/busy from events.', required: true },
     sync: { type: 'Capability', description: 'Fetch changes since a cursor with `syncEvents`.', required: true },
     webhooks: { type: 'Capability', description: 'Push notifications. Part of the contract, not implemented by any provider yet.', required: true },
   }}

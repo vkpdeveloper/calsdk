@@ -1,32 +1,41 @@
 ---
 title: How it works
-description: Functions, providers, results, warnings and errors, and how a call moves between them.
+metaTitle: 'How it works: core functions and providers'
+description: 'calsdk has two layers: functions in @cal-sdk/core that your app calls, and providers that turn each call into one calendar API''s requests.'
 ---
 
-Calendar APIs disagree about nearly everything, so calsdk keeps the disagreement in one place. It has two layers, the same way the Vercel AI SDK splits `generateText` from model providers.
+Calendar APIs disagree about nearly everything, so calsdk keeps that disagreement inside the providers.
 
-The functions in `@cal-sdk/core`, such as `listEvents` and `createEvent`, are what your app calls. They validate input, retry, page through results and fill in features a provider lacks, so that work is written once instead of once per API. Providers, such as `google()` and `microsoft()`, are plain objects that translate: each turns calsdk requests into one API's requests and turns the responses back into calsdk's shapes. Sync progress lives in cursors you store, not in the provider.
-
-Your app only calls functions, and passes a provider as `calendar`:
+Functions such as `listEvents` validate input, retry, page through results and fill in features a provider lacks, so that work is written once, not once per API. Providers such as `google()` and `microsoft()` are plain objects that translate calsdk requests into one API's requests, and the responses back. Your app only calls functions, and passes a provider as `calendar`:
 
 ```ts
 const { events } = await listEvents({ calendar: google({ accessToken }), timeMin, timeMax });
 ```
 
-## A call, step by step
+## What happens when you call a calsdk function?
+
+A calsdk call goes through five steps, from checking your input to handing back the result and its warnings:
 
 1. The function checks ids, time windows, event times, time zones, RRULEs, colors and emails, and throws `InvalidArgumentError` before any request. A typo never costs you an API call.
 2. A `dateTime` without an offset gets the offset for its `timeZone`, so providers always receive exact times.
 3. The provider makes its requests, passing along your `abortSignal` and `headers`.
-4. Rate limits, timeouts, server errors and network failures are retried with backoff, twice by default. Creates only retry rate limits, because a server error can arrive after the event was already saved.
+4. Rate limits, timeouts, server errors and network failures are retried with backoff, twice by default. Creates only retry rate limits, because a server error can arrive after the event was already saved. [Errors and retries](/docs/concepts/errors) has the details.
 5. You get the result with its `warnings`, which are also logged once to the console by default.
 
 ## Options and results
 
-Functions take `calendar`, the provider to call, plus `maxRetries`, `abortSignal`, `headers` and `providerOptions`. Results carry `warnings`, and can carry `providerMetadata` and the raw `response`. `findFreeTime` is the exception, since it works across several calendars at once: it takes a list of them and returns `slots` and `warnings`. The [API overview](/docs/reference#common-options) lists the exact fields.
+Functions take `calendar`, the provider to call, plus `maxRetries`, `abortSignal`, `headers` and `providerOptions`. Results carry `warnings`, and can carry `providerMetadata` and the raw `response`. `findFreeTime` is the exception, since it works across several calendars at once: it takes a list of them and returns `slots` and `warnings`. The [API reference](/docs/reference#common-options) lists the exact fields.
 
-## When providers differ
+Sync progress lives in cursors you store, not in the provider. [Sync](/docs/guides/sync) shows how to keep them.
 
-Calendars don't all support the same things, and calsdk handles each gap in one of three ways. Where it can fill the gap, it does: a provider without a free/busy endpoint gets free/busy computed from its events, and the result carries a `compatibility` warning. Where a field can be left out without changing the meeting, it leaves it out and says so: an Outlook event can't have a color, so `color` is dropped with an `unsupported` warning and everything else is saved. And where going ahead would save something different from what you asked for, such as a recurrence rule Outlook can't express, the call throws `UnsupportedFunctionalityError` instead.
+If you've used the [Vercel AI SDK](https://ai-sdk.dev/docs/foundations/providers-and-models), the split will feel familiar: there, `generateText` is separate from the model providers in the same way.
+
+## What does calsdk do when providers differ?
+
+calsdk handles each gap between calendars in one of three ways: it fills the gap and warns, drops a harmless field and warns, or throws rather than save something you didn't ask for.
+
+- **Fill the gap.** A provider without a free/busy endpoint gets free/busy computed from its events, and the result carries a `compatibility` [warning](/docs/concepts/warnings).
+- **Leave out a harmless field.** [Outlook events](https://learn.microsoft.com/en-us/graph/api/resources/event) have categories rather than a color of their own, so `color` is dropped with an `unsupported` warning and everything else is saved.
+- **Refuse.** Where going ahead would save something different from what you asked for, such as a recurrence rule that Outlook's [recurrence patterns](https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence) can't express, the call throws `UnsupportedFunctionalityError` instead.
 
 Each provider declares what it supports in `calendar.capabilities`. See [Capabilities](/docs/reference/capabilities).

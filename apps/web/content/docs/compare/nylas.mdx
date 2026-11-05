@@ -1,9 +1,10 @@
 ---
 title: calsdk vs Nylas
-description: An open source alternative to the Nylas Calendar API. What each one does, what each costs, and when to pick which.
+metaTitle: "calsdk vs Nylas: an open source Nylas alternative"
+description: calsdk and Nylas both give your app one event shape across Google, Microsoft and iCloud, but Nylas is a paid hosted API and calsdk is a free library.
 ---
 
-Nylas is a hosted API: your app calls Nylas, and Nylas talks to Google, Microsoft and iCloud for you. calsdk is a library: it runs inside your app and talks to those providers directly, with tokens your app already holds. Both give you one event shape across calendars. The difference is where the integration runs, what you pay for it, and what you still have to build yourself.
+Nylas is a [hosted API](https://developer.nylas.com/docs/v3/calendar/): your app calls Nylas, and Nylas talks to Google, Microsoft and iCloud for you. calsdk is a library: it runs inside your app and talks to those providers directly, with tokens your app already holds. The difference is where the integration runs, what you pay for it, and what you still have to build yourself.
 
 ## Side by side
 
@@ -22,27 +23,33 @@ Nylas is a hosted API: your app calls Nylas, and Nylas talks to Google, Microsof
 
 Nylas prices and features are from [nylas.com/pricing](https://www.nylas.com/pricing/) and the [Nylas calendar docs](https://developer.nylas.com/docs/v3/calendar/), checked in November 2026.
 
-## What it costs
+## What does Nylas cost?
 
-Nylas charges per connected account every month. Calendar-only accounts are not included on the free plan. On Essentials ($15 a month) each one past the first 10 costs $1.70, and on Pro ($49 a month, or $43 on an annual commitment) each one past the first 35 costs $1.50, or $1.35 on the annual plan.
+Nylas charges per connected account every month, and [calendar-only accounts](https://www.nylas.com/pricing/) aren't included on the free plan. On Essentials ($15 a month), each one past the first 10 costs $1.70.
 
-So an app with 1,000 users who each connect one calendar pays about $1,500 a month on Pro Monthly, or about $1,350 on Pro Annual. That number grows with your user count, not with how much your users do.
+On [Pro](https://www.nylas.com/pricing/) ($49 a month, or $43 on an annual commitment), each calendar-only account past the first 35 costs $1.50, or $1.35 on the annual plan. So an app with 1,000 users who each connect one calendar pays about $1,500 a month on Pro Monthly, or about $1,350 on Pro Annual. That number grows with your user count, not with how much your users do.
 
-calsdk has no price. You pay for the servers your app already runs on, and the provider APIs themselves are free within their quotas.
+calsdk has no price. You pay for the servers your app already runs on, and the [Google Calendar API](https://developers.google.com/workspace/calendar/api/guides/quota) and [Microsoft Graph](https://learn.microsoft.com/en-us/graph/metered-api-overview) calendar calls it makes are free within their quotas.
 
-## Where your users' data goes
+## Where does your users' data go?
 
-With Nylas, every calendar request passes through Nylas's servers in the region you chose (US or EU). Nylas says v3 forwards requests to the provider rather than storing calendar data, but the traffic, and the tokens if you use hosted auth, still go through a third party. Object ids are tied to that region, so moving regions means your users connect again.
+With Nylas, every calendar request passes through Nylas's servers in the [region you chose](https://developer.nylas.com/docs/dev-guide/platform/data-residency/), US or EU. Moving to the other region means creating a new Nylas application and having your users connect again.
+
+Since v3, Nylas [no longer keeps event data](https://www.nylas.com/blog/introducing-nylas-apiv3/) for Google and Microsoft accounts and queries the provider live instead. The traffic, and the tokens if you use hosted auth, still go through a third party.
 
 With calsdk there is no third party. Requests go from your server straight to Google or Microsoft, and the tokens never leave your app. For some teams that's the whole reason: one less vendor in a security review, one less place calendar data passes through.
 
-## When Nylas is the better choice
+## When is Nylas the better choice?
 
-Pick Nylas if you'd rather not run OAuth yourself. Google's sensitive calendar scopes need a verified app, and Nylas can take that on for you on higher plans. Pick it if you need webhooks today, a ready-made scheduling page, Exchange servers reached over EWS, or email and contacts alongside calendars. And pick it if your backend isn't JavaScript: calsdk only runs where TypeScript or JavaScript does.
+Pick Nylas if you'd rather not run OAuth yourself. Public apps that use Google's calendar scopes need [Google's verification](https://developers.google.com/workspace/calendar/api/auth), and Nylas offers an already verified [shared Google app](https://www.nylas.com/pricing/) as an add-on on Pro Annual and Enterprise.
 
-## When calsdk fits better
+Pick it if you need [webhooks](https://developer.nylas.com/docs/v3/notifications/) today, a ready-made [scheduling page](https://developer.nylas.com/docs/v3/scheduler/), [Exchange servers reached over EWS](https://developer.nylas.com/docs/cookbook/use-cases/build/oauth-exchange-vs-m365/), or email and contacts alongside calendars. And pick it if your backend isn't JavaScript: calsdk only runs where TypeScript or JavaScript does.
 
-calsdk fits when your app already signs users in with Google or Microsoft, so it already has the tokens, and you want the calendar features without a per-user bill. It also fits when you need calendars Nylas doesn't cover, like Fastmail, Nextcloud, Zoho, Cal.com or Calendly. And when you want your calendar code testable offline, the [mock provider](/docs/providers/mock) runs the same functions in memory.
+## When does calsdk fit better?
+
+calsdk fits when your app already signs users in with Google or Microsoft, so it already has the tokens, and you want the calendar features without a per-user bill.
+
+calsdk also reaches Fastmail, Nextcloud and other CalDAV-only servers, which [Nylas doesn't connect](https://developer.nylas.com/docs/cookbook/calendar/caldav-vs-calendar-api/), through its [CalDAV provider](/docs/providers/caldav). It covers Zoho, [Cal.com](/docs/providers/calcom) and [Calendly](/docs/providers/calendly) too. And when you want your calendar code testable offline, the [mock provider](/docs/providers/mock) runs the same functions in memory.
 
 ## Moving from Nylas
 
@@ -58,6 +65,24 @@ const calendar = google({ accessToken: () => getFreshAccessToken(userId) });
 const { events } = await listEvents({ calendar, timeMin, timeMax });
 ```
 
-The two pieces you'd build yourself are the OAuth flow (most auth libraries, such as Auth.js or Better Auth, already store Google and Microsoft tokens) and the webhook replacement, which is a scheduled [sync](/docs/guides/sync) per calendar.
+The two pieces you'd build yourself are the OAuth flow (auth libraries such as [Auth.js](https://authjs.dev/concepts/database-models) and [Better Auth](https://www.better-auth.com/docs/concepts/oauth) already store Google and Microsoft tokens) and the webhook replacement, which is a scheduled [sync](/docs/guides/sync) per calendar.
 
 [Install calsdk](/docs/installation) or try it without an account in the [quickstart](/docs/quickstart).
+
+## FAQ
+
+### Is calsdk a free alternative to Nylas?
+
+Yes, calsdk is MIT-licensed and has no per-account fee, while Nylas [bills every connected account](https://www.nylas.com/pricing/) each month. What you take on in exchange is the OAuth flow and a scheduled sync job.
+
+### Does calsdk support webhooks like Nylas?
+
+No, calsdk has no server to receive push notifications. Call `syncEvents` on a schedule instead: with the cursor you saved last time, it returns only the events that changed since.
+
+### Can calsdk find free time on iCloud calendars?
+
+Yes, calsdk computes free/busy from events on providers without a free/busy endpoint, iCloud included, and returns a warning saying so. Nylas's free/busy endpoint [isn't available for iCloud](https://developer.nylas.com/docs/v3/calendar/).
+
+### Does calsdk refresh OAuth tokens the way Nylas hosted auth does?
+
+No, your app refreshes tokens. Pass `accessToken` as a function, such as `() => getFreshAccessToken(userId)`, and calsdk calls it before each request, so you can return a cached token or refresh it with the auth library you already use.

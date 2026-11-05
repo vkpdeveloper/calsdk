@@ -1,6 +1,7 @@
 ---
 title: Mock
-description: An in-memory calendar for trying calsdk, testing your app offline and checking a provider against a reference.
+metaTitle: "Mock calendar for tests and demos"
+description: The mock provider is an in-memory calendar for trying calsdk, testing your app offline and checking a provider against a reference.
 ---
 
 The mock needs no credentials and makes no requests, so it's the quickest way to try calsdk and the right thing to put in your tests. It supports everything calsdk models except a free/busy endpoint, which also makes it the reference implementation for [provider authors](/docs/build-a-provider).
@@ -33,12 +34,14 @@ const { events } = await listEvents({
 console.log(calendar.events); // the stored state
 ```
 
-## How it behaves
+## How does the mock calendar behave?
 
-Ids are predictable, `evt_1`, `evt_2` and so on, so your test assertions can name them. An occurrence is `<series id>_<UTC start>`, like Google's.
+The mock keeps ids predictable, `evt_1`, `evt_2` and so on, so your test assertions can name them. An occurrence is `<series id>_<UTC start>`, like [Google's](/docs/providers/google).
 
-Recurrence follows RFC 5545: one `RRULE` line plus `EXDATE` lines. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`.
-
-Seed events passed in `events` skip the checks `createEvent` runs, so give every `dateTime` an offset. `createConference: true` adds a placeholder link with `provider: 'other'`. Free/busy is computed from events by calsdk, with a `compatibility` warning, as it is for any provider without an endpoint.
+Seed events passed in `events` skip the checks `createEvent` runs, so give every `dateTime` an offset. `createConference: true` adds a placeholder link with `provider: 'other'`. Free/busy is computed from events by calsdk, with a `compatibility` [warning](/docs/concepts/warnings), as it is for any provider without an endpoint.
 
 [Test your code](/docs/guides/testing) covers the settings and how to use the mock in tests.
+
+## Which recurrence rules does the mock support?
+
+The mock accepts one [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5) `RRULE` line plus any `EXDATE` lines. `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`. [Recurring events](/docs/guides/recurring-events) shows how to write and change a series.

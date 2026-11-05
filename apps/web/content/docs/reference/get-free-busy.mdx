@@ -1,9 +1,10 @@
 ---
 title: getFreeBusy
-description: Returns busy blocks for one or more calendars of one provider.
+metaTitle: "getFreeBusy: busy times for one or more calendars"
+description: getFreeBusy returns merged busy blocks for one or more calendars on one provider, without exposing what the events are.
 ---
 
-Use `getFreeBusy` when you need to know when someone is busy, not what their events are.
+Use `getFreeBusy` when you need to know when someone is busy, not what their events are. To find open slots across several providers at once, use [`findFreeTime`](/docs/reference/find-free-time).
 
 ```ts
 import { getFreeBusy } from '@cal-sdk/core';
@@ -16,7 +17,7 @@ const { calendars } = await getFreeBusy({
 });
 ```
 
-Google answers from its free/busy endpoint. Other providers are read from their events instead, with a `compatibility` warning: [Find free time](/docs/guides/free-time) covers how the busy times are worked out.
+Google answers from its [free/busy endpoint](https://developers.google.com/workspace/calendar/api/v3/reference/freebusy/query). Other providers are read from their events instead, with a `compatibility` warning: [Find free time](/docs/guides/free-time) covers how the busy times are worked out.
 
 ## Options
 

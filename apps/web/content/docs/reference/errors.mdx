@@ -1,9 +1,10 @@
 ---
 title: Errors
-description: Every error class calsdk throws, its fields and when it is thrown.
+metaTitle: "Errors: every error class, its fields and when it's thrown"
+description: calsdk errors are typed classes such as NotFoundError and RateLimitError that all extend CalsdkError, so you can handle each kind of failure on its own.
 ---
 
-When a call fails, the error's class tells you what went wrong and its fields tell you where. All errors extend `CalsdkError`, which extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
+When a call fails, the error's class tells you what went wrong and its fields tell you where. `CalsdkError` itself extends `Error`. Every class has a static `isInstance(error)` check that works across duplicated package copies. Errors from a provider keep the original failure in `cause`.
 
 ```ts
 import { NotFoundError } from '@cal-sdk/core';
@@ -28,9 +29,9 @@ if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
 | `AuthenticationError` | `provider` | Credentials were rejected (401) |
 | `PermissionDeniedError` | `provider` | The user may not do this (403) |
 | `NotFoundError` | `provider`, `resource` (`'calendar'` or `'event'`), `id` | The calendar or event does not exist, was deleted or is hidden (404, 410) |
-| `ConflictError` | `provider`, `eventId` | `ifMatch` no longer matches (412) |
+| `ConflictError` | `provider`, `eventId` | `ifMatch` on [`updateEvent`](/docs/reference/update-event) or [`deleteEvent`](/docs/reference/delete-event) no longer matches (412) |
 | `RateLimitError` | `provider`, `retryAfterMs?`, `isRetryable` (always `true`) | The provider is throttling (429) |
-| `SyncCursorExpiredError` | `provider`, `calendarId` | The provider no longer accepts the sync cursor |
+| `SyncCursorExpiredError` | `provider`, `calendarId` | The provider no longer accepts the [`syncEvents`](/docs/reference/sync-events) cursor |
 | `InvalidResponseDataError` | `data` | The provider returned data in a shape calsdk does not expect. The message leaves the data out |
 | `APICallError` | `url`, `statusCode?`, `responseHeaders?`, `responseBody?`, `isRetryable` | Any other failed request, including network errors |
 
@@ -40,6 +41,6 @@ if (NotFoundError.isInstance(error)) console.log(error.resource, error.id);
 
 | Class | Fields | Thrown when |
 | --- | --- | --- |
-| `FreeBusyUnavailableError` | `provider`, `calendarId` | `findFreeTime` could not read one of the calendars |
+| `FreeBusyUnavailableError` | `provider`, `calendarId` | [`findFreeTime`](/docs/reference/find-free-time) could not read one of the calendars |
 
 `NotFoundError`, `SyncCursorExpiredError` and `FreeBusyUnavailableError` leave calendar ids out of their messages, since they are often email addresses. Read them from the fields.

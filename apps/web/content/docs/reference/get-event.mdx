@@ -1,9 +1,10 @@
 ---
 title: getEvent
-description: Fetches one event by id.
+metaTitle: "getEvent: fetch one calendar event by id"
+description: getEvent fetches one calendar event by id from any calsdk provider, with its current details and attendees.
 ---
 
-Use `getEvent` when you have an event's id and want its current details, including attendees that some providers leave out of listings.
+Use `getEvent` when you have an event's id and want its current details, including attendees that some providers [leave out of listings](/docs/concepts/events#people). To read many events at once, use [`listEvents`](/docs/reference/list-events) instead.
 
 ```ts
 import { getEvent } from '@cal-sdk/core';
@@ -31,6 +32,8 @@ Plus the [common options](/docs/reference#common-options).
   }}
 />
 
+See [`CalendarEvent`](/docs/reference/types#calendarevent) for every field of the event.
+
 ## Throws
 
-- `NotFoundError` when the event or calendar does not exist or is not visible to the user. `resource` says which.
+- `NotFoundError` when the event or calendar does not exist or is not visible to the user. `resource` says which. [Errors](/docs/reference/errors) lists its other fields.

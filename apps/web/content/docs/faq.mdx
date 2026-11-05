@@ -1,39 +1,52 @@
 ---
 title: FAQ
-description: Short answers to the questions people ask before they pick calsdk, with links to the details.
+metaTitle: 'FAQ: common questions about calsdk'
+description: This FAQ answers what calsdk is, which calendars it supports, how it handles OAuth, recurring events and sync, and whether it is free.
 ---
 
 ## What is calsdk?
 
-calsdk is an open source TypeScript library that gives your app one API for many calendar providers. You create a provider, such as `google({ accessToken })`, and pass it to plain functions like `listEvents`, `createEvent`, `findFreeTime` and `syncEvents`. Every provider returns the same event shape, so switching calendars changes one line. See the [overview](/docs).
+calsdk is an open source TypeScript library that gives your app one API for many calendar providers. Every provider returns the same event shape, so switching calendars changes one line.
+
+You create a provider, such as `google({ accessToken })`, and pass it to plain functions like `listEvents`, `createEvent`, `findFreeTime` and `syncEvents`. See the [overview](/docs).
 
 ## Which calendars does calsdk support?
 
-Google Calendar, Microsoft Outlook and Microsoft 365, iCloud, Zoho Calendar and any other CalDAV server (such as Fastmail, Nextcloud and Radicale), Zoom, Cal.com, Calendly, and ICS feeds, which are read only. There is also an in-memory mock calendar for tests. The providers don't all support the same things: [compare providers](/docs/providers) shows what each one can do.
+Google Calendar, Microsoft Outlook and Microsoft 365, iCloud, Zoho Calendar and any other CalDAV server (such as Fastmail, Nextcloud and Radicale), Zoom, Cal.com, Calendly, and ICS feeds, which are read only.
+
+There is also an in-memory mock calendar for tests. The providers don't all support the same things: [compare providers](/docs/providers) shows what each one can do.
 
 ## Is calsdk a hosted service like Nylas or Cronofy?
 
-No. Hosted calendar APIs run the integration on their own servers: your app calls their API, and they hold the connection to each calendar. calsdk is a library that runs inside your app and calls Google, Microsoft and the others directly, with tokens your app passes in. It has no server, database or queue of its own, so your users' calendar data doesn't pass through anyone else. See how it compares with [Nylas](/docs/compare/nylas), [Cronofy](/docs/compare/cronofy) and [Unified.to](/docs/compare/unified-to).
+No. calsdk is a library that runs inside your app and calls Google, Microsoft and the others directly, with tokens your app passes in. It has no server, database or queue of its own, so your users' calendar data doesn't pass through anyone else.
+
+Hosted calendar APIs, such as [Nylas's Calendar API](https://developer.nylas.com/docs/v3/calendar/), run the integration on their own servers: your app calls their API, and they hold the connection to each calendar. Your users' data then lives in regions they run, such as [Nylas's U.S. and EU regions](https://developer.nylas.com/docs/dev-guide/platform/data-residency/) or [Cronofy's data centers](https://docs.cronofy.com/developers/data-centers/). See how calsdk compares with [Nylas](/docs/compare/nylas), [Cronofy](/docs/compare/cronofy) and [Unified.to](/docs/compare/unified-to).
 
 ## Does calsdk handle OAuth?
 
-No. calsdk doesn't run OAuth flows or refresh tokens, because your app owns the user's account and so it owns the tokens. Pass a token, or a function that returns a fresh one: calsdk calls it before each request, so you can refresh and cache tokens however your app already does. See [Install](/docs/installation#keep-credentials-on-the-server).
+No. calsdk doesn't run OAuth flows or refresh tokens, because your app owns the user's account and so it owns the tokens.
+
+Pass a token, or a function that returns a fresh one: calsdk calls it before each request, so you can refresh and cache tokens however your app already does. See [Installation](/docs/installation#keep-credentials-on-the-server).
 
 ## Where does calsdk run?
 
 Anywhere with `fetch`. Every package is ESM only and talks to provider APIs with `fetch` and nothing else, so it runs on Node.js 20 or later, Bun, Deno and edge runtimes. Create providers in server code, since their tokens give full access to a user's calendar.
 
-## How do I find a free time across Google Calendar and Outlook?
+## How do I find free time across Google Calendar and Outlook?
 
 Call `findFreeTime` with calendars from any mix of providers, and it returns the slots when all of them are free. If one calendar can't be read, it throws `FreeBusyUnavailableError` instead of offering times that might clash. See [Find free time](/docs/guides/free-time).
 
 ## How does calsdk handle recurring events?
 
-You create a series with an RRULE, and listing expands it into occurrences, each with its own id. To change one, pass its id to `updateEvent` or `deleteEvent` with a scope: `'this'` for that occurrence only, `'thisAndFollowing'` for it and every later one, or `'all'` for the whole series. Not every provider has every scope (Outlook has no "this and following"), and the provider pages say which. See [Recurring events](/docs/guides/recurring-events).
+You create a series with an RRULE, and listing expands it into occurrences, each with its own id. To change one, pass its id to `updateEvent` or `deleteEvent` with a scope.
+
+The scope is `'this'` for that occurrence only, `'thisAndFollowing'` for it and every later one, or `'all'` for the whole series. Not every provider has every scope: Outlook stores a series as a [pattern and a range](https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence) and has no "this and following", and the provider pages say which. See [Recurring events](/docs/guides/recurring-events).
 
 ## What happens when a provider can't do what I asked?
 
-If the call can still do what you meant, calsdk saves what it can and returns `warnings` that say what it couldn't, such as an event color the provider doesn't have. If going ahead would save a different schedule or lose data, it throws `UnsupportedFunctionalityError` instead. It never quietly changes your data. See [Warnings](/docs/concepts/warnings).
+calsdk either saves what it can and returns `warnings`, or throws `UnsupportedFunctionalityError`. It never quietly changes your data.
+
+If the call can still do what you meant, calsdk saves it and the warnings say what it couldn't do, such as an event color the provider doesn't have. If going ahead would save a different schedule or lose data, it throws instead. See [Warnings](/docs/concepts/warnings).
 
 ## How do I keep a copy of a calendar in sync?
 

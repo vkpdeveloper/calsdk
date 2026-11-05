@@ -1,11 +1,16 @@
 ---
 title: Sync changes
-description: Keep a local copy of a calendar up to date with the changes since a saved cursor.
+metaTitle: Sync calendar changes with a cursor
+description: syncEvents returns the changes to a calendar since a saved cursor, so you can keep a local copy of its events up to date.
 ---
 
 To mirror your users' calendars into Postgres, apply the changes `syncEvents` returns and save its cursor for the next run. The first sync, without a cursor, returns everything the provider syncs: for most providers that's the whole calendar, while Outlook covers a window.
 
 After that you get back only what changed, though some providers have to reread the whole calendar to find it. Check [how each provider syncs](#how-each-provider-syncs) before you choose how often to run it.
+
+## Sync a calendar into your database
+
+This function syncs one calendar, and starts over when the provider no longer accepts the cursor:
 
 ```ts
 import { SyncCursorExpiredError, syncEvents } from '@cal-sdk/core';
@@ -29,7 +34,7 @@ async function sync(calendarId: string) {
 
 ## Apply changes in order
 
-Apply changes in the order they come. The same event can show up more than once in a round (Outlook does this), and the later entry is the newer one, so applying them in order leaves you with the latest version. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
+Apply changes in the order they come. The same event can show up more than once in a round, because Microsoft Graph's [delta query](https://learn.microsoft.com/en-us/graph/delta-query-overview) may return an item each time it changed, and the later entry is the newer one, so applying them in order leaves you with the latest version. An `upsert` carries an `event` to insert, or to replace the one with the same `id`, and a `delete` carries the `eventId` to remove:
 
 ```ts
 import type { SyncChange } from '@cal-sdk/core';
@@ -42,13 +47,13 @@ async function applyChanges(changes: SyncChange[]) {
 }
 ```
 
-Sync returns what the provider stores, not computed occurrences: single events, series and exceptions. A daily standup with no end has infinitely many occurrences, so there's no sensible way to sync them all. To show a week, expand series yourself, or call `listEvents` for that window.
+Sync returns what the provider stores, not computed occurrences: single events, series and exceptions. A daily standup with no end has infinitely many occurrences, so there's no sensible way to sync them all. To show a week, expand series yourself, or call [`listEvents`](/docs/guides/read-events) for that window.
 
-## Cursors
+## How do I store the sync cursor?
 
 Store the cursor as a string and never parse it: depending on the provider, it's a provider token or a list of fingerprints. Save it only after the changes are applied, so a crash in between replays them instead of losing them.
 
-Providers can expire a cursor, for example after a long time unused, and then `syncEvents` throws `SyncCursorExpiredError`. Throw away the cursor and your copy, and sync again without one, as the example at the top does.
+Providers can expire a cursor, for example after a long time unused: Google answers an old [sync token](https://developers.google.com/workspace/calendar/api/guides/sync) with `410 Gone`, and Graph drops old [delta tokens](https://learn.microsoft.com/en-us/graph/delta-query-overview). calsdk turns both into [`SyncCursorExpiredError`](/docs/concepts/errors). Throw away the cursor and your copy, and sync again without one, as the [example above](#sync-a-calendar-into-your-database) does.
 
 ## Large syncs
 
@@ -72,17 +77,19 @@ Pass the same `calendarId` and `cursor` on every page of a round. The last page 
 
 ## How each provider syncs
 
+Google, Outlook and CalDAV return only what changed, using the provider's own sync tokens. Cal.com asks for bookings by the time they last changed. Calendly, Zoom and ICS reread every event and compare it with the last sync, so each round costs more and their cursors grow.
+
 | Provider          | How                                                               |
 | ----------------- | ----------------------------------------------------------------- |
-| Google            | Google sync tokens                                                |
-| Outlook           | Graph delta queries over a fixed window, by default a year back and two years ahead |
-| CalDAV            | The server's sync tokens (RFC 6578)                               |
+| Google            | Google [sync tokens](https://developers.google.com/workspace/calendar/api/guides/sync)                                        |
+| Outlook           | Graph [delta queries](https://learn.microsoft.com/en-us/graph/delta-query-events) over a fixed window, by default a year back and two years ahead |
+| CalDAV            | The server's sync tokens ([RFC 6578](https://datatracker.ietf.org/doc/html/rfc6578)) |
 | Cal.com           | Bookings by the time they last changed                            |
 | Calendly          | Rereads every meeting and compares it with the last sync. The cursor grows with the number of events |
 | Zoom              | Rereads every meeting and compares it with the last sync. The cursor grows with the number of events |
-| ICS               | Downloads the feed unless the server answers `304 Not Modified`, then compares it with the last sync. The cursor grows with the number of events |
+| ICS               | Downloads the feed unless the server answers [`304 Not Modified`](https://www.rfc-editor.org/rfc/rfc9110#section-15.4.5), then compares it with the last sync. The cursor grows with the number of events |
 | Mock              | A change log in memory                                            |
 
-Outlook syncs a window because Graph's delta query needs a date range. Pass `providerOptions.microsoft.timeMin` and `timeMax` on the first sync to choose a different one; the window is kept in the cursor after that.
+Outlook syncs a window because Graph's [calendar view delta query](https://learn.microsoft.com/en-us/graph/delta-query-events) needs a start and end date. Pass `providerOptions.microsoft.timeMin` and `timeMax` on the first sync to choose a different one; the window is kept in the cursor after that.
 
-No provider pushes changes yet, so run sync on a schedule, or when the user opens your app.
+No provider pushes changes yet, so run sync on a schedule, or when the user opens your app. The [`syncEvents` reference](/docs/reference/sync-events) lists every option.

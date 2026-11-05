@@ -1,6 +1,7 @@
 ---
 title: Write events
-description: Create, update and delete events, invite attendees, add video links and avoid overwriting changes.
+metaTitle: "Write events: create, update and delete"
+description: createEvent, updateEvent and deleteEvent write events to every provider that accepts writes, with attendees, video links and etag checks.
 ---
 
 You want every booking in your app to land in your users' real calendars, whichever one they use. With calsdk, each booking is one `createEvent` call.
@@ -22,7 +23,7 @@ const { event, warnings } = await createEvent({
 });
 ```
 
-You get back the event as the provider stored it, with its `id`, and an `etag` where the provider supports version checks. Check `warnings` for anything the provider changed or couldn't save, such as a color Google doesn't have.
+You get back the event as the provider stored it, with its `id`, and an `etag` where the provider supports version checks. Check `warnings` for anything the provider changed or couldn't save, such as [a color Google doesn't have](https://developers.google.com/workspace/calendar/api/v3/reference/colors).
 
 All-day events use dates instead, and the end date is exclusive:
 
@@ -54,11 +55,13 @@ await createEvent({
 });
 ```
 
-`sendUpdates` decides who gets an email: `'all'`, `'externalOnly'` (people outside the organization) or `'none'`. Leave it out to get the provider's default. Not every provider lets you choose: some always email attendees, and some never do. Cal.com, for example, always emails attendees about their bookings, so asking for `'none'` there still sends the email and returns a warning that says so. Each [provider page](/docs/providers) says what it does.
+`sendUpdates` decides who gets an email: `'all'`, `'externalOnly'` (people outside the organization) or `'none'`. Leave it out to get the provider's default. Not every provider lets you choose: some always email attendees, and some never do. Cal.com, for example, always emails attendees about their bookings, and its [create booking endpoint](https://cal.com/docs/api-reference/v2/bookings/create-a-booking) has no setting to skip that, so asking for `'none'` there still sends the email and returns a warning that says so. Each [provider page](/docs/providers) says what it does.
 
 When you read events back, `attendees` carry their `responseStatus` (`needsAction`, `accepted`, `declined` or `tentative`), and `organizer` says who organized it.
 
-## Add a video link
+## How do I add a video link to an event?
+
+Pass `createConference: true` when you create the event. Google adds a [Meet link](https://developers.google.com/workspace/calendar/api/guides/create-events), Outlook adds a [Teams meeting](https://learn.microsoft.com/en-us/graph/outlook-calendar-online-meetings), and you read the link back from `conference`:
 
 ```ts
 const { event } = await createEvent({
@@ -70,7 +73,17 @@ console.log(event.conference);
 // { provider: 'google-meet', joinUrl: 'https://meet.google.com/...', id: '...' }
 ```
 
-Google adds a Meet link and Outlook a Teams meeting (work and school accounts only). Every Zoom meeting has its link already. Other providers can't create links, but CalDAV and ICS events often have one pasted in, so calsdk looks for a Meet, Teams or Zoom link in the event's URL, location or description and returns it as `conference`.
+| Provider          | `createConference`                | `conference` you get back |
+| ----------------- | --------------------------------- | ------------------------- |
+| Google            | Yes                               | Google Meet               |
+| Outlook           | Work and school accounts only     | Microsoft Teams           |
+| Zoom              | Not needed                        | The meeting's own Zoom link |
+| Cal.com, Calendly | No, the event type sets the link  | The booking's meeting link |
+| CalDAV            | No                                | A Meet, Teams or Zoom link found in the event's URL, location or description |
+| ICS               | No, read only                     | Same as CalDAV            |
+| Mock              | Yes                               | A placeholder link        |
+
+Microsoft Graph adds Teams meetings only where Teams comes with a [Microsoft 365 business or enterprise plan](https://learn.microsoft.com/en-us/graph/outlook-calendar-online-meetings). On personal accounts, and some work accounts, the event is saved without one, and the result carries a warning. CalDAV and ICS can't create links, but their events often have one pasted in, which is why calsdk looks for it in the text.
 
 ## Update an event
 
@@ -86,7 +99,7 @@ const { event } = await updateEvent({
 });
 ```
 
-`start` and `end` can be replaced but not cleared. Always use the `id` of the returned event afterwards, because a few providers replace an event when it moves. Cal.com, for one, cancels the old booking and gives you a new one with a new id.
+`start` and `end` can be replaced but not cleared. Always use the `id` of the returned event afterwards, because a few providers replace an event when it moves. Cal.com, for one, [reschedules](https://cal.com/docs/api-reference/v2/bookings/reschedule-a-booking) by cancelling the old booking and giving you a new one with a new id.
 
 ## Delete an event
 
@@ -98,9 +111,9 @@ await deleteEvent({ calendar, eventId });
 
 A missing event throws `NotFoundError`. The exception is a retry: if an earlier attempt deleted the event but its response got lost, calsdk treats the delete as done instead of failing.
 
-## Don't overwrite someone else's change
+## How do I avoid overwriting someone else's change to an event?
 
-You read a meeting, a colleague renames it in Outlook, and your update quietly overwrites their change. To prevent that, pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. The update then only goes through if nobody changed the event since you read it:
+Pass the event's `etag` (a version tag, on providers that have one) as `ifMatch`. Without it, you read a meeting, a colleague renames it in Outlook, and your update overwrites their change. With it, the update only goes through if nobody changed the event since you read it:
 
 ```ts
 import { ConflictError, getEvent, updateEvent } from '@cal-sdk/core';
@@ -115,15 +128,20 @@ try {
 }
 ```
 
-`deleteEvent` takes `ifMatch` too. Outlook ignores it on deletes, so calsdk reads the event, compares the etag and then deletes. A change made between the read and the delete isn't caught.
+`deleteEvent` takes `ifMatch` too. Outlook ignores `If-Match` on [deletes](https://learn.microsoft.com/en-us/graph/api/event-delete), so calsdk reads the event, compares the etag and then deletes. A change made between the read and the delete isn't caught.
 
-Google, Outlook, CalDAV and the mock support `ifMatch`. Cal.com, Calendly and Zoom throw `UnsupportedFunctionalityError` when you pass it.
+| Provider                | `ifMatch`                                              |
+| ----------------------- | ------------------------------------------------------ |
+| Google, CalDAV, Mock    | Yes                                                    |
+| Outlook                 | Yes. On deletes, calsdk compares the etag itself first |
+| Cal.com, Calendly, Zoom | No. Passing it throws `UnsupportedFunctionalityError`  |
+| ICS                     | No, read only                                          |
 
 ## Retries
 
-calsdk retries rate limits, timeouts, server errors and network failures twice by default, with exponential backoff that honors `Retry-After`. A `Retry-After` over a minute isn't waited out: calsdk throws so the call doesn't hang. Set `maxRetries` to change the count, or `0` to turn retries off.
+calsdk retries rate limits, timeouts, server errors and network failures twice by default, with exponential backoff that honors `Retry-After`. A `Retry-After` over a minute isn't waited out: calsdk throws so the call doesn't hang. Set `maxRetries` to change the count, or `0` to turn retries off. [Errors and retries](/docs/concepts/errors) lists which errors count as retryable.
 
-Creates are the exception. They only retry rate limits, which the provider rejects before doing any work, because retrying after a server error could create the event twice. To make an Outlook create safe to retry yourself, pass a `transactionId`, and Outlook won't create the event again on a repeat:
+Creates are the exception. They only retry rate limits, which the provider rejects before doing any work, because retrying after a server error could create the event twice. To make an Outlook create safe to retry yourself, pass a [`transactionId`](https://learn.microsoft.com/en-us/graph/api/resources/event), and Outlook won't create the event again on a repeat:
 
 ```ts
 await createEvent({

@@ -1,13 +1,14 @@
 ---
 title: Recurring events
-description: Create a series with an RRULE, then change or delete one occurrence, the rest of the series, or all of it.
+metaTitle: "Recurring events: RRULEs, occurrences and exceptions"
+description: calsdk describes every recurring event with RFC 5545 RRULE lines and lets you change or delete one occurrence, the following ones, or the whole series.
 ---
 
-Recurring events are where calendar APIs disagree the most, so calsdk describes every series the same way, with RFC 5545 rules, and translates them for each provider.
+Recurring events are where calendar APIs disagree the most. Google stores [RRULE lines](https://developers.google.com/workspace/calendar/api/guides/recurringevents), Outlook a [`patternedRecurrence`](https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence) object and Zoom a [recurrence object](https://developers.zoom.us/docs/api/meetings/) of its own. calsdk takes the same [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10) rules on every provider, translates them, and throws when a provider can't store one.
 
 ## Create a series
 
-A series is an event with `recurrence`, one RFC 5545 line per array item, and its `start` and `end` describe the first occurrence:
+A series is an event with `recurrence`, one [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10) line per array item, and its `start` and `end` describe the first occurrence:
 
 ```ts
 const { event: standup } = await createEvent({
@@ -33,7 +34,7 @@ A few rules you'll reach for often:
 | `RRULE:FREQ=MONTHLY;BYMONTHDAY=15;COUNT=6`   | The 15th, six times                      |
 | `RRULE:FREQ=DAILY;UNTIL=20261231T235959Z`    | Every day until the end of 2026          |
 
-Add `EXDATE` lines to skip occurrences. The series repeats in its `start.timeZone`, so a 9:30 standup in Berlin stays at 9:30 local time when daylight saving time starts or ends, instead of drifting an hour.
+Add [`EXDATE`](https://datatracker.ietf.org/doc/html/rfc5545#section-3.8.5.1) lines to skip occurrences. The series repeats in its `start.timeZone`, so a 9:30 standup in Berlin stays at 9:30 local time when daylight saving time starts or ends, instead of drifting an hour.
 
 ## Four kinds of event
 
@@ -41,16 +42,16 @@ Every event has a `kind` that says how it relates to a series:
 
 | Kind         | What it is                                         | Has            |
 | ------------ | -------------------------------------------------- | -------------- |
-| `single`     | An event that does not repeat                      |                |
+| `single`     | An event that does not repeat                      | Nothing        |
 | `series`     | The recurring event itself                         | `recurrence`   |
 | `occurrence` | One instance, as the rule placed it                | `seriesId`, `originalStart` |
 | `exception`  | One instance someone changed                       | `seriesId`, `originalStart` |
 
 `listEvents` returns occurrences and exceptions by default, and series with `expandRecurring: false`. `originalStart` is where the rule put an instance, and it stays put when the instance moves, so it's how you recognize Friday's standup even after someone dragged it to 10:00.
 
-## Change one occurrence, or more
+## How do I change one occurrence of a recurring event?
 
-This is the part every calendar UI asks about: "this event, or all events in the series?" `updateEvent` and `deleteEvent` take the id of an occurrence or exception, and a `scope` that answers it:
+Pass the occurrence's id to `updateEvent` or `deleteEvent`. Both take the id of an occurrence or exception, and a `scope` that answers the question every calendar UI asks: "this event, or all events in the series?"
 
 | `scope`              | Changes                                       |
 | -------------------- | --------------------------------------------- |
@@ -87,9 +88,13 @@ A `thisAndFollowing` change always works this way, as two series. Ids of later o
 
 ## Moving a series
 
-Patching an occurrence's `start` with scope `'all'` moves the whole series by as much as that occurrence moved. What happens to instances someone already edited is up to the provider: Google resets them and Zoom schedules every meeting again, both with a warning. The provider pages have the details.
+Patching an occurrence's `start` with scope `'all'` moves the whole series by as much as that occurrence moved. What happens to instances someone already edited, which Google calls [exceptions](https://developers.google.com/workspace/calendar/api/guides/recurringevents#modifying_or_deleting_instances), is up to the provider: Google resets them and Zoom schedules every meeting again from its [recurrence object](https://developers.zoom.us/docs/api/meetings/), both with a warning. The [Google](/docs/providers/google) and [Zoom](/docs/providers/zoom) pages have the details.
 
-## What each provider supports
+## Which recurrence rules does each calsdk provider support?
+
+Google takes any RRULE and supports all three scopes. CalDAV takes any rule, while [Outlook](https://learn.microsoft.com/en-us/graph/api/resources/recurrencepattern) and [Zoom](https://developers.zoom.us/docs/api/meetings/) take only the rules their APIs can express, and none of those three supports `thisAndFollowing`.
+
+calsdk books Cal.com and Calendly events one at a time: [Calendly meetings](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/list-scheduled-events) don't repeat, and calsdk refuses Cal.com's [recurring event types](https://cal.com/docs/api-reference/v2/bookings/create-a-booking).
 
 | Provider  | Repeats                         | `thisAndFollowing` | Notes |
 | --------- | ------------------------------- | ------------------ | ----- |
@@ -100,5 +105,7 @@ Patching an occurrence's `start` with scope `'all'` moves the whole series by as
 | Mock      | One `RRULE` plus `EXDATE` lines | Yes                | `RDATE` and `EXRULE` throw |
 | Cal.com, Calendly | No                      | No                 | Bookings do not repeat |
 | ICS       | Any RRULE, read only, with expansion limits | No     | Same limits as CalDAV |
+
+Outlook's limits come from Graph's [recurrence patterns](https://learn.microsoft.com/en-us/graph/api/resources/recurrencepattern), which have no hourly type and no list of extra dates, and Zoom's from its [Meetings API](https://developers.zoom.us/docs/api/meetings/), which allows at most 60 occurrences.
 
 When a provider can't store a rule, calsdk throws `UnsupportedFunctionalityError` rather than saving a schedule that's close but wrong. A standup that silently lands on the wrong days is worse than an error. Each [provider page](/docs/providers) lists its exact limits.

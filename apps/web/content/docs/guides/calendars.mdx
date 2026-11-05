@@ -1,6 +1,7 @@
 ---
 title: Calendars
-description: List the calendars a user can see and pick the one to read or write.
+metaTitle: List a user's calendars and pick one to write to
+description: listCalendars returns every calendar a user can see, with its id, access role and time zone, so you can choose where your app reads and writes events.
 ---
 
 Most accounts hold more than one calendar: the user's own, a shared team calendar, someone's holidays. When your app needs to put an event somewhere other than the default, or let the user choose where it goes, start with `listCalendars`:
@@ -17,9 +18,9 @@ for (const item of calendars) {
 
 Exactly one calendar in the list has `isPrimary: true`.
 
-## The `'primary'` id
+## What does the `'primary'` calendar id mean?
 
-You often don't need the list at all. Every function that takes a `calendarId` defaults to `'primary'`, and every provider resolves it to the user's default calendar, so you only pass a `calendarId` when you want a different one:
+`'primary'` is the user's default calendar. Every function that takes a `calendarId` defaults to it, and every provider resolves it for you, so you often don't need the list at all. Pass a `calendarId` only when you want a different calendar:
 
 ```ts
 const { calendars } = await listCalendars({ calendar });
@@ -28,7 +29,7 @@ const team = calendars.find((item) => item.name === 'Team');
 if (team) await createEvent({ calendar, calendarId: team.id, event });
 ```
 
-What counts as the default depends on the provider. Booking tools don't have calendars in the usual sense, so calsdk maps what they do have:
+What counts as the default depends on the provider. A CalDAV server names its default in the [`schedule-default-calendar-URL`](https://datatracker.ietf.org/doc/html/rfc6638#section-9.2) property. Booking and meeting tools don't have calendars in the usual sense: [Cal.com](https://cal.com/docs/api-reference/v2/event-types/list-event-types) has event types, while [Calendly](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/list-scheduled-events) and [Zoom](https://developers.zoom.us/docs/api/meetings/) have scheduled meetings. calsdk maps what each one does have:
 
 | Provider        | `'primary'` is                                                  |
 | --------------- | --------------------------------------------------------------- |
@@ -38,9 +39,11 @@ What counts as the default depends on the provider. Booking tools don't have cal
 | Calendly, Zoom  | Every meeting the user hosts. There are no other calendars      |
 | ICS             | The feed                                                        |
 
-## Access roles
+## Which calendars can a user write to?
 
-Check `accessRole` before you offer a calendar as somewhere to save events. `owner` and `writer` can read and write events, and `reader` can only read them. A `freeBusyReader` sees nothing but busy times, so ask for those with [`getFreeBusy`](/docs/guides/free-time) instead of listing events.
+A user can write to the calendars whose `accessRole` is `owner` or `writer`, so check it before you offer a calendar as somewhere to save events. `reader` can only read events. A `freeBusyReader` sees nothing but busy times, so ask for those with [`getFreeBusy`](/docs/guides/free-time) instead of listing events.
+
+To create the event once the user has picked a calendar, pass its `id` as `calendarId` to [`createEvent`](/docs/guides/write-events).
 
 ## The `Calendar` shape
 

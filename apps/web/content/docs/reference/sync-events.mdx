@@ -1,9 +1,10 @@
 ---
 title: syncEvents
-description: Returns what changed in a calendar since the last sync.
+metaTitle: "syncEvents: incremental calendar sync with a cursor"
+description: syncEvents returns every event created, changed or deleted in a calendar since a stored cursor, so you can keep a local copy up to date.
 ---
 
-Use `syncEvents` to keep a local copy of a calendar, such as a table in Postgres, up to date. The first call returns what the provider syncs, and each later call returns what changed since the cursor you pass. Save the new cursor after applying the changes. [Sync changes](/docs/guides/sync#how-each-provider-syncs) covers how much each provider fetches, and Outlook's fixed window.
+The first call returns what the provider syncs, and each later call returns what changed since the cursor you pass. Save the new cursor after applying the changes to your copy, such as a table in Postgres. Outlook syncs a fixed window, because Microsoft Graph runs [delta queries on a date range](https://learn.microsoft.com/en-us/graph/delta-query-events). [Sync changes](/docs/guides/sync#how-each-provider-syncs) covers how much each provider fetches.
 
 ```ts
 import { syncEvents } from '@cal-sdk/core';
@@ -40,6 +41,8 @@ Plus the [common options](/docs/reference#common-options).
 Changes cover single events, series and exceptions, never computed occurrences.
 
 ## Throws
+
+Both errors are listed with their fields in [Errors](/docs/reference/errors).
 
 - `SyncCursorExpiredError` when the provider no longer accepts the cursor. Drop it, and your copy, and sync without one.
 - `UnsupportedFunctionalityError` when the provider has no sync. Every built-in provider has it.

@@ -1,9 +1,10 @@
 ---
 title: deleteEvent
-description: Deletes an event, one occurrence, or a series.
+metaTitle: "deleteEvent: delete an event, occurrence or series"
+description: deleteEvent deletes a calendar event, one occurrence or a whole recurring series, and can notify the guests where the provider allows it.
 ---
 
-For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes. Pass `sendUpdates` to tell the guests, where the provider can.
+For a recurring event, `scope` decides whether one occurrence, the rest of the series or the whole series goes. [Recurring events](/docs/guides/recurring-events) shows how occurrence ids and scopes fit together. Pass `sendUpdates` to tell the guests, where the provider can.
 
 ```ts
 import { deleteEvent } from '@cal-sdk/core';
@@ -30,6 +31,8 @@ Plus the [common options](/docs/reference#common-options).
 `{ warnings }`, plus `providerMetadata` and `response` when the provider sets them.
 
 ## Throws
+
+Each error's fields are listed in [Errors](/docs/reference/errors).
 
 - `NotFoundError` when the event does not exist. If a retry finds the event gone because an earlier attempt deleted it, the call succeeds instead.
 - `ConflictError` when `ifMatch` no longer matches.

@@ -1,9 +1,10 @@
 ---
 title: listCalendars
-description: Lists the calendars the user can see.
+metaTitle: "listCalendars: list the calendars a user can see"
+description: listCalendars lists every calendar the signed-in user can see on a provider, such as work, personal and shared team calendars.
 ---
 
-Most users have more than one calendar, such as work, personal and a shared team calendar. `listCalendars` returns every one they can see, so you can let them pick.
+Show the list so users can pick which calendar you read and write, then pass the chosen `id` as `calendarId` to functions such as [`listEvents`](/docs/reference/list-events). Leave `calendarId` out and they use the user's primary calendar.
 
 ```ts
 import { listCalendars } from '@cal-sdk/core';

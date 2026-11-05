@@ -1,9 +1,10 @@
 ---
 title: findFreeTime
-description: Finds slots when every listed calendar is free, across providers.
+metaTitle: "findFreeTime: find free slots across calendars"
+description: findFreeTime finds meeting slots when every listed calendar is free, across Google, Outlook, iCloud and other providers, inside optional working hours.
 ---
 
-Pass everyone's calendars, even on different providers, and set `workingHours` so slots land inside the working day of the person you're booking. Slots come back as UTC instants, ready to show in each viewer's own zone.
+Pass everyone's calendars, even on different providers, and set `workingHours` so slots land inside the working day of the person you're booking. Each provider's calendars are read with [`getFreeBusy`](/docs/reference/get-free-busy), and slots come back as UTC instants.
 
 ```ts
 import { findFreeTime } from '@cal-sdk/core';
@@ -52,7 +53,11 @@ const { slots } = await findFreeTime({
   }}
 />
 
+The [Find free time](/docs/guides/free-time) guide goes from slots to a booked event.
+
 ## Throws
+
+Both errors are listed with their fields in [Errors](/docs/reference/errors).
 
 - `FreeBusyUnavailableError` when any calendar cannot be read, rather than return slots that might clash. It has `provider` and `calendarId`.
 - `InvalidArgumentError` when `duration` or `slotInterval` is not a positive whole number, or `workingHours` is invalid.

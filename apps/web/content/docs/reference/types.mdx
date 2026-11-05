@@ -1,9 +1,10 @@
 ---
 title: Types
-description: The calendar, event and time shapes every provider returns.
+metaTitle: "Types: CalendarEvent, EventTime, Calendar and more"
+description: calsdk types such as CalendarEvent, EventTime and Calendar are the shapes every function takes and returns, the same for every provider.
 ---
 
-These are the shapes every function takes and returns, the same for every provider. Import them from `@cal-sdk/core`:
+Import them from `@cal-sdk/core` with `import type`, so they add nothing to your bundle:
 
 ```ts
 import type { Calendar, CalendarEvent, EventInput, EventPatch, EventTime } from '@cal-sdk/core';
@@ -65,7 +66,7 @@ An all-day event has only a date:
 
 ## EventInput
 
-What `createEvent` takes. `EventPatch`, for `updateEvent`, has the same fields, all optional, and `null` clears a field other than `start` and `end`.
+What [`createEvent`](/docs/reference/create-event) takes. `EventPatch`, for [`updateEvent`](/docs/reference/update-event), has the same fields, all optional, and `null` clears a field other than `start` and `end`.
 
 <TypeTable
   type={{

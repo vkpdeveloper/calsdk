@@ -1,6 +1,7 @@
 ---
 title: Google Calendar
-description: Read and write Google Calendar events, with Meet links, free/busy and sync tokens.
+metaTitle: "Google Calendar provider: events, Meet and sync"
+description: calsdk connects to Google Calendar through the Google Calendar API to read and write events, with Meet links, free/busy and sync tokens.
 ---
 
 Google is the most complete provider: it supports everything calsdk models, including splitting a recurring series with `thisAndFollowing`, Meet links, search and a real free/busy endpoint. If your users are mostly on Google Workspace or Gmail, this is the one you'll spend the least time working around.
@@ -24,7 +25,7 @@ const { events } = await listEvents({
 
 ## Credentials
 
-`accessToken` is an OAuth access token with a Calendar scope, such as `https://www.googleapis.com/auth/calendar`, or `calendar.readonly` if you only read. calsdk doesn't run the OAuth flow, since your app almost certainly has an auth library already. Get tokens there and pass a function that returns a fresh one: calsdk calls it before every request, so a token that expires mid-sync isn't a problem.
+`accessToken` is an OAuth access token with a [Calendar scope](https://developers.google.com/workspace/calendar/api/auth), such as `https://www.googleapis.com/auth/calendar`, or `calendar.readonly` if you only read. calsdk doesn't run the OAuth flow, since your app almost certainly has an auth library already. Get tokens there and pass a function that returns a fresh one: calsdk calls it before every request, so a token that expires mid-sync isn't a problem.
 
 ## Settings
 
@@ -37,11 +38,13 @@ const { events } = await listEvents({
   }}
 />
 
-## How it behaves
+## Google Calendar behavior
 
-### Splitting a series
+### How does calsdk split a Google Calendar series?
 
-Google's API has no "this and following" operation, so calsdk splits the series itself for `thisAndFollowing`. It starts a new series at the chosen instance, copying attendees and the meeting link, and ends the old one just before it. A `COUNT` is split between the two, and `EXDATE` and `RDATE` lines go to the half they fall in. If ending the old series fails, calsdk deletes the new one so you're not left with both.
+calsdk splits the series itself, because [Google's API](https://developers.google.com/workspace/calendar/api/guides/recurringevents) has no "this and following" operation. For `thisAndFollowing`, it starts a new series at the chosen instance, copying attendees and the meeting link, and ends the old one just before it.
+
+A `COUNT` is split between the two, and `EXDATE` and `RDATE` lines go to the half they fall in. If ending the old series fails, calsdk deletes the new one so you're not left with both. [Recurring events](/docs/guides/recurring-events) covers scopes on every provider.
 
 One case can't be done safely. A series with a `COUNT` and `EXDATE` or `RDATE` lines before the split throws `UnsupportedFunctionalityError`, because calsdk can't count the occurrences that are left. Give the series an `UNTIL` first.
 
@@ -49,19 +52,23 @@ One case can't be done safely. A series with a `COUNT` and `EXDATE` or `RDATE` l
 
 A new `start` with scope `all` or `thisAndFollowing` moves the series on the wall clock of its time zone, so a 9:00 standup stays at 9:00 across daylight saving changes. Rules that pick days of the month or year can't be moved this way and throw `UnsupportedFunctionalityError`. You also can't change a series' time zone through one of its instances: update the series id instead.
 
-Google resets single-instance changes when a series moves or splits. calsdk keeps the occurrences you deleted, as `EXDATE`s, but edited ones lose their changes, and you get a `compatibility` warning.
+Google resets [single-instance changes](https://developers.google.com/workspace/calendar/api/guides/recurringevents#modifying_or_deleting_instances) when a series moves or splits. calsdk keeps the occurrences you deleted, as `EXDATE`s, but edited ones lose their changes, and you get a `compatibility` [warning](/docs/concepts/warnings).
 
-When reading, Google's expanded listings don't say which instances of a series were edited. To tell an `exception` from a plain `occurrence`, calsdk makes one extra request per page that has recurring instances.
+When reading, Google's [expanded listings](https://developers.google.com/workspace/calendar/api/v3/reference/events/list) don't say which instances of a series were edited. To tell an `exception` from a plain `occurrence`, calsdk makes one extra request per page that has recurring instances.
 
-### Meet links and colors
+### Can Google Calendar events use any color?
 
-`createConference: true` adds a Google Meet link. Colors are less flexible: Google has a fixed palette of 11 event colors, not arbitrary hex values, so if you pass another color, calsdk saves the nearest one and returns a `compatibility` warning.
+No. Google has a [fixed palette](https://developers.google.com/workspace/calendar/api/v3/reference/colors) of 11 event colors, not arbitrary hex values, so if you pass another color, calsdk saves the nearest one and returns a `compatibility` warning.
 
-### Free/busy and sync
+Meet links are simpler: `createConference: true` adds a [Google Meet](https://developers.google.com/workspace/calendar/api/guides/create-events) link to the event.
 
-Free/busy uses Google's own endpoint, so events marked as free are ignored, and calendars the user can only see as free/busy still work. Sync uses Google sync tokens. An expired one throws `SyncCursorExpiredError`, and you start over with a full sync.
+### How do free/busy and sync work on Google Calendar?
+
+Free/busy uses Google's own [free/busy endpoint](https://developers.google.com/workspace/calendar/api/v3/reference/freebusy/query), so events marked as free are ignored, and calendars the user can only see as free/busy still work. [Sync](/docs/guides/sync) uses Google [sync tokens](https://developers.google.com/workspace/calendar/api/guides/sync). An expired one throws `SyncCursorExpiredError`, and you start over with a full sync.
 
 ## Provider options
+
+Google-only settings go in `providerOptions.google`, as described in [Provider options](/docs/guides/provider-options).
 
 ```ts
 await createEvent({
@@ -104,7 +111,7 @@ await listEvents({
   }}
 />
 
-## Metadata
+## Metadata [#event-fields]
 
 Events carry `providerMetadata.google`:
 

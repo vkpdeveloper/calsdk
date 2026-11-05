@@ -1,15 +1,16 @@
 ---
 title: Test your code
-description: Run your app's calendar logic against an in-memory calendar, with no account and no network.
+metaTitle: Test calendar code with the mock provider
+description: "@cal-sdk/mock is an in-memory calendar provider that lets you test your app's calendar code with no account, no OAuth tokens and no network."
 ---
 
-Your booking flow shouldn't need a Google account, OAuth tokens or a network to prove it picks the right slot. `@cal-sdk/mock` is a full calendar in memory: your code calls the same functions it calls in production, and you check the result on the mock.
+Your booking flow shouldn't need a Google account to prove it picks the right slot. With the [mock provider](/docs/providers/mock), your code calls the same functions it calls in production, and you check the result on the mock.
 
 ```npm
 npm install -D @cal-sdk/mock
 ```
 
-## Pass the calendar in
+## How do I pass a mock calendar into my app?
 
 The one change to make in your app is to take the provider as an argument instead of creating it inside the function. Production passes `google(...)`, tests pass the mock:
 
@@ -95,19 +96,21 @@ test('books the first free half hour', async () => {
 
 `calendar.events` holds the stored events (single events, series and changed occurrences), and `calendar.calendars` holds the calendars. Both are copies, so changing them doesn't change the mock.
 
-Ids are predictable, so you can assert on them: events are `evt_1`, `evt_2` and so on, and an occurrence is `<series id>_<UTC start>`, such as `evt_1_20261109T083000Z`, the same shape Google uses. Pass `now` to make `createdAt` and `updatedAt` predictable too.
+Ids are predictable, so you can assert on them: events are `evt_1`, `evt_2` and so on, and an occurrence is `<series id>_<UTC start>`, such as `evt_1_20261109T083000Z`, the same shape as the ids Google gives the [instances of a recurring event](https://developers.google.com/workspace/calendar/api/v3/reference/events/instances). Pass `now` to make `createdAt` and `updatedAt` predictable too.
 
 ## What the mock does
 
-The mock behaves like a full-featured provider, so your tests take the same paths real calendars do. Recurring events follow RFC 5545, with one `RRULE` line plus `EXDATE` lines, and all three scopes work; `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`. Etags change on every write, so a stale `ifMatch` throws `ConflictError`. Sync keeps a change log, with cursors and pages like a real provider. Search works, and attendees, video links, reminders and colors are stored as given.
+The mock behaves like a full-featured provider: recurring events, etags, sync, search, attendees and video links all work, so your tests take the same paths real calendars do.
+
+Recurring events follow [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10), with one `RRULE` line plus `EXDATE` lines, and all three scopes work; `RDATE` and `EXRULE` throw `UnsupportedFunctionalityError`. Etags change on every write, so a stale `ifMatch` throws `ConflictError`. Sync keeps a change log, with cursors and pages like a real provider. Search works, and attendees, video links, reminders and colors are stored as given.
 
 Free/busy has no endpoint of its own, so `getFreeBusy` and `findFreeTime` compute it from events and return a `compatibility` warning, as they do for most providers.
 
-What the mock doesn't do is imitate any one provider's quirks, such as Outlook's limits on recurrence. A test that passes on the mock tells you your logic is right, not that Outlook will accept your RRULE, so test those paths against a recording of the real API.
+What the mock doesn't do is imitate any one provider's quirks, such as Outlook's limits on [recurrence patterns](https://learn.microsoft.com/en-us/graph/api/resources/recurrencepattern). A test that passes on the mock tells you your logic is right, not that Outlook will accept your RRULE, so test those paths against a recording of the real API.
 
 ## Silence warnings in tests
 
-Warnings go to `console.warn` by default, which clutters test output. Turn them off in a test setup file and assert on the `warnings` a call returns instead:
+[Warnings](/docs/concepts/warnings) go to `console.warn` by default, which clutters test output. Turn them off in a test setup file and assert on the `warnings` a call returns instead:
 
 ```ts title="vitest.setup.ts"
 globalThis.CALSDK_WARNINGS = 'silent';

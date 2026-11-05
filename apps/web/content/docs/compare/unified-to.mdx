@@ -1,9 +1,10 @@
 ---
 title: calsdk vs Unified.to
-description: An open source alternative to the Unified.to calendar API. A hosted unified API and a library compared on cost, coverage and data.
+metaTitle: "calsdk vs Unified.to: an open source Unified.to alternative"
+description: calsdk and Unified.to both normalize events across calendar providers, but Unified.to is a hosted API billed per call and calsdk is a free library.
 ---
 
-Unified.to is a hosted unified API that covers many categories, calendars among them. Your app calls Unified.to, and it calls the calendar provider live, without keeping a copy. calsdk does the calendar part as a library: it runs in your app and calls the providers directly, with tokens your app holds. Both normalize events across providers. The difference is the hop through a vendor, and the bill that comes with it.
+Unified.to is a hosted unified API that covers many categories, calendars among them. Your app calls Unified.to, and it calls the calendar provider live, [without keeping a copy](https://unified.to/calendar). calsdk does the calendar part as a library: it runs in your app and calls the providers directly, with tokens your app holds. The difference is the hop through a vendor, and the bill that comes with it.
 
 ## Side by side
 
@@ -20,25 +21,31 @@ Unified.to is a hosted unified API that covers many categories, calendars among 
 
 Unified.to prices and features are from [unified.to/pricing](https://unified.to/pricing) and [unified.to/calendar](https://unified.to/calendar), checked in November 2026.
 
-## What it costs
+## What does Unified.to cost?
 
-Unified.to bills by API volume rather than by connected account, with unlimited connections. The free Test plan is for non-production use. Production starts with Grow at $750 a month for 750,000 calls, then $1 per 1,000 calls, and goes up to Scale at $3,000 a month.
+Unified.to [bills by API volume](https://unified.to/pricing), not by connected account. The free Test plan is for non-production use. Production starts with Grow at $750 a month for 750,000 calls plus $1 per 1,000 more, and Scale is $3,000 a month with 6 million calls included, then $0.50 per 1,000.
 
-That model is friendly if you have many users who each make few calls. It's less friendly for calendars, where a sync job or a free-time search makes several calls per user every few minutes.
+Volume pricing is friendly if you have many users who each make few calls. Calendars are the opposite case: a sync job that checks one calendar every 5 minutes makes at least 8,640 calls a month. For 1,000 users on that schedule, that's 8.6 million calls, about $8,600 a month on Grow or $4,300 on [Scale](https://unified.to/pricing).
 
-calsdk costs nothing, and provider APIs are free within their quotas.
+calsdk costs nothing. The [Google Calendar API](https://developers.google.com/workspace/calendar/api/guides/quota) and [Microsoft Graph](https://learn.microsoft.com/en-us/graph/metered-api-overview) calendar calls it makes are free within their quotas.
 
-## Where your users' data goes
+## Where does your users' data go?
 
-Unified.to says it never stores end-customer data and that every request hits the provider live, with no caching. That's a better position than a service that keeps a copy, but every request still passes through Unified.to's servers (US, EU or AU). With calsdk there's no middle hop: your server calls Google or Microsoft directly.
+Unified.to doesn't store calendar data, but every request passes through its servers in the US, EU or Australia. Its [security page](https://unified.to/security) says end-customer data is fetched live from the source and never stored.
 
-## When Unified.to is the better choice
+A pass-through service is a better position than one that keeps a copy, but it's still a third party in the path of every request. With calsdk there's no middle hop: your server calls Google or Microsoft directly.
 
-Pick Unified.to if you need many categories at once, say a CRM, an ATS and calendars, behind one vendor and one auth component. Pick it if your backend is in Go, Java or C#, or if you want webhooks without writing a sync job.
+## When is Unified.to the better choice?
 
-## When calsdk fits better
+Pick Unified.to if you need [many categories](https://unified.to/calendar) at once, say a CRM, an ATS and calendars, behind one vendor.
 
-calsdk fits when calendars are what you need, and you want them deep rather than broad. It handles recurring series with per-occurrence edits and "this and following" where the provider supports it, free time that fails closed instead of guessing, and sync with a stored cursor, with typed warnings whenever a provider can't do exactly what you asked. It also fits when $750 a month doesn't make sense for one feature, and when you'd rather your users' calendar traffic not pass through a third party.
+Pick it, too, if your backend is in Go, Java or C#, where Unified.to has [official SDKs](https://github.com/unified-to) and calsdk doesn't run, or if you want [native and virtual webhooks](https://unified.to/calendar) without writing a sync job.
+
+## When does calsdk fit better?
+
+calsdk fits when calendars are what you need, and you want them deep rather than broad. It also fits when a $750 monthly plan doesn't make sense for one feature, and when you'd rather your users' calendar traffic not pass through a third party.
+
+The depth shows in the hard parts. calsdk handles [recurring series](/docs/guides/recurring-events) with per-occurrence edits and "this and following" where the provider supports it, free time that fails closed instead of guessing, and sync with a stored cursor. Whenever a provider can't do exactly what you asked, you get typed [warnings](/docs/concepts/warnings).
 
 ```ts
 import { listEvents } from '@cal-sdk/core';
@@ -49,3 +56,21 @@ const { events } = await listEvents({ calendar, timeMin, timeMax });
 ```
 
 [Install calsdk](/docs/installation) or try it without an account in the [quickstart](/docs/quickstart).
+
+## FAQ
+
+### Is calsdk cheaper than Unified.to?
+
+Yes, calsdk is free under the MIT license, and Unified.to's production plans [start at $750 a month](https://unified.to/pricing). Your only costs with calsdk are your own servers and the work of running OAuth and sync yourself.
+
+### Does calsdk cover CRMs and other categories like Unified.to?
+
+No, calsdk only does calendars and the booking tools around them, such as Zoom, Cal.com and Calendly. If you also need a CRM or an ATS, a unified API covers those, and calsdk can still handle the calendar part.
+
+### Which calendar providers does calsdk support?
+
+calsdk supports Google Calendar, Microsoft Outlook, iCloud, Zoho and any CalDAV server, plus Zoom, Cal.com, Calendly and read-only ICS feeds. The [provider comparison](/docs/providers) shows what each one can do.
+
+### Can I try calsdk without connecting a real calendar?
+
+Yes, `@cal-sdk/mock` is an in-memory calendar that works with the same functions, so you can build and test before connecting any account. The [testing guide](/docs/guides/testing) shows how.

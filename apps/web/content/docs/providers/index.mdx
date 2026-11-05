@@ -1,44 +1,51 @@
 ---
 title: Compare providers
-description: See what each calendar can do before you build on it, straight from the capabilities every provider declares.
+metaTitle: "Compare providers: calendar features side by side"
+description: Each calsdk provider supports a different set of features, and this table compares them, from recurring series and video links to search and sync.
 ---
 
-Calendar APIs agree on less than you'd hope. Google can split a recurring series in two, Outlook can't, and Cal.com names every booking after its event type no matter what title you send. Every provider declares what it supports in `calendar.capabilities`, and most of this table comes straight from that data. A dash means no, and "Some" means it depends on a condition, explained below the table.
+Google supports every feature calsdk models. Outlook and CalDAV cover the essentials but can't split a recurring series, Cal.com and Calendly book and cancel meetings rather than keep a calendar, and ICS feeds are read only. Check the table before you build on a feature, because calendar APIs agree on less than you'd hope.
+
+## Which features does each provider support?
+
+Google supports all 13 features below, the mock every one but a free/busy API, and the other providers leave some out. Most rows come straight from the `calendar.capabilities` each provider declares. "Some" means it depends on a condition, explained below the table.
 
 | Feature            | Google | Outlook | CalDAV | Cal.com | Calendly | Zoom | ICS  | Mock |
 | ------------------ | :----: | :-----: | :----: | :-----: | :------: | :--: | :--: | :--: |
-| Write events       | Yes    | Yes     | Yes    | Some    | Some     | Yes  | -    | Yes  |
-| Keeps title        | Yes    | Yes     | Yes    | -       | -        | Yes  | -    | Yes  |
-| All-day            | Yes    | Yes     | Yes    | -       | -        | -    | Some | Yes  |
-| Recurring          | Yes    | Yes     | Yes    | -       | -        | Some | Some | Yes  |
-| This and following | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
+| Write events       | Yes    | Yes     | Yes    | Some    | Some     | Yes  | No   | Yes  |
+| Keeps title        | Yes    | Yes     | Yes    | No      | No       | Yes  | No   | Yes  |
+| All-day            | Yes    | Yes     | Yes    | No      | No       | No   | Some | Yes  |
+| Recurring          | Yes    | Yes     | Yes    | No      | No       | Some | Some | Yes  |
+| This and following | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
 | Attendees          | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Some | Yes  |
-| Video links        | Yes    | Some    | -      | -       | -        | Yes  | -    | Yes  |
-| Reminders          | Yes    | Some    | -      | -       | -        | -    | -    | Yes  |
-| Colors             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
-| `ifMatch`          | Yes    | Yes     | Yes    | -       | -        | -    | -    | Yes  |
-| Search             | Yes    | -       | -      | -       | -        | -    | -    | Yes  |
-| Free/busy API      | Yes    | -       | -      | -       | -        | -    | -    | -    |
+| Video links        | Yes    | Some    | No     | No      | No       | Yes  | No   | Yes  |
+| Reminders          | Yes    | Some    | No     | No      | No       | No   | No   | Yes  |
+| Colors             | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
+| `ifMatch`          | Yes    | Yes     | Yes    | No      | No       | No   | No   | Yes  |
+| Search             | Yes    | No      | No     | No      | No       | No   | No   | Yes  |
+| Free/busy API      | Yes    | No      | No     | No      | No       | No   | No   | No   |
 | Sync               | Yes    | Yes     | Yes    | Yes     | Yes      | Yes  | Yes  | Yes  |
 
-## Conditions
+## When does a provider support a feature only sometimes?
 
-Where the table says Some:
+A "Some" in the table means the feature works for some accounts or some inputs only:
 
-- Outlook adds Teams links only on work or school accounts.
-- Outlook keeps one popup reminder per event.
-- Cal.com books, moves (as a new booking with a new id) and cancels.
-- Calendly books and cancels; `updateEvent` throws.
-- Zoom repeats daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
-- ICS feeds are read only: all-day, recurring and attendee data is read but can't be written.
+- Outlook adds Teams links only on work or school accounts: [Microsoft Graph](https://learn.microsoft.com/graph/outlook-calendar-online-meetings) creates them where Teams comes with a Microsoft 365 business or enterprise plan.
+- Outlook keeps one popup reminder per event, the [event's `reminderMinutesBeforeStart`](https://learn.microsoft.com/graph/api/resources/event).
+- Cal.com books, moves and cancels. A move [reschedules](https://cal.com/docs/api-reference/v2/bookings/reschedule-a-booking) the booking as a new one with a new id.
+- Calendly books and cancels; `updateEvent` throws, since the [Calendly API](https://developer.calendly.com/api-docs) can't change a scheduled meeting.
+- Zoom [repeats](https://developers.zoom.us/docs/api/meetings/) daily, weekly on set weekdays, or monthly on a day or an nth weekday, for up to 60 meetings or until a date. One meeting of a series can only be moved, resized or deleted.
+- ICS feeds are read only: all-day, recurring and attendee data from the [iCalendar](https://datatracker.ietf.org/doc/html/rfc5545) file is read but can't be written.
 
-"Keeps title" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type, so a title you pass is ignored with a warning rather than saved.
+"Keeps title" matters for the scheduling tools. Cal.com and Calendly name bookings after their event type (Cal.com's [`customName`](https://cal.com/docs/api-reference/v2/event-types/create-an-event-type) sets it, and Calendly's [booking endpoint](https://developer.calendly.com/api-docs/calendly-api/scheduled-events/create-event-invitee) takes no title), so a title you pass is ignored with a [warning](/docs/concepts/warnings) rather than saved. Each page has the details: [Cal.com](/docs/providers/calcom) and [Calendly](/docs/providers/calendly).
 
-Free/busy works on every provider. Where there's no endpoint, calsdk computes it from events and returns a warning, so `findFreeTime` behaves the same everywhere. Search is different: providers without it throw `UnsupportedFunctionalityError`, and you filter the listed events yourself.
+Free/busy works on every provider. Where there's no endpoint, calsdk computes it from events and returns a warning, so [`findFreeTime`](/docs/reference/find-free-time) behaves the same everywhere. Search is different: providers without it throw `UnsupportedFunctionalityError`, and you filter the listed events yourself.
 
 Webhooks are part of the provider contract, but no provider implements them yet. Until they do, run [sync](/docs/guides/sync) on a schedule.
 
-## Check at runtime
+## How do I check a provider's capabilities at runtime?
+
+Read `calendar.capabilities` before you call a feature that not every provider has. Each value is `true`, `false`, `'unknown'` or `{ condition: string }`, and anything but `true` means "check first".
 
 ```ts
 const { events } = calendar.capabilities;
@@ -48,4 +55,4 @@ if (events.recurrenceScopeThisAndFollowing === true) {
 }
 ```
 
-Values are `true`, `false`, `'unknown'` or `{ condition: string }`. Treat anything but `true` as "check first": a condition means it works for some accounts or some inputs, not all of them. See [Capabilities](/docs/reference/capabilities).
+A condition means it works for some accounts or some inputs, not all of them, and its string says which. [Capabilities](/docs/reference/capabilities) lists every flag.

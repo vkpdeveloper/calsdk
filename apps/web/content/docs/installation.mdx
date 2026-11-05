@@ -1,15 +1,18 @@
 ---
-title: Install
-description: Add calsdk and a provider package to a TypeScript project.
+title: Installation
+metaTitle: 'Installation: add calsdk to a TypeScript project'
+description: Installing calsdk means adding @cal-sdk/core plus one package per calendar, and it runs on Node.js 20 or later, Bun, Deno and edge runtimes.
 ---
 
-calsdk is split into a core package and one package per calendar, so your app only installs the providers it talks to. Start with `@cal-sdk/core` and one provider:
+Your app only installs the providers it talks to. Start with `@cal-sdk/core` and one provider:
 
 ```npm
 npm install @cal-sdk/core @cal-sdk/google
 ```
 
-## Pick your providers
+## Which calsdk package does each calendar need?
+
+Every calendar needs `@cal-sdk/core` plus its own package: `@cal-sdk/google` for Google Calendar, `@cal-sdk/microsoft` for Outlook, and `@cal-sdk/caldav` for iCloud, Zoho and other CalDAV servers. Each package exports the function that creates its provider:
 
 | Calendar                                 | Package             | Function                        |
 | ---------------------------------------- | ------------------- | ------------------------------- |
@@ -24,9 +27,9 @@ npm install @cal-sdk/core @cal-sdk/google
 
 Not sure which one fits? [Choose a provider](/docs/choose-a-provider) walks through the credentials each one needs.
 
-## Requirements
+## Which runtimes does calsdk support?
 
-Every package is ESM only. Providers talk to their APIs with `fetch` and nothing else, so they run on Node.js 20 or later, Bun, Deno and edge runtimes. CI checks this by running the quickstart in Deno with no file, network or environment access.
+calsdk runs on Node.js 20 or later, Bun, Deno and edge runtimes. Every package is ESM only, and providers talk to their APIs with `fetch` and nothing else. CI checks this by running the [quickstart](/docs/quickstart) in Deno with no file, network or environment access.
 
 TypeScript is optional, but worth it here. Provider options and metadata are typed by the provider you pass, so typos are caught before they reach an API.
 

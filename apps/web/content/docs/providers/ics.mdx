@@ -1,9 +1,10 @@
 ---
 title: ICS feeds
-description: Read a subscribed iCalendar feed, such as a holiday calendar or a calendar shared by its secret address.
+metaTitle: "ICS feeds: read and sync iCalendar subscriptions"
+description: The calsdk ICS provider lets you read and sync a subscribed iCalendar feed, such as a holiday calendar or a calendar shared by its secret address.
 ---
 
-Sometimes all you have is a link: a public holiday calendar, a team's shared `.ics` address, the feed a booking tool publishes. This provider reads it like any other calendar, recurring series and all, and syncs it. It can't write, because a feed is a file someone else publishes.
+The ICS provider reads any [iCalendar](https://datatracker.ietf.org/doc/html/rfc5545) feed, including `webcal://` addresses, like any other calendar with its recurring series, and syncs it. Typical feeds are a public holiday calendar, a team's shared `.ics` address or the feed a booking tool publishes. Writing isn't possible, because a feed is a file someone else publishes.
 
 ```npm
 npm install @cal-sdk/core @cal-sdk/ics
@@ -36,11 +37,11 @@ const { changes, nextCursor } = await syncEvents({ calendar, cursor });
   }}
 />
 
-## Not supported
+## Can calsdk write to an ICS feed?
 
-Feeds are read only, so creating, updating and deleting throw `UnsupportedFunctionalityError`. Search, reminders and colors aren't supported either. Free/busy is computed from events. See the [comparison](/docs/providers) for every provider.
+No. Feeds are read only, so creating, updating and deleting throw `UnsupportedFunctionalityError`. Search, reminders and colors aren't supported either. Free/busy is computed from events. See the [comparison](/docs/providers) for every provider.
 
-## How it behaves
+## ICS feed behavior
 
 ### Downloading the feed
 
@@ -48,17 +49,19 @@ The feed is `'primary'`, the only calendar, and every call downloads it. There's
 
 ### Recurring events and time zones
 
-calsdk expands recurring events itself, with their `EXDATE`s and their moved and cancelled instances. A series stops after 50,000 instances or a second of work, with a warning, so one runaway rule can't stall your app. Rules repeating every minute or second, with an `INTERVAL` above 1,000, or that RFC 5545 doesn't allow, list only their first instance. An instance in the hour skipped when clocks go forward is shown an hour later, the way Google, Apple and Outlook show it.
+calsdk expands recurring events itself, with their `EXDATE`s and their moved and cancelled instances. A series stops after 50,000 instances or a second of work, with a [warning](/docs/concepts/warnings), so one runaway rule can't stall your app. Rules repeating every minute or second, with an `INTERVAL` above 1,000, or that [RFC 5545](https://datatracker.ietf.org/doc/html/rfc5545#section-3.3.10) doesn't allow, list only their first instance. An instance in the hour skipped when clocks go forward is shown an hour later, the way Google, Apple and Outlook show it.
 
-IANA names, Windows names and zones defined only in the feed are all understood. Times in UTC, without a zone, or in a zone defined only in the feed are shown in the calendar's zone. In a zone defined only in the feed, a time within the hour the clocks change may be off by that hour.
+IANA names, Windows names and zones defined only in the feed are all understood, and [Time zones](/docs/concepts/time-zones) explains how calsdk represents them. Times in UTC, without a zone, or in a zone defined only in the feed are shown in the calendar's zone. In a zone defined only in the feed, a time within the hour the clocks change may be off by that hour.
 
 ### Ids and video links
 
 An event id is the feed's `UID`. Instances of a series are `<UID>_<original start>`, the start being a UTC date-time (`20261103T100000Z`) or, for all-day series, a date (`20261103`). Google Meet, Teams and Zoom links in the event's URL, location or description become its `conference`.
 
-### Sync
+### How does calsdk sync an ICS feed?
 
-A feed has no change log, so calsdk compares each single event, series and moved instance with the last sync, and the cursor holds a short fingerprint per event. A cancelled instance is reported once as a delete, in the first sync too. When the server says the feed hasn't changed (`ETag` or `Last-Modified`), it isn't downloaded again.
+calsdk compares each single event, series and moved instance with the last sync, because a feed has no change log. The cursor holds a short fingerprint per event, and a cancelled instance is reported once as a delete, in the first sync too.
+
+When the server says the feed hasn't changed, through an [`ETag` or `Last-Modified`](https://www.rfc-editor.org/rfc/rfc9110#name-conditional-requests) check, calsdk doesn't download it again. [Sync](/docs/guides/sync) covers cursors and full syncs on every provider.
 
 ## Provider options
 

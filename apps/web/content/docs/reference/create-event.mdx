@@ -1,9 +1,10 @@
 ---
 title: createEvent
-description: Creates an event or a recurring series and returns it as the provider stored it.
+metaTitle: "createEvent: create a calendar event or recurring series"
+description: createEvent creates a calendar event or a recurring series on any calsdk provider and returns it as the provider stored it.
 ---
 
-Keep the returned `id` for later updates, and check `warnings` for anything the provider changed or ignored, such as the title Cal.com replaces with its event type's name.
+Keep the returned `id` for later updates, and check `warnings` for anything the provider changed or ignored. Cal.com, for example, names each booking from a [template on its event type](https://cal.com/docs/api-reference/v2/event-types/create-an-event-type), so it ignores the `title` you send and returns a warning instead. The [Write events](/docs/guides/write-events) guide walks through invites, video links and updates.
 
 ```ts
 import { createEvent } from '@cal-sdk/core';
@@ -58,7 +59,13 @@ Plus the [common options](/docs/reference#common-options). Only rate limits are 
   }}
 />
 
+The event has every field of [`CalendarEvent`](/docs/reference/types#calendarevent), and each entry in `warnings` is one of the shapes in [Warnings](/docs/concepts/warnings).
+
 ## Throws
+
+Both errors are listed with their fields in [Errors](/docs/reference/errors).
 
 - `InvalidArgumentError` when `end` is not after `start`, `start` and `end` mix timed and all-day, the time zone is unknown or a Windows name, a recurrence line is malformed, or a color or email is invalid.
 - `UnsupportedFunctionalityError` when the provider cannot store the event as given, such as a rule Outlook cannot repeat or an all-day Zoom meeting.
+
+Outlook stores a series as a [pattern and a range](https://learn.microsoft.com/en-us/graph/api/resources/patternedrecurrence) rather than an RFC 5545 rule, so some rules have no Outlook form. Zoom meetings always have a [start time and a duration in minutes](https://developers.zoom.us/docs/api/meetings/), so there is no all-day meeting.

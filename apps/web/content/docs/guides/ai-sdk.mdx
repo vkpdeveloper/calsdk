@@ -22,11 +22,20 @@ const localTime = z.string().describe('Local date-time, e.g. 2026-11-09T14:00:00
 export function calendarTools(calendar: CalendarProvider, timeZone: string) {
   return {
     listEvents: tool({
-      description: 'List events between two times, recurring events expanded.',
-      inputSchema: z.object({ from: instant, to: instant }),
-      execute: async ({ from, to }) => {
-        const { events } = await listEvents({ calendar, timeMin: from, timeMax: to });
-        return events.map(({ id, title, start, end }) => ({ id, title, start, end }));
+      description:
+        'List events between two times, recurring events expanded. If nextPageToken is returned, call again with it as pageToken for the rest.',
+      inputSchema: z.object({ from: instant, to: instant, pageToken: z.string().optional() }),
+      execute: async ({ from, to, pageToken }) => {
+        const { events, nextPageToken } = await listEvents({
+          calendar,
+          timeMin: from,
+          timeMax: to,
+          pageToken,
+        });
+        return {
+          events: events.map(({ id, title, start, end }) => ({ id, title, start, end })),
+          nextPageToken,
+        };
       },
     }),
 

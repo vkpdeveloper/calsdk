@@ -22,7 +22,7 @@ npx -y @cal-sdk/mcp --demo
 | `update_event` | Change some fields, for one occurrence or the whole series |
 | `delete_event` | Remove an event, one occurrence or the rest of a series |
 
-Connect more than one account and each tool takes an `account` argument (`google`, `microsoft`, `icloud` or `caldav`). `find_free_time` checks all of them by default, and fails instead of guessing when one can't be read, so the model never books over a meeting it couldn't see.
+Connect more than one account and each tool takes an `account` argument (`google`, `microsoft`, `icloud` or `caldav`). `find_free_time` takes a `calendars` list instead, with an `account` and optional `calendarIds` in each entry. Left out, it checks the primary calendar of every account, and it fails instead of guessing when one can't be read, so the model never books over a meeting it couldn't see.
 
 ## Add it to your client
 

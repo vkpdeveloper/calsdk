@@ -19,15 +19,20 @@ const instant = z
 function calendarTools(calendar: CalendarProvider, timeZone: string) {
   return {
     listEvents: tool({
-      description: 'List events between two times, recurring events expanded.',
-      inputSchema: z.object({ from: instant, to: instant }),
-      execute: async ({ from, to }) => {
-        const { events } = await listEvents({
+      description:
+        'List events between two times, recurring events expanded. If nextPageToken is returned, call again with it as pageToken for the rest.',
+      inputSchema: z.object({ from: instant, to: instant, pageToken: z.string().optional() }),
+      execute: async ({ from, to, pageToken }) => {
+        const { events, nextPageToken } = await listEvents({
           calendar,
           timeMin: from,
           timeMax: to,
+          pageToken,
         });
-        return events.map(({ id, title, start, end }) => ({ id, title, start, end }));
+        return {
+          events: events.map(({ id, title, start, end }) => ({ id, title, start, end })),
+          nextPageToken,
+        };
       },
     }),
 

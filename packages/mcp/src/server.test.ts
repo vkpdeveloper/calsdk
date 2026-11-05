@@ -1,0 +1,111 @@
+import { mockCalendar } from '@cal-sdk/mock';
+import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
+import { describe, expect, it, vi } from 'vitest';
+import { refreshingToken } from './refreshing-token';
+import { createCalendarServer } from './server';
+
+const start = { dateTime: '2026-11-09T10:00:00Z', timeZone: 'UTC' };
+const end = { dateTime: '2026-11-09T11:00:00Z', timeZone: 'UTC' };
+
+async function connect() {
+  const server = createCalendarServer({
+    work: mockCalendar({
+      calendars: [{ id: 'work' }],
+      events: [{ title: 'Standup', start, end }],
+    }),
+    home: mockCalendar({
+      calendars: [{ id: 'home' }],
+      events: [
+        {
+          title: 'Dentist',
+          start: { dateTime: '2026-11-09T12:00:00Z', timeZone: 'UTC' },
+          end: { dateTime: '2026-11-09T13:00:00Z', timeZone: 'UTC' },
+        },
+      ],
+    }),
+  });
+  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const client = new Client({ name: 'test', version: '1.0.0' });
+  await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+  return async (name: string, args: Record<string, unknown>) => {
+    const result = await client.callTool({ name, arguments: args });
+    const [content] = result.content as { type: string; text: string }[];
+    return { isError: result.isError ?? false, text: content?.text ?? '' };
+  };
+}
+
+describe('createCalendarServer', () => {
+  it('creates an event on the chosen account and lists it back', async () => {
+    const call = await connect();
+    const created = await call('create_event', {
+      account: 'home',
+      event: { title: 'Call mom', start, end },
+    });
+    expect(created.isError).toBe(false);
+
+    const listed = await call('list_events', {
+      account: 'home',
+      timeMin: '2026-11-09',
+      timeMax: '2026-11-10',
+    });
+    const titles = JSON.parse(listed.text).events.map((event: { title: string }) => event.title);
+    expect(titles).toEqual(['Call mom', 'Dentist']);
+  });
+
+  it('finds free time across every account by default', async () => {
+    const call = await connect();
+    const { text } = await call('find_free_time', {
+      timeMin: '2026-11-09T09:00:00Z',
+      timeMax: '2026-11-09T14:00:00Z',
+      duration: 60,
+      slotInterval: 60,
+    });
+    expect(JSON.parse(text).slots).toEqual([
+      { start: '2026-11-09T09:00:00.000Z', end: '2026-11-09T10:00:00.000Z' },
+      { start: '2026-11-09T11:00:00.000Z', end: '2026-11-09T12:00:00.000Z' },
+      { start: '2026-11-09T13:00:00.000Z', end: '2026-11-09T14:00:00.000Z' },
+    ]);
+  });
+
+  it('reports calendar errors to the model instead of crashing', async () => {
+    const call = await connect();
+    const result = await call('delete_event', { eventId: 'missing' });
+    expect(result.isError).toBe(true);
+    expect(result.text).toMatch(/not found/);
+  });
+});
+
+describe('refreshingToken', () => {
+  it('refreshes once for concurrent calls and reuses the token until it expires', async () => {
+    const fetch = vi.fn(async () =>
+      Response.json({ access_token: 'fresh', expires_in: 3600, refresh_token: 'rotated' }),
+    );
+    const token = refreshingToken({
+      tokenUrl: 'https://auth.example/token',
+      clientId: 'client',
+      refreshToken: 'original',
+      fetch,
+    });
+
+    expect(await Promise.all([token(), token()])).toEqual(['fresh', 'fresh']);
+    expect(await token()).toBe('fresh');
+    expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it('includes the provider error in the message', async () => {
+    const fetch = vi.fn(async () =>
+      Response.json(
+        { error: 'invalid_grant', error_description: 'Token revoked' },
+        { status: 400 },
+      ),
+    );
+    const token = refreshingToken({
+      tokenUrl: 'https://auth.example/token',
+      clientId: 'client',
+      refreshToken: 'revoked',
+      fetch,
+    });
+    await expect(token()).rejects.toThrow('Token revoked');
+  });
+});

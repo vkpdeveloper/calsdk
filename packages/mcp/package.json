@@ -1,0 +1,65 @@
+{
+  "name": "@cal-sdk/mcp",
+  "version": "0.0.0",
+  "description": "MCP server for Google Calendar, Outlook, iCloud and CalDAV: let AI agents read events, find free time and book meetings.",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "model-context-protocol",
+    "ai-agents",
+    "calendar",
+    "google-calendar",
+    "outlook",
+    "icloud",
+    "caldav",
+    "scheduling",
+    "free-busy",
+    "calsdk"
+  ],
+  "license": "MIT",
+  "homepage": "https://www.cal-sdk.com/docs/guides/mcp",
+  "mcpName": "io.github.vkpdeveloper/calsdk",
+  "type": "module",
+  "sideEffects": false,
+  "bin": {
+    "cal-sdk-mcp": "./dist/cli.js"
+  },
+  "exports": {
+    ".": {
+      "@cal-sdk/source": "./src/index.ts",
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsdown"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vkpdeveloper/calsdk.git",
+    "directory": "packages/mcp"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@cal-sdk/caldav": "workspace:*",
+    "@cal-sdk/core": "workspace:*",
+    "@cal-sdk/google": "workspace:*",
+    "@cal-sdk/microsoft": "workspace:*",
+    "@cal-sdk/mock": "workspace:*",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "^2.4.0"
+  }
+}

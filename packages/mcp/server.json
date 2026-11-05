@@ -1,0 +1,73 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.vkpdeveloper/calsdk",
+  "title": "calsdk calendars",
+  "description": "Google Calendar, Outlook, iCloud and CalDAV for agents: list events, find free time, book.",
+  "websiteUrl": "https://www.cal-sdk.com/docs/guides/mcp",
+  "repository": {
+    "url": "https://github.com/vkpdeveloper/calsdk",
+    "source": "github",
+    "subfolder": "packages/mcp"
+  },
+  "version": "0.1.0",
+  "packages": [
+    {
+      "registryType": "npm",
+      "registryBaseUrl": "https://registry.npmjs.org",
+      "identifier": "@cal-sdk/mcp",
+      "version": "0.1.0",
+      "runtimeHint": "npx",
+      "transport": { "type": "stdio" },
+      "environmentVariables": [
+        {
+          "name": "GOOGLE_ACCESS_TOKEN",
+          "description": "Google OAuth access token with a Calendar scope",
+          "isSecret": true
+        },
+        {
+          "name": "GOOGLE_REFRESH_TOKEN",
+          "description": "Google refresh token, used with the client id and secret to stay signed in",
+          "isSecret": true
+        },
+        { "name": "GOOGLE_CLIENT_ID", "description": "Google OAuth client id" },
+        {
+          "name": "GOOGLE_CLIENT_SECRET",
+          "description": "Google OAuth client secret",
+          "isSecret": true
+        },
+        {
+          "name": "MICROSOFT_ACCESS_TOKEN",
+          "description": "Microsoft Graph access token with Calendars.ReadWrite",
+          "isSecret": true
+        },
+        {
+          "name": "MICROSOFT_REFRESH_TOKEN",
+          "description": "Microsoft refresh token, used with the client id to stay signed in",
+          "isSecret": true
+        },
+        { "name": "MICROSOFT_CLIENT_ID", "description": "Microsoft Entra app (client) id" },
+        {
+          "name": "MICROSOFT_CLIENT_SECRET",
+          "description": "Microsoft client secret, for confidential apps",
+          "isSecret": true
+        },
+        { "name": "ICLOUD_APPLE_ID", "description": "Apple ID email for iCloud Calendar" },
+        {
+          "name": "ICLOUD_APP_PASSWORD",
+          "description": "App-specific password from account.apple.com",
+          "isSecret": true
+        },
+        {
+          "name": "CALDAV_URL",
+          "description": "CalDAV server address, e.g. https://caldav.fastmail.com/dav/"
+        },
+        { "name": "CALDAV_USERNAME", "description": "CalDAV username" },
+        {
+          "name": "CALDAV_PASSWORD",
+          "description": "CalDAV password or app password",
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

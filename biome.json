@@ -49,7 +49,12 @@
       }
     },
     {
-      "includes": ["packages/*/src/**", "!packages/provider-tests/**", "!**/*.test.ts"],
+      "includes": [
+        "packages/*/src/**",
+        "!packages/provider-tests/**",
+        "!**/*.test.ts",
+        "!packages/mcp/src/cli.ts"
+      ],
       "linter": {
         "rules": {
           "correctness": {

@@ -8,15 +8,17 @@ import { highlightCode } from '@/components/landing/code';
 import { CopyCommand } from '@/components/landing/copy-command';
 import { FeatureTabs } from '@/components/landing/feature-tabs';
 import { ProviderShowcase } from '@/components/landing/provider-showcase';
+import { createCalendars, readWeek, SOURCES } from '@/components/landing/sample-week';
 import { Mark } from '@/components/logo';
 import type { ProviderLogoId } from '@/components/provider-logo';
-import { pageMetadata, softwareJsonLd } from '@/lib/seo';
+import { homeTitle, pageMetadata, softwareJsonLd } from '@/lib/seo';
 import { appDescription, githubUrl } from '@/lib/shared';
 
 export const metadata: Metadata = pageMetadata({
-  title: { absolute: 'calsdk: TypeScript SDK for Google Calendar, Outlook and iCloud' },
+  title: { absolute: homeTitle },
   description: appDescription,
   path: '/',
+  type: 'website',
 });
 
 type Support = boolean | string;
@@ -399,7 +401,8 @@ const EXTRAS: { icon: LucideIcon; title: string; body: ReactNode }[] = [
 ];
 
 export default async function HomePage() {
-  const [providers, features] = await Promise.all([
+  const [initialRun, providers, features] = await Promise.all([
+    readWeek(createCalendars(), SOURCES, false),
     Promise.all(
       PROVIDERS.map(async ({ id, label, pkg, setup, support }) => {
         const { code, changed } = providerCode(id, pkg, setup);
@@ -434,8 +437,7 @@ export default async function HomePage() {
           One API.
         </h1>
         <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-neutral-400">
-          Events, free time and sync for nine providers, including Google, Outlook and iCloud, in
-          one typed TypeScript API.
+          {appDescription}
         </p>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
           <Link
@@ -449,7 +451,7 @@ export default async function HomePage() {
       </section>
 
       <section className="mt-12 sm:mt-16 xl:-mx-10 2xl:-mx-40" aria-label="Live demo">
-        <CalendarApp />
+        <CalendarApp initialRun={initialRun} />
         <p className="mt-4 text-center text-sm text-neutral-500">
           Running in your browser: six sample calendars in memory, with the real listEvents,
           findFreeTime and createEvent.
@@ -457,6 +459,7 @@ export default async function HomePage() {
       </section>
 
       <Section
+        id="switch-calendars"
         title="Switch calendars, not code"
         aside="Pick a provider. Only the import and the setup change, and the events come back in the same shape."
         link={{ href: '/docs/choose-a-provider', label: 'Choose a provider' }}
@@ -465,6 +468,7 @@ export default async function HomePage() {
       </Section>
 
       <Section
+        id="quirks-handled"
         title={
           <>
             <span className="block">The quirks are handled.</span>
@@ -480,7 +484,9 @@ export default async function HomePage() {
             body="Outlook stores a pattern object and Zoom numbers its weekdays. You read and write one RRULE."
           >
             <div className="font-mono text-xs leading-relaxed">
-              <pre className="text-neutral-400">{OUTLOOK_PATTERN}</pre>
+              <pre className="text-neutral-400">
+                <code>{OUTLOOK_PATTERN}</code>
+              </pre>
               <ArrowRight aria-hidden className="my-2 size-3.5 rotate-90 text-neutral-600" />
               <p className="break-words text-[#a5d6ff]">
                 'RRULE:FREQ=WEEKLY;
@@ -536,6 +542,7 @@ export default async function HomePage() {
       </Section>
 
       <Section
+        id="calendar-code"
         title="The calendar code you'd rather not write"
         link={{ href: '/docs/guides/write-events', label: 'Read the guides' }}
       >
@@ -546,7 +553,9 @@ export default async function HomePage() {
         {EXTRAS.map(({ icon: Icon, title, body }) => (
           <div key={title}>
             <Icon aria-hidden className="size-5 text-neutral-300" strokeWidth={1.75} />
-            <h3 className="mt-4 font-medium text-white">{title}</h3>
+            <h3 id={slug(title)} className="mt-4 font-medium text-white">
+              {title}
+            </h3>
             <p className="mt-1.5 text-sm leading-relaxed text-neutral-400">{body}</p>
           </div>
         ))}
@@ -554,7 +563,10 @@ export default async function HomePage() {
 
       <section className="mt-24 flex flex-col items-center border-t border-line py-24 text-center sm:mt-32 sm:py-32">
         <Mark className="size-12 text-white" />
-        <h2 className="mt-8 max-w-2xl text-balance text-[clamp(2.25rem,6vw,4rem)] leading-[0.98] font-semibold tracking-[-0.05em] text-white">
+        <h2
+          id="try-it"
+          className="mt-8 max-w-2xl text-balance text-[clamp(2.25rem,6vw,4rem)] leading-[0.98] font-semibold tracking-[-0.05em] text-white"
+        >
           Try it without connecting a calendar
         </h2>
         <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
@@ -590,11 +602,13 @@ export default async function HomePage() {
 }
 
 function Section({
+  id,
   title,
   aside,
   link,
   children,
 }: {
+  id: string;
   title: ReactNode;
   aside?: string;
   link: { href: string; label: string };
@@ -603,7 +617,10 @@ function Section({
   return (
     <section className="mt-24 sm:mt-36">
       <div className="mb-10 grid gap-5 lg:grid-cols-[1fr_auto] lg:items-end lg:gap-16">
-        <h2 className="max-w-2xl text-balance text-[2rem] leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-5xl">
+        <h2
+          id={id}
+          className="max-w-2xl text-balance text-[2rem] leading-[1.02] font-semibold tracking-[-0.045em] text-white sm:text-5xl"
+        >
           {title}
         </h2>
         <div className="lg:max-w-sm">
@@ -629,11 +646,21 @@ function Card({ title, body, children }: { title: string; body: string; children
         <div className="w-full">{children}</div>
       </div>
       <div className="p-6">
-        <h3 className="font-medium text-white">{title}</h3>
+        <h3 id={slug(title)} className="font-medium text-white">
+          {title}
+        </h3>
         <p className="mt-1.5 text-sm leading-relaxed text-neutral-400">{body}</p>
       </div>
     </div>
   );
+}
+
+/** A heading's text as an id, so every section can be linked to. */
+function slug(text: string) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }
 
 function Swatch({ color, label }: { color: string; label: string }) {

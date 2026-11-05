@@ -1,10 +1,12 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import { Breadcrumb } from '@/components/breadcrumb';
 import { JsonLd } from '@/components/json-ld';
 import { getMDXComponents } from '@/components/mdx';
-import { pageMetadata, website } from '@/lib/seo';
-import { appName, author, formatPostDate, githubUrl, siteUrl } from '@/lib/shared';
+import { postDates } from '@/lib/content-dates';
+import { breadcrumbs, faqJsonLd, organization, pageMetadata, website } from '@/lib/seo';
+import { appName, author, formatDate, githubUrl, siteUrl } from '@/lib/shared';
 import { posts } from '@/lib/source';
 
 function getPost(slug: string) {
@@ -13,17 +15,19 @@ function getPost(slug: string) {
   return entry.post;
 }
 
+type BlogPost = ReturnType<typeof getPost>;
+
 export default async function Post(props: PageProps<'/blog/[slug]'>) {
   const { slug } = await props.params;
   const post = getPost(slug);
   const MDX = post.body;
+  const dates = postDates(post);
 
+  // The layout already provides <main>; the post is an <article> inside it.
   return (
-    <main className="mx-auto w-full max-w-3xl flex-1 px-5 pt-14 pb-24 sm:px-8 sm:pt-20">
+    <article className="mx-auto w-full max-w-3xl flex-1 px-5 pt-14 pb-24 sm:px-8 sm:pt-20">
       <JsonLd data={postJsonLd(slug, post)} />
-      <Link href="/blog" className="font-mono text-xs text-neutral-500 hover:text-neutral-300">
-        ← Blog
-      </Link>
+      <Breadcrumb crumbs={postCrumbs(slug, post)} className="font-mono text-xs text-neutral-500" />
       <h1 className="mt-6 text-balance text-[clamp(2rem,5.5vw,3rem)] leading-[1.05] font-semibold tracking-[-0.035em] text-white">
         {post.title}
       </h1>
@@ -32,12 +36,18 @@ export default async function Post(props: PageProps<'/blog/[slug]'>) {
         <a href={author.url} className="text-neutral-300 hover:text-white">
           {author.name}
         </a>{' '}
-        · <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+        · Published <time dateTime={dates.published}>{formatDate(dates.published)}</time>
+        {dates.modified.slice(0, 10) > dates.published.slice(0, 10) && (
+          <>
+            {' '}
+            · Updated <time dateTime={dates.modified}>{formatDate(dates.modified)}</time>
+          </>
+        )}
       </p>
       {/* Long inline code, like a full property path, would push the page sideways on phones. */}
-      <article className="prose mt-12 max-w-none border-t border-line pt-10 [&_:not(pre)>code]:[overflow-wrap:anywhere]">
+      <div className="prose mt-12 max-w-none border-t border-line pt-10 [&_:not(pre)>code]:[overflow-wrap:anywhere]">
         <MDX components={getMDXComponents()} />
-      </article>
+      </div>
       <div className="mt-16 rounded-2xl border border-line bg-panel p-6">
         <p className="text-[15px] leading-relaxed text-neutral-300">
           calsdk is an open source TypeScript library with one API for Google Calendar, Outlook,
@@ -58,7 +68,7 @@ export default async function Post(props: PageProps<'/blog/[slug]'>) {
           </a>
         </div>
       </div>
-    </main>
+    </article>
   );
 }
 
@@ -70,62 +80,49 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
   const { slug } = await props.params;
   const post = getPost(slug);
   return pageMetadata({
-    title: post.title,
+    title: post.metaTitle ?? post.title,
     description: post.description,
     path: `/blog/${slug}`,
     image: `/og/blog/${slug}/image.png`,
+    markdownPath: `/blog/${slug}.md`,
+    dates: postDates(post),
   });
 }
 
-function postJsonLd(slug: string, post: ReturnType<typeof getPost>) {
+function postCrumbs(slug: string, post: BlogPost) {
+  return [
+    { name: appName, path: '/' },
+    { name: 'Blog', path: '/blog' },
+    { name: post.title, path: `/blog/${slug}` },
+  ];
+}
+
+function postJsonLd(slug: string, post: BlogPost) {
   const url = `${siteUrl}/blog/${slug}`;
+  const dates = postDates(post);
   return {
     '@context': 'https://schema.org',
     '@graph': [
       website,
+      organization,
       {
         '@type': 'BlogPosting',
         '@id': `${url}#article`,
         headline: post.title,
         description: post.description,
-        datePublished: post.date,
+        datePublished: dates.published,
+        dateModified: dates.modified,
         url,
+        mainEntityOfPage: url,
         image: `${siteUrl}/og/blog/${slug}/image.png`,
         inLanguage: 'en',
         author: { '@type': 'Person', name: author.name, url: author.url },
-        isPartOf: { '@id': website['@id'] },
+        publisher: { '@id': organization['@id'] },
+        isPartOf: { '@id': `${siteUrl}/blog#blog` },
         about: { '@type': 'SoftwareSourceCode', name: appName, codeRepository: githubUrl },
       },
-      ...faqJsonLd(post),
+      breadcrumbs(postCrumbs(slug, post)),
+      ...faqJsonLd(post.structuredData),
     ],
   };
-}
-
-/**
- * A post's `## FAQ` section as FAQPage data, built from the post itself so the two can't drift:
- * every heading after `## FAQ` is a question, and the text under it is the answer.
- */
-function faqJsonLd(post: ReturnType<typeof getPost>) {
-  const { headings, contents } = post.structuredData;
-  const start = headings.findIndex((heading) => heading.content === 'FAQ');
-  if (start === -1) return [];
-
-  return [
-    {
-      '@type': 'FAQPage',
-      mainEntity: headings.slice(start + 1).map((heading) => ({
-        '@type': 'Question',
-        name: heading.content,
-        acceptedAnswer: {
-          '@type': 'Answer',
-          text: contents
-            .filter((block) => block.heading === heading.id)
-            .map((block) => block.content)
-            .join(' ')
-            // Search text keeps inline code backticks; an answer is plain text.
-            .replaceAll('`', ''),
-        },
-      })),
-    },
-  ];
 }

@@ -1,8 +1,8 @@
-import { GoogleAnalytics } from '@next/third-parties/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
 import { Archivo, Source_Code_Pro } from 'next/font/google';
-import { appDescription, appName, gaMeasurementId, siteUrl } from '@/lib/shared';
+import Script from 'next/script';
+import { appName, gaMeasurementId, siteUrl } from '@/lib/shared';
 import './global.css';
 
 const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo' });
@@ -12,7 +12,8 @@ const sourceCodePro = Source_Code_Pro({ subsets: ['latin'], variable: '--font-so
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
   title: { default: appName, template: `%s | ${appName}` },
-  description: appDescription,
+  description:
+    'Docs, guides and API reference for calsdk, the open source TypeScript calendar library.',
   applicationName: appName,
   openGraph: { siteName: appName, type: 'website', locale: 'en_US' },
   twitter: { card: 'summary_large_image' },
@@ -30,8 +31,19 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           {children}
         </RootProvider>
       </body>
-      {/* Only the live site reports to Analytics, so previews and local builds don't skew the numbers. */}
-      {process.env.VERCEL_ENV === 'production' && <GoogleAnalytics gaId={gaMeasurementId} />}
+      {/* Only the live site reports to Analytics, so previews and local builds don't skew the numbers.
+          It loads once the page is idle, so it never delays reading. */}
+      {process.env.VERCEL_ENV === 'production' && (
+        <>
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${gaMeasurementId}`}
+            strategy="lazyOnload"
+          />
+          <Script id="google-analytics" strategy="lazyOnload">
+            {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag('js',new Date());gtag('config','${gaMeasurementId}');`}
+          </Script>
+        </>
+      )}
     </html>
   );
 }

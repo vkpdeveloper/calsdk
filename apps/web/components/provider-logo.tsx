@@ -18,6 +18,19 @@ const LOGOS = {
 
 export type ProviderLogoId = keyof typeof LOGOS;
 
+const NAMES = {
+  google: 'Google Calendar',
+  microsoft: 'Outlook',
+  icloud: 'iCloud',
+  zoho: 'Zoho Calendar',
+  caldav: 'CalDAV',
+  zoom: 'Zoom',
+  calcom: 'Cal.com',
+  calendly: 'Calendly',
+  ics: 'ICS feed',
+  mock: 'Mock calendar',
+} satisfies Record<ProviderLogoId, string>;
+
 /**
  * A provider's mark on a small light tile, so dark marks stay visible on the dark site.
  * Decorative: the provider's name always sits next to it.
@@ -33,7 +46,9 @@ export function ProviderLogo({ id, className = '' }: { id: ProviderLogoId; class
         // Unoptimized: the marks are SVGs, plus one small PNG, that need no resizing.
         <Image
           src={Logo}
-          alt=""
+          // The tile is hidden from screen readers, but text-only readers of the page still
+          // see an image, and an empty alt tells them nothing.
+          alt={`${NAMES[id]} logo`}
           width={14}
           height={14}
           unoptimized

@@ -2,8 +2,8 @@ import { createMDX } from 'fumadocs-mdx/next';
 
 const withMDX = createMDX();
 
-// Every docs page is also served as Markdown, for AI tools and anything else that reads text:
-// at its URL plus `.md`, or at its URL when the request prefers Markdown.
+// Every docs page and blog post is also served as Markdown, for AI tools and anything else that
+// reads text: at its URL plus `.md`, or at its URL when the request prefers Markdown.
 const markdown = '/llms.mdx/docs/:path*/content.md';
 const prefersMarkdown = [{ type: 'header', key: 'accept', value: '(.*)text/markdown(.*)' }];
 
@@ -20,6 +20,10 @@ const config = {
         { source: '/docs/:path*.md', destination: markdown },
         { source: '/docs', has: prefersMarkdown, destination: '/llms.mdx/docs/content.md' },
         { source: '/docs/:path*', has: prefersMarkdown, destination: markdown },
+        { source: '/blog.md', destination: '/llms.mdx/blog' },
+        { source: '/blog/:slug.md', destination: '/llms.mdx/blog/:slug' },
+        { source: '/blog', has: prefersMarkdown, destination: '/llms.mdx/blog' },
+        { source: '/blog/:slug', has: prefersMarkdown, destination: '/llms.mdx/blog/:slug' },
       ],
     };
   },

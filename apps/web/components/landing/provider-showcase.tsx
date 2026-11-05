@@ -40,7 +40,7 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
             type="button"
             role="tab"
             id={`${prefix}-tab-${provider.id}`}
-            aria-controls={`${prefix}-panel`}
+            aria-controls={`${prefix}-panel-${provider.id}`}
             tabIndex={provider.id === current?.id ? 0 : -1}
             aria-selected={provider.id === current?.id}
             onClick={() => setActive(provider.id)}
@@ -55,20 +55,20 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
         ))}
       </div>
 
-      <div className="flex min-w-0 flex-col">
-        {/* Keyed by provider so the changed lines flash once on every switch. */}
+      {/* Every provider's panel is in the HTML, so crawlers and answer engines read all of them.
+          A panel's flash restarts each time it's shown, since hiding it stops the animation. */}
+      {providers.map((provider) => (
         <div
-          key={current?.id}
-          id={`${prefix}-panel`}
+          key={provider.id}
+          id={`${prefix}-panel-${provider.id}`}
           role="tabpanel"
-          aria-labelledby={`${prefix}-tab-${current?.id}`}
-          className="code code-flash flex-1 py-2"
+          aria-labelledby={`${prefix}-tab-${provider.id}`}
+          hidden={provider.id !== current?.id}
+          className="flex min-w-0 flex-col"
         >
-          {current?.code}
-        </div>
-        {current && (
+          <div className="code code-flash flex-1 py-2">{provider.code}</div>
           <ul className="flex flex-wrap gap-x-5 gap-y-2 border-t border-line px-5 py-4 text-sm">
-            {current.support.map(([capability, value]) => (
+            {provider.support.map(([capability, value]) => (
               <li key={capability} className="flex items-center gap-2">
                 {/* Full support is a filled dot, partial support a ring with its note. */}
                 <span
@@ -93,8 +93,8 @@ export function ProviderShowcase({ providers }: { providers: ShowcaseProvider[] 
               </li>
             ))}
           </ul>
-        )}
-      </div>
+        </div>
+      ))}
     </div>
   );
 }

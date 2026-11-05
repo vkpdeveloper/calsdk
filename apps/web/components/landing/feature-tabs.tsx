@@ -39,7 +39,7 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
             type="button"
             role="tab"
             id={`${prefix}-tab-${f.id}`}
-            aria-controls={`${prefix}-panel`}
+            aria-controls={`${prefix}-panel-${f.id}`}
             tabIndex={f.id === feature?.id ? 0 : -1}
             aria-selected={f.id === feature?.id}
             onClick={() => setActive(f.id)}
@@ -49,26 +49,34 @@ export function FeatureTabs({ features }: { features: Feature[] }) {
           </button>
         ))}
       </div>
-      {feature && (
+      {/* Every panel is in the HTML, so crawlers and answer engines read all of them. */}
+      {features.map((f) => (
         <div
-          id={`${prefix}-panel`}
+          key={f.id}
+          id={`${prefix}-panel-${f.id}`}
           role="tabpanel"
-          aria-labelledby={`${prefix}-tab-${feature.id}`}
+          aria-labelledby={`${prefix}-tab-${f.id}`}
+          hidden={f.id !== feature?.id}
           className="mt-6 grid overflow-hidden rounded-2xl border border-line bg-panel lg:grid-cols-[24rem_minmax(0,1fr)] lg:grid-rows-[auto_1fr]"
         >
           <div className="border-line p-6 max-lg:border-b sm:p-8 lg:border-r">
-            <h3 className="text-xl font-semibold tracking-[-0.02em] text-white">{feature.title}</h3>
-            <p className="mt-3 leading-relaxed text-neutral-400">{feature.body}</p>
+            <h3
+              id={`feature-${f.id}`}
+              className="text-xl font-semibold tracking-[-0.02em] text-white"
+            >
+              {f.title}
+            </h3>
+            <p className="mt-3 leading-relaxed text-neutral-400">{f.body}</p>
           </div>
           {/* Desktop: code on the right, its result under the text. Phones: code, then result. */}
           <div className="code min-w-0 py-2 lg:col-start-2 lg:row-span-2 lg:row-start-1">
-            {feature.code}
+            {f.code}
           </div>
           <div className="not-fumadocs-codeblock code code-result min-w-0 border-t border-line bg-black/20 py-2 lg:col-start-1 lg:row-start-2 lg:border-r">
-            {feature.result}
+            {f.result}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 }

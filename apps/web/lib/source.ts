@@ -10,7 +10,10 @@ import { docsRoute, siteUrl } from './shared';
 const docs = defineDocs({
   dir: 'content/docs',
   docs: {
-    schema: pageSchema,
+    schema: pageSchema.extend({
+      /** The <title> before " | calsdk", when the H1 alone would make a vague or short title. */
+      metaTitle: z.string().optional(),
+    }),
     mdxOptions: applyMdxPreset({ remarkPlugins: [remarkTypeTableSearch] }),
     postprocess: {
       includeProcessedMarkdown: true,
@@ -31,7 +34,15 @@ export const source = loader({
 const blog = defineCollections({
   type: 'doc',
   dir: 'content/blog',
-  schema: pageSchema.extend({ description: z.string(), date: z.iso.date() }),
+  schema: pageSchema.extend({
+    description: z.string(),
+    /** The day the post was published, in UTC. */
+    date: z.iso.date(),
+    metaTitle: z.string().optional(),
+  }),
+  postprocess: {
+    includeProcessedMarkdown: true,
+  },
 });
 
 /** Blog posts, newest first. A post's file name is its URL slug. */

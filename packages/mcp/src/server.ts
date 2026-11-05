@@ -261,7 +261,7 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
         scope,
         sendUpdates,
       }),
-      annotations: { idempotentHint: true },
+      // Not idempotent: a retried createConference adds another meeting link.
     },
     async ({ account, ...options }, ctx) => {
       const { event, warnings } = await updateEvent({

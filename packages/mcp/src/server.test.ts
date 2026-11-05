@@ -1,6 +1,6 @@
 import { mockCalendar } from '@cal-sdk/mock';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, onTestFinished, vi } from 'vitest';
 import { accountsFromEnv } from './accounts';
 import { refreshingToken } from './refreshing-token';
 import { createCalendarServer } from './server';
@@ -104,9 +104,19 @@ describe('createCalendarServer', () => {
 
 describe('refreshingToken', () => {
   it('refreshes once for concurrent calls and reuses the token until it expires', async () => {
-    const fetch = vi.fn(async () =>
-      Response.json({ access_token: 'fresh', expires_in: 3600, refresh_token: 'rotated' }),
-    );
+    vi.useFakeTimers({ toFake: ['Date'] });
+    onTestFinished(() => {
+      vi.useRealTimers();
+    });
+    const grants: (string | null)[] = [];
+    const fetch = vi.fn(async (_url: string | URL | Request, init?: RequestInit) => {
+      grants.push(new URLSearchParams(String(init?.body)).get('refresh_token'));
+      return Response.json({
+        access_token: `token-${grants.length}`,
+        expires_in: 3600,
+        refresh_token: 'rotated',
+      });
+    });
     const token = refreshingToken({
       tokenUrl: 'https://auth.example/token',
       clientId: 'client',
@@ -114,9 +124,14 @@ describe('refreshingToken', () => {
       fetch,
     });
 
-    expect(await Promise.all([token(), token()])).toEqual(['fresh', 'fresh']);
-    expect(await token()).toBe('fresh');
+    expect(await Promise.all([token(), token()])).toEqual(['token-1', 'token-1']);
+    expect(await token()).toBe('token-1');
     expect(fetch).toHaveBeenCalledTimes(1);
+
+    // Tokens are renewed a minute before they expire, with the rotated refresh token.
+    vi.advanceTimersByTime(3600_000 - 60_000);
+    expect(await token()).toBe('token-2');
+    expect(grants).toEqual(['original', 'rotated']);
   });
 
   it('includes the provider error in the message', async () => {

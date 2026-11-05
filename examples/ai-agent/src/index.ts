@@ -110,7 +110,7 @@ const { text, steps } = await generateText({
   model: anthropic('claude-sonnet-5-5'),
   tools: calendarTools(calendar, timeZone),
   stopWhen: isStepCount(6),
-  instructions: `You manage the user's calendar. Today is ${new Date().toDateString()}. All times are in ${timeZone}.`,
+  instructions: `You manage the user's calendar. Today is ${new Date().toLocaleDateString('en-US', { timeZone, dateStyle: 'full' })}. All times are in ${timeZone}.`,
   prompt:
     process.argv[2] ??
     'Find an hour tomorrow afternoon for a planning session with ana@example.com and book it.',

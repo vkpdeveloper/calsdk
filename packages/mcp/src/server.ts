@@ -163,8 +163,15 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       description:
         'Find meeting slots when every listed calendar is free, across accounts and providers. Fails instead of guessing if a calendar cannot be read.',
       inputSchema: z.object({
+        // An empty list would read no calendar and call every slot free.
         calendars: z
-          .array(z.object({ account: z.enum(names), calendarIds: z.array(z.string()).optional() }))
+          .array(
+            z.object({
+              account: z.enum(names),
+              calendarIds: z.array(z.string()).min(1).optional(),
+            }),
+          )
+          .min(1)
           .optional()
           .describe(
             'Calendars that must be free. Defaults to the primary calendar of every account',

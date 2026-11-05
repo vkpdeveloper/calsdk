@@ -68,6 +68,19 @@ describe('createCalendarServer', () => {
     ]);
   });
 
+  it('rejects an empty calendar list instead of calling every slot free', async () => {
+    const call = await connect();
+    const window = { timeMin: '2026-11-09T09:00:00Z', timeMax: '2026-11-09T14:00:00Z' };
+    const noCalendars = await call('find_free_time', { ...window, duration: 60, calendars: [] });
+    expect(noCalendars.isError).toBe(true);
+    const noIds = await call('find_free_time', {
+      ...window,
+      duration: 60,
+      calendars: [{ account: 'work', calendarIds: [] }],
+    });
+    expect(noIds.isError).toBe(true);
+  });
+
   it('reports calendar errors to the model instead of crashing', async () => {
     const call = await connect();
     const result = await call('delete_event', { eventId: 'missing' });

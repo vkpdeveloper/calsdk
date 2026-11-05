@@ -1,0 +1,128 @@
+---
+title: Finding a free slot across Google, Outlook and iCloud
+description: Each calendar API answers "when is this person busy?" differently. Here's what each one gives you, and how to merge them without double booking.
+date: 2026-11-06
+---
+
+Here's a feature request that sounds like an afternoon's work: show the times when Ana (on Google Calendar) and Raj (on Outlook) are both free for 30 minutes next week, during Berlin working hours.
+
+You fetch two lists of busy times, merge them and look for the gaps. The merge really is the easy part. The hard part is getting a busy time you can trust from each provider, because the three big calendar APIs each answer "when is this person busy?" in a different way, and one of them barely answers it at all.
+
+## Google: a real free/busy endpoint
+
+Google is the easy one. You `POST /freeBusy` with a window and a list of calendar ids, and get back busy ranges per calendar:
+
+```json
+{
+  "calendars": {
+    "primary": {
+      "busy": [{ "start": "2026-11-09T08:30:00Z", "end": "2026-11-09T09:00:00Z" }]
+    },
+    "team@example.com": {
+      "errors": [{ "domain": "global", "reason": "notFound" }]
+    }
+  }
+}
+```
+
+There are two things to notice. First, Google has already applied its own rules: an event marked "show as free" (`transparency: "transparent"`) isn't in there, and it works for calendars the user can only see as free/busy, where listing events would give you nothing. Second, a failure doesn't fail the request. A calendar that wasn't found, or that isn't shared with you, comes back with an `errors` array and no `busy` key. If your code reads `busy ?? []`, that calendar now looks completely free. That isn't an edge case. It's the default way to get it wrong.
+
+The only limit worth knowing is that one request covers at most 50 calendars, so a big team needs batching.
+
+## Outlook: an endpoint you probably can't use
+
+Microsoft Graph does have a free/busy endpoint, `getSchedule`. You give it email addresses and a window, and it gives you back an `availabilityView` string with one digit per time slot:
+
+```json
+{ "scheduleId": "raj@contoso.com", "availabilityView": "000220130" }
+```
+
+`0` is free, `1` tentative, `2` busy, `3` out of office and `4` working elsewhere. The slot length (`availabilityViewInterval`) defaults to 30 minutes and goes from 5 to 1440. There's also a `scheduleItems` array with the actual start and end of each item, which is what you want: the digit string rounds everything to the slot length.
+
+The catch is in the permissions table: `getSchedule` doesn't support personal Microsoft accounts. If your users sign in with an outlook.com or hotmail.com address, it's not an option. On a busy shared calendar it also gives up past 1000 entries in the window.
+
+The other route works for every account: list the events with `calendarView`, which expands recurring series into occurrences on the server, and work out busy time yourself. That's what calsdk does for Outlook. It does mean you now own the rules Graph would have applied for you, starting with `showAs`. Outlook has six values (`free`, `tentative`, `busy`, `oof`, `workingElsewhere` and `unknown`), and you have to decide which ones block time.
+
+Interestingly, `getSchedule` writes "working elsewhere" as `0`, which is free. I went the other way and count everything except `free` as busy. Someone working from another office, or tentatively holding a slot, usually doesn't want a stranger booking it.
+
+Time zones need care too. Graph names zones the Windows way, like `"Pacific Standard Time"`, not `"America/Los_Angeles"`, and a `Prefer: outlook.timezone` header changes which zone it writes times in. For busy time, ask for UTC with `Prefer: outlook.timezone="UTC"` and you skip the mapping entirely.
+
+## iCloud and CalDAV: compute it yourself
+
+CalDAV is the protocol behind iCloud, Fastmail, Nextcloud, Zoho and most self-hosted calendars. On paper it has free/busy too: RFC 4791 defines a `free-busy-query` REPORT. In practice I didn't want a feature where whether it works depends on which server the user happens to be on, so calsdk treats CalDAV the same way as Outlook: list the events and compute.
+
+Listing is a `calendar-query` REPORT with a time range:
+
+```xml
+<C:calendar-query xmlns:D="DAV:" xmlns:C="urn:ietf:params:xml:ns:caldav">
+  <D:prop><D:getetag/><C:calendar-data/></D:prop>
+  <C:filter>
+    <C:comp-filter name="VCALENDAR">
+      <C:comp-filter name="VEVENT">
+        <C:time-range start="20261108T000000Z" end="20261115T000000Z"/>
+      </C:comp-filter>
+    </C:comp-filter>
+  </C:filter>
+</C:calendar-query>
+```
+
+What comes back is raw iCalendar text, and everything is now your problem. Recurring events arrive as one `VEVENT` with an `RRULE` and its exceptions, so you expand the occurrences yourself. Servers read floating times and all-day dates in a zone of their choosing, so calsdk asks for a day of slack on either side and filters the results itself. Busy or free is the `TRANSP` property (`TRANSPARENT` means free), and cancelled occurrences have `STATUS:CANCELLED`.
+
+Some servers have extra quirks. Zoho answers a calendar query without the event data, so every event has to be fetched again with a `calendar-multiget`. If one of those fetches fails, it's tempting to skip that event. Don't: a missing event is time that looks free. calsdk fails the whole listing instead.
+
+## The gotchas that cut across all three
+
+All-day events are dates, not instants. A holiday on November 9 means November 9 in the calendar's own time zone, so to turn it into a busy range you need that zone, which you only get from the calendar list. If you can't get it, the safe choice is to block the day in every zone, from UTC+14 through UTC-12. That covers more than a day, but it never shows a holiday as free.
+
+Private events still block time. You won't see the title, but you need the range.
+
+Declined invitations are a judgment call. The event fallback in calsdk only looks at the event's own free/busy flag and whether it's cancelled, not at your RSVP. So a declined invite that stays on the calendar still counts as busy. That's a choice, and it errs the same way as everything else: better to hide a free slot than to offer a taken one.
+
+Rate limits are real once you list a week of events for 20 people. Retry `429`s after the `Retry-After` the provider sends, and keep the window as small as the feature allows.
+
+## The merge, and why it should fail closed
+
+With trustworthy busy ranges in hand, the algorithm is short:
+
+1. Put every busy range from every calendar into one list, clip it to the window, sort by start and merge ranges that overlap or touch.
+2. Walk candidate start times (every 15 minutes, say) inside working hours, in the organizer's time zone.
+3. Keep a candidate if `[start, start + duration)` doesn't overlap any merged range.
+
+Working hours need more care than they seem to. "9 to 5 in Berlin" is a different UTC range on either side of a daylight saving change, and on the day the clocks spring forward an hour of wall-clock time simply doesn't exist. calsdk places slots on the local wall clock within each stretch of constant UTC offset, so the grid stays on the hour after the change and the missing hour gets no slots.
+
+The important decision is what to do when one calendar can't be read. Remember Google's per-calendar `errors`. If Raj's calendar comes back with an error and you carry on with Ana's alone, every slot you show is a guess about Raj. A booking page that confidently offers a time that clashes is worse than one that says "couldn't check Raj's calendar". So `findFreeTime` fails closed: it throws `FreeBusyUnavailableError`, with the `provider` and `calendarId`, rather than return slots that might clash.
+
+## How calsdk does it
+
+calsdk wraps all of the above in two functions. `getFreeBusy` gives you merged busy ranges for one provider. It uses Google's endpoint where it exists, and lists events everywhere else, returning a `compatibility` warning so you know which path it took. `findFreeTime` takes calendars from any mix of providers and gives you the slots:
+
+```ts
+import { findFreeTime, FreeBusyUnavailableError } from '@cal-sdk/core';
+import { icloud } from '@cal-sdk/caldav';
+import { google } from '@cal-sdk/google';
+import { microsoft } from '@cal-sdk/microsoft';
+
+try {
+  const { slots, warnings } = await findFreeTime({
+    calendars: [
+      { calendar: google({ accessToken: anaToken }) },
+      { calendar: microsoft({ accessToken: rajToken }), calendarIds: ['primary', roomCalendarId] },
+      { calendar: icloud({ appleId, appPassword }) },
+    ],
+    timeMin: '2026-11-09T00:00:00Z',
+    timeMax: '2026-11-14T00:00:00Z',
+    duration: 30,
+    workingHours: { start: '09:00', end: '17:00', timeZone: 'Europe/Berlin' },
+  });
+  // slots: [{ start: '2026-11-09T08:00:00.000Z', end: '2026-11-09T08:30:00.000Z' }, ...]
+} catch (error) {
+  if (FreeBusyUnavailableError.isInstance(error)) {
+    // Tell the user which calendar couldn't be read, instead of guessing.
+  }
+  throw error;
+}
+```
+
+Slots come back as UTC instants, ready to show in each viewer's own zone. The [free time guide](/docs/guides/free-time) covers slot intervals, overlapping slots and booking the one the user picks.
+
+If you want to poke at it without connecting a real account, the [quickstart](/docs/quickstart) runs against an in-memory calendar in a couple of minutes.

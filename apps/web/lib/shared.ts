@@ -24,6 +24,19 @@ export const gitConfig = {
 
 export const githubUrl = `https://github.com/${gitConfig.user}/${gitConfig.repo}`;
 
+// The byline on blog posts.
+export const author = { name: 'Vaibhav Pathak', url: 'https://x.com/vkpdeveloper' };
+
+/** A post's `YYYY-MM-DD` date as "Nov 6, 2026". UTC, so the server's time zone can't shift the day. */
+export function formatPostDate(date: string) {
+  return new Date(date).toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+}
+
 const getContentUrl = createGetUrl(docsContentRoute);
 
 export function getPageMarkdownUrl(page: { slugs: string[]; locale?: string }) {

@@ -121,11 +121,14 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       inputSchema: z.object({ account: accountName.describe('Omit to list every account') }),
       annotations: { readOnlyHint: true },
     },
-    async ({ account }) => {
+    async ({ account }, ctx) => {
       const chosen = account === undefined ? names : [account];
       const result = await Promise.all(
         chosen.map(async (name) => {
-          const { calendars, warnings } = await listCalendars({ calendar: calendarOf(name) });
+          const { calendars, warnings } = await listCalendars({
+            calendar: calendarOf(name),
+            abortSignal: ctx.mcpReq.signal,
+          });
           return { account: name, calendars, warnings };
         }),
       );
@@ -149,11 +152,12 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       }),
       annotations: { readOnlyHint: true },
     },
-    async ({ account, ...options }) => {
+    async ({ account, ...options }, ctx) => {
       const { events, nextPageToken, warnings } = await listEvents({
         calendar: calendarOf(account),
         ...options,
         pageSize: 100,
+        abortSignal: ctx.mcpReq.signal,
       });
       return json({ events, nextPageToken, warnings });
     },
@@ -202,7 +206,7 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       }),
       annotations: { readOnlyHint: true },
     },
-    async ({ calendars, maxSlots = 20, ...options }) => {
+    async ({ calendars, maxSlots = 20, ...options }, ctx) => {
       // findFreeTime builds every slot in the window before maxSlots applies, so a long
       // window with a short interval would block the server. Unparseable bounds are left
       // to findFreeTime, which rejects them.
@@ -219,6 +223,7 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
           calendar: calendarOf(account),
           calendarIds,
         })),
+        abortSignal: ctx.mcpReq.signal,
       });
       return json({ slots: slots.slice(0, maxSlots), totalSlots: slots.length, warnings });
     },
@@ -232,8 +237,12 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
         'Create an event, optionally recurring or with attendees, and return it as stored.',
       inputSchema: z.object({ account: accountName, calendarId, event: eventInput, sendUpdates }),
     },
-    async ({ account, ...options }) => {
-      const { event, warnings } = await createEvent({ calendar: calendarOf(account), ...options });
+    async ({ account, ...options }, ctx) => {
+      const { event, warnings } = await createEvent({
+        calendar: calendarOf(account),
+        ...options,
+        abortSignal: ctx.mcpReq.signal,
+      });
       return json({ event, warnings });
     },
   );
@@ -254,8 +263,12 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       }),
       annotations: { idempotentHint: true },
     },
-    async ({ account, ...options }) => {
-      const { event, warnings } = await updateEvent({ calendar: calendarOf(account), ...options });
+    async ({ account, ...options }, ctx) => {
+      const { event, warnings } = await updateEvent({
+        calendar: calendarOf(account),
+        ...options,
+        abortSignal: ctx.mcpReq.signal,
+      });
       return json({ event, warnings });
     },
   );
@@ -274,8 +287,12 @@ export function createCalendarServer(accounts: Record<string, CalendarProvider>)
       }),
       annotations: { destructiveHint: true, idempotentHint: true },
     },
-    async ({ account, ...options }) => {
-      const { warnings } = await deleteEvent({ calendar: calendarOf(account), ...options });
+    async ({ account, ...options }, ctx) => {
+      const { warnings } = await deleteEvent({
+        calendar: calendarOf(account),
+        ...options,
+        abortSignal: ctx.mcpReq.signal,
+      });
       return json({ deleted: true, warnings });
     },
   );

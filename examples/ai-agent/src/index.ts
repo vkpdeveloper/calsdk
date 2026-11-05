@@ -82,7 +82,11 @@ function calendarTools(calendar: CalendarProvider, timeZone: string) {
 }
 
 const timeZone = 'Europe/Berlin';
-const tomorrow = new Date(Date.now() + 86_400_000).toISOString().slice(0, 10);
+// Tomorrow in Berlin, not in UTC: just after midnight there, UTC is still on the day before.
+const berlinToday = new Date().toLocaleDateString('en-CA', { timeZone }); // YYYY-MM-DD
+const nextDay = new Date(`${berlinToday}T00:00:00Z`);
+nextDay.setUTCDate(nextDay.getUTCDate() + 1);
+const tomorrow = nextDay.toISOString().slice(0, 10);
 
 // A real calendar when a token is set, otherwise an in-memory one with a busy tomorrow.
 const calendar = process.env.GOOGLE_ACCESS_TOKEN

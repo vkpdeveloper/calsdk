@@ -25,19 +25,20 @@ Docs: https://www.cal-sdk.com/docs/guides/mcp`;
  */
 export function accountsFromEnv(env: Env): Record<string, CalendarProvider> {
   const accounts: Record<string, CalendarProvider> = {};
+  // `||`, not `??`: an empty variable, as an MCP client config often leaves, counts as unset.
 
   const googleToken =
-    env.GOOGLE_ACCESS_TOKEN ??
+    env.GOOGLE_ACCESS_TOKEN ||
     refreshFromEnv(env, 'GOOGLE', { tokenUrl: 'https://oauth2.googleapis.com/token' });
   if (googleToken) accounts.google = google({ accessToken: googleToken });
 
-  const tenant = env.MICROSOFT_TENANT ?? 'common';
+  const tenant = env.MICROSOFT_TENANT || 'common';
   const microsoftToken =
-    env.MICROSOFT_ACCESS_TOKEN ??
+    env.MICROSOFT_ACCESS_TOKEN ||
     refreshFromEnv(env, 'MICROSOFT', {
       tokenUrl: `https://login.microsoftonline.com/${tenant}/oauth2/v2.0/token`,
       // Microsoft wants the scopes again on refresh.
-      scope: env.MICROSOFT_SCOPE ?? 'offline_access Calendars.ReadWrite',
+      scope: env.MICROSOFT_SCOPE || 'offline_access Calendars.ReadWrite',
     });
   if (microsoftToken) accounts.microsoft = microsoft({ accessToken: microsoftToken });
 

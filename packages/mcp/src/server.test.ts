@@ -1,6 +1,7 @@
 import { mockCalendar } from '@cal-sdk/mock';
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import { describe, expect, it, vi } from 'vitest';
+import { accountsFromEnv } from './accounts';
 import { refreshingToken } from './refreshing-token';
 import { createCalendarServer } from './server';
 
@@ -132,5 +133,16 @@ describe('refreshingToken', () => {
       fetch,
     });
     await expect(token()).rejects.toThrow('Token revoked');
+  });
+});
+
+describe('accountsFromEnv', () => {
+  it('treats an empty access token as unset and falls back to the refresh token', () => {
+    const accounts = accountsFromEnv({
+      GOOGLE_ACCESS_TOKEN: '',
+      GOOGLE_REFRESH_TOKEN: 'refresh',
+      GOOGLE_CLIENT_ID: 'client',
+    });
+    expect(Object.keys(accounts)).toEqual(['google']);
   });
 });

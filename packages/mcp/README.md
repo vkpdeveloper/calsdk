@@ -1,6 +1,6 @@
 # @cal-sdk/mcp
 
-An MCP server that gives Claude, Cursor or any [Model Context Protocol](https://modelcontextprotocol.io) client your Google Calendar, Outlook, iCloud or CalDAV calendars. The model can list events, find a free slot across every calendar and book, move or cancel meetings. It runs locally and calls the calendar APIs directly, built on [calsdk](https://www.cal-sdk.com).
+An MCP server that gives Claude, Cursor or any [Model Context Protocol](https://modelcontextprotocol.io) client your Google Calendar, Outlook, iCloud or CalDAV calendars. The model can list events, find a free slot across all your accounts and book, move or cancel meetings. It runs locally and calls the calendar APIs directly, built on [calsdk](https://www.cal-sdk.com).
 
 Try it on two in-memory calendars, no account needed:
 

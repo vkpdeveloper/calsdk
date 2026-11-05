@@ -1,7 +1,8 @@
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import type { Metadata } from 'next';
 import { Archivo, Source_Code_Pro } from 'next/font/google';
-import { appDescription, appName, siteUrl } from '@/lib/shared';
+import { appDescription, appName, gaMeasurementId, siteUrl } from '@/lib/shared';
 import './global.css';
 
 const archivo = Archivo({ subsets: ['latin'], variable: '--font-archivo' });
@@ -29,6 +30,8 @@ export default function Layout({ children }: LayoutProps<'/'>) {
           {children}
         </RootProvider>
       </body>
+      {/* Only the live site reports to Analytics, so previews and local builds don't skew the numbers. */}
+      {process.env.VERCEL_ENV === 'production' && <GoogleAnalytics gaId={gaMeasurementId} />}
     </html>
   );
 }

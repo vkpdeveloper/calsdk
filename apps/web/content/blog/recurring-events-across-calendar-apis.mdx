@@ -1,0 +1,153 @@
+---
+title: One standup, three calendar APIs
+description: How Google Calendar, Outlook and CalDAV store the same recurring meeting and its exceptions, and what it takes to put one API over all three.
+date: 2026-11-06
+---
+
+A daily standup is the most boring event on any calendar. It's also where calendar APIs disagree the most.
+
+Here's the event I'll use for the rest of this post: a standup at 9:30 in Berlin, every weekday, ten times, starting Monday, November 9. Someone cancels Tuesday's. Someone else moves Friday's to 10:00. Any calendar UI can show that in a second, but each of the three big APIs stores it in its own way, and an app that supports all three has to read and write every version.
+
+I've spent a lot of time with these differences while building [calsdk](/docs), so here is how each provider stores that week, and the places where it caught me out.
+
+## Google: RRULE, plus objects for everything else
+
+Google is the closest to the standard. The series is one event with a `recurrence` array of RFC 5545 lines:
+
+```json
+{
+  "id": "abc123",
+  "summary": "Standup",
+  "start": { "dateTime": "2026-11-09T09:30:00+01:00", "timeZone": "Europe/Berlin" },
+  "end": { "dateTime": "2026-11-09T09:45:00+01:00", "timeZone": "Europe/Berlin" },
+  "recurrence": ["RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=10"]
+}
+```
+
+The changes are separate objects. Friday's move is an instance with its own id (the series id plus the original start in UTC), a `recurringEventId` pointing back at the series, and an `originalStartTime` that says which slot it replaced:
+
+```json
+{
+  "id": "abc123_20261113T083000Z",
+  "recurringEventId": "abc123",
+  "originalStartTime": { "dateTime": "2026-11-13T09:30:00+01:00", "timeZone": "Europe/Berlin" },
+  "start": { "dateTime": "2026-11-13T10:00:00+01:00", "timeZone": "Europe/Berlin" }
+}
+```
+
+Tuesday's cancellation is the first surprise. You might expect an `EXDATE` line in the series' `recurrence`, and Google does accept those. But deleting an instance through the API leaves a third kind of object: an instance with `status: "cancelled"`. So there are two ways to say "not on Tuesday", and your code has to handle both.
+
+For reading, `singleEvents=true` expands the series on Google's side and gives you one object per occurrence. That's convenient, but the expanded list doesn't tell you which occurrences were edited. Friday looks like every other day, just at 10:00. If your UI wants to say "this occurrence was changed", you need a second request with `singleEvents=false` to find the exceptions.
+
+The hard part is "this and following events". Google Calendar's UI offers it, but the API has no such operation. You build it yourself: end the old series just before the chosen occurrence, and create a new series starting there. If the rule has a `COUNT`, you split the count between the two halves. Then you learn that Google resets edited occurrences when a series moves or splits, so Friday's change to 10:00 is lost unless you carry it over.
+
+## Outlook: patterns instead of rules
+
+Microsoft Graph doesn't use RRULE at all. A series is a `seriesMaster` with a `recurrence` object made of a pattern and a range:
+
+```json
+{
+  "id": "AAMkAGI2...",
+  "type": "seriesMaster",
+  "subject": "Standup",
+  "originalStartTimeZone": "W. Europe Standard Time",
+  "recurrence": {
+    "pattern": {
+      "type": "weekly",
+      "interval": 1,
+      "daysOfWeek": ["monday", "tuesday", "wednesday", "thursday", "friday"],
+      "firstDayOfWeek": "monday"
+    },
+    "range": {
+      "type": "numbered",
+      "startDate": "2026-11-09",
+      "numberOfOccurrences": 10,
+      "recurrenceTimeZone": "W. Europe Standard Time"
+    }
+  }
+}
+```
+
+Two things stand out. First, time zones have Windows names: Berlin is `W. Europe Standard Time`, and New York is `Eastern Standard Time`. So the first thing you need is a mapping table to IANA names, and calsdk ships one generated from the CLDR data.
+
+Second, a pattern can't express everything an RRULE can. Daily, weekly on set days, and monthly or yearly on a date or an "nth weekday" all map cleanly. Hourly rules, `RDATE`, and most combinations of `BYDAY` with `BYMONTHDAY` have no pattern. Some rules map but behave differently. `RRULE:FREQ=MONTHLY;BYMONTHDAY=31` skips months without a 31st, while Outlook moves that occurrence to the last day of the month. If you translate it naively, the user gets a meeting on February 28 that they never asked for. The RRULE that matches Outlook's behavior is `BYMONTHDAY=28,29,30,31;BYSETPOS=-1`, and that's how calsdk reads it back.
+
+Instances have a `type` of `occurrence` or `exception` and a `seriesMasterId`. Cancellations are where Outlook surprised me most: there's no exclusion list. Outlook only remembers occurrences that were deleted one by one, as `cancelledOccurrences` on the master. Graph only returns that when you `$select` it on a single event by id, so you need one extra request per series to learn which days are gone. And because no list exists, you can't exclude a date by writing an `EXDATE`. You delete that occurrence instead.
+
+There's no "this and following" here either. You end the series and create a new one, with the same bookkeeping as on Google.
+
+## CalDAV: the series is a file
+
+iCloud, Fastmail, Nextcloud and Zoho all speak CalDAV. CalDAV stores calendars as iCalendar files on a server, so the whole series, with every exception, is one `.ics` resource:
+
+```text
+BEGIN:VEVENT
+UID:standup-7f3a
+DTSTART;TZID=Europe/Berlin:20261109T093000
+DTEND;TZID=Europe/Berlin:20261109T094500
+RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=10
+EXDATE;TZID=Europe/Berlin:20261110T093000
+SUMMARY:Standup
+END:VEVENT
+BEGIN:VEVENT
+UID:standup-7f3a
+RECURRENCE-ID;TZID=Europe/Berlin:20261113T093000
+DTSTART;TZID=Europe/Berlin:20261113T100000
+DTEND;TZID=Europe/Berlin:20261113T101500
+SUMMARY:Standup
+END:VEVENT
+```
+
+(I've left out the `VCALENDAR` wrapper and the `VTIMEZONE` block.) Tuesday is an `EXDATE`. Friday is a second `VEVENT` with the same `UID` and a `RECURRENCE-ID` naming the slot it replaces. It's the most honest of the three formats, and the most work to use.
+
+There are no instance ids at all. If your app needs to point at "Friday's standup", you have to make up an id. calsdk uses the resource name plus the original start in UTC, such as `standup-7f3a_20261113T083000Z`.
+
+Editing one occurrence means rewriting the whole file. You read it, change or add a `VEVENT`, and `PUT` it back with `If-Match` on the ETag, so you don't overwrite someone else's change made in the meantime.
+
+Then you expand the series yourself. CalDAV does let you ask the server to expand a series, but calsdk asks the server only for the resources in a time window, and expands them locally with ical.js. That gives one code path for every CalDAV server, and the same code reads plain ICS feeds, which have no server to ask. Expanding locally has its own traps. ical.js's own event expansion reads any `TZID` it has no definition for as UTC, so an `EXDATE` or `UNTIL` compared with a start in New York can be hours off and fail to match. calsdk builds the set of occurrences itself to avoid that. A rule like `FREQ=SECONDLY` from 2009 would expand forever, so expansion is capped, and those rules list only their first instance with a warning.
+
+Servers vary in small ways too. Zoho, for example, answers a calendar query without the event data, so every event has to be fetched again.
+
+## Putting one API over all three
+
+The design choice that made the rest possible was to speak RFC 5545 everywhere. Google and CalDAV already use it, so only Outlook needs translating, in both directions. Every event has a `kind`: `single`, `series`, `occurrence` or `exception`. Occurrences and exceptions carry a `seriesId` and an `originalStart`, which stays put when the occurrence moves. Here's the standup week, which works the same with `microsoft()` or `icloud()` in place of `google()`:
+
+```ts
+import { createEvent, deleteEvent, listEvents, updateEvent } from '@cal-sdk/core';
+import { google } from '@cal-sdk/google';
+
+const calendar = google({ accessToken: () => getFreshAccessToken() });
+
+await createEvent({
+  calendar,
+  event: {
+    title: 'Standup',
+    start: { dateTime: '2026-11-09T09:30:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-09T09:45:00', timeZone: 'Europe/Berlin' },
+    recurrence: ['RRULE:FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;COUNT=10'],
+  },
+});
+
+const { events } = await listEvents({
+  calendar,
+  timeMin: '2026-11-09T00:00:00Z',
+  timeMax: '2026-11-14T00:00:00Z',
+});
+
+// Tuesday is cancelled, Friday moves to 10:00.
+await deleteEvent({ calendar, eventId: events[1].id });
+await updateEvent({
+  calendar,
+  eventId: events[4].id,
+  patch: {
+    start: { dateTime: '2026-11-13T10:00:00', timeZone: 'Europe/Berlin' },
+    end: { dateTime: '2026-11-13T10:15:00', timeZone: 'Europe/Berlin' },
+  },
+});
+```
+
+`updateEvent` and `deleteEvent` take a `scope` for instances: `'this'` (the default), `'all'`, or `'thisAndFollowing'`. On Google, calsdk does the split for `thisAndFollowing` itself, and if the second write fails, it deletes the new series so you aren't left with both. Outlook and CalDAV throw `UnsupportedFunctionalityError` for that scope, and `calendar.capabilities.events.recurrenceScopeThisAndFollowing` tells you beforehand, so your UI can hide the option.
+
+The rule I held to is to never save a schedule that's different from the one you asked for. If Outlook can't store a rule exactly, calsdk throws instead of saving something close. If the call can still do what you meant, but something is lost along the way, such as Google resetting edited occurrences when a series moves, the call succeeds and returns a warning that says so. A standup that quietly lands on the wrong days is worse than an error.
+
+The [recurring events guide](/docs/guides/recurring-events) has every scope and the limits for each provider. If you want to see it work without connecting an account, the [quickstart](/docs/quickstart) runs against an in-memory calendar.

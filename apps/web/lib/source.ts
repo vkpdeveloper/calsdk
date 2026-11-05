@@ -2,7 +2,8 @@ import { llms, loader } from 'fumadocs-core/source';
 import { lucideIconsPlugin } from 'fumadocs-core/source/lucide-icons';
 import { metaSchema, pageSchema } from 'fumadocs-core/source/schema';
 import { applyMdxPreset } from 'fumadocs-mdx/config';
-import { defineDocs } from 'fumadocs-mdx/macro';
+import { defineCollections, defineDocs } from 'fumadocs-mdx/macro';
+import { z } from 'zod';
 import { remarkTypeTableSearch } from './remark-type-table';
 import { docsRoute, siteUrl } from './shared';
 
@@ -26,6 +27,17 @@ export const source = loader({
   source: docs.toFumadocsSource(),
   plugins: [lucideIconsPlugin()],
 });
+
+const blog = defineCollections({
+  type: 'doc',
+  dir: 'content/blog',
+  schema: pageSchema.extend({ description: z.string(), date: z.iso.date() }),
+});
+
+/** Blog posts, newest first. A post's file name is its URL slug. */
+export const posts = blog.entries
+  .map((post) => ({ post, slug: post.info.path.replace(/\.mdx$/, '') }))
+  .sort((a, b) => b.post.date.localeCompare(a.post.date));
 
 export const docsLlms = llms(source, {
   renderPage: async (page) => `# ${page.data.title} (${siteUrl}${page.url})

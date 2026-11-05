@@ -36,6 +36,16 @@
         "tailwindcss": "4.3.4",
       },
     },
+    "examples/playground": {
+      "name": "calsdk-playground",
+      "dependencies": {
+        "@cal-sdk/core": "^0.1.0",
+        "@cal-sdk/mock": "^0.1.0",
+      },
+      "devDependencies": {
+        "vite": "8.3.5",
+      },
+    },
     "examples/quickstart": {
       "name": "calsdk-quickstart",
       "dependencies": {
@@ -640,6 +650,8 @@
     "baseline-browser-mapping": ["baseline-browser-mapping@2.11.35", "", { "bin": { "baseline-browser-mapping": "dist/cli.cjs" } }, "sha512-GNk8KX52CHqeNKGk8+7tZnQab/2k1t/BgrUHPKNdijzpEhF1saPQZHVKb6m5loSAxB39gyrTYw34Qf9CQ3u1qQ=="],
 
     "cac": ["cac@7.1.0", "", {}, "sha512-LMDU/U2yA4IPIY8KT0NsNPWEYZvAMkbgyspxJ6btJaYV+WMDOHAZCmB0lsTObiHaRS1V/ztKAl7+TSkTqXyeoA=="],
+
+    "calsdk-playground": ["calsdk-playground@workspace:examples/playground"],
 
     "calsdk-quickstart": ["calsdk-quickstart@workspace:examples/quickstart"],
 

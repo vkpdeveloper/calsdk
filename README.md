@@ -9,11 +9,13 @@
 
 Events, free time and sync for nine providers, including Google Calendar, Outlook and iCloud, in one typed TypeScript API.
 
-[Website](https://www.cal-sdk.com) · [Docs](https://www.cal-sdk.com/docs) · [Quickstart](https://www.cal-sdk.com/docs/quickstart) · [FAQ](https://www.cal-sdk.com/docs/faq)
+[Website](https://www.cal-sdk.com) · [Docs](https://www.cal-sdk.com/docs) · [Quickstart](https://www.cal-sdk.com/docs/quickstart) · [Playground](https://stackblitz.com/github/vkpdeveloper/calsdk/tree/main/examples/playground?file=src/main.ts) · [FAQ](https://www.cal-sdk.com/docs/faq)
 
 The website opens with a live demo. It runs in your browser on six sample calendars, using the real `listEvents`, `findFreeTime` and `createEvent`.
 
 ## Try it
+
+To edit code without installing anything, open the [playground on StackBlitz](https://stackblitz.com/github/vkpdeveloper/calsdk/tree/main/examples/playground?file=src/main.ts). Or install it:
 
 ```bash
 npm i @cal-sdk/core @cal-sdk/mock

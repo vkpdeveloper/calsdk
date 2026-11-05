@@ -10,11 +10,16 @@ export function isAllDay(time: EventTimeV1): time is Extract<EventTimeV1, { date
 /**
  * The instant an event time refers to, in epoch milliseconds.
  *
- * All-day dates have no instant of their own: they start at midnight in
- * `allDayTimeZone` (usually the calendar's zone), UTC when omitted.
+ * A `dateTime` without an offset is a wall-clock time in its `timeZone`, never in the
+ * zone of the machine running the code. All-day dates have no instant of their own:
+ * they start at midnight in `allDayTimeZone` (usually the calendar's zone), UTC when
+ * omitted.
  */
 export function eventTimeToInstant(time: EventTimeV1, allDayTimeZone = 'UTC'): number {
-  if (!isAllDay(time)) return Date.parse(time.dateTime);
+  if (!isAllDay(time)) {
+    const wallClock = parseLocalDateTime(time.dateTime);
+    return wallClock ? localToInstant(wallClock, time.timeZone) : Date.parse(time.dateTime);
+  }
   const local = parseLocalDateTime(time.date);
   if (!local) return Number.NaN;
   return localToInstant(local, allDayTimeZone);

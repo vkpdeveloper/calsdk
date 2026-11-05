@@ -33,7 +33,12 @@ export function refreshingToken(options: {
     if (options.clientSecret) body.set('client_secret', options.clientSecret);
     if (options.scope) body.set('scope', options.scope);
 
-    const response = await fetchToken(options.tokenUrl, { method: 'POST', body });
+    // Every caller waits on this one request, so a stalled token endpoint must not hold them.
+    const response = await fetchToken(options.tokenUrl, {
+      method: 'POST',
+      body,
+      signal: AbortSignal.timeout(15_000),
+    });
     const json: unknown = await response.json().catch(() => undefined);
     const parsed = tokenResponse.safeParse(json);
     if (!response.ok || !parsed.success) {
